@@ -1,0 +1,47 @@
+{
+  "project_info": {
+    "project_number": "947504790040",
+    "project_id": "streammly-2d1c6",
+    "storage_bucket": "streammly-2d1c6.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:947504790040:android:20a71ff790862d79b1a16d",
+        "android_client_info": {
+          "package_name": "com.example.streammly"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "947504790040-03dm9riljhmlp9soesm29nmvbl4ik40l.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.streammly",
+            "certificate_hash": "cc9184f9cafc6840b4d82ed2fd3d8610d8c71845"
+          }
+        },
+        {
+          "client_id": "947504790040-g3opk9hafnj0qs8qlpcil281tstnnhtp.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDL2_8-z2uvOvxc0Mq0lNV8U7O1P0iW8XM"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "947504790040-g3opk9hafnj0qs8qlpcil281tstnnhtp.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
