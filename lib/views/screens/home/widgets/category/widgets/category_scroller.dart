@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import '../../../../../models/category/category_item.dart';
+import '../../../../../../models/category/category_item.dart';
 
 class CategoryScroller extends StatelessWidget {
   final String? title;

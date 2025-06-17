@@ -16,46 +16,49 @@ class _NavigationMenuState extends State<NavigationMenu> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: Obx(() => controller.screens[controller.selectedIndex.value]),
-      floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
-      floatingActionButton: Obx(
-        () => CircleAvatar(
-          radius: 20,
-          backgroundColor: Colors.white,
-          child: FloatingActionButton(
+    return PopScope(
+      canPop: false,
+      child: Scaffold(
+        body: Obx(() => controller.screens[controller.selectedIndex.value]),
+        floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
+        floatingActionButton: Obx(
+          () => CircleAvatar(
+            radius: 20,
             backgroundColor: Colors.white,
-            elevation: 3,
-            onPressed: () {
-              controller.selectedIndex.value = 2;
-            },
-            child: Icon(Iconsax.bag, size: 26, color: controller.selectedIndex.value == 2 ? theme.primaryColor : Colors.grey),
-          ),
-        ),
-      ),
-      bottomNavigationBar: Obx(() {
-        return ClipRRect(
-          borderRadius: const BorderRadius.only(topLeft: Radius.circular(20), topRight: Radius.circular(20)),
-          child: BottomAppBar(
-            shape: const CircularNotchedRectangle(),
-            notchMargin: 5,
-            color: const Color(0xffF1F6FB),
-            child: SizedBox(
-              height: 60,
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceAround,
-                children: [
-                  _buildNavItem(icon: Iconsax.home, label: 'Home', index: 0),
-                  _buildNavItem(icon: Iconsax.shop, label: 'Shop', index: 1),
-                  const SizedBox(width: 30), // Space for FAB
-                  _buildNavItem(icon: Iconsax.calendar, label: 'Bookings', index: 3),
-                  _buildNavItem(icon: Iconsax.more, label: 'More', index: 4),
-                ],
-              ),
+            child: FloatingActionButton(
+              backgroundColor: Colors.white,
+              elevation: 3,
+              onPressed: () {
+                controller.selectedIndex.value = 2;
+              },
+              child: Icon(Iconsax.bag, size: 26, color: controller.selectedIndex.value == 2 ? theme.primaryColor : Colors.grey),
             ),
           ),
-        );
-      }),
+        ),
+        bottomNavigationBar: Obx(() {
+          return ClipRRect(
+            borderRadius: const BorderRadius.only(topLeft: Radius.circular(20), topRight: Radius.circular(20)),
+            child: BottomAppBar(
+              shape: const CircularNotchedRectangle(),
+              notchMargin: 5,
+              color: const Color(0xffF1F6FB),
+              child: SizedBox(
+                height: 30,
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceAround,
+                  children: [
+                    _buildNavItem(icon: Iconsax.home, label: 'Home', index: 0),
+                    _buildNavItem(icon: Iconsax.shop, label: 'Shop', index: 1),
+                    const SizedBox(width: 25), // Space for FAB
+                    _buildNavItem(icon: Iconsax.calendar, label: 'Bookings', index: 3),
+                    _buildNavItem(icon: Iconsax.more, label: 'More', index: 4),
+                  ],
+                ),
+              ),
+            ),
+          );
+        }),
+      ),
     );
   }
 
@@ -86,4 +89,68 @@ class NavigationController extends GetxController {
     const Center(child: Text("Bookings Page Coming Soon")),
     const Center(child: Text("More Page Coming Soon")),
   ];
+}
+
+// ADD THIS STATIC METHOD TO CREATE STANDALONE BOTTOM NAV
+class NavigationHelper {
+  static Widget buildBottomNav() {
+    return ClipRRect(
+      borderRadius: const BorderRadius.only(topLeft: Radius.circular(20), topRight: Radius.circular(20)),
+      child: BottomAppBar(
+        shape: const CircularNotchedRectangle(),
+        notchMargin: 5,
+        color: const Color(0xffF1F6FB),
+        child: SizedBox(
+          height: 60,
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceAround,
+            children: [
+              _buildNavItem(icon: Iconsax.home, label: 'Home', index: 0),
+              _buildNavItem(icon: Iconsax.shop, label: 'Shop', index: 1),
+              const SizedBox(width: 25), // Space for FAB
+              _buildNavItem(icon: Iconsax.calendar, label: 'Bookings', index: 3),
+              _buildNavItem(icon: Iconsax.more, label: 'More', index: 4),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  static Widget _buildNavItem({required IconData icon, required String label, required int index}) {
+    return GestureDetector(
+      onTap: () {
+        try {
+          Get.find<NavigationController>().selectedIndex.value = index;
+          Get.back();
+        } catch (e) {
+          Get.offAll(() => const NavigationMenu());
+        }
+      },
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [Icon(icon, color: Colors.black54), const SizedBox(height: 4), Text(label, style: const TextStyle(fontSize: 12, color: Colors.black54))],
+      ),
+    );
+  }
+
+  static Widget buildFloatingButton() {
+    return CircleAvatar(
+      radius: 20,
+      backgroundColor: Colors.white,
+      child: FloatingActionButton(
+        backgroundColor: Colors.white,
+        elevation: 3,
+        onPressed: () {
+          try {
+            Get.find<NavigationController>().selectedIndex.value = 2;
+            Get.back();
+          } catch (e) {
+            Get.offAll(() => const NavigationMenu());
+          }
+        },
+        child: const Icon(Iconsax.bag, size: 26, color: Colors.grey),
+      ),
+    );
+  }
 }

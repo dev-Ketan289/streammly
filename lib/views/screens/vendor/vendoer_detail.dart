@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:streammly/models/category/category_item.dart';
-import 'package:streammly/views/screens/home/widgets/category/category_scroller.dart';
+import 'package:streammly/views/screens/home/widgets/category/widgets/category_scroller.dart';
 import 'package:streammly/views/screens/home/widgets/header_banner.dart';
 import 'package:streammly/views/screens/vendor/vendor_group.dart';
 
+import '../../../models/banner/banner_item.dart';
+import '../../../navigation_menu.dart';
 import '../home/widgets/category/review_card.dart';
 import '../home/widgets/horizontal_card.dart';
 
@@ -14,7 +16,9 @@ class VendorDetailScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      // bottomNavigationBar: NavigationMenu(),
+      bottomNavigationBar: NavigationHelper.buildBottomNav(), // Use the helper method
+      floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
+      floatingActionButton: NavigationHelper.buildFloatingButton(),
       body: SafeArea(
         child: SingleChildScrollView(
           child: Column(
@@ -22,11 +26,12 @@ class VendorDetailScreen extends StatelessWidget {
             children: [
               // Cover Image & Name
               HeaderBanner(
-                backgroundImage: 'assets/images/recommended_banner/FocusPointVendor.png',
-                title: 'FocusPoint Studio ',
-                subtitle: 'Photographer',
-                height: 275,
-                color: Colors.indigo.withValues(alpha: 0.7),
+                banners: [BannerItem(image: "assets/images/recommended_banner/FocusPointVendor.png", title: "Photography", subtitle: "Capture your moments perfectly.")],
+                height: 280,
+                location: "Mahim",
+                address: "MTNL Telephone Colony, VSNL Colony",
+                color: Colors.indigo.withValues(alpha: 0.4),
+                overlayOpacity: 0.7,
               ),
               const SizedBox(height: 6),
               CategoryScroller(

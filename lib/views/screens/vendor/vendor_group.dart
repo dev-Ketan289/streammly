@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:streammly/views/screens/vendor/package_page.dart';
+import 'package:streammly/views/screens/package/package_page.dart';
 
+import '../../../models/banner/banner_item.dart';
+import '../../../navigation_menu.dart';
 import '../home/widgets/header_banner.dart';
 
 class VendorGroup extends StatelessWidget {
@@ -90,29 +92,25 @@ class VendorGroup extends StatelessWidget {
     );
   }
 
-  // static Widget _facilityChip(IconData icon, String label) {
-  //   return Chip(
-  //     avatar: Icon(icon, size: 18, color: Colors.white),
-  //     label: Text(label, style: const TextStyle(fontSize: 12)),
-  //     backgroundColor: Colors.blue.shade700,
-  //     labelStyle: const TextStyle(color: Colors.white),
-  //   );
-  // }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: const Color(0xFFF7F9FD),
+      bottomNavigationBar: NavigationHelper.buildBottomNav(), // Use the helper method
+      floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
+      floatingActionButton: NavigationHelper.buildFloatingButton(),
       body: SafeArea(
         child: SingleChildScrollView(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
               HeaderBanner(
-                backgroundImage: 'assets/images/recommended_banner/FocusPointVendor.png',
-                title: 'FocusPoint Studio ',
-                subtitle: 'Photographer',
-                height: 275,
-                color: Colors.indigo.withValues(alpha: 0.7),
+                banners: [BannerItem(image: "assets/images/recommended_banner/FocusPointVendor.png", title: "Photography", subtitle: "Capture your moments perfectly.")],
+                height: 280,
+                location: "Mahim",
+                address: "MTNL Telephone Colony, VSNL Colony",
+                color: Colors.indigo.withValues(alpha: 0.4),
+                overlayOpacity: 0.7,
               ),
               const SizedBox(height: 10),
               GridView.builder(
@@ -157,7 +155,7 @@ Widget _buildOptionTile({required IconData icon, required String label, required
       decoration: BoxDecoration(border: Border.all(color: Colors.grey.shade300), borderRadius: BorderRadius.circular(10)),
       child: Row(
         children: [
-          CircleAvatar(backgroundColor: iconColor.withOpacity(0.1), child: Icon(icon, color: iconColor)),
+          CircleAvatar(backgroundColor: iconColor.withValues(alpha: 0.1), child: Icon(icon, color: iconColor)),
           const SizedBox(width: 16),
           Expanded(child: Text(label, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w500))),
           const Icon(Icons.chevron_right),
@@ -177,7 +175,7 @@ class _FacilityIcon extends StatelessWidget {
   Widget build(BuildContext context) {
     return Column(
       children: [
-        CircleAvatar(backgroundColor: Colors.indigo.withOpacity(0.1), radius: 22, child: Icon(icon, color: Colors.indigo, size: 20)),
+        CircleAvatar(backgroundColor: Colors.indigo.withValues(alpha: 0.1), radius: 22, child: Icon(icon, color: Colors.indigo, size: 20)),
         const SizedBox(height: 4),
         Text(label, style: const TextStyle(fontSize: 10), textAlign: TextAlign.center),
       ],

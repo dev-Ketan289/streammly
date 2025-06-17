@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
+import 'package:streammly/controllers/location_controller.dart';
 import 'package:streammly/views/screens/common/enter_location_manually.dart';
 
 class LocationScreen extends StatelessWidget {
@@ -16,34 +18,18 @@ class LocationScreen extends StatelessWidget {
           height: size.height,
           child: Column(
             children: [
-              // Top AppBar Section
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 10),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    // IconButton(icon: const Icon(Icons.arrow_back), onPressed: () => Get.back()),
-                    const SizedBox(width: 10),
-                    const Text("Location", style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
-                  ],
-                ),
+              const Padding(
+                padding: EdgeInsets.symmetric(horizontal: 16.0, vertical: 10),
+                child: Row(mainAxisAlignment: MainAxisAlignment.center, children: [Text("Location", style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold))]),
               ),
               const SizedBox(height: 40),
-
-              // Description Text
               const Padding(
                 padding: EdgeInsets.symmetric(horizontal: 16.0),
                 child: Text("Let us know the spot.....\nwe’ll bring the magic there.", textAlign: TextAlign.center, style: TextStyle(fontSize: 15, color: Colors.black54)),
               ),
-
               const SizedBox(height: 20),
-
-              // Center Illustration
               Image.asset('assets/images/location_girl_map.png', height: 220),
-
               const SizedBox(height: 20),
-
-              // Location Buttons
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 20.0),
                 child: Column(
@@ -53,8 +39,9 @@ class LocationScreen extends StatelessWidget {
                       height: 50,
                       child: ElevatedButton(
                         style: ElevatedButton.styleFrom(backgroundColor: Colors.indigo, shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10))),
-                        onPressed: () {
-                          // TODO: Request location permission and get current location
+                        onPressed: () async {
+                          await Get.find<LocationController>().getCurrentLocation();
+                          Get.to(() => EnterLocationManuallyScreen());
                         },
                         child: const Text("Use Current Location", style: TextStyle(color: Colors.white, fontSize: 16)),
                       ),
@@ -66,7 +53,7 @@ class LocationScreen extends StatelessWidget {
                       child: OutlinedButton(
                         style: OutlinedButton.styleFrom(side: const BorderSide(color: Colors.blue), shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10))),
                         onPressed: () {
-                          Navigator.push(context, MaterialPageRoute(builder: (_) => EnterLocationManuallyScreen()));
+                          Get.to(() => EnterLocationManuallyScreen());
                         },
                         child: const Text("Enter Location Manually", style: TextStyle(color: Colors.blue, fontSize: 16)),
                       ),
@@ -74,10 +61,7 @@ class LocationScreen extends StatelessWidget {
                   ],
                 ),
               ),
-
               const Spacer(),
-
-              // Bottom Image (Fixed height)
               Image.asset('assets/images/location_map_bottom.jpg', fit: BoxFit.cover, width: double.infinity, height: 180),
             ],
           ),

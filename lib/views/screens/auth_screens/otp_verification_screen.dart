@@ -2,9 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:pin_code_fields/pin_code_fields.dart';
+import 'package:streammly/controllers/auth_controller.dart';
 import 'package:streammly/views/screens/auth_screens/welcome.dart';
 
-import '../../../controllers/auth_controller.dart';
+import '../../../generated/animation/shake_widget.dart';
 import '../../../services/theme.dart' as theme;
 
 class OtpScreen extends StatelessWidget {
@@ -14,8 +15,8 @@ class OtpScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final String rawNumber = Get.arguments ?? '0000000000';
-    final String fullNumber = 'Via SMS $rawNumber';
+    final String phone = Get.arguments ?? '0000000000';
+    final String fullNumber = 'Via SMS $phone';
 
     return PopScope(
       canPop: false,
@@ -48,39 +49,36 @@ class OtpScreen extends StatelessWidget {
                                 const SizedBox(height: 4),
                                 Text(fullNumber, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
                                 const SizedBox(height: 24),
-                                PinCodeTextField(
-                                  appContext: context,
-                                  controller: controller.otpController,
-                                  length: 6,
-                                  keyboardType: TextInputType.number,
-                                  pinTheme: PinTheme(
-                                    shape: PinCodeFieldShape.box,
-                                    borderRadius: BorderRadius.circular(10),
-                                    fieldHeight: 55,
-                                    fieldWidth: 45,
-                                    inactiveColor: Colors.grey.shade300,
-                                    selectedColor: Colors.blue.shade300,
-                                    activeColor: Colors.indigo,
-                                  ),
-                                  onChanged: (value) {},
-                                ),
-                                const SizedBox(height: 10),
+
+                                ///  PIN FIELD WITH SHAKE
                                 Obx(
-                                  () => Row(
-                                    mainAxisAlignment: MainAxisAlignment.center,
-                                    children: [
-                                      const Icon(Icons.timer, size: 16, color: Colors.grey),
-                                      const SizedBox(width: 5),
-                                      Text("Resend code in 00:${controller.secondsRemaining.value.toString().padLeft(2, '0')}", style: const TextStyle(color: Colors.grey)),
-                                      const SizedBox(width: 10),
-                                      if (controller.secondsRemaining.value == 0)
-                                        GestureDetector(
-                                          onTap: controller.resendOTP,
-                                          child: const Text("Resend OTP", style: TextStyle(color: Colors.indigo, fontWeight: FontWeight.bold)),
-                                        ),
-                                    ],
+                                  () => ShakeWidget(
+                                    shake: controller.shakeOnError.value,
+                                    child: PinCodeTextField(
+                                      appContext: context,
+                                      controller: controller.otpController,
+                                      length: 6,
+                                      keyboardType: TextInputType.number,
+                                      pinTheme: PinTheme(
+                                        shape: PinCodeFieldShape.box,
+                                        borderRadius: BorderRadius.circular(10),
+                                        fieldHeight: 55,
+                                        fieldWidth: 45,
+                                        inactiveColor: Colors.grey.shade300,
+                                        selectedColor: Colors.blue.shade300,
+                                        activeColor: Colors.indigo,
+                                      ),
+                                      onChanged: (value) {},
+                                    ),
                                   ),
                                 ),
+
+                                const SizedBox(height: 10),
+                                Obx(() {
+                                  return controller.secondsRemaining.value > 0
+                                      ? Text("Resend OTP in 00:${controller.secondsRemaining.value.toString().padLeft(2, '0')}")
+                                      : TextButton(onPressed: () => controller.resendOTP(phone), child: const Text("Resend OTP"));
+                                }),
                                 const SizedBox(height: 30),
                                 SizedBox(
                                   width: double.infinity,
@@ -88,12 +86,12 @@ class OtpScreen extends StatelessWidget {
                                   child: ElevatedButton(
                                     style: ElevatedButton.styleFrom(backgroundColor: Colors.indigo),
                                     onPressed: () {
-                                      Navigator.push(context, MaterialPageRoute(builder: (_) => WelcomeScreen()));
-                                      // controller.confirmOTP(
-                                      //   onVerified: () {
-                                      //     Get.offAll(() => const WelcomeScreen());
-                                      //   },
-                                      // );
+                                      controller.confirmOTP(
+                                        phone,
+                                        onVerified: () {
+                                          Get.offAll(() => const WelcomeScreen());
+                                        },
+                                      );
                                     },
                                     child: const Text("Confirm OTP", style: TextStyle(fontSize: 19, color: Colors.white)),
                                   ),

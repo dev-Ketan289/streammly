@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:streammly/views/screens/auth_screens/welcome.dart';
 
 import '../../../controllers/auth_controller.dart';
 
@@ -12,7 +13,7 @@ class LoginScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final isDark = theme.brightness == Brightness.dark;
+    // final isDark = theme.brightness == Brightness.dark;
 
     return Scaffold(
       resizeToAvoidBottomInset: true,
@@ -87,7 +88,9 @@ class LoginScreen extends StatelessWidget {
                               width: double.infinity,
                               height: 50,
                               child: OutlinedButton.icon(
-                                onPressed: controller.signInWithGoogle,
+                                onPressed: () {
+                                  Get.to(() => WelcomeScreen());
+                                },
                                 icon: Image.asset('assets/images/img.png', height: 24),
                                 label: Text("Continue with Google", style: theme.textTheme.bodySmall),
                                 style: OutlinedButton.styleFrom(
