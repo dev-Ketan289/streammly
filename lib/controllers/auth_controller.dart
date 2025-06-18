@@ -1,13 +1,15 @@
 import 'dart:async';
 import 'dart:convert';
-import 'dart:io';
 
-import 'package:device_info_plus/device_info_plus.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:get/get.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:http/http.dart' as http;
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:uuid/uuid.dart';
 
 import '../views/screens/auth_screens/otp_verification_screen.dart';
 import '../views/screens/auth_screens/welcome.dart';
@@ -63,6 +65,7 @@ class LoginController extends GetxController {
   ///-Google Login Setup
   void signInWithGoogle() async {
     try {
+      // Google Sign In
       final GoogleSignInAccount? googleUser = await GoogleSignIn().signIn();
       if (googleUser == null) {
         Fluttertoast.showToast(msg: "Google sign-in cancelled");
@@ -70,46 +73,100 @@ class LoginController extends GetxController {
       }
 
       final GoogleSignInAuthentication googleAuth = await googleUser.authentication;
-      final idToken = googleAuth.idToken;
 
-      if (idToken == null) {
-        Fluttertoast.showToast(msg: "Failed to get ID token");
+      // Create Firebase credential
+      final credential = GoogleAuthProvider.credential(accessToken: googleAuth.accessToken, idToken: googleAuth.idToken);
+
+      // Sign in to Firebase
+      final UserCredential userCredential = await FirebaseAuth.instance.signInWithCredential(credential);
+      final User? firebaseUser = userCredential.user;
+
+      if (firebaseUser == null) {
+        Fluttertoast.showToast(msg: "Firebase authentication failed");
         return;
       }
 
-      // Get device ID
-      final deviceInfo = DeviceInfoPlugin();
-      String deviceId = '';
-      if (Platform.isAndroid) {
-        final androidInfo = await deviceInfo.androidInfo;
-        deviceId = androidInfo.id;
-      } else if (Platform.isIOS) {
-        final iosInfo = await deviceInfo.iosInfo;
-        deviceId = iosInfo.identifierForVendor ?? '';
-      }
+      // Get Firebase UID for logging
+      final String firebaseUid = firebaseUser.uid;
+      debugPrint("Firebase UID: $firebaseUid");
+
+      // Get Firebase Project ID dynamically
+      final String firebaseProjectId = Firebase.app().options.projectId ?? "unknown-project";
+      debugPrint("Firebase Project ID: $firebaseProjectId");
+
+      // Get or generate device ID (36 characters UUID)
+      String deviceId = await getOrCreateDeviceId();
 
       if (deviceId.isEmpty) {
         Fluttertoast.showToast(msg: "Device ID not found");
         return;
       }
 
-      // Make API call
+      debugPrint("Device ID: $deviceId (Length: ${deviceId.length})");
+
+      // Make API call with Firebase Project ID as token
       final url = Uri.parse("http://192.168.1.113:8000/api/v1/user/auth/googleLogin");
-      final response = await http.post(url, headers: {'Content-Type': 'application/json'}, body: jsonEncode({"token": idToken, "device_id": deviceId}));
+
+      final body = jsonEncode({
+        "token": firebaseProjectId, // Using Firebase Project ID as token
+        "device_id": deviceId,
+        "firebase_uid": firebaseUid, // Include Firebase UID for user identification
+      });
+
+      debugPrint("Request Body: $body");
+
+      final response = await http.post(url, headers: {'Content-Type': 'application/json', 'Accept': 'application/json'}, body: body);
 
       final jsonResponse = jsonDecode(response.body);
-      debugPrint("✅ API Response: $jsonResponse");
+      debugPrint("API Response: $jsonResponse");
+      debugPrint("Status Code: ${response.statusCode}");
 
       if (response.statusCode == 200 && jsonResponse['success'] == true) {
         Fluttertoast.showToast(msg: "Login Successful");
-
-        // Navigate to Welcome Screen
         Get.offAll(() => WelcomeScreen());
       } else {
-        Fluttertoast.showToast(msg: jsonResponse['message'] ?? "Login failed");
+        // Extract error message more safely
+        String errorMessage = "Login failed";
+        if (jsonResponse['message'] != null) {
+          errorMessage = jsonResponse['message'].toString();
+          // Truncate long error messages for toast
+          if (errorMessage.length > 100) {
+            errorMessage = errorMessage.substring(0, 100) + "...";
+          }
+        }
+        Fluttertoast.showToast(msg: errorMessage, toastLength: Toast.LENGTH_LONG);
+        debugPrint("Full error: ${jsonResponse['message']}");
       }
     } catch (e) {
+      // Sign out from Firebase if there's an error
+      await FirebaseAuth.instance.signOut();
+      await GoogleSignIn().signOut();
+
       Fluttertoast.showToast(msg: "Error: $e");
+      debugPrint("Exception: $e");
+    }
+  }
+
+  Future<String> getOrCreateDeviceId() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      String? existingDeviceId = prefs.getString('device_id');
+
+      if (existingDeviceId != null && existingDeviceId.length == 36) {
+        return existingDeviceId;
+      }
+
+      // Generate new UUID (36 characters including hyphens)
+      const uuid = Uuid();
+      String newDeviceId = uuid.v4();
+
+      // Save to SharedPreferences for future use
+      await prefs.setString('device_id', newDeviceId);
+
+      return newDeviceId;
+    } catch (e) {
+      debugPrint("Error generating device ID: $e");
+      return '';
     }
   }
 }
@@ -123,7 +180,7 @@ class OtpController extends GetxController {
   Timer? _timer;
 
   void startTimer() {
-    _timer?.cancel(); // cancel previous timer if any
+    _timer?.cancel(); // cancel previous timer if running
     secondsRemaining.value = 30;
 
     _timer = Timer.periodic(const Duration(seconds: 1), (timer) {
@@ -151,35 +208,25 @@ class OtpController extends GetxController {
   }
 
   void resendOTP(String phone) async {
-    if (phone.isEmpty || phone.length != 10) {
-      Fluttertoast.showToast(msg: "Invalid phone number");
-      return;
-    }
-
     try {
       final url = Uri.parse("http://192.168.1.113:8000/api/v1/user/auth/generateOtp");
-
       final response = await http.post(url, headers: {'Content-Type': 'application/json'}, body: jsonEncode({"phone": phone}));
 
-      if (response.statusCode == 200) {
-        final responseBody = jsonDecode(response.body);
+      final responseBody = jsonDecode(response.body);
 
-        if (responseBody['success'] == true) {
-          final otpMessage = responseBody['data'];
-          final otpCode = otpMessage.toString().split(" ").first;
+      if (response.statusCode == 200 && responseBody['success'] == true) {
+        final otpMessage = responseBody['data'];
+        final otpCode = otpMessage.toString().split(" ").first;
 
-          receivedOTP.value = otpCode;
-          Fluttertoast.showToast(msg: "OTP resent: $otpCode");
+        receivedOTP.value = otpCode;
+        Fluttertoast.showToast(msg: "OTP resent: $otpCode");
 
-          startTimer();
-        } else {
-          Fluttertoast.showToast(msg: responseBody['message'] ?? "Could not resend OTP");
-        }
+        startTimer(); // restart timer
       } else {
-        Fluttertoast.showToast(msg: "Server error: ${response.statusCode}");
+        Fluttertoast.showToast(msg: responseBody['message'] ?? "Could not resend OTP");
       }
     } catch (e) {
-      Fluttertoast.showToast(msg: "Could not connect to server: $e");
+      Fluttertoast.showToast(msg: "Could not connect to server");
     }
   }
 

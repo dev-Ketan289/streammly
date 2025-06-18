@@ -89,6 +89,7 @@ class LoginScreen extends StatelessWidget {
                               height: 50,
                               child: OutlinedButton.icon(
                                 onPressed: () {
+                                  // controller.signInWithGoogle();
                                   Get.to(() => WelcomeScreen());
                                 },
                                 icon: Image.asset('assets/images/img.png', height: 24),

@@ -15,8 +15,9 @@ class OtpScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final String phone = Get.arguments ?? '0000000000';
-    final String fullNumber = 'Via SMS $phone';
+    final String fullPhone = Get.arguments ?? "+91 0000000000";
+    final String phone = fullPhone.replaceAll("+91 ", "");
+    final String fullNumber = 'Via SMS $fullPhone';
 
     return PopScope(
       canPop: false,
@@ -50,7 +51,7 @@ class OtpScreen extends StatelessWidget {
                                 Text(fullNumber, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
                                 const SizedBox(height: 24),
 
-                                ///  PIN FIELD WITH SHAKE
+                                /// OTP Field
                                 Obx(
                                   () => ShakeWidget(
                                     shake: controller.shakeOnError.value,
@@ -72,14 +73,17 @@ class OtpScreen extends StatelessWidget {
                                     ),
                                   ),
                                 ),
-
                                 const SizedBox(height: 10),
+
+                                /// Resend or Timer
                                 Obx(() {
                                   return controller.secondsRemaining.value > 0
                                       ? Text("Resend OTP in 00:${controller.secondsRemaining.value.toString().padLeft(2, '0')}")
                                       : TextButton(onPressed: () => controller.resendOTP(phone), child: const Text("Resend OTP"));
                                 }),
                                 const SizedBox(height: 30),
+
+                                /// Confirm OTP Button
                                 SizedBox(
                                   width: double.infinity,
                                   height: 50,

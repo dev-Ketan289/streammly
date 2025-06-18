@@ -62,7 +62,7 @@ class HomeScreen extends StatelessWidget {
                 const SizedBox(height: 24),
                 RecommendedList(context: context),
                 const SizedBox(height: 24),
-                ExploreUs(context: context),
+                ExploreUs(),
                 SizedBox(height: 26),
                 PromoSlider(),
 

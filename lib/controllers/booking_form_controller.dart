@@ -1,136 +1,133 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:intl/intl.dart';
 
-class BookingController extends GetxController {
-  // Personal Info
-  final nameController = TextEditingController();
-  final mobileController = TextEditingController();
-  final emailController = TextEditingController();
+class BookingFormController extends GetxController {
+  var currentPage = 0.obs;
+  var selectedPackages = <Map<String, dynamic>>[].obs;
 
-  // Alternate contact
-  var altMobiles = <TextEditingController>[].obs;
-  var altEmails = <TextEditingController>[].obs;
+  final personalInfo = {'name': ''.obs, 'mobile': ''.obs, 'email': ''.obs};
 
-  void addAltMobile() {
-    altMobiles.add(TextEditingController());
-  }
+  final alternateMobiles = <RxString>[].obs;
+  final alternateEmails = <RxString>[].obs;
 
-  void removeAltMobile(int index) {
-    altMobiles.removeAt(index);
-  }
+  final packageFormsData = <int, Map<String, dynamic>>{}.obs;
 
-  void addAltEmail() {
-    altEmails.add(TextEditingController());
-  }
+  // Add acceptance of terms
+  var acceptTerms = false.obs;
 
-  void removeAltEmail(int index) {
-    altEmails.removeAt(index);
-  }
-
-  // Package Toggles
-  var selectedPackageIndex = 0.obs;
-
-  void selectPackage(int index) {
-    selectedPackageIndex.value = index;
-  }
-
-  // Assume 3 packages (adjust if needed)
-  final int packageCount = 3;
-
-  // Booking Schedule Controllers
-  late List<TextEditingController> dateControllers;
-  late List<TextEditingController> startTimeControllers;
-  late List<TextEditingController> endTimeControllers;
-
-  // Questions for each package
-  late List<TextEditingController> question1Controllers;
-  late List<TextEditingController> question2Controllers;
-
-  // Terms accepted toggle
-  late List<RxBool> termsAccepted;
-
-  @override
-  void onInit() {
-    super.onInit();
-
-    dateControllers = List.generate(packageCount, (_) => TextEditingController());
-    startTimeControllers = List.generate(packageCount, (_) => TextEditingController());
-    endTimeControllers = List.generate(packageCount, (_) => TextEditingController());
-
-    question1Controllers = List.generate(packageCount, (_) => TextEditingController());
-    question2Controllers = List.generate(packageCount, (_) => TextEditingController());
-
-    termsAccepted = List.generate(packageCount, (_) => false.obs);
-  }
-
-  // Pickers
-  void pickDate(BuildContext context, int index) async {
-    DateTime? picked = await showDatePicker(context: context, initialDate: DateTime.now(), firstDate: DateTime.now(), lastDate: DateTime.now().add(Duration(days: 365)));
-    if (picked != null) {
-      dateControllers[index].text = DateFormat('yyyy-MM-dd').format(picked);
+  void initSelectedPackages(List<Map<String, dynamic>> packages) {
+    selectedPackages.assignAll(packages);
+    for (int i = 0; i < packages.length; i++) {
+      packageFormsData[i] = {'date': '', 'startTime': '', 'endTime': '', 'babyInfo': null, 'theme': null, 'freeAddOn': null, 'extraAddOn': null};
     }
   }
 
-  void pickStartTime(BuildContext context, int index) async {
-    TimeOfDay? picked = await showTimePicker(context: context, initialTime: TimeOfDay.now());
-    if (picked != null) {
-      startTimeControllers[index].text = picked.format(context);
+  void updatePersonalInfo(String key, String value) {
+    if (personalInfo.containsKey(key)) {
+      personalInfo[key]?.value = value;
     }
   }
 
-  void pickEndTime(BuildContext context, int index) async {
-    TimeOfDay? picked = await showTimePicker(context: context, initialTime: TimeOfDay.now());
+  void addAlternateMobile() => alternateMobiles.add(''.obs);
+  void removeAlternateMobile(int index) {
+    if (index < alternateMobiles.length) alternateMobiles.removeAt(index);
+  }
+
+  void addAlternateEmail() => alternateEmails.add(''.obs);
+  void removeAlternateEmail(int index) {
+    if (index < alternateEmails.length) alternateEmails.removeAt(index);
+  }
+
+  void updatePackageForm(int index, String field, dynamic value) {
+    final data = packageFormsData[index] ?? {};
+    data[field] = value;
+    packageFormsData[index] = data;
+  }
+
+  void selectDate(int index, BuildContext context) async {
+    final picked = await showDatePicker(context: context, initialDate: DateTime.now(), firstDate: DateTime.now(), lastDate: DateTime.now().add(const Duration(days: 365)));
     if (picked != null) {
-      endTimeControllers[index].text = picked.format(context);
+      final formatted = "${picked.day} ${_getMonthName(picked.month)} ${picked.year}";
+      updatePackageForm(index, 'date', formatted);
     }
   }
 
-  void toggleTerms(bool value, int index) {
-    termsAccepted[index].value = value;
+  String _getMonthName(int month) {
+    const months = ['', 'January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+    return months[month];
   }
 
-  // Submission logic placeholder
-  void submitForm() {
-    final selected = selectedPackageIndex.value;
+  void pickTime(int index, {required bool isStart, required BuildContext context}) async {
+    final now = TimeOfDay.now();
+    final picked = await showTimePicker(
+      context: context,
+      initialTime: now,
+      builder: (context, child) {
+        return Theme(
+          data: Theme.of(context).copyWith(
+            timePickerTheme: TimePickerThemeData(
+              backgroundColor: const Color(0xFFF0F2FF),
+              hourMinuteColor: Colors.white,
+              hourMinuteTextColor: Colors.black,
+              dialHandColor: const Color(0xFF4A6CF7),
+              dialBackgroundColor: Colors.white,
+            ),
+          ),
+          child: child!,
+        );
+      },
+    );
 
-    // Validate main fields
-    if (nameController.text.isEmpty || mobileController.text.isEmpty || emailController.text.isEmpty) {
-      Get.snackbar("Error", "Please fill all required personal info fields");
+    if (picked != null) {
+      final formattedTime = picked.format(context);
+      updatePackageForm(index, isStart ? 'startTime' : 'endTime', formattedTime);
+    }
+  }
+
+  void toggleAddOn(int index, String type) {
+    final form = packageFormsData[index] ?? {};
+    final key = type == 'free' ? 'freeAddOn' : 'extraAddOn';
+    form[key] = form[key] == null ? 'Selected' : null;
+    packageFormsData[index] = form;
+  }
+
+  void toggleTermsAcceptance() {
+    acceptTerms.value = !acceptTerms.value;
+  }
+
+  bool canSubmit() {
+    // Check if personal info is filled
+    if (personalInfo['name']?.value.isEmpty ?? true) return false;
+    if (personalInfo['mobile']?.value.isEmpty ?? true) return false;
+    if (personalInfo['email']?.value.isEmpty ?? true) return false;
+
+    // Check if terms are accepted
+    if (!acceptTerms.value) return false;
+
+    // Check if at least one package form has required fields
+    for (int i = 0; i < selectedPackages.length; i++) {
+      final form = packageFormsData[i] ?? {};
+      if (form['date']?.toString().isNotEmpty == true && form['startTime']?.toString().isNotEmpty == true && form['endTime']?.toString().isNotEmpty == true) {
+        return true;
+      }
+    }
+
+    return false;
+  }
+
+  void submitBooking() {
+    if (!canSubmit()) {
+      Get.snackbar('Error', 'Please fill all required fields and accept terms');
       return;
     }
 
-    // Validate schedule
-    if (dateControllers[selected].text.isEmpty || startTimeControllers[selected].text.isEmpty || endTimeControllers[selected].text.isEmpty) {
-      Get.snackbar("Error", "Please select booking schedule");
-      return;
-    }
-
-    // Validate T&C
-    if (!termsAccepted[selected].value) {
-      Get.snackbar("Error", "Please accept Terms & Conditions");
-      return;
-    }
-
-    // If all good
-    Get.snackbar("Success", "Form submitted successfully");
-  }
-
-  @override
-  void onClose() {
-    nameController.dispose();
-    mobileController.dispose();
-    emailController.dispose();
-
-    for (var c in altMobiles) c.dispose();
-    for (var c in altEmails) c.dispose();
-
-    for (var c in dateControllers) c.dispose();
-    for (var c in startTimeControllers) c.dispose();
-    for (var c in endTimeControllers) c.dispose();
-    for (var c in question1Controllers) c.dispose();
-    for (var c in question2Controllers) c.dispose();
-
-    super.onClose();
+    final data = {
+      'personalInfo': personalInfo.map((k, v) => MapEntry(k, v.value)),
+      'altMobiles': alternateMobiles.map((e) => e.value).toList(),
+      'altEmails': alternateEmails.map((e) => e.value).toList(),
+      'packages': List.generate(selectedPackages.length, (i) => {'info': selectedPackages[i], 'form': packageFormsData[i]}),
+      'termsAccepted': acceptTerms.value,
+    };
+    print('✅ Booking Data Submitted:\n$data');
   }
 }

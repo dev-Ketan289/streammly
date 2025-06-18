@@ -34,6 +34,9 @@ class _WebViewScreenState extends State<WebViewScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(appBar: AppBar(title: const Text('Web View')), body: WebViewWidget(controller: _controller));
+    return Scaffold(
+      appBar: AppBar(backgroundColor: Colors.transparent, title: Center(child: const Text('Web View')), leading: Icon(Icons.cancel_outlined)),
+      body: WebViewWidget(controller: _controller),
+    );
   }
 }

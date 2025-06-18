@@ -1,11 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:streammly/views/screens/home/vendor_locator.dart';
 
 import '../../../vendor/vendor_description.dart';
 
 class ExploreUs extends StatelessWidget {
-  const ExploreUs({super.key, required this.context});
-
-  final BuildContext context;
+  const ExploreUs({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -31,7 +30,7 @@ class ExploreUs extends StatelessWidget {
               const Text("Explore Us !!!", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
               InkWell(
                 onTap: () {
-                  // TODO: Navigate to map screen
+                  Navigator.push(context, MaterialPageRoute(builder: (_) => VendorLocator()));
                 },
                 child: Row(
                   children: const [
@@ -54,13 +53,8 @@ class ExploreUs extends StatelessWidget {
             return InkWell(
               borderRadius: BorderRadius.circular(18),
               onTap: () {
-                // ✅ Navigate to detailed screen
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (_) => const VendorDescription(), // Replace with your screen
-                  ),
-                );
+                // Navigate to detailed screen
+                Navigator.push(context, MaterialPageRoute(builder: (_) => const VendorDescription()));
               },
               child: Container(
                 margin: const EdgeInsets.only(bottom: 20),
