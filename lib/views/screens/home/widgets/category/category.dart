@@ -4,6 +4,7 @@ import 'package:get/get.dart';
 import '../../../../../controllers/category_controller.dart';
 import '../../../../../navigation_menu.dart';
 import '../../../common/images/rounded_image.dart';
+import '../../vendor_locator.dart';
 
 class CategoryListScreen extends StatelessWidget {
   final CategoryController controller = Get.put(CategoryController());
@@ -37,42 +38,48 @@ class CategoryListScreen extends StatelessWidget {
           itemBuilder: (context, index) {
             final cat = controller.categories[index];
 
-            return Container(
-              margin: const EdgeInsets.only(bottom: 16),
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(16),
-                boxShadow: [BoxShadow(color: Colors.grey.withValues(alpha: 0.1), blurRadius: 8, offset: const Offset(0, 4))],
-              ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  // Image
-                  Stack(
-                    children: [
-                      Center(
-                        child: Padding(
-                          padding: const EdgeInsets.only(top: 8.0),
-                          child: TRoundedImage(imageUrl: "${controller.baseUrl}${cat.image}", height: 100, width: 380, fit: BoxFit.cover, borderRadius: 16, isNetworkImage: true),
-                        ),
-                      ),
-                      const Positioned(top: 10, right: 10, child: Icon(Icons.bookmark, size: 25, color: Colors.red)),
-                    ],
-                  ),
+            return GestureDetector(
+              onTap: () {
+                Get.to(() => CompanyLocatorMapScreen(categoryId: cat.id));
+              },
 
-                  // Text
-                  Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
+              child: Container(
+                margin: const EdgeInsets.only(bottom: 16),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(16),
+                  boxShadow: [BoxShadow(color: Colors.grey.withValues(alpha: 0.1), blurRadius: 8, offset: const Offset(0, 4))],
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    // Image
+                    Stack(
                       children: [
-                        Text(cat.title, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
-                        const SizedBox(height: 4),
-                        Text(cat.shortDescription ?? "No description available", style: const TextStyle(fontSize: 13, color: Colors.grey)),
+                        Center(
+                          child: Padding(
+                            padding: const EdgeInsets.only(top: 8.0),
+                            child: TRoundedImage(imageUrl: "${controller.baseUrl}${cat.image}", height: 100, width: 380, fit: BoxFit.cover, borderRadius: 16, isNetworkImage: true),
+                          ),
+                        ),
+                        const Positioned(top: 10, right: 10, child: Icon(Icons.bookmark, size: 25, color: Colors.red)),
                       ],
                     ),
-                  ),
-                ],
+
+                    // Text
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(cat.title, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+                          const SizedBox(height: 4),
+                          Text(cat.shortDescription ?? "No description available", style: const TextStyle(fontSize: 13, color: Colors.grey)),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
               ),
             );
           },

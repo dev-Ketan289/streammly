@@ -30,7 +30,7 @@ class ExploreUs extends StatelessWidget {
               const Text("Explore Us !!!", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
               InkWell(
                 onTap: () {
-                  Navigator.push(context, MaterialPageRoute(builder: (_) => VendorLocator()));
+                  Navigator.push(context, MaterialPageRoute(builder: (_) => CompanyLocatorMapScreen(categoryId: 1)));
                 },
                 child: Row(
                   children: const [

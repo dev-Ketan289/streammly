@@ -28,8 +28,8 @@ class VendorDetailScreen extends StatelessWidget {
               HeaderBanner(
                 banners: [BannerItem(image: "assets/images/recommended_banner/FocusPointVendor.png", title: "Photography", subtitle: "Capture your moments perfectly.")],
                 height: 280,
-                location: "Mahim",
-                address: "MTNL Telephone Colony, VSNL Colony",
+                // location: "Mahim",
+                // address: "MTNL Telephone Colony, VSNL Colony",
                 color: Colors.indigo.withValues(alpha: 0.4),
                 overlayOpacity: 0.7,
               ),

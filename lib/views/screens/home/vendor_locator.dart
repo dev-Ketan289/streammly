@@ -1,13 +1,30 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
-import 'package:streammly/controllers/location_controller.dart';
 
-class VendorLocator extends StatelessWidget {
-  final controller = Get.put(LocationController());
-  final TextEditingController searchController = TextEditingController();
+import '../../../controllers/category_controller.dart';
+import '../../../controllers/company_controller.dart';
 
-  VendorLocator({super.key});
+class CompanyLocatorMapScreen extends StatefulWidget {
+  final int categoryId;
+
+  const CompanyLocatorMapScreen({super.key, required this.categoryId});
+
+  @override
+  State<CompanyLocatorMapScreen> createState() => _CompanyLocatorMapScreenState();
+}
+
+class _CompanyLocatorMapScreenState extends State<CompanyLocatorMapScreen> {
+  final MapController controller = Get.put(MapController());
+  final CategoryController categoryController = Get.put(CategoryController());
+
+  @override
+  void initState() {
+    super.initState();
+    // set the selected category and fetch companies
+    controller.selectedCategoryId.value = widget.categoryId;
+    controller.fetchCompaniesByCategory(widget.categoryId);
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -15,104 +32,81 @@ class VendorLocator extends StatelessWidget {
       body: Obx(() {
         return Stack(
           children: [
-            /// ---------- MAP BACKGROUND ----------
+            /// Google Map
             GoogleMap(
-              initialCameraPosition: CameraPosition(target: LatLng(controller.rxLat.value, controller.rxLng.value), zoom: 15),
-              onMapCreated: (mapController) {
-                controller.setMapController(mapController);
-              },
-              onTap: (LatLng position) {
-                // Allow users to tap on map to select location
-                controller.updateLocation(position.latitude, position.longitude);
-              },
-              markers: {
-                Marker(
-                  markerId: const MarkerId("selected_location"),
-                  position: LatLng(controller.rxLat.value, controller.rxLng.value),
-                  draggable: true,
-                  onDragEnd: (LatLng position) {
-                    controller.updateLocation(position.latitude, position.longitude);
-                  },
-                ),
-              },
-              myLocationEnabled: true,
-              myLocationButtonEnabled: true,
+              initialCameraPosition: const CameraPosition(target: LatLng(19.2189, 72.9805), zoom: 12),
+              markers:
+                  controller.companies.map((company) {
+                    return Marker(
+                      markerId: MarkerId(company.companyName),
+                      position: LatLng(company.latitude!, company.longitude!),
+                      onTap: () => controller.selectCompany(company),
+                      infoWindow: InfoWindow(title: company.companyName),
+                    );
+                  }).toSet(),
             ),
 
-            /// ---------- SEARCH BAR ON TOP ----------
-            SafeArea(
-              child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    // Back + Title
-                    // Row(
-                    //   children: [
-                    //     IconButton(icon: const Icon(Icons.arrow_back, color: Colors.black), onPressed: () => Get.back()),
-                    //     const SizedBox(width: 8),
-                    //     const Text("Select Location", style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
-                    //   ],
-                    // ),
-                    // const SizedBox(height: 8),
+            /// Dropdown for selecting category (Dynamic)
+            Positioned(
+              top: 60,
+              left: 20,
+              right: 20,
+              child: Obx(() {
+                if (categoryController.isLoading.value) {
+                  return const Center(child: CircularProgressIndicator());
+                }
 
-                    // Search Box with improved design
-                    Container(
-                      decoration: BoxDecoration(boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: 0.1), blurRadius: 8, offset: const Offset(0, 2))]),
-                      child: TextField(
-                        controller: searchController,
-                        onChanged: controller.searchAutocomplete,
-                        decoration: InputDecoration(
-                          hintText: "Search Location here",
-                          prefixIcon: const Icon(Icons.search, color: Colors.grey),
-                          suffixIcon:
-                              searchController.text.isNotEmpty
-                                  ? IconButton(
-                                    icon: const Icon(Icons.clear, color: Colors.grey),
-                                    onPressed: () {
-                                      searchController.clear();
-                                      controller.clearSuggestions();
-                                    },
-                                  )
-                                  : null,
-                          filled: true,
-                          fillColor: Colors.white,
-                          border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide.none),
-                          contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-                        ),
-                      ),
-                    ),
-
-                    // Suggestion List with improved styling
-                    if (controller.suggestions.isNotEmpty)
-                      Container(
-                        margin: const EdgeInsets.only(top: 8),
-                        height: 200,
-                        decoration: BoxDecoration(
-                          color: Colors.white,
-                          borderRadius: BorderRadius.circular(12),
-                          boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: 0.1), blurRadius: 8, offset: const Offset(0, 2))],
-                        ),
-                        child: ListView.separated(
-                          itemCount: controller.suggestions.length,
-                          separatorBuilder: (context, index) => const Divider(height: 1),
-                          itemBuilder: (context, index) {
-                            final prediction = controller.suggestions[index];
-                            return ListTile(
-                              leading: const Icon(Icons.location_on, color: Colors.blue),
-                              title: Text(prediction.description ?? '', style: const TextStyle(fontSize: 14)),
-                              onTap: () {
-                                controller.selectPrediction(prediction);
-                                searchController.text = prediction.description ?? '';
-                              },
-                            );
-                          },
-                        ),
-                      ),
-                  ],
-                ),
-              ),
+                return Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 16),
+                  decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(12)),
+                  child: DropdownButton<int>(
+                    value: controller.selectedCategoryId.value,
+                    isExpanded: true,
+                    underline: const SizedBox(),
+                    items:
+                        categoryController.categories.map((category) {
+                          return DropdownMenuItem<int>(value: category.id, child: Text(category.title, textAlign: TextAlign.center));
+                        }).toList(),
+                    onChanged: (int? newId) {
+                      if (newId != null) {
+                        controller.selectedCategoryId.value = newId;
+                        controller.fetchCompaniesByCategory(newId);
+                        controller.selectedCompany.value = null;
+                      }
+                    },
+                  ),
+                );
+              }),
             ),
+
+            /// Info Card when company is selected
+            Obx(() {
+              final company = controller.selectedCompany.value;
+              if (company == null) return const SizedBox();
+
+              return Positioned(
+                bottom: 0,
+                left: 0,
+                right: 0,
+                child: Container(
+                  padding: const EdgeInsets.all(16),
+                  decoration: const BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+                    boxShadow: [BoxShadow(blurRadius: 10, color: Colors.black26)],
+                  ),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Text(company.companyName, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
+                      const SizedBox(height: 8),
+                      Text("Lat: ${company.latitude}"),
+                      Text("Lng: ${company.longitude}"),
+                    ],
+                  ),
+                ),
+              );
+            }),
           ],
         );
       }),

@@ -8,8 +8,7 @@ import '../models/category/category_model.dart';
 class CategoryController extends GetxController {
   var categories = <CategoryModel>[].obs;
   var isLoading = true.obs;
-
-  final String baseUrl = 'http://192.168.1.113:8000/';
+  final String baseUrl = 'http://192.168.1.27:8000/';
 
   @override
   void onInit() {

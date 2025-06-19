@@ -1,32 +1,24 @@
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 
+import '../../../../controllers/location_controller.dart';
 import '../../../../models/banner/banner_item.dart';
 
 class HeaderBanner extends StatefulWidget {
   final List<BannerItem> banners;
   final double height;
-  final String location;
-  final String address;
   final bool showSearchBar;
   final Color color;
   final double overlayOpacity;
 
-  const HeaderBanner({
-    super.key,
-    required this.banners,
-    required this.height,
-    required this.location,
-    required this.address,
-    this.showSearchBar = true,
-    required this.color,
-    required this.overlayOpacity,
-  });
+  const HeaderBanner({super.key, required this.banners, required this.height, this.showSearchBar = true, required this.color, required this.overlayOpacity});
 
   @override
   State<HeaderBanner> createState() => _HeaderBannerState();
 }
 
 class _HeaderBannerState extends State<HeaderBanner> {
+  final LocationController locationController = Get.find();
   int currentIndex = 0;
 
   @override
@@ -38,54 +30,55 @@ class _HeaderBannerState extends State<HeaderBanner> {
       height: widget.height,
       child: Stack(
         children: [
-          // PageView with background images
+          /// ---------- Background Image with Overlay ----------
           PageView.builder(
             itemCount: widget.banners.length,
             onPageChanged: (index) => setState(() => currentIndex = index),
             itemBuilder: (context, index) {
               final banner = widget.banners[index];
               return Container(
-                decoration: BoxDecoration(image: DecorationImage(image: AssetImage(banner.image), fit: BoxFit.fill)),
-                child: Container(color: widget.color.withValues(alpha: (widget.overlayOpacity))),
+                decoration: BoxDecoration(image: DecorationImage(image: AssetImage(banner.image), fit: BoxFit.cover)),
+                child: Container(color: widget.color.withValues(alpha: widget.overlayOpacity)),
               );
             },
           ),
 
-          // Vector image overlay (e.g., woman with camera)
-          if (currentBanner.vectorImage != null)
-            Positioned(
-              right: 16,
-              bottom: 20,
-              child: Image.asset(
-                currentBanner.vectorImage!,
-                height: 140, // Adjust as needed
-              ),
-            ),
+          /// ---------- Vector image ----------
+          if (currentBanner.vectorImage != null) Positioned(right: 16, bottom: 20, child: Image.asset(currentBanner.vectorImage!, height: 140)),
 
-          // Static top content
+          /// ---------- Top Content ----------
           Padding(
             padding: const EdgeInsets.fromLTRB(16, 20, 16, 0),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // Location row
-                Row(
-                  children: [
-                    const Icon(Icons.location_on, color: Colors.white, size: 20),
-                    const SizedBox(width: 8),
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(widget.location, style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 13)),
-                        Text(widget.address, style: const TextStyle(color: Colors.white, fontSize: 10)),
-                      ],
-                    ),
-                  ],
+                /// Location Row with Obx
+                Obx(
+                  () => Row(
+                    children: [
+                      const Icon(Icons.location_on, color: Colors.white, size: 25),
+                      const SizedBox(width: 8),
+                      Flexible(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            const Text("Current Location", style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 13)),
+                            Text(
+                              locationController.selectedAddress.value.isNotEmpty ? locationController.selectedAddress.value : "Fetching address...",
+                              style: const TextStyle(color: Colors.white, fontSize: 10),
+                              maxLines: 2,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
 
                 const SizedBox(height: 16),
 
-                // Search bar
+                /// Search Bar
                 Row(
                   children: [
                     const Icon(Icons.menu, color: Colors.white),
@@ -111,6 +104,7 @@ class _HeaderBannerState extends State<HeaderBanner> {
 
                 const SizedBox(height: 24),
 
+                /// Banner Title & Subtitle
                 Text(currentBanner.title, style: const TextStyle(fontSize: 24, color: Colors.white, fontWeight: FontWeight.bold)),
                 const SizedBox(height: 6),
                 Text(currentBanner.subtitle, style: const TextStyle(color: Colors.white, fontSize: 13)),

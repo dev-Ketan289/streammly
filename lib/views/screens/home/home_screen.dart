@@ -1,5 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:streammly/controllers/home_screen_controller.dart';
+import 'package:streammly/controllers/location_controller.dart';
+import 'package:streammly/models/banner/banner_item.dart';
+import 'package:streammly/models/category/category_item.dart';
 import 'package:streammly/views/screens/home/widgets/category/category.dart';
 import 'package:streammly/views/screens/home/widgets/category/explore_us.dart';
 import 'package:streammly/views/screens/home/widgets/category/page_nav.dart';
@@ -7,15 +11,12 @@ import 'package:streammly/views/screens/home/widgets/category/recommended_list.d
 import 'package:streammly/views/screens/home/widgets/category/widgets/category_scroller.dart';
 import 'package:streammly/views/screens/home/widgets/header_banner.dart';
 import 'package:streammly/views/screens/home/widgets/promo_slider.dart';
-
-import '../../../controllers/home_screen_controller.dart';
-import '../../../models/banner/banner_item.dart';
-import '../../../models/category/category_item.dart';
-import 'widgets/upcoming_offer_card.dart';
+import 'package:streammly/views/screens/home/widgets/upcoming_offer_card.dart';
 
 class HomeScreen extends StatelessWidget {
   final List<String> promoSlider = ["assets/images/category/media.png"];
   final HomeController controller = Get.put(HomeController());
+  final LocationController locationController = Get.put(LocationController());
 
   HomeScreen({super.key});
 
@@ -29,21 +30,24 @@ class HomeScreen extends StatelessWidget {
           child: SingleChildScrollView(
             child: Column(
               children: [
+                // Updated HeaderBanner with reactive location/address
                 HeaderBanner(
                   banners: [
                     BannerItem(image: "assets/images/banner.png", vectorImage: "assets/images/photographer.png", title: "Photography", subtitle: "Capture your moments perfectly."),
                     BannerItem(image: "assets/images/banner.png", vectorImage: "assets/images/photographer.png", title: "Wedding", subtitle: "Plan your perfect wedding today."),
-                    // Add more from backend
                   ],
                   height: 370,
-                  location: "Mahim",
-                  address: "MTNL Telephone Colony, VSNL Colony",
-                  color: Colors.white.withValues(alpha: 0.4),
+                  color: Colors.white,
                   overlayOpacity: 0.2,
                 ),
+
                 const SizedBox(height: 24),
+
+                // Upcoming offers
                 UpcomingOfferCard(),
                 const SizedBox(height: 24),
+
+                // Categories
                 CategoryScroller(
                   title: "Categories",
                   onSeeAll: () {
@@ -57,16 +61,25 @@ class HomeScreen extends StatelessWidget {
                     CategoryItem(label: "Catering", icon: Icons.local_dining, onTap: () {}),
                   ],
                 ),
+
                 const SizedBox(height: 24),
+
+                // Page nav (could be Explore, Book Now, etc.)
                 PageNav(),
                 const SizedBox(height: 24),
+
+                // Recommended Vendors
                 RecommendedList(context: context),
                 const SizedBox(height: 24),
+
+                // Explore Section
                 ExploreUs(),
-                SizedBox(height: 26),
+                const SizedBox(height: 26),
+
+                // Promo Slider
                 PromoSlider(),
 
-                // You can add more widgets below for category, offers, explore etc.
+                const SizedBox(height: 24),
               ],
             ),
           ),
