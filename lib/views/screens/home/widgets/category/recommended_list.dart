@@ -23,7 +23,7 @@ class RecommendedList extends StatelessWidget {
     return SizedBox(
       height: 270,
       child: ListView.separated(
-        padding: const EdgeInsets.symmetric(horizontal: 16),
+        padding: const EdgeInsets.all(16),
         scrollDirection: Axis.horizontal,
         itemCount: vendors.length,
         separatorBuilder: (_, __) => const SizedBox(width: 12),

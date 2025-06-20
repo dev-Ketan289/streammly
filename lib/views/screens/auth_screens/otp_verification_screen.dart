@@ -19,6 +19,11 @@ class OtpScreen extends StatelessWidget {
     final String phone = fullPhone.replaceAll("+91 ", "");
     final String fullNumber = 'Via SMS $fullPhone';
 
+    /// ✅ Auto-fill OTP for test number
+    if (phone == "8111111111") {
+      controller.otpController.text = "123456";
+    }
+
     return PopScope(
       canPop: false,
       child: Scaffold(

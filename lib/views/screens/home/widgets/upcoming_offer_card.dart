@@ -39,16 +39,16 @@ class UpcomingOfferCard extends StatelessWidget {
                     children: [
                       const Icon(Icons.calendar_today, size: 16, color: Colors.black54),
                       const SizedBox(width: 6),
-                      const Text("15 June, Saturday", style: TextStyle(fontSize: 12, color: Colors.black87)),
+                      const Text("15 June, Saturday", style: TextStyle(fontSize: 12, color: Colors.black87), overflow: TextOverflow.ellipsis),
                       const SizedBox(width: 16),
                       const Icon(Icons.access_time, size: 16, color: Colors.black54),
                       const SizedBox(width: 6),
                       const Text("12:30 pm", style: TextStyle(fontSize: 12, color: Colors.black87)),
-                      const Spacer(),
-                      const Text("3 Photographers", style: TextStyle(fontSize: 12, color: Colors.black87)),
                     ],
                   ),
-                  const SizedBox(height: 60), // For bottom corner design
+                  const SizedBox(height: 30),
+                  // const Spacer(),
+                  const Text("3 Photographers", style: TextStyle(fontSize: 12, color: Colors.black87), maxLines: 2, overflow: TextOverflow.ellipsis), // For bottom corner design
                 ],
               ),
             ),

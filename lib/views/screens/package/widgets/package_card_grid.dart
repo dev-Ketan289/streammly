@@ -9,115 +9,113 @@ class PackagesGridView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      children: [
-        SizedBox(
-          width: 340,
-          height: 340,
-          child: PageView.builder(
-            controller: PageController(viewportFraction: 0.8),
-            itemCount: controller.packages.length,
-            onPageChanged: (index) {
-              controller.togglePackageSelection(index);
-            },
-            itemBuilder: (context, index) {
-              final pkg = controller.packages[index];
+    return SingleChildScrollView(
+      padding: const EdgeInsets.symmetric(vertical: 16),
+      child: Column(
+        children: [
+          SizedBox(
+            width: 340,
+            height: 340,
+            child: PageView.builder(
+              controller: PageController(viewportFraction: 0.8),
+              itemCount: controller.packages.length,
+              itemBuilder: (context, index) {
+                final pkg = controller.packages[index];
 
-              return Container(
-                margin: const EdgeInsets.symmetric(horizontal: 8, vertical: 16),
-                decoration: BoxDecoration(
-                  color: const Color(0xFF4A6CF7),
-                  borderRadius: BorderRadius.circular(16),
-                  boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.1), blurRadius: 10, offset: const Offset(0, 4))],
-                ),
-                child: Stack(
-                  children: [
-                    Padding(
-                      padding: const EdgeInsets.all(20),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(pkg["title"], style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold, color: Colors.white)),
-                          Text(pkg["type"], style: const TextStyle(fontSize: 12, color: Colors.white70, fontWeight: FontWeight.w500)),
-                          const SizedBox(height: 20),
-                          const Text("Just For", style: TextStyle(fontSize: 11, color: Colors.white70)),
-                          Text("₹${pkg["price"]}/-", style: const TextStyle(fontSize: 26, fontWeight: FontWeight.bold, color: Colors.white)),
-                          const SizedBox(height: 16),
-                          Row(
-                            children:
-                                pkg["hours"].map<Widget>((hour) {
-                                  return Obx(
-                                    () => Container(
-                                      margin: const EdgeInsets.only(right: 8),
-                                      child: GestureDetector(
-                                        onTap: () => controller.toggleHour(index, hour),
-                                        child: Container(
-                                          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                                          decoration: BoxDecoration(
-                                            color: (controller.selectedHours[index]?.contains(hour) ?? false) ? Colors.white : Colors.transparent,
-                                            borderRadius: BorderRadius.circular(12),
-                                            border: Border.all(color: Colors.white, width: 1),
-                                          ),
-                                          child: Text(
-                                            hour,
-                                            style: TextStyle(
-                                              fontSize: 11,
-                                              color: (controller.selectedHours[index]?.contains(hour) ?? false) ? const Color(0xFF4A6CF7) : Colors.white,
-                                              fontWeight: FontWeight.w600,
+                return Container(
+                  margin: const EdgeInsets.symmetric(horizontal: 8, vertical: 16),
+                  decoration: BoxDecoration(
+                    color: const Color(0xFF4A6CF7),
+                    borderRadius: BorderRadius.circular(16),
+                    boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: 0.1), blurRadius: 10, offset: const Offset(0, 4))],
+                  ),
+                  child: Stack(
+                    children: [
+                      Padding(
+                        padding: const EdgeInsets.all(20),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(pkg["title"], style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold, color: Colors.white)),
+                            Text(pkg["type"], style: const TextStyle(fontSize: 12, color: Colors.white70, fontWeight: FontWeight.w500)),
+                            const SizedBox(height: 20),
+                            const Text("Just For", style: TextStyle(fontSize: 11, color: Colors.white70)),
+                            Text("₹${pkg["price"]}/-", style: const TextStyle(fontSize: 26, fontWeight: FontWeight.bold, color: Colors.white)),
+                            const SizedBox(height: 16),
+                            Row(
+                              children:
+                                  pkg["hours"].map<Widget>((hour) {
+                                    return Obx(
+                                      () => Container(
+                                        margin: const EdgeInsets.only(right: 8),
+                                        child: GestureDetector(
+                                          onTap: () => controller.toggleHour(index, hour),
+                                          child: Container(
+                                            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                                            decoration: BoxDecoration(
+                                              color: (controller.selectedHours[index]?.contains(hour) ?? false) ? Colors.white : Colors.transparent,
+                                              borderRadius: BorderRadius.circular(12),
+                                              border: Border.all(color: Colors.white, width: 1),
+                                            ),
+                                            child: Text(
+                                              hour,
+                                              style: TextStyle(
+                                                fontSize: 11,
+                                                color: (controller.selectedHours[index]?.contains(hour) ?? false) ? const Color(0xFF4A6CF7) : Colors.white,
+                                                fontWeight: FontWeight.w600,
+                                              ),
                                             ),
                                           ),
                                         ),
                                       ),
-                                    ),
-                                  );
-                                }).toList(),
-                          ),
-                          const Spacer(),
-                          SizedBox(
-                            width: double.infinity,
-                            child: ElevatedButton(
-                              style: ElevatedButton.styleFrom(
-                                backgroundColor: Colors.transparent,
-                                foregroundColor: Colors.white,
-                                padding: const EdgeInsets.symmetric(vertical: 12),
-                                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-                                elevation: 0,
-                              ),
-                              onPressed: () => controller.switchToListView(),
-                              child: const Text("View More", style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600)),
+                                    );
+                                  }).toList(),
                             ),
-                          ),
-                        ],
-                      ),
-                    ),
-                    Positioned(
-                      top: 16,
-                      right: 16,
-                      child: Obx(
-                        () => Container(
-                          padding: const EdgeInsets.all(4),
-                          decoration: BoxDecoration(shape: BoxShape.circle, color: controller.isPackageSelected(index) ? Colors.white : Colors.white54),
-                          child: Icon(Icons.check, color: controller.isPackageSelected(index) ? const Color(0xFF4A6CF7) : Colors.grey, size: 16),
+                            const Spacer(),
+                            SizedBox(
+                              width: double.infinity,
+                              child: ElevatedButton(
+                                style: ElevatedButton.styleFrom(
+                                  backgroundColor: Colors.transparent,
+                                  foregroundColor: Colors.white,
+                                  padding: const EdgeInsets.symmetric(vertical: 12),
+                                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                                  elevation: 0,
+                                ),
+                                onPressed: () => controller.switchToListView(),
+                                child: const Text("View More", style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600)),
+                              ),
+                            ),
+                          ],
                         ),
                       ),
-                    ),
-                  ],
-                ),
-              );
-            },
-          ),
-        ),
-        const SizedBox(height: 8),
-        Expanded(
-          child: SingleChildScrollView(
-            padding: const EdgeInsets.symmetric(horizontal: 16),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [_buildCategorySection(controller, "HomeShoot"), const SizedBox(height: 20), _buildCategorySection(controller, "StudioShoot"), const SizedBox(height: 16)],
+                      Positioned(
+                        top: 16,
+                        right: 16,
+                        child: Obx(
+                          () => GestureDetector(
+                            onTap: () => controller.togglePackageSelection(index),
+                            child: Container(
+                              padding: const EdgeInsets.all(4),
+                              decoration: BoxDecoration(shape: BoxShape.circle, color: controller.isPackageSelected(index) ? Colors.white : Colors.white54),
+                              child: Icon(Icons.check, color: controller.isPackageSelected(index) ? const Color(0xFF4A6CF7) : Colors.grey, size: 16),
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                );
+              },
             ),
           ),
-        ),
-      ],
+          const SizedBox(height: 8),
+          _buildCategorySection(controller, "HomeShoot"),
+          const SizedBox(height: 20),
+          _buildCategorySection(controller, "StudioShoot"),
+          const SizedBox(height: 16),
+        ],
+      ),
     );
   }
 
@@ -125,16 +123,19 @@ class PackagesGridView extends StatelessWidget {
     final categoryPackages = controller.packages.where((pkg) => pkg["type"] == category).toList();
     if (categoryPackages.isEmpty) return const SizedBox.shrink();
 
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(category, style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600, color: Colors.grey.shade600)),
-        const SizedBox(height: 12),
-        ...categoryPackages.map((pkg) {
-          final index = controller.packages.indexOf(pkg);
-          return _buildPackageCard(controller, pkg, index);
-        }),
-      ],
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(category, style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600, color: Colors.grey.shade600)),
+          const SizedBox(height: 12),
+          ...categoryPackages.map((pkg) {
+            final index = controller.packages.indexOf(pkg);
+            return _buildPackageCard(controller, pkg, index);
+          }),
+        ],
+      ),
     );
   }
 
@@ -151,7 +152,7 @@ class PackagesGridView extends StatelessWidget {
             color: Colors.white,
             borderRadius: BorderRadius.circular(12),
             border: isSelected ? Border.all(color: const Color(0xFF4A6CF7), width: 2) : null,
-            boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.04), blurRadius: 8, offset: const Offset(0, 2))],
+            boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: 0.04), blurRadius: 8, offset: const Offset(0, 2))],
           ),
           child: Row(
             children: [
@@ -160,7 +161,7 @@ class PackagesGridView extends StatelessWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text("₹${pkg["price"]}/-", style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: const Color(0xFF4A6CF7))),
+                    Text("₹${pkg["price"]}/-", style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Color(0xFF4A6CF7))),
                     const SizedBox(height: 4),
                     Text(pkg["type"], style: const TextStyle(fontSize: 10, color: Colors.grey, fontWeight: FontWeight.w500)),
                   ],

@@ -23,7 +23,7 @@ class PromoSlider extends StatelessWidget {
           CarouselSlider(
             items:
                 controller.promoList.map((item) {
-                  final imageUrl = controller.baseUrl + item.media;
+                  final imageUrl = item.media != null ? controller.baseUrl + item.media! : '';
                   return GestureDetector(
                     onTap: () => controller.handleTap(item),
                     child: Container(

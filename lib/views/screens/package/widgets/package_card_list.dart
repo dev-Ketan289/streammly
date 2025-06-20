@@ -28,7 +28,7 @@ class PackagesListView extends StatelessWidget {
                   color: Colors.white,
                   borderRadius: BorderRadius.circular(12),
                   border: isSelected ? Border.all(color: const Color(0xFF4A6CF7), width: 2) : null,
-                  boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 8, offset: const Offset(0, 2))],
+                  boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: 0.05), blurRadius: 8, offset: const Offset(0, 2))],
                 ),
                 child: IntrinsicHeight(
                   child: Row(

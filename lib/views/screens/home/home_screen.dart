@@ -34,7 +34,7 @@ class HomeScreen extends StatelessWidget {
                 HeaderBanner(
                   banners: [
                     BannerItem(image: "assets/images/banner.png", vectorImage: "assets/images/photographer.png", title: "Photography", subtitle: "Capture your moments perfectly."),
-                    BannerItem(image: "assets/images/banner.png", vectorImage: "assets/images/photographer.png", title: "Wedding", subtitle: "Plan your perfect wedding today."),
+                    // BannerItem(image: "assets/images/banner.png", vectorImage: "assets/images/photographer.png", title: "Wedding", subtitle: "Plan your perfect wedding today."),
                   ],
                   height: 370,
                   color: Colors.white,

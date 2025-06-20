@@ -12,8 +12,8 @@ class PromoSliderController extends GetxController {
   final RxList<PromoSliderModel> promoList = <PromoSliderModel>[].obs;
   final RxBool isLoading = true.obs;
 
-  final String baseUrl = 'http://192.168.1.113:8000/';
-  final String apiUrl = 'http://192.168.1.113:8000/api/v1/basic/sliders';
+  final String baseUrl = 'http://192.168.1.27:8000/';
+  final String apiUrl = 'http://192.168.1.27:8000/api/v1/basic/sliders';
 
   @override
   void onInit() {

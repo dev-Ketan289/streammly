@@ -2,7 +2,7 @@ class PromoSliderModel {
   final int id;
   final String title;
   final String mediaType;
-  final String media;
+  final String? media;
   final String? url;
   final String bannerType;
   final List<int>? categoryIds;
@@ -15,7 +15,7 @@ class PromoSliderModel {
     required this.id,
     required this.title,
     required this.mediaType,
-    required this.media,
+    this.media,
     required this.url,
     required this.bannerType,
     required this.categoryIds,

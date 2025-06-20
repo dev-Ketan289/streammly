@@ -43,7 +43,7 @@ class PackagesBottomBar extends StatelessWidget {
                               .map(
                                 (pkg) => Container(
                                   padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                                  decoration: BoxDecoration(color: const Color(0xFF4A6CF7).withOpacity(0.1), borderRadius: BorderRadius.circular(12)),
+                                  decoration: BoxDecoration(color: const Color(0xFF4A6CF7).withValues(alpha: 0.1), borderRadius: BorderRadius.circular(12)),
                                   child: Text(
                                     "${pkg['title']} (${pkg['selectedHours'].join(', ')})",
                                     style: const TextStyle(fontSize: 12, color: Color(0xFF4A6CF7), fontWeight: FontWeight.w500),
