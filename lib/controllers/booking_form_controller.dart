@@ -18,7 +18,15 @@ class BookingFormController extends GetxController {
   void initSelectedPackages(List<Map<String, dynamic>> packages) {
     selectedPackages.assignAll(packages);
     for (int i = 0; i < packages.length; i++) {
-      packageFormsData[i] = {'date': '', 'startTime': '', 'endTime': '', 'babyInfo': null, 'theme': null, 'freeAddOn': null, 'extraAddOn': null};
+      packageFormsData[i] = {
+        'date': '',
+        'startTime': '',
+        'endTime': '',
+        'babyInfo': null,
+        'theme': null,
+        'freeAddOn': null,
+        'extraAddOn': null,
+      };
     }
   }
 
@@ -44,20 +52,45 @@ class BookingFormController extends GetxController {
     packageFormsData[index] = data;
   }
 
-  void selectDate(int index, BuildContext context) async {
-    final picked = await showDatePicker(context: context, initialDate: DateTime.now(), firstDate: DateTime.now(), lastDate: DateTime.now().add(const Duration(days: 365)));
+  Future<String> selectDate(int index, BuildContext context) async {
+    final picked = await showDatePicker(
+      context: context,
+      initialDate: DateTime.now(),
+      firstDate: DateTime.now(),
+      lastDate: DateTime.now().add(const Duration(days: 365)),
+    );
+    String formatted = "";
     if (picked != null) {
-      final formatted = "${picked.day} ${_getMonthName(picked.month)} ${picked.year}";
+      formatted = "${picked.day} ${_getMonthName(picked.month)} ${picked.year}";
       updatePackageForm(index, 'date', formatted);
     }
+    return formatted;
   }
 
   String _getMonthName(int month) {
-    const months = ['', 'January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+    const months = [
+      '',
+      'January',
+      'February',
+      'March',
+      'April',
+      'May',
+      'June',
+      'July',
+      'August',
+      'September',
+      'October',
+      'November',
+      'December',
+    ];
     return months[month];
   }
 
-  void pickTime(int index, {required bool isStart, required BuildContext context}) async {
+  void pickTime(
+    int index, {
+    required bool isStart,
+    required BuildContext context,
+  }) async {
     final now = TimeOfDay.now();
     final picked = await showTimePicker(
       context: context,
@@ -80,7 +113,11 @@ class BookingFormController extends GetxController {
 
     if (picked != null) {
       final formattedTime = picked.format(context);
-      updatePackageForm(index, isStart ? 'startTime' : 'endTime', formattedTime);
+      updatePackageForm(
+        index,
+        isStart ? 'startTime' : 'endTime',
+        formattedTime,
+      );
     }
   }
 
@@ -107,7 +144,9 @@ class BookingFormController extends GetxController {
     // Check if at least one package form has required fields
     for (int i = 0; i < selectedPackages.length; i++) {
       final form = packageFormsData[i] ?? {};
-      if (form['date']?.toString().isNotEmpty == true && form['startTime']?.toString().isNotEmpty == true && form['endTime']?.toString().isNotEmpty == true) {
+      if (form['date']?.toString().isNotEmpty == true &&
+          form['startTime']?.toString().isNotEmpty == true &&
+          form['endTime']?.toString().isNotEmpty == true) {
         return true;
       }
     }
@@ -125,7 +164,10 @@ class BookingFormController extends GetxController {
       'personalInfo': personalInfo.map((k, v) => MapEntry(k, v.value)),
       'altMobiles': alternateMobiles.map((e) => e.value).toList(),
       'altEmails': alternateEmails.map((e) => e.value).toList(),
-      'packages': List.generate(selectedPackages.length, (i) => {'info': selectedPackages[i], 'form': packageFormsData[i]}),
+      'packages': List.generate(
+        selectedPackages.length,
+        (i) => {'info': selectedPackages[i], 'form': packageFormsData[i]},
+      ),
       'termsAccepted': acceptTerms.value,
     };
     print('✅ Booking Data Submitted:\n$data');

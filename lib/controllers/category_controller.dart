@@ -8,6 +8,7 @@ import '../models/category/category_model.dart';
 class CategoryController extends GetxController {
   var categories = <CategoryModel>[].obs;
   var isLoading = true.obs;
+
   final String baseUrl = 'http://192.168.1.27:8000/';
 
   @override
@@ -19,13 +20,19 @@ class CategoryController extends GetxController {
   void fetchCategories() async {
     try {
       isLoading(true);
-      final response = await http.get(Uri.parse('${baseUrl}api/v1/basic/categories'));
+      isLoading(true);
+      isLoading(true);
+
+      final response = await http.get(
+        Uri.parse('${baseUrl}api/v1/basic/categories'),
+      );
 
       if (response.statusCode == 200) {
         final jsonData = json.decode(response.body);
         final List<dynamic> dataList = jsonData['data'];
 
-        categories.value = dataList.map((item) => CategoryModel.fromJson(item)).toList();
+        categories.value =
+            dataList.map((item) => CategoryModel.fromJson(item)).toList();
       } else {
         Get.snackbar("Error", "Failed to load categories");
       }

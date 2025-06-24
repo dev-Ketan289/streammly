@@ -19,9 +19,20 @@ class HomeController extends GetxController {
     await Future.delayed(const Duration(seconds: 2));
 
     // Dummy data
-    categories.value = ['Venue', 'Photographer', 'Event Organiser', 'Makeup Artist', 'Food & Caterers'];
+    categories.value = [
+      'Venue',
+      'Photographer',
+      'Event Organiser',
+      'Makeup Artist',
+      'Food & Caterers',
+    ];
 
-    recommendedItems.value = ['FocusPoint Studio', 'Velvet Parlour', 'Flavor Theory', 'Echo Booth'];
+    recommendedItems.value = [
+      'FocusPoint Studio',
+      'Velvet Parlour',
+      'Flavor Theory',
+      'Echo Booth',
+    ];
 
     isLoading.value = false;
   }

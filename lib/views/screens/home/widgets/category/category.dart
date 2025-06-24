@@ -22,7 +22,14 @@ class CategoryListScreen extends StatelessWidget {
         elevation: 0,
         backgroundColor: Colors.transparent,
         leading: const BackButton(color: Colors.black),
-        title: const Text("Categories", style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Colors.black)),
+        title: const Text(
+          "Categories",
+          style: TextStyle(
+            fontSize: 20,
+            fontWeight: FontWeight.bold,
+            color: Colors.black,
+          ),
+        ),
         centerTitle: true,
       ),
       body: Obx(() {
@@ -48,7 +55,13 @@ class CategoryListScreen extends StatelessWidget {
                 decoration: BoxDecoration(
                   color: Colors.white,
                   borderRadius: BorderRadius.circular(16),
-                  boxShadow: [BoxShadow(color: Colors.grey.withValues(alpha: 0.1), blurRadius: 8, offset: const Offset(0, 4))],
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.grey.withValues(alpha: 0.1),
+                      blurRadius: 8,
+                      offset: const Offset(0, 4),
+                    ),
+                  ],
                 ),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -59,22 +72,52 @@ class CategoryListScreen extends StatelessWidget {
                         Center(
                           child: Padding(
                             padding: const EdgeInsets.only(top: 8.0),
-                            child: TRoundedImage(imageUrl: "${controller.baseUrl}${cat.image}", height: 100, width: 380, fit: BoxFit.cover, borderRadius: 16, isNetworkImage: true),
+                            child: TRoundedImage(
+                              imageUrl: "${controller.baseUrl}${cat.image}",
+                              height: 100,
+                              width: 380,
+                              fit: BoxFit.cover,
+                              borderRadius: 16,
+                              isNetworkImage: true,
+                            ),
                           ),
                         ),
-                        const Positioned(top: 10, right: 10, child: Icon(Icons.bookmark, size: 25, color: Colors.red)),
+                        const Positioned(
+                          top: 10,
+                          right: 10,
+                          child: Icon(
+                            Icons.bookmark,
+                            size: 25,
+                            color: Colors.red,
+                          ),
+                        ),
                       ],
                     ),
 
                     // Text
                     Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 16,
+                        vertical: 12,
+                      ),
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text(cat.title, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+                          Text(
+                            cat.title,
+                            style: const TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
                           const SizedBox(height: 4),
-                          Text(cat.shortDescription ?? "No description available", style: const TextStyle(fontSize: 13, color: Colors.grey)),
+                          Text(
+                            cat.shortDescription ?? "No description available",
+                            style: const TextStyle(
+                              fontSize: 13,
+                              color: Colors.grey,
+                            ),
+                          ),
                         ],
                       ),
                     ),
