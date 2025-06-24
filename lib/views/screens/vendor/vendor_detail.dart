@@ -1,13 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:streammly/models/category/category_item.dart';
-import 'package:streammly/views/screens/home/widgets/category/widgets/category_scroller.dart';
-import 'package:streammly/views/screens/home/widgets/header_banner.dart';
 import 'package:streammly/views/screens/vendor/vendor_group.dart';
 
-import '../../../models/banner/banner_item.dart';
+import '../../../models/category/category_item.dart';
 import '../../../navigation_menu.dart';
 import '../home/widgets/category/review_card.dart';
+import '../home/widgets/category/widgets/category_scroller.dart';
+import '../home/widgets/header_banner.dart';
 import '../home/widgets/horizontal_card.dart';
 
 class VendorDetailScreen extends StatelessWidget {
@@ -26,12 +25,10 @@ class VendorDetailScreen extends StatelessWidget {
             children: [
               // Cover Image & Name
               HeaderBanner(
-                banners: [BannerItem(image: "assets/images/recommended_banner/FocusPointVendor.png", title: "Photography", subtitle: "Capture your moments perfectly.")],
                 height: 280,
-                // location: "Mahim",
-                // address: "MTNL Telephone Colony, VSNL Colony",
-                color: Colors.indigo.withValues(alpha: 0.4),
-                overlayOpacity: 0.7,
+                backgroundImage: 'assets/images/recommended_banner/FocusPointVendor.png',
+                overlayColor: Colors.indigo.withValues(alpha: 0.6),
+                overrideTitle: 'Focus Point',
               ),
               const SizedBox(height: 6),
               CategoryScroller(

@@ -37,9 +37,9 @@ class RecommendedList extends StatelessWidget {
             child: Container(
               width: 160, // Use a fixed width that's reasonable for all screen sizes
               decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(12),
+                borderRadius: BorderRadius.circular(16),
                 color: Colors.white,
-                boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: 0.1), blurRadius: 9, offset: const Offset(0, 2))],
+                boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: 0.04), blurRadius: 3, offset: const Offset(1, 2))],
               ),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -47,14 +47,14 @@ class RecommendedList extends StatelessWidget {
                   Stack(
                     children: [
                       ClipRRect(
-                        borderRadius: const BorderRadius.vertical(top: Radius.circular(12)),
-                        child: Image.asset(vendor["image"]!, height: 120, width: double.infinity, fit: BoxFit.cover),
+                        borderRadius: const BorderRadius.vertical(top: Radius.circular(16)),
+                        child: Image.asset(vendor["image"]!, height: 155, width: double.infinity, fit: BoxFit.fitHeight),
                       ),
                       Positioned(top: 8, right: 8, child: Icon(Icons.favorite, size: 20, color: Colors.white)),
                     ],
                   ),
                   Padding(
-                    padding: const EdgeInsets.all(8),
+                    padding: const EdgeInsets.all(4),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
@@ -68,9 +68,9 @@ class RecommendedList extends StatelessWidget {
                             ),
                           ],
                         ),
-                        const SizedBox(height: 4),
+                        const SizedBox(height: 2),
                         Text(vendor["type"]!, style: const TextStyle(fontSize: 12, color: Colors.grey), overflow: TextOverflow.ellipsis),
-                        const SizedBox(height: 8),
+                        const SizedBox(height: 2),
                         Row(
                           children: [
                             const Icon(Icons.access_time, size: 14, color: Colors.grey),
@@ -78,7 +78,7 @@ class RecommendedList extends StatelessWidget {
                             Expanded(child: Text(vendor["time"]!, style: const TextStyle(fontSize: 12, color: Colors.grey), overflow: TextOverflow.ellipsis)),
                           ],
                         ),
-                        const SizedBox(height: 4),
+                        const SizedBox(height: 2),
                         Row(
                           children: [
                             const Icon(Icons.location_on, size: 14, color: Colors.grey),

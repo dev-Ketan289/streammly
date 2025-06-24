@@ -1,19 +1,30 @@
 import 'package:flutter/material.dart';
-import 'package:streammly/views/screens/vendor/vendoer_detail.dart';
+import 'package:get/get.dart';
+import 'package:streammly/controllers/company_controller.dart';
+import 'package:streammly/views/screens/vendor/vendor_detail.dart';
 
 class VendorDescription extends StatelessWidget {
   const VendorDescription({super.key});
 
   @override
   Widget build(BuildContext context) {
+    final company = Get.find<MapController>().selectedCompany.value;
+
     return Scaffold(
       body: Stack(
         children: [
-          // Background Image
-          Container(height: double.infinity, width: double.infinity, child: Image.asset('assets/images/newBorn.jpg', fit: BoxFit.cover)),
+          // Background Image (fallback if banner is missing)
+          Container(
+            height: double.infinity,
+            width: double.infinity,
+            child:
+                company?.bannerImage != null
+                    ? Image.network('http://192.168.1.27:8000/${company!.bannerImage}', fit: BoxFit.fitHeight)
+                    : Image.asset('assets/images/newBorn.jpg', fit: BoxFit.fill),
+          ),
 
           // Overlay
-          Container(height: double.infinity, width: double.infinity, color: Colors.indigo.withValues(alpha: 0.6)),
+          Container(height: double.infinity, width: double.infinity, color: Colors.indigo.withValues(alpha: 0.4)),
 
           // Content
           SafeArea(
@@ -23,70 +34,76 @@ class VendorDescription extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   // AppBar-like section
-                  Center(
+                  GestureDetector(
+                    onTap: () => Navigator.pop(context),
                     child: Row(
                       children: [
-                        Icon(Icons.arrow_back, color: Colors.white),
+                        const Icon(Icons.arrow_back, color: Colors.white),
                         const SizedBox(width: 10),
-                        Text("FocusPoint Studio", style: const TextStyle(color: Colors.white, fontSize: 20, fontWeight: FontWeight.bold)),
+                        Text(company?.companyName ?? 'Vendor', style: const TextStyle(color: Colors.white, fontSize: 20, fontWeight: FontWeight.bold)),
                       ],
                     ),
                   ),
                   const SizedBox(height: 20),
 
-                  // Spacer to push content near bottom
                   const Spacer(),
-
-                  // Vendor Info
-                  const SizedBox(height: 10),
 
                   Row(
                     children: [
-                      const Text("Photographer", style: TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold)),
-                      const SizedBox(height: 20),
-                      Padding(
-                        padding: const EdgeInsets.all(8.0),
-                        child: Container(
+                      Text(company?.categoryName ?? 'Service', style: const TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold)),
+                      const SizedBox(width: 20),
+                      if (company?.rating != null)
+                        Container(
                           padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
                           decoration: BoxDecoration(color: Colors.blue.shade600, borderRadius: BorderRadius.circular(6)),
-                          child: const Text("3.9 ★", style: TextStyle(color: Colors.white, fontSize: 12)),
+                          child: Text("${company!.rating!.toStringAsFixed(1)} ★", style: const TextStyle(color: Colors.white, fontSize: 12)),
                         ),
-                      ),
                     ],
                   ),
+
                   const SizedBox(height: 8),
                   Row(
                     children: [
                       const Icon(Icons.location_on, size: 16, color: Colors.white),
                       const SizedBox(width: 4),
-                      const Text("28-33 mins · 3.6 km", style: TextStyle(color: Colors.white, fontSize: 14)),
+                      Text(
+                        company?.distanceKm != null && company!.distanceKm! > 1 ? "${company.distanceKm!.toStringAsFixed(1)} km" : "${(company?.distanceKm ?? 0) * 1000 ~/ 1} m",
+                        style: const TextStyle(color: Colors.white, fontSize: 14),
+                      ),
                     ],
                   ),
+
                   const SizedBox(height: 10),
 
-                  const Text(
-                    "FocusPoint Studio is a premium photography and videography studio, offering state-of-the-art facilities for creative professionals and clients.",
-                    style: TextStyle(color: Colors.white70, fontSize: 13),
+                  // Dynamic Description or Fallback Static
+                  Text(
+                    (company?.description?.trim().isNotEmpty ?? false)
+                        ? company!.description!.replaceAll(RegExp(r'<[^>]*>|&[^;]+;'), '')
+                        : "FocusPoint Studio is a premium photography and videography studio, offering state-of-the-art facilities for creative professionals and clients.",
+                    style: const TextStyle(color: Colors.white70, fontSize: 13),
                   ),
+
                   const SizedBox(height: 16),
 
-                  // Services List
-                  const Text("Our Services Include:", style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
-                  const SizedBox(height: 6),
-                  const Text("✅ Studio Rental (Photography / Videography)", style: TextStyle(color: Colors.white)),
-                  const Text("✅ Professional Photography Services", style: TextStyle(color: Colors.white)),
-                  const Text("✅ Cinematic Videography", style: TextStyle(color: Colors.white)),
-                  const SizedBox(height: 16),
+                  // Show static sections only if description is missing
+                  if (company?.description == null || company!.description!.trim().isEmpty) ...[
+                    const Text("Our Services Include:", style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+                    const SizedBox(height: 6),
+                    const Text("✅ Studio Rental (Photography / Videography)", style: TextStyle(color: Colors.white)),
+                    const Text("✅ Professional Photography Services", style: TextStyle(color: Colors.white)),
+                    const Text("✅ Cinematic Videography", style: TextStyle(color: Colors.white)),
+                    const SizedBox(height: 16),
 
-                  // Why Choose Us
-                  const Text("Why Choose Us:", style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
-                  const SizedBox(height: 6),
-                  const Text("• High-end studio environment", style: TextStyle(color: Colors.white)),
-                  const Text("• Latest photography and video equipment", style: TextStyle(color: Colors.white)),
-                  const Text("• Experienced creative team", style: TextStyle(color: Colors.white)),
+                    const Text("Why Choose Us:", style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+                    const SizedBox(height: 6),
+                    const Text("• High-end studio environment", style: TextStyle(color: Colors.white)),
+                    const Text("• Latest photography and video equipment", style: TextStyle(color: Colors.white)),
+                    const Text("• Experienced creative team", style: TextStyle(color: Colors.white)),
+                  ],
+
                   const SizedBox(height: 20),
 
-                  // Button
+                  // Continue Button
                   Center(
                     child: ElevatedButton(
                       style: ElevatedButton.styleFrom(

@@ -44,12 +44,14 @@ class BookingFormController extends GetxController {
     packageFormsData[index] = data;
   }
 
-  void selectDate(int index, BuildContext context) async {
+  Future<String> selectDate(int index, BuildContext context) async {
     final picked = await showDatePicker(context: context, initialDate: DateTime.now(), firstDate: DateTime.now(), lastDate: DateTime.now().add(const Duration(days: 365)));
+    String formatted = "";
     if (picked != null) {
-      final formatted = "${picked.day} ${_getMonthName(picked.month)} ${picked.year}";
+      formatted = "${picked.day} ${_getMonthName(picked.month)} ${picked.year}";
       updatePackageForm(index, 'date', formatted);
     }
+    return formatted;
   }
 
   String _getMonthName(int month) {

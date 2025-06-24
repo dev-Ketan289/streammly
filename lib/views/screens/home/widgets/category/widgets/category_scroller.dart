@@ -36,8 +36,6 @@ class CategoryScroller extends StatelessWidget {
             ),
             const SizedBox(height: 16),
           ],
-
-          /// Horizontal Scroll List
           SizedBox(
             height: 90,
             child: ListView.separated(
@@ -60,7 +58,10 @@ class CategoryScroller extends StatelessWidget {
                           decoration: BoxDecoration(color: const Color(0xFFF0F6FF), borderRadius: BorderRadius.circular(16)),
                           child:
                               item.imagePath != null
-                                  ? ClipRRect(borderRadius: BorderRadius.circular(16), child: Image.asset(item.imagePath!, fit: BoxFit.cover))
+                                  ? ClipRRect(
+                                    borderRadius: BorderRadius.circular(16),
+                                    child: Image.network(item.imagePath!, fit: BoxFit.cover, errorBuilder: (_, __, ___) => const Icon(Icons.broken_image, color: Colors.grey)),
+                                  )
                                   : Icon(item.icon, size: 28, color: Colors.blue),
                         ),
                       ),

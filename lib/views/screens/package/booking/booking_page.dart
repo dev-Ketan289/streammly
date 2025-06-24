@@ -18,16 +18,16 @@ class BookingPage extends StatelessWidget {
 
     return Scaffold(
       appBar: AppBar(
+        backgroundColor: Colors.transparent,
         title: Text(
           controller.selectedPackages.isNotEmpty ? controller.selectedPackages[0]['title'] ?? "Booking" : "Booking",
           style: const TextStyle(color: Colors.black, fontSize: 18, fontWeight: FontWeight.w600),
         ),
-        backgroundColor: Colors.white,
         iconTheme: const IconThemeData(color: Colors.black),
         elevation: 0,
         centerTitle: true,
       ),
-      backgroundColor: Colors.white,
+      backgroundColor: Colors.grey[200],
       body: Obx(
         () => Column(
           children: [

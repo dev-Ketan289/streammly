@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 import '../../../../../controllers/booking_form_controller.dart';
+import '../../../common/widgets/custom_textfield.dart' show CustomTextField;
 
 class PersonalInfoSection extends StatelessWidget {
   const PersonalInfoSection({super.key});
@@ -14,29 +15,52 @@ class PersonalInfoSection extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         const Text("Personal Info", style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600, color: Colors.black87)),
-        const SizedBox(height: 20),
+        const SizedBox(height: 5),
 
         // Name Field
-        _buildInputField(label: 'Name *', onChanged: (val) => controller.updatePersonalInfo('name', val)),
+        CustomTextField(
+          labelText: 'Name *',
+          hintText: 'Enter your name',
+          onChanged: (val) => controller.updatePersonalInfo('name', val),
+          validator: (value) {
+            if (value == null || value.isEmpty) {
+              return 'Please enter your name';
+            }
+            if (value.length < 2) {
+              return 'Name must be at least 2 characters';
+            }
+            return null;
+          },
+        ),
         const SizedBox(height: 16),
 
         // Mobile Number Section
+        const Text("Mobile No *", style: TextStyle(fontWeight: FontWeight.w500, fontSize: 16, color: Colors.black87)),
+        const SizedBox(height: 8),
+        CustomTextField(
+          labelText: "Number",
+          hintText: '+91 8545254789',
+          keyboardType: TextInputType.phone,
+          onChanged: (val) => controller.updatePersonalInfo('mobile', val),
+          validator: (value) {
+            if (value == null || value.isEmpty) {
+              return 'Please enter your mobile number';
+            }
+            if (!RegExp(r'^\+?\d{10,12}$').hasMatch(value)) {
+              return 'Please enter a valid mobile number';
+            }
+            return null;
+          },
+        ),
         Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          mainAxisAlignment: MainAxisAlignment.end,
           children: [
-            const Text("Mobile No *", style: TextStyle(fontWeight: FontWeight.w500, fontSize: 16, color: Colors.black87)),
             TextButton.icon(
               onPressed: () => controller.addAlternateMobile(),
-              icon: const Icon(Icons.add, color: Color(0xFF4A6CF7), size: 18),
-              label: const Text('Add +', style: TextStyle(color: Color(0xFF4A6CF7), fontWeight: FontWeight.w500)),
+              label: const Text('Add +', style: TextStyle(color: Color.fromARGB(255, 143, 149, 170), fontWeight: FontWeight.w500)),
             ),
           ],
         ),
-        const SizedBox(height: 8),
-
-        _buildInputField(placeholder: '+91 8545254789', keyboardType: TextInputType.phone, onChanged: (val) => controller.updatePersonalInfo('mobile', val)),
-        const SizedBox(height: 12),
-
         // Alternate Mobile Numbers
         Obx(
           () => Column(
@@ -49,14 +73,21 @@ class PersonalInfoSection extends StatelessWidget {
                     child: Row(
                       children: [
                         Expanded(
-                          child: _buildInputField(
+                          child: CustomTextField(
                             initialValue: rxStr.value,
-                            placeholder: 'Alternate Mobile No',
+                            hintText: 'Alternate Mobile No',
                             keyboardType: TextInputType.phone,
                             onChanged: (val) => rxStr.value = val,
+                            validator: (value) {
+                              if (value != null && value.isNotEmpty) {
+                                if (!RegExp(r'^\+?\d{10,12}$').hasMatch(value)) {
+                                  return 'Please enter a valid mobile number';
+                                }
+                              }
+                              return null;
+                            },
                           ),
                         ),
-                        const SizedBox(width: 12),
                         GestureDetector(
                           onTap: () => controller.removeAlternateMobile(index),
                           child: Container(
@@ -72,25 +103,33 @@ class PersonalInfoSection extends StatelessWidget {
           ),
         ),
 
-        const SizedBox(height: 20),
-
         // Email Section
+        const Text("Mail ID *", style: TextStyle(fontWeight: FontWeight.w500, fontSize: 16, color: Colors.black87)),
+        const SizedBox(height: 8),
+        CustomTextField(
+          labelText: "Email",
+          hintText: 'umarajput123@gmail.com',
+          keyboardType: TextInputType.emailAddress,
+          onChanged: (val) => controller.updatePersonalInfo('email', val),
+          validator: (value) {
+            if (value == null || value.isEmpty) {
+              return 'Please enter your email';
+            }
+            if (!RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$').hasMatch(value)) {
+              return 'Please enter a valid email';
+            }
+            return null;
+          },
+        ),
         Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          mainAxisAlignment: MainAxisAlignment.end,
           children: [
-            const Text("Mail ID *", style: TextStyle(fontWeight: FontWeight.w500, fontSize: 16, color: Colors.black87)),
             TextButton.icon(
               onPressed: () => controller.addAlternateEmail(),
-              icon: const Icon(Icons.add, color: Color(0xFF4A6CF7), size: 18),
-              label: const Text('Add +', style: TextStyle(color: Color(0xFF4A6CF7), fontWeight: FontWeight.w500)),
+              label: const Text('Add +', style: TextStyle(color: Color.fromARGB(255, 143, 149, 170), fontWeight: FontWeight.w500)),
             ),
           ],
         ),
-        const SizedBox(height: 8),
-
-        _buildInputField(placeholder: 'umarajput123@gmail.com', keyboardType: TextInputType.emailAddress, onChanged: (val) => controller.updatePersonalInfo('email', val)),
-        const SizedBox(height: 12),
-
         // Alternate Email Addresses
         Obx(
           () => Column(
@@ -103,11 +142,19 @@ class PersonalInfoSection extends StatelessWidget {
                     child: Row(
                       children: [
                         Expanded(
-                          child: _buildInputField(
+                          child: CustomTextField(
                             initialValue: rxStr.value,
-                            placeholder: 'Alternate Mail ID',
+                            hintText: 'Alternate Mail ID',
                             keyboardType: TextInputType.emailAddress,
                             onChanged: (val) => rxStr.value = val,
+                            validator: (value) {
+                              if (value != null && value.isNotEmpty) {
+                                if (!RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$').hasMatch(value)) {
+                                  return 'Please enter a valid email';
+                                }
+                              }
+                              return null;
+                            },
                           ),
                         ),
                         const SizedBox(width: 12),
@@ -126,26 +173,6 @@ class PersonalInfoSection extends StatelessWidget {
           ),
         ),
       ],
-    );
-  }
-
-  Widget _buildInputField({String? label, String? placeholder, String? initialValue, TextInputType keyboardType = TextInputType.text, required Function(String) onChanged}) {
-    return Container(
-      decoration: BoxDecoration(color: Colors.grey.shade50, borderRadius: BorderRadius.circular(8), border: Border.all(color: Colors.grey.shade200)),
-      child: TextFormField(
-        initialValue: initialValue,
-        keyboardType: keyboardType,
-        onChanged: onChanged,
-        style: const TextStyle(fontSize: 16, color: Colors.black87),
-        decoration: InputDecoration(
-          labelText: label,
-          hintText: placeholder,
-          border: InputBorder.none,
-          contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-          labelStyle: TextStyle(color: Colors.grey.shade600, fontSize: 14),
-          hintStyle: TextStyle(color: Colors.grey.shade500, fontSize: 16),
-        ),
-      ),
     );
   }
 }

@@ -1,90 +1,99 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:streammly/controllers/home_screen_controller.dart';
-import 'package:streammly/controllers/location_controller.dart';
-import 'package:streammly/models/banner/banner_item.dart';
-import 'package:streammly/models/category/category_item.dart';
-import 'package:streammly/views/screens/home/widgets/category/category.dart';
-import 'package:streammly/views/screens/home/widgets/category/explore_us.dart';
-import 'package:streammly/views/screens/home/widgets/category/page_nav.dart';
-import 'package:streammly/views/screens/home/widgets/category/recommended_list.dart';
-import 'package:streammly/views/screens/home/widgets/category/widgets/category_scroller.dart';
-import 'package:streammly/views/screens/home/widgets/header_banner.dart';
-import 'package:streammly/views/screens/home/widgets/promo_slider.dart';
-import 'package:streammly/views/screens/home/widgets/upcoming_offer_card.dart';
 
-class HomeScreen extends StatelessWidget {
-  final List<String> promoSlider = ["assets/images/category/media.png"];
-  final HomeController controller = Get.put(HomeController());
+import '../../../controllers/category_controller.dart';
+import '../../../controllers/home_screen_controller.dart';
+import '../../../controllers/location_controller.dart';
+import '../../../models/category/category_item.dart';
+import '../../../models/category/category_model.dart';
+import '../home/widgets/category/category.dart';
+import '../home/widgets/category/explore_us.dart';
+import '../home/widgets/category/page_nav.dart';
+import '../home/widgets/category/recommended_list.dart';
+import '../home/widgets/category/widgets/category_scroller.dart';
+import '../home/widgets/header_banner.dart';
+import '../home/widgets/promo_slider.dart';
+import '../home/widgets/upcoming_offer_card.dart';
+
+class HomeScreen extends StatefulWidget {
+  const HomeScreen({super.key});
+
+  @override
+  State<HomeScreen> createState() => _HomeScreenState();
+}
+
+class _HomeScreenState extends State<HomeScreen> {
+  final HeaderController headerController = Get.put(HeaderController());
   final LocationController locationController = Get.put(LocationController());
+  final CategoryController categoryController = Get.put(CategoryController());
 
-  HomeScreen({super.key});
+  @override
+  void initState() {
+    super.initState();
+    headerController.fetchSlides();
+    categoryController.fetchCategories();
+  }
+
+  List<CategoryItem> convertToCategoryItems(List<CategoryModel> models) {
+    const String baseUrl = 'http://192.168.1.27:8000';
+
+    return models.map((model) {
+      String? fullImageUrl;
+      if (model.image != null && model.image!.isNotEmpty) {
+        final path = model.image!.startsWith('/') ? model.image! : '/${model.image!}';
+        fullImageUrl = '$baseUrl$path';
+      }
+
+      return CategoryItem(
+        label: model.title,
+        imagePath: fullImageUrl,
+        onTap: () {
+          print("Tapped on ${model.title}");
+        },
+      );
+    }).toList();
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.white,
-      body: PopScope(
-        canPop: true,
-        child: SafeArea(
+      body: Obx(() {
+        final slides = headerController.headerSlides;
+        final isCategoryLoading = categoryController.isLoading.value;
+        final categoryModels = categoryController.categories;
+
+        if (slides.isEmpty) {
+          return const Center(child: CircularProgressIndicator());
+        }
+
+        return SafeArea(
           child: SingleChildScrollView(
             child: Column(
               children: [
-                // Updated HeaderBanner with reactive location/address
-                HeaderBanner(
-                  banners: [
-                    BannerItem(image: "assets/images/banner.png", vectorImage: "assets/images/photographer.png", title: "Photography", subtitle: "Capture your moments perfectly."),
-                    // BannerItem(image: "assets/images/banner.png", vectorImage: "assets/images/photographer.png", title: "Wedding", subtitle: "Plan your perfect wedding today."),
-                  ],
-                  height: 370,
-                  color: Colors.white,
-                  overlayOpacity: 0.2,
-                ),
-
+                HeaderBanner(slides: slides, height: 370, backgroundImage: "assets/images/banner.png", overlayColor: Colors.white.withOpacity(0.3)),
                 const SizedBox(height: 24),
-
-                // Upcoming offers
                 UpcomingOfferCard(),
                 const SizedBox(height: 24),
 
-                // Categories
-                CategoryScroller(
-                  title: "Categories",
-                  onSeeAll: () {
-                    Get.to(() => CategoryListScreen());
-                  },
-                  categories: [
-                    CategoryItem(label: "Venue", icon: Icons.place, onTap: () {}),
-                    CategoryItem(label: "Photographer", icon: Icons.linked_camera_outlined, onTap: () {}),
-                    CategoryItem(label: "Event", icon: Icons.event, onTap: () {}),
-                    CategoryItem(label: "Makeup", icon: Icons.brush_sharp, onTap: () {}),
-                    CategoryItem(label: "Catering", icon: Icons.local_dining, onTap: () {}),
-                  ],
-                ),
+                isCategoryLoading
+                    ? const CircularProgressIndicator()
+                    : CategoryScroller(title: "Categories", onSeeAll: () => Get.to(() => CategoryListScreen()), categories: convertToCategoryItems(categoryModels)),
 
                 const SizedBox(height: 24),
-
-                // Page nav (could be Explore, Book Now, etc.)
                 PageNav(),
                 const SizedBox(height: 24),
-
-                // Recommended Vendors
                 RecommendedList(context: context),
                 const SizedBox(height: 24),
-
-                // Explore Section
                 ExploreUs(),
                 const SizedBox(height: 26),
-
-                // Promo Slider
                 PromoSlider(),
-
                 const SizedBox(height: 24),
               ],
             ),
           ),
-        ),
-      ),
+        );
+      }),
     );
   }
 }

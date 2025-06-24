@@ -14,8 +14,20 @@ class MapController extends GetxController {
     return await Geolocator.getCurrentPosition(locationSettings: const LocationSettings(accuracy: LocationAccuracy.best));
   }
 
-  double _calculateDistance(double lat1, double lon1, double lat2, double lon2) {
+  double calculateDistance(double lat1, double lon1, double lat2, double lon2) {
     return Geolocator.distanceBetween(lat1, lon1, lat2, lon2) / 1000;
+  }
+
+  String _estimateTimeFromDistance(double distanceKm) {
+    final speedKmph = 25.0; // You can change this to 5.0 for walking
+    final timeHours = distanceKm / speedKmph;
+    final minutes = (timeHours * 60).round();
+
+    if (minutes < 1) return "1 min";
+    if (minutes <= 60) return "$minutes mins";
+    final hours = minutes ~/ 60;
+    final remainingMinutes = minutes % 60;
+    return "$hours hr${hours > 1 ? 's' : ''}${remainingMinutes > 0 ? ' $remainingMinutes mins' : ''}";
   }
 
   Future<void> fetchCompaniesByCategory(int categoryId) async {
@@ -32,7 +44,8 @@ class MapController extends GetxController {
                 .map((item) {
                   final c = CompanyLocation.fromJson(item);
                   if (c.latitude != null && c.longitude != null && userPosition != null) {
-                    c.distanceKm = _calculateDistance(userPosition!.latitude, userPosition!.longitude, c.latitude!, c.longitude!);
+                    c.distanceKm = calculateDistance(userPosition!.latitude, userPosition!.longitude, c.latitude!, c.longitude!);
+                    c.estimatedTime = _estimateTimeFromDistance(c.distanceKm!);
                   }
                   return c;
                 })
@@ -40,34 +53,71 @@ class MapController extends GetxController {
                 .toList();
 
         companies.value = validCompanies;
-        print("Loaded ${companies.length} companies for category $categoryId.");
       } else {
-        Get.snackbar("Error", "Failed to load company locations");
+        Get.snackbar("Error", "Failed to load companies");
       }
     } catch (e) {
-      Get.snackbar("Error", e.toString());
-      print("Error fetching companies: $e");
+      Get.snackbar("Error", "Something went wrong: $e");
     }
   }
 
-  void selectCompany(CompanyLocation company) {
-    selectedCompany.value = company;
+  Future<void> fetchCompanyById(int companyId) async {
+    try {
+      final response = await http.get(Uri.parse("http://192.168.1.27:8000/api/v1/basic/getcompanysprofile/$companyId"));
+
+      if (response.statusCode == 200) {
+        final jsonData = json.decode(response.body);
+        final data = jsonData['data'];
+        final company = CompanyLocation.fromJson(data);
+        selectedCompany.value = company;
+      } else {
+        Get.snackbar("Error", "Failed to fetch company details.");
+      }
+    } catch (e) {
+      Get.snackbar("Error", "Something went wrong: $e");
+    }
   }
 }
 
 class CompanyLocation {
+  final int? id;
   final String companyName;
   final double? latitude;
   final double? longitude;
   double? distanceKm;
+  String? estimatedTime;
 
-  CompanyLocation({required this.companyName, required this.latitude, required this.longitude, this.distanceKm});
+  final String? bannerImage;
+  final String? logo;
+  final String? description;
+  final String? categoryName;
+  final double? rating;
+
+  CompanyLocation({
+    this.id,
+    required this.companyName,
+    required this.latitude,
+    required this.longitude,
+    this.distanceKm,
+    this.estimatedTime,
+    this.bannerImage,
+    this.logo,
+    this.description,
+    this.categoryName,
+    this.rating,
+  });
 
   factory CompanyLocation.fromJson(Map<String, dynamic> json) {
     return CompanyLocation(
+      id: json['id'],
       companyName: json['company_name'] ?? 'Unknown',
       latitude: json['latitude'] != null ? double.tryParse(json['latitude'].toString()) : null,
       longitude: json['longitude'] != null ? double.tryParse(json['longitude'].toString()) : null,
+      bannerImage: json['banner_image'],
+      logo: json['logo'],
+      description: json['description'],
+      categoryName: json['category_name'],
+      rating: json['rating'] != null ? double.tryParse(json['rating'].toString()) : 3.9,
     );
   }
 }

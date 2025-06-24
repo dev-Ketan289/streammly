@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:streammly/views/screens/home/vendor_locator.dart';
-
-import '../../../vendor/vendor_description.dart';
+import 'package:streammly/views/screens/vendor/vendor_detail.dart';
 
 class ExploreUs extends StatelessWidget {
   const ExploreUs({super.key});
@@ -53,8 +52,7 @@ class ExploreUs extends StatelessWidget {
             return InkWell(
               borderRadius: BorderRadius.circular(18),
               onTap: () {
-                // Navigate to detailed screen
-                Navigator.push(context, MaterialPageRoute(builder: (_) => const VendorDescription()));
+                Navigator.push(context, MaterialPageRoute(builder: (_) => VendorDetailScreen()));
               },
               child: Container(
                 margin: const EdgeInsets.only(bottom: 20),

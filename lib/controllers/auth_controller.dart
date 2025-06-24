@@ -35,7 +35,7 @@ class LoginController extends GetxController {
     // Navigate to OTP screen immediately
     Get.to(() => OtpScreen(), arguments: "+91 $phone");
 
-    // ✅ TEST NUMBER HANDLING (Auto-set OTP)
+    // TEST NUMBER HANDLING (Auto-set OTP)
     if (phone == "8111111111") {
       otpController.receivedOTP.value = "123456";
       otpController.startTimer();
@@ -170,7 +170,7 @@ class OtpController extends GetxController {
   void confirmOTP(String phone, {VoidCallback? onVerified}) {
     final enteredOTP = otpController.text.trim();
 
-    /// ✅ Bypass check for test number
+    ///  Bypass check for test number
     if (phone == "8111111111") {
       Fluttertoast.showToast(msg: "Test number login successful");
       onVerified?.call();

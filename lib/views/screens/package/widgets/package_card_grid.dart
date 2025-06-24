@@ -217,9 +217,7 @@ class PackagesGridView extends StatelessWidget {
                           onPressed: () {
                             controller.togglePackageSelection(index);
                             final selectedPackage = controller.isPackageSelected(index);
-                            if (selectedPackage != null) {
-                              print("Quick buy for: $selectedPackage");
-                            }
+                            print("Quick buy for: $selectedPackage");
                           },
                           child: const Text("BUY", style: TextStyle(fontSize: 10, fontWeight: FontWeight.w600)),
                         ),

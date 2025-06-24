@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:streammly/views/screens/package/package_page.dart';
 
-import '../../../models/banner/banner_item.dart';
 import '../../../navigation_menu.dart';
 import '../home/widgets/header_banner.dart';
 
@@ -105,12 +104,10 @@ class VendorGroup extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
               HeaderBanner(
-                banners: [BannerItem(image: "assets/images/recommended_banner/FocusPointVendor.png", title: "Photography", subtitle: "Capture your moments perfectly.")],
                 height: 280,
-                // location: "Mahim",
-                // address: "MTNL Telephone Colony, VSNL Colony",
-                color: Colors.indigo.withValues(alpha: 0.4),
-                overlayOpacity: 0.7,
+                backgroundImage: 'assets/images/recommended_banner/FocusPointVendor.png',
+                overlayColor: Colors.indigo.withValues(alpha: 0.6),
+                overrideTitle: 'Focus Point',
               ),
               const SizedBox(height: 10),
               GridView.builder(

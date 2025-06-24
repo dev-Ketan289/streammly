@@ -1,3 +1,4 @@
+import 'dart:math' as Math;
 import 'dart:typed_data';
 import 'dart:ui' as ui;
 
@@ -5,9 +6,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:get/get.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:streammly/views/screens/vendor/vendor_description.dart';
 
 import '../../../controllers/category_controller.dart';
 import '../../../controllers/company_controller.dart';
+import '../vendor/widgets/vendor_info_card.dart';
 
 class CompanyLocatorMapScreen extends StatefulWidget {
   final int categoryId;
@@ -31,10 +34,8 @@ class _CompanyLocatorMapScreenState extends State<CompanyLocatorMapScreen> {
   }
 
   Future<void> _loadData() async {
-    // ✅ Clear previous markers before loading new ones
     _customMarkers.clear();
-    setState(() {}); // Refresh UI to clear the map before adding new markers
-
+    setState(() {});
     await controller.fetchCompaniesByCategory(controller.selectedCategoryId.value);
     await _generateCustomMarkers();
   }
@@ -42,7 +43,29 @@ class _CompanyLocatorMapScreenState extends State<CompanyLocatorMapScreen> {
   Future<void> _generateCustomMarkers() async {
     _customMarkers.clear();
 
-    for (var company in controller.companies) {
+    final usedPositions = <String>{};
+
+    for (int i = 0; i < controller.companies.length; i++) {
+      final company = controller.companies[i];
+
+      double lat = company.latitude!;
+      double lng = company.longitude!;
+      String posKey = "$lat-$lng";
+
+      // If overlapping, apply circular offset
+      int retry = 0;
+      while (usedPositions.contains(posKey)) {
+        double offset = 0.00008 * (retry + 1); // Distance between each ring
+        double angle = (retry % 8) * (45 * 3.1416 / 180); // 8 directions around
+
+        lat = company.latitude! + offset * Math.sin(angle);
+        lng = company.longitude! + offset * Math.cos(angle);
+        posKey = "$lat-$lng";
+        retry++;
+      }
+
+      usedPositions.add(posKey);
+
       final distanceText =
           company.distanceKm != null ? (company.distanceKm! < 1 ? "${(company.distanceKm! * 1000).toStringAsFixed(0)} m" : "${company.distanceKm!.toStringAsFixed(1)} km") : "--";
 
@@ -50,29 +73,29 @@ class _CompanyLocatorMapScreenState extends State<CompanyLocatorMapScreen> {
 
       _customMarkers.add(
         Marker(
-          markerId: MarkerId(company.companyName),
-          position: LatLng(company.latitude!, company.longitude!),
+          markerId: MarkerId("${company.companyName}-$i"),
+          position: LatLng(lat, lng),
           icon: BitmapDescriptor.bytes(bytes),
-          onTap: () => controller.selectCompany(company),
+          onTap: () => controller.fetchCompanyById(company.id!),
         ),
       );
     }
 
-    setState(() {}); // Update UI with new markers
+    setState(() {});
   }
 
   Future<Uint8List> _createCustomMarkerBitmap(BuildContext context, String title, String distance) async {
     final key = GlobalKey();
 
-    final widget = Material(type: MaterialType.transparency, child: RepaintBoundary(key: key, child: _buildCustomMarker(title, distance)));
+    final markerWidget = Material(type: MaterialType.transparency, child: RepaintBoundary(key: key, child: _buildCustomMarker(title, distance)));
 
     final overlay = Overlay.of(context);
-    final entry = OverlayEntry(builder: (_) => Center(child: widget));
+    final entry = OverlayEntry(builder: (_) => Center(child: markerWidget));
     overlay.insert(entry);
     await Future.delayed(const Duration(milliseconds: 100));
 
     RenderRepaintBoundary boundary = key.currentContext!.findRenderObject() as RenderRepaintBoundary;
-    final image = await boundary.toImage(pixelRatio: 3.0);
+    final image = await boundary.toImage(pixelRatio: 1.5);
     final byteData = await image.toByteData(format: ui.ImageByteFormat.png);
     final pngBytes = byteData!.buffer.asUint8List();
 
@@ -89,7 +112,7 @@ class _CompanyLocatorMapScreenState extends State<CompanyLocatorMapScreen> {
           decoration: BoxDecoration(color: Colors.blueAccent, borderRadius: BorderRadius.circular(20)),
           child: Text(distance, style: const TextStyle(color: Colors.white, fontSize: 12, fontWeight: FontWeight.bold)),
         ),
-        const SizedBox(height: 4),
+        const SizedBox(height: 2),
         Container(
           constraints: const BoxConstraints(minWidth: 80),
           padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
@@ -105,14 +128,29 @@ class _CompanyLocatorMapScreenState extends State<CompanyLocatorMapScreen> {
     return Scaffold(
       body: Stack(
         children: [
-          GoogleMap(
-            initialCameraPosition: const CameraPosition(target: LatLng(19.2189, 72.9805), zoom: 12),
-            markers: _customMarkers,
-            myLocationEnabled: true,
-            myLocationButtonEnabled: true,
+          // MAP + overlay
+          Stack(
+            children: [
+              GoogleMap(
+                initialCameraPosition: const CameraPosition(target: LatLng(19.2189, 72.9805), zoom: 12),
+                markers: _customMarkers,
+                myLocationEnabled: true,
+                myLocationButtonEnabled: true,
+                onTap: (_) => controller.selectedCompany.value = null,
+              ),
+
+              // Overlay when info card visible
+              Obx(() {
+                final showOverlay = controller.selectedCompany.value != null;
+                return IgnorePointer(
+                  ignoring: true,
+                  child: AnimatedOpacity(opacity: showOverlay ? 0.2 : 0.0, duration: const Duration(milliseconds: 300), child: Container(color: Colors.indigo)),
+                );
+              }),
+            ],
           ),
 
-          /// Category Dropdown
+          // Dropdown
           Positioned(
             top: 60,
             left: 20,
@@ -130,14 +168,14 @@ class _CompanyLocatorMapScreenState extends State<CompanyLocatorMapScreen> {
                   isExpanded: true,
                   underline: const SizedBox(),
                   items:
-                      categoryController.categories.map((category) {
-                        return DropdownMenuItem<int>(value: category.id, child: Center(child: Text(category.title, textAlign: TextAlign.center)));
-                      }).toList(),
+                      categoryController.categories
+                          .map((category) => DropdownMenuItem<int>(value: category.id, child: Center(child: Text(category.title, textAlign: TextAlign.center))))
+                          .toList(),
                   onChanged: (int? newId) {
                     if (newId != null) {
                       controller.selectedCategoryId.value = newId;
                       controller.selectedCompany.value = null;
-                      _loadData(); // Reload with new category
+                      _loadData();
                     }
                   },
                 ),
@@ -145,7 +183,7 @@ class _CompanyLocatorMapScreenState extends State<CompanyLocatorMapScreen> {
             }),
           ),
 
-          /// Info Card
+          // Info card
           Obx(() {
             final company = controller.selectedCompany.value;
             if (company == null) return const SizedBox();
@@ -154,25 +192,21 @@ class _CompanyLocatorMapScreenState extends State<CompanyLocatorMapScreen> {
               bottom: 0,
               left: 0,
               right: 0,
-              child: Container(
-                padding: const EdgeInsets.all(16),
-                decoration: const BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-                  boxShadow: [BoxShadow(blurRadius: 10, color: Colors.black26)],
-                ),
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Text(company.companyName, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
-                    const SizedBox(height: 8),
-                    Text("Lat: ${company.latitude}"),
-                    Text("Lng: ${company.longitude}"),
-                    if (company.distanceKm != null)
-                      Text(
-                        company.distanceKm! < 1 ? "Distance: ${(company.distanceKm! * 1000).toStringAsFixed(0)} meters" : "Distance: ${company.distanceKm!.toStringAsFixed(2)} km",
-                      ),
-                  ],
+              child: GestureDetector(
+                onTap: () {
+                  Get.to(() => VendorDescription());
+                },
+                child: VendorInfoCard(
+                  logoImage: "http://192.168.1.27:8000/${company.logo ?? ''}",
+                  companyName: company.companyName,
+                  category: company.categoryName ?? '',
+                  description: company.description ?? '',
+                  rating: company.rating?.toStringAsFixed(1) ?? '3.9',
+                  estimatedTime: "31–36 mins",
+                  distanceKm:
+                      company.distanceKm != null
+                          ? (company.distanceKm! < 1 ? "${(company.distanceKm! * 1000).toStringAsFixed(0)} m" : "${company.distanceKm!.toStringAsFixed(1)} km")
+                          : null,
                 ),
               ),
             );
