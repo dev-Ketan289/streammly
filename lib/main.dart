@@ -1,6 +1,7 @@
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:streammly/data/init.dart';
 import 'package:streammly/views/screens/common/webview_screen.dart';
 import 'package:streammly/views/screens/home/widgets/category/category.dart';
 
@@ -10,6 +11,7 @@ import 'views/screens/splash_screen/splash_screen.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  await Init().initialize();
   await Firebase.initializeApp();
   runApp(const StreammlyApp());
 }
@@ -25,7 +27,10 @@ class StreammlyApp extends StatelessWidget {
       theme: ThemeData(
         primarySwatch: Colors.indigo,
         scaffoldBackgroundColor: Colors.white,
-        textTheme: const TextTheme(bodyLarge: TextStyle(fontFamily: 'Open Sans', color: Colors.black), bodyMedium: TextStyle(fontFamily: 'Open Sans', color: Colors.black54)),
+        textTheme: const TextTheme(
+          bodyLarge: TextStyle(fontFamily: 'Open Sans', color: Colors.black),
+          bodyMedium: TextStyle(fontFamily: 'Open Sans', color: Colors.black54),
+        ),
       ),
       initialRoute: '/splash',
       getPages: [

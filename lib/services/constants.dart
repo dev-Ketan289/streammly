@@ -26,7 +26,7 @@ class AppConstants {
   set setBaseUrl(String url) => baseUrl = url;
 
   //TODO: Change Base Url
-  static String baseUrl = 'https://www.base-url.in/';
+  static String baseUrl = 'http://192.168.1.10:8000/';
   // static String baseUrl = 'http://192.168.1.5:9000/'; ///USE FOR LOCAL
   //TODO: Change Base Url
   static String appName = 'App Name';
@@ -34,17 +34,17 @@ class AppConstants {
   static const String agoraAppId = 'c87b710048c049f59570bd1895b7e561';
 
   // Auth
-  static const String loginUri = 'api/v1/user/login';
-  static const String logoutUri = '';
-  static const String profileUri = 'api/v1/user/profile';
-
+  static const String sendOtp = 'api/v1/user/auth/generateOtp';
 
   static const String extras = 'api/v1/extra';
 
   //
   static const double horizontalPadding = 16;
   static const double verticalPadding = 20;
-  static const EdgeInsets screenPadding = EdgeInsets.symmetric(horizontal: AppConstants.horizontalPadding, vertical: AppConstants.verticalPadding);
+  static const EdgeInsets screenPadding = EdgeInsets.symmetric(
+    horizontal: AppConstants.horizontalPadding,
+    vertical: AppConstants.verticalPadding,
+  );
 
   // Shared Key
   static const String token = 'user_app_token';

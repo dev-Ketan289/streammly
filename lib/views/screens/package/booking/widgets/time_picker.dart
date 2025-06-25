@@ -28,21 +28,21 @@ class _CustomTimePickerState extends State<CustomTimePicker> {
         _buildCupertinoPicker(
           hour,
           List.generate(12, (index) => index + 1),
-              (value) => setState(() {
+          (value) => setState(() {
             hour = value + 1;
           }),
         ),
         _buildCupertinoPicker(
           minute,
           List.generate(60, (index) => index),
-              (value) => setState(() {
+          (value) => setState(() {
             minute = value;
           }),
         ),
         _buildCupertinoPicker(
           amPm == 'AM' ? 0 : 1,
           ['AM', 'PM'],
-              (value) => setState(() {
+          (value) => setState(() {
             amPm = value == 0 ? 'AM' : 'PM';
           }),
         ),
@@ -51,10 +51,10 @@ class _CustomTimePickerState extends State<CustomTimePicker> {
   }
 
   Widget _buildCupertinoPicker(
-      int selectedValue,
-      List values,
-      Function(int) onSelectedItemChanged,
-      ) {
+    int selectedValue,
+    List values,
+    Function(int) onSelectedItemChanged,
+  ) {
     return SizedBox(
       width: 80,
       height: 150,
@@ -73,14 +73,14 @@ class _CustomTimePickerState extends State<CustomTimePicker> {
         itemExtent: 32,
         onSelectedItemChanged: onSelectedItemChanged,
         children:
-        values.map<Widget>((val) {
-          return Center(
-            child: Text(
-              val is int ? val.toString().padLeft(2, '0') : val.toString(),
-              style: const TextStyle(fontSize: 18),
-            ),
-          );
-        }).toList(),
+            values.map<Widget>((val) {
+              return Center(
+                child: Text(
+                  val is int ? val.toString().padLeft(2, '0') : val.toString(),
+                  style: const TextStyle(fontSize: 18),
+                ),
+              );
+            }).toList(),
       ),
     );
   }
@@ -94,35 +94,45 @@ class _CustomTimePickerState extends State<CustomTimePicker> {
         children: [
           Container(
             padding: const EdgeInsets.symmetric(vertical: 16),
-            color: Colors.blueGrey.shade50,
-            child: Center(
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-
-                children: [
-                  Text(
-                    "Start",
-                    style: const TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold,
+            decoration: BoxDecoration(
+              color: Colors.blueGrey.shade50,
+              borderRadius: BorderRadius.circular(16), // Circular border radius
+            ),
+            child: Row(
+              children: [
+                Expanded(
+                  child: Center(
+                    child: Text(
+                      "Start",
+                      style: TextStyle(
+                        fontSize: 16, // Match font size of Set/Cancel
+                        color: Colors.blue, // Match color of Set
+                      ),
                     ),
                   ),
-
-                  Text(
-                    "End",
-                    style: const TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold,
+                ),
+                Container(width: 1, color: Colors.grey.shade300), // Divider
+                Expanded(
+                  child: Center(
+                    child: Text(
+                      "End",
+                      style: TextStyle(
+                        fontSize: 16, // Match font size of Set/Cancel
+                        color: Colors.red, // Match color of Cancel
+                      ),
                     ),
                   ),
-                ],
-              ),
+                ),
+              ],
             ),
           ),
           Expanded(child: _buildPickerColumn()),
           Container(
             height: 50,
-            color: Colors.blueGrey.shade50,
+            decoration: BoxDecoration(
+              color: Colors.blueGrey.shade50,
+              borderRadius: BorderRadius.circular(16), // Circular border radius
+            ),
             child: Row(
               children: [
                 Expanded(
@@ -132,10 +142,10 @@ class _CustomTimePickerState extends State<CustomTimePicker> {
                         // Format the time to match TimeOfDay.format (e.g., "9:30 AM")
                         final formattedTime =
                             '${hour == 12 && amPm == 'AM'
-                            ? 0
-                            : hour == 12 && amPm == 'PM'
-                            ? 12
-                            : hour}:${minute.toString().padLeft(2, '0')} ${amPm}';
+                                ? 0
+                                : hour == 12 && amPm == 'PM'
+                                ? 12
+                                : hour}:${minute.toString().padLeft(2, '0')} ${amPm}';
                         widget.onTimeSelected(formattedTime);
                       },
                       child: const Text(
