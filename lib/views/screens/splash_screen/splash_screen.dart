@@ -49,7 +49,12 @@ class _SplashScreenState extends State<SplashScreen> {
           crossAxisAlignment: CrossAxisAlignment.end,
           children: [
             // App Logo or GIF
-            Image.asset('assets/images/splash.gif', height: size.height, width: size.height, fit: BoxFit.cover),
+            Image.asset(
+              'assets/images/splash.gif',
+              height: size.height,
+              width: size.height,
+              fit: BoxFit.cover,
+            ),
           ],
         ),
       ),

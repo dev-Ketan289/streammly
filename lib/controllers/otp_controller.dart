@@ -12,6 +12,7 @@ import 'package:streammly/models/response/response_model.dart';
 import 'auth_controller.dart';
 
 class OtpController extends GetxController implements GetxService {
+  
   final AuthRepo authRepo;
   OtpController({required this.authRepo});
   final TextEditingController otpController = TextEditingController();
@@ -27,8 +28,12 @@ class OtpController extends GetxController implements GetxService {
     update();
     ResponseModel responseModel;
     try {
-      Response response = await authRepo.verifyOtp(phone: Get.find<AuthController>().phoneController.text, otp: otpController.text);
-      if (response.statusCode == 200 && response.body['data']['token'] != null) {
+      Response response = await authRepo.verifyOtp(
+        phone: Get.find<AuthController>().phoneController.text,
+        otp: otpController.text,
+      );
+      if (response.statusCode == 200 &&
+          response.body['data']['token'] != null) {
         Get.find<AuthController>().setUserToken(response.body['data']['token']);
         responseModel = ResponseModel(true, "verification Sucessfull");
       } else {
@@ -93,8 +98,14 @@ class OtpController extends GetxController implements GetxService {
     }
 
     try {
-      final url = Uri.parse("http://192.168.1.113:8000/api/v1/user/auth/generateOtp");
-      final response = await http.post(url, headers: {'Content-Type': 'application/json'}, body: jsonEncode({"phone": phone}));
+      final url = Uri.parse(
+        "http://192.168.1.113:8000/api/v1/user/auth/generateOtp",
+      );
+      final response = await http.post(
+        url,
+        headers: {'Content-Type': 'application/json'},
+        body: jsonEncode({"phone": phone}),
+      );
 
       final responseBody = jsonDecode(response.body);
 
@@ -106,7 +117,9 @@ class OtpController extends GetxController implements GetxService {
         startTimer();
         Fluttertoast.showToast(msg: "OTP resent: $otpCode");
       } else {
-        Fluttertoast.showToast(msg: responseBody['message'] ?? "Could not resend OTP");
+        Fluttertoast.showToast(
+          msg: responseBody['message'] ?? "Could not resend OTP",
+        );
       }
     } catch (e) {
       Fluttertoast.showToast(msg: "Could not connect to server");

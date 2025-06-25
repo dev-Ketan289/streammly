@@ -10,7 +10,9 @@ class HeaderController extends GetxController {
 
   Future<void> fetchSlides() async {
     try {
-      final res = await http.get(Uri.parse("http://192.168.1.113:8000/api/v1/basic/header-sliders"));
+      final res = await http.get(
+        Uri.parse("http://192.168.1.113:8000/api/v1/basic/header-sliders"),
+      );
       if (res.statusCode == 200) {
         final json = jsonDecode(res.body);
         final List data = json['data'];
