@@ -26,7 +26,7 @@ class _HomeScreenState extends State<HomeScreen> {
   final HeaderController headerController = Get.put(HeaderController());
   final LocationController locationController = Get.put(LocationController());
 
-  // ✅ Using Get.find to get the pre-initialized controller
+  // Using Get.find to get the pre-initialized controller
   final CategoryController categoryController = Get.find<CategoryController>();
 
   @override

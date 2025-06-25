@@ -2,14 +2,9 @@ import 'dart:convert';
 
 import 'package:geolocator/geolocator.dart';
 import 'package:get/get.dart';
+import 'package:http/http.dart' as http;
 
-import '../../data/repository/company_repo.dart';
-import '../models/company/company_location_model.dart';
-
-class CompanyMapController extends GetxController {
-  final CompanyRepo companyRepo;
-  CompanyMapController({required this.companyRepo});
-
+class MapController extends GetxController {
   RxList<CompanyLocation> companies = <CompanyLocation>[].obs;
   Rx<CompanyLocation?> selectedCompany = Rx<CompanyLocation?>(null);
   RxInt selectedCategoryId = 1.obs;
@@ -24,7 +19,7 @@ class CompanyMapController extends GetxController {
   }
 
   String _estimateTimeFromDistance(double distanceKm) {
-    final speedKmph = 25.0;
+    final speedKmph = 25.0; // You can change this to 5.0 for walking
     final timeHours = distanceKm / speedKmph;
     final minutes = (timeHours * 60).round();
 
@@ -38,7 +33,8 @@ class CompanyMapController extends GetxController {
   Future<void> fetchCompaniesByCategory(int categoryId) async {
     try {
       userPosition = await _getCurrentLocation();
-      final response = await companyRepo.getCompaniesByCategory(categoryId);
+
+      final response = await http.get(Uri.parse('http://192.168.1.10:8000/api/v1/basic/getcompanyslocations/$categoryId'));
 
       if (response.statusCode == 200) {
         final data = json.decode(response.body)['data'] as List;
@@ -67,11 +63,12 @@ class CompanyMapController extends GetxController {
 
   Future<void> fetchCompanyById(int companyId) async {
     try {
-      final response = await companyRepo.getCompanyById(companyId);
+      final response = await http.get(Uri.parse("http://192.168.1.10:8000/api/v1/basic/getcompanysprofile/$companyId"));
 
       if (response.statusCode == 200) {
-        final jsonData = json.decode(response.body)['data'];
-        final company = CompanyLocation.fromJson(jsonData);
+        final jsonData = json.decode(response.body);
+        final data = jsonData['data'];
+        final company = CompanyLocation.fromJson(data);
         selectedCompany.value = company;
       } else {
         Get.snackbar("Error", "Failed to fetch company details.");
@@ -79,5 +76,48 @@ class CompanyMapController extends GetxController {
     } catch (e) {
       Get.snackbar("Error", "Something went wrong: $e");
     }
+  }
+}
+
+class CompanyLocation {
+  final int? id;
+  final String companyName;
+  final double? latitude;
+  final double? longitude;
+  double? distanceKm;
+  String? estimatedTime;
+
+  final String? bannerImage;
+  final String? logo;
+  final String? description;
+  final String? categoryName;
+  final double? rating;
+
+  CompanyLocation({
+    this.id,
+    required this.companyName,
+    required this.latitude,
+    required this.longitude,
+    this.distanceKm,
+    this.estimatedTime,
+    this.bannerImage,
+    this.logo,
+    this.description,
+    this.categoryName,
+    this.rating,
+  });
+
+  factory CompanyLocation.fromJson(Map<String, dynamic> json) {
+    return CompanyLocation(
+      id: json['id'],
+      companyName: json['company_name'] ?? 'Unknown',
+      latitude: json['latitude'] != null ? double.tryParse(json['latitude'].toString()) : null,
+      longitude: json['longitude'] != null ? double.tryParse(json['longitude'].toString()) : null,
+      bannerImage: json['banner_image'],
+      logo: json['logo'],
+      description: json['description'],
+      categoryName: json['category_name'],
+      rating: json['rating'] != null ? double.tryParse(json['rating'].toString()) : 3.9,
+    );
   }
 }

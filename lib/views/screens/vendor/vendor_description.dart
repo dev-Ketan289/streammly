@@ -8,7 +8,7 @@ class VendorDescription extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final company = Get.find<CompanyMapController>().selectedCompany.value;
+    final company = Get.find<MapController>().selectedCompany.value;
 
     return Scaffold(
       body: Stack(
@@ -19,7 +19,7 @@ class VendorDescription extends StatelessWidget {
             width: double.infinity,
             child:
                 company?.bannerImage != null
-                    ? Image.network('http://192.168.1.27:8000/${company!.bannerImage}', fit: BoxFit.fitHeight)
+                    ? Image.network('http://192.168.1.10:8000/${company!.bannerImage}', fit: BoxFit.fitHeight)
                     : Image.asset('assets/images/newBorn.jpg', fit: BoxFit.fill),
           ),
 
