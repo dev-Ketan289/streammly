@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:streammly/views/screens/vendor/vendor_group.dart';
+import 'package:streammly/controllers/company_controller.dart';
 
 import '../../../models/category/category_item.dart';
 import '../../../navigation_menu.dart';
@@ -8,14 +8,17 @@ import '../home/widgets/category/review_card.dart';
 import '../home/widgets/category/widgets/category_scroller.dart';
 import '../home/widgets/header_banner.dart';
 import '../home/widgets/horizontal_card.dart';
+import 'vendor_group.dart';
 
 class VendorDetailScreen extends StatelessWidget {
-  const VendorDetailScreen({super.key});
+  final CompanyLocation company;
+
+  const VendorDetailScreen({super.key, required this.company});
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      bottomNavigationBar: NavigationHelper.buildBottomNav(), // Use the helper method
+      bottomNavigationBar: NavigationHelper.buildBottomNav(),
       floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
       floatingActionButton: NavigationHelper.buildFloatingButton(),
       body: SafeArea(
@@ -23,29 +26,28 @@ class VendorDetailScreen extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // Cover Image & Name
+              // Dynamic banner from passed company
               HeaderBanner(
                 height: 280,
-                backgroundImage: 'assets/images/recommended_banner/FocusPointVendor.png',
+                backgroundImage:
+                    company.bannerImage != null && company.bannerImage!.isNotEmpty
+                        ? 'http://192.168.1.10:8000/${company.bannerImage}'
+                        : 'assets/images/recommended_banner/FocusPointVendor.png',
                 overlayColor: Colors.indigo.withValues(alpha: 0.6),
-                overrideTitle: 'Focus Point',
+                overrideTitle: company.companyName,
               ),
               const SizedBox(height: 6),
+
               CategoryScroller(
                 categories: [
-                  CategoryItem(
-                    label: 'Baby Shoot',
-                    imagePath: 'assets/images/category/vendor_category/img.png',
-                    onTap: () {
-                      Get.to(() => VendorGroup());
-                    },
-                  ),
-                  CategoryItem(label: 'wedding Shoot', imagePath: 'assets/images/category/vendor_category/img.png', onTap: () {}),
+                  CategoryItem(label: 'Baby Shoot', imagePath: 'assets/images/category/vendor_category/img.png', onTap: () => Get.to(() => VendorGroup())),
+                  CategoryItem(label: 'Wedding Shoot', imagePath: 'assets/images/category/vendor_category/img.png', onTap: () {}),
                   CategoryItem(label: 'Portfolio Shoot', imagePath: 'assets/images/category/vendor_category/img.png', onTap: () {}),
                   CategoryItem(label: 'Maternity Shoot', imagePath: 'assets/images/category/vendor_category/img.png', onTap: () {}),
                   CategoryItem(label: 'Family Function', imagePath: 'assets/images/category/vendor_category/img.png', onTap: () {}),
                 ],
               ),
+
               const SizedBox(height: 10),
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
@@ -66,6 +68,7 @@ class VendorDetailScreen extends StatelessWidget {
                   ],
                 ),
               ),
+
               SizedBox(
                 height: 210,
                 child: ListView(
@@ -89,7 +92,6 @@ class VendorDetailScreen extends StatelessWidget {
                     ReviewCard(
                       name: "Ravi K.",
                       dateTime: "09 April 2025 09:45 AM",
-
                       review: "Highly recommend FocusPoint Studios! They were professional, and delivered quality.",
                       rating: 5,
                     ),
@@ -98,6 +100,7 @@ class VendorDetailScreen extends StatelessWidget {
               ),
 
               const SizedBox(height: 20),
+
               PackageSection(
                 title: "Popular Packages",
                 onSeeAll: () {},

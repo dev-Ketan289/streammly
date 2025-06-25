@@ -13,7 +13,7 @@ class VendorDescription extends StatelessWidget {
     return Scaffold(
       body: Stack(
         children: [
-          // Background Image (fallback if banner is missing)
+          // Background Image
           Container(
             height: double.infinity,
             width: double.infinity,
@@ -24,7 +24,7 @@ class VendorDescription extends StatelessWidget {
           ),
 
           // Overlay
-          Container(height: double.infinity, width: double.infinity, color: Colors.indigo.withValues(alpha: 0.4)),
+          Container(height: double.infinity, width: double.infinity, color: Colors.indigo.withOpacity(0.4)),
 
           // Content
           SafeArea(
@@ -33,7 +33,7 @@ class VendorDescription extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  // AppBar-like section
+                  // Back Button
                   GestureDetector(
                     onTap: () => Navigator.pop(context),
                     child: Row(
@@ -74,8 +74,6 @@ class VendorDescription extends StatelessWidget {
                   ),
 
                   const SizedBox(height: 10),
-
-                  // Dynamic Description or Fallback Static
                   Text(
                     (company?.description?.trim().isNotEmpty ?? false)
                         ? company!.description!.replaceAll(RegExp(r'<[^>]*>|&[^;]+;'), '')
@@ -84,8 +82,6 @@ class VendorDescription extends StatelessWidget {
                   ),
 
                   const SizedBox(height: 16),
-
-                  // Show static sections only if description is missing
                   if (company?.description == null || company!.description!.trim().isEmpty) ...[
                     const Text("Our Services Include:", style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
                     const SizedBox(height: 6),
@@ -93,7 +89,6 @@ class VendorDescription extends StatelessWidget {
                     const Text("✅ Professional Photography Services", style: TextStyle(color: Colors.white)),
                     const Text("✅ Cinematic Videography", style: TextStyle(color: Colors.white)),
                     const SizedBox(height: 16),
-
                     const Text("Why Choose Us:", style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
                     const SizedBox(height: 6),
                     const Text("• High-end studio environment", style: TextStyle(color: Colors.white)),
@@ -103,7 +98,6 @@ class VendorDescription extends StatelessWidget {
 
                   const SizedBox(height: 20),
 
-                  // Continue Button
                   Center(
                     child: ElevatedButton(
                       style: ElevatedButton.styleFrom(
@@ -112,7 +106,9 @@ class VendorDescription extends StatelessWidget {
                         padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 14),
                       ),
                       onPressed: () {
-                        Navigator.push(context, MaterialPageRoute(builder: (_) => VendorDetailScreen()));
+                        if (company != null) {
+                          Navigator.push(context, MaterialPageRoute(builder: (_) => VendorDetailScreen(company: company)));
+                        }
                       },
                       child: const Text("Let’s Continue", style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
                     ),
