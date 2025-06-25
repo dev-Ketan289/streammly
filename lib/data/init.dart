@@ -30,7 +30,7 @@ class Init {
 
       //Controller initialization
       Get.lazyPut(() => AuthController(authRepo: Get.find()));
-      Get.lazyPut(() => OtpController());
+      Get.lazyPut(() => OtpController(authRepo: Get.find()));
       // Category
       Get.lazyPut(() => CategoryRepo(apiClient: Get.find()));
       Get.lazyPut(() => CategoryController(categoryRepo: Get.find()));
