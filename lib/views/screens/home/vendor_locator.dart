@@ -10,6 +10,7 @@ import 'package:streammly/views/screens/vendor/vendor_description.dart';
 
 import '../../../controllers/category_controller.dart';
 import '../../../controllers/company_controller.dart';
+import '../../../services/constants.dart';
 import '../vendor/widgets/vendor_info_card.dart';
 
 class CompanyLocatorMapScreen extends StatefulWidget {
@@ -22,9 +23,7 @@ class CompanyLocatorMapScreen extends StatefulWidget {
 }
 
 class _CompanyLocatorMapScreenState extends State<CompanyLocatorMapScreen> {
-  final CompanyMapController controller = Get.put(CompanyMapController());
-
-  // FIXED: use Get.find to use initialized CategoryController
+  final CompanyMapController controller = Get.find<CompanyMapController>();
   final CategoryController categoryController = Get.find<CategoryController>();
 
   final Set<Marker> _customMarkers = {};
@@ -53,7 +52,7 @@ class _CompanyLocatorMapScreenState extends State<CompanyLocatorMapScreen> {
       double lng = company.longitude!;
       String posKey = "$lat-$lng";
 
-      // Prevent overlapping markers
+      // Avoid overlapping markers
       int retry = 0;
       while (usedPositions.contains(posKey)) {
         double offset = 0.00008 * (retry + 1);
@@ -128,6 +127,7 @@ class _CompanyLocatorMapScreenState extends State<CompanyLocatorMapScreen> {
     return Scaffold(
       body: Stack(
         children: [
+          // MAP
           Stack(
             children: [
               GoogleMap(
@@ -146,6 +146,8 @@ class _CompanyLocatorMapScreenState extends State<CompanyLocatorMapScreen> {
               }),
             ],
           ),
+
+          // DROPDOWN
           Positioned(
             top: 60,
             left: 20,
@@ -177,6 +179,8 @@ class _CompanyLocatorMapScreenState extends State<CompanyLocatorMapScreen> {
               );
             }),
           ),
+
+          // INFO CARD
           Obx(() {
             final company = controller.selectedCompany.value;
             if (company == null) return const SizedBox();
@@ -187,15 +191,15 @@ class _CompanyLocatorMapScreenState extends State<CompanyLocatorMapScreen> {
               right: 0,
               child: GestureDetector(
                 onTap: () {
-                  Get.to(() => VendorDescription());
+                  Get.to(() => const VendorDescription());
                 },
                 child: VendorInfoCard(
-                  logoImage: "http://192.168.1.27:8000/${company.logo ?? ''}",
+                  logoImage: "${AppConstants.baseUrl}${company.logo ?? ''}",
                   companyName: company.companyName,
                   category: company.categoryName ?? '',
                   description: company.description ?? '',
                   rating: company.rating?.toStringAsFixed(1) ?? '3.9',
-                  estimatedTime: "31–36 mins",
+                  estimatedTime: company.estimatedTime ?? 'N/A',
                   distanceKm:
                       company.distanceKm != null
                           ? (company.distanceKm! < 1 ? "${(company.distanceKm! * 1000).toStringAsFixed(0)} m" : "${company.distanceKm!.toStringAsFixed(1)} km")
