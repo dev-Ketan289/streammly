@@ -48,31 +48,14 @@ class _OtpScreenState extends State<OtpScreen> {
                 (context, constraints) => SingleChildScrollView(
                   physics: const ClampingScrollPhysics(),
                   child: ConstrainedBox(
-                    constraints: BoxConstraints(
-                      minHeight: constraints.maxHeight,
-                    ),
+                    constraints: BoxConstraints(minHeight: constraints.maxHeight),
                     child: IntrinsicHeight(
                       child: Column(
                         children: [
                           const SizedBox(height: 20),
-                          Text(
-                            "STREAMMLY",
-                            style: GoogleFonts.cinzelDecorative(
-                              fontSize: 28,
-                              fontWeight: FontWeight.bold,
-                              color: theme.primaryColor,
-                            ),
-                          ),
+                          Text("STREAMMLY", style: GoogleFonts.cinzelDecorative(fontSize: 28, fontWeight: FontWeight.bold, color: theme.primaryColor)),
                           const SizedBox(height: 20),
-                          Padding(
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 40.0,
-                            ),
-                            child: Image.asset(
-                              "assets/images/loginpage.gif",
-                              height: 300,
-                            ),
-                          ),
+                          Padding(padding: const EdgeInsets.symmetric(horizontal: 40.0), child: Image.asset("assets/images/loginpage.gif", height: 300)),
                           const SizedBox(height: 20),
                           Padding(
                             padding: const EdgeInsets.symmetric(horizontal: 24),
@@ -83,19 +66,10 @@ class _OtpScreenState extends State<OtpScreen> {
                                     Text(
                                       "Please enter the code we just sent to your phone number",
                                       textAlign: TextAlign.center,
-                                      style: TextStyle(
-                                        fontSize: 14,
-                                        color: Colors.grey[700],
-                                      ),
+                                      style: TextStyle(fontSize: 14, color: Colors.grey[700]),
                                     ),
                                     const SizedBox(height: 4),
-                                    Text(
-                                      fullNumber,
-                                      style: const TextStyle(
-                                        fontSize: 16,
-                                        fontWeight: FontWeight.bold,
-                                      ),
-                                    ),
+                                    Text(fullNumber, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
                                     const SizedBox(height: 24),
 
                                     /// OTP Field
@@ -108,9 +82,7 @@ class _OtpScreenState extends State<OtpScreen> {
                                         keyboardType: TextInputType.number,
                                         pinTheme: PinTheme(
                                           shape: PinCodeFieldShape.box,
-                                          borderRadius: BorderRadius.circular(
-                                            10,
-                                          ),
+                                          borderRadius: BorderRadius.circular(10),
                                           fieldHeight: 55,
                                           fieldWidth: 45,
                                           inactiveColor: Colors.grey.shade300,
@@ -129,9 +101,7 @@ class _OtpScreenState extends State<OtpScreen> {
                                       width: double.infinity,
                                       height: 50,
                                       child: ElevatedButton(
-                                        style: ElevatedButton.styleFrom(
-                                          backgroundColor: Colors.indigo,
-                                        ),
+                                        style: ElevatedButton.styleFrom(backgroundColor: Colors.indigo),
                                         onPressed:
                                             otpController.isLoading
                                                 ? null
@@ -144,28 +114,15 @@ class _OtpScreenState extends State<OtpScreen> {
                                                   //     );
                                                   //   },
                                                   // );
-                                                  otpController.verifyOtp().then((
-                                                    value,
-                                                  ) {
+                                                  otpController.verifyOtp().then((value) {
                                                     if (value.isSuccess) {
-                                                      Get.offAll(
-                                                        () =>
-                                                            const WelcomeScreen(),
-                                                      );
+                                                      Get.offAll(() => const WelcomeScreen());
                                                     } else {
-                                                      Fluttertoast.showToast(
-                                                        msg: value.message,
-                                                      );
+                                                      Fluttertoast.showToast(msg: value.message);
                                                     }
                                                   });
                                                 },
-                                        child: const Text(
-                                          "Confirm OTP",
-                                          style: TextStyle(
-                                            fontSize: 19,
-                                            color: Colors.white,
-                                          ),
-                                        ),
+                                        child: const Text("Confirm OTP", style: TextStyle(fontSize: 19, color: Colors.white)),
                                       ),
                                     ),
                                   ],
@@ -175,36 +132,17 @@ class _OtpScreenState extends State<OtpScreen> {
                           ),
                           const Spacer(),
                           Padding(
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 30,
-                              vertical: 20,
-                            ),
+                            padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 20),
                             child: Text.rich(
                               TextSpan(
-                                text:
-                                    "By providing my phone number, I hereby agree and accept the ",
+                                text: "By providing my phone number, I hereby agree and accept the ",
                                 children: [
-                                  TextSpan(
-                                    text: "Terms & Condition",
-                                    style: TextStyle(
-                                      color: Colors.indigo,
-                                      decoration: TextDecoration.underline,
-                                    ),
-                                  ),
+                                  TextSpan(text: "Terms & Condition", style: TextStyle(color: Colors.indigo, decoration: TextDecoration.underline)),
                                   const TextSpan(text: " & "),
-                                  TextSpan(
-                                    text: "Privacy Policy",
-                                    style: TextStyle(
-                                      color: Colors.indigo,
-                                      decoration: TextDecoration.underline,
-                                    ),
-                                  ),
+                                  TextSpan(text: "Privacy Policy", style: TextStyle(color: Colors.indigo, decoration: TextDecoration.underline)),
                                   const TextSpan(text: " in use of this app."),
                                 ],
-                                style: const TextStyle(
-                                  fontSize: 12,
-                                  color: Colors.grey,
-                                ),
+                                style: const TextStyle(fontSize: 12, color: Colors.grey),
                               ),
                               textAlign: TextAlign.center,
                             ),

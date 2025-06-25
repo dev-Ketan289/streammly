@@ -1,6 +1,7 @@
 import 'package:get/get.dart';
 import 'package:streammly/data/repository/category_repo.dart';
-import 'package:streammly/models/category/category_model.dart';
+
+import '../models/category/category_model.dart';
 
 class CategoryController extends GetxController {
   final CategoryRepo categoryRepo;
@@ -33,3 +34,22 @@ class CategoryController extends GetxController {
     }
   }
 }
+
+// class SubCategoryController extends GetxController {
+//   final SubCategoryRepo subCategoryRepo;
+//
+//   SubCategoryController({required this.subCategoryRepo});
+//
+//   RxBool isLoading = false.obs;
+//   RxList<SubCategoryModel> subCategories = <SubCategoryModel>[].obs;
+//
+//   Future<void> fetchSubCategories(int categoryId) async {
+//     isLoading.value = true;
+//     final response = await subCategoryRepo.getSubCategories(categoryId);
+//     if (response.statusCode == 200) {
+//       final List data = response.body['data'];
+//       subCategories.value = data.map((e) => SubCategoryModel.fromJson(e)).toList();
+//     }
+//     isLoading.value = false;
+//   }
+// }
