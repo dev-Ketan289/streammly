@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:pin_code_fields/pin_code_fields.dart';
 import 'package:streammly/controllers/auth_controller.dart';
+import 'package:streammly/controllers/otp_controller.dart';
 import 'package:streammly/views/screens/auth_screens/welcome.dart';
 
 import '../../../generated/animation/shake_widget.dart';
@@ -13,7 +15,7 @@ class OtpScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final String fullPhone = Get.arguments ?? "+91 0000000000";
+    final String fullPhone = Get.find<AuthController>().phoneController.text;
     final String phone = fullPhone.replaceAll("+91 ", "");
     final String fullNumber = 'Via SMS $fullPhone';
 
@@ -116,16 +118,33 @@ class OtpScreen extends StatelessWidget {
                                         style: ElevatedButton.styleFrom(
                                           backgroundColor: Colors.indigo,
                                         ),
-                                        onPressed: () {
-                                          otpController.confirmOTP(
-                                            phone,
-                                            onVerified: () {
-                                              Get.offAll(
-                                                () => const WelcomeScreen(),
-                                              );
-                                            },
-                                          );
-                                        },
+                                        onPressed:
+                                            otpController.isLoading
+                                                ? null
+                                                : () {
+                                                  // otpController.confirmOTP(
+                                                  //   phone,
+                                                  //   onVerified: () {
+                                                  //     Get.offAll(
+                                                  //       () => const WelcomeScreen(),
+                                                  //     );
+                                                  //   },
+                                                  // );
+                                                  otpController.verifyOtp().then((
+                                                    value,
+                                                  ) {
+                                                    if (value.isSuccess) {
+                                                      Get.offAll(
+                                                        () =>
+                                                            const WelcomeScreen(),
+                                                      );
+                                                    } else {
+                                                      Fluttertoast.showToast(
+                                                        msg: value.message,
+                                                      );
+                                                    }
+                                                  });
+                                                },
                                         child: const Text(
                                           "Confirm OTP",
                                           style: TextStyle(

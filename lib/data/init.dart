@@ -3,6 +3,7 @@ import 'dart:developer';
 import 'package:get/get.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:streammly/controllers/auth_controller.dart';
+import 'package:streammly/controllers/otp_controller.dart';
 import 'package:streammly/data/repository/auth_repo.dart';
 
 import '../services/constants.dart';
@@ -27,7 +28,7 @@ class Init {
 
       //Controller initialization
       Get.lazyPut(() => AuthController(authRepo: Get.find()));
-      Get.lazyPut(() => OtpController());
+      Get.lazyPut(() => OtpController(authRepo: Get.find()));
     } catch (e) {
       log('---- ${e.toString()} ----', name: "ERROR AT initialize()");
     }
