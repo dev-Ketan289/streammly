@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:streammly/services/constants.dart';
 
 import '../../../../../controllers/category_controller.dart';
 import '../../../../../navigation_menu.dart';
@@ -7,7 +8,7 @@ import '../../../common/images/rounded_image.dart';
 import '../../vendor_locator.dart';
 
 class CategoryListScreen extends StatelessWidget {
-  final CategoryController controller = Get.put(CategoryController());
+  final CategoryController controller = Get.find<CategoryController>();
 
   CategoryListScreen({super.key});
 
@@ -42,13 +43,12 @@ class CategoryListScreen extends StatelessWidget {
               onTap: () {
                 Get.to(() => CompanyLocatorMapScreen(categoryId: cat.id));
               },
-
               child: Container(
                 margin: const EdgeInsets.only(bottom: 16),
                 decoration: BoxDecoration(
                   color: Colors.white,
                   borderRadius: BorderRadius.circular(16),
-                  boxShadow: [BoxShadow(color: Colors.grey.withValues(alpha: 0.1), blurRadius: 8, offset: const Offset(0, 4))],
+                  boxShadow: [BoxShadow(color: Colors.grey.withAlpha(40), blurRadius: 8, offset: const Offset(0, 4))],
                 ),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -59,7 +59,14 @@ class CategoryListScreen extends StatelessWidget {
                         Center(
                           child: Padding(
                             padding: const EdgeInsets.only(top: 8.0),
-                            child: TRoundedImage(imageUrl: "${controller.baseUrl}${cat.image}", height: 100, width: 380, fit: BoxFit.cover, borderRadius: 16, isNetworkImage: true),
+                            child: TRoundedImage(
+                              imageUrl: "${AppConstants.baseUrl}${cat.image}",
+                              height: 100,
+                              width: 380,
+                              fit: BoxFit.cover,
+                              borderRadius: 16,
+                              isNetworkImage: true,
+                            ),
                           ),
                         ),
                         const Positioned(top: 10, right: 10, child: Icon(Icons.bookmark, size: 25, color: Colors.red)),

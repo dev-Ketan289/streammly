@@ -22,8 +22,11 @@ class CompanyLocatorMapScreen extends StatefulWidget {
 }
 
 class _CompanyLocatorMapScreenState extends State<CompanyLocatorMapScreen> {
-  final MapController controller = Get.put(MapController());
-  final CategoryController categoryController = Get.put(CategoryController());
+  final CompanyMapController controller = Get.put(CompanyMapController());
+
+  // FIXED: use Get.find to use initialized CategoryController
+  final CategoryController categoryController = Get.find<CategoryController>();
+
   final Set<Marker> _customMarkers = {};
 
   @override
@@ -42,22 +45,19 @@ class _CompanyLocatorMapScreenState extends State<CompanyLocatorMapScreen> {
 
   Future<void> _generateCustomMarkers() async {
     _customMarkers.clear();
-
     final usedPositions = <String>{};
 
     for (int i = 0; i < controller.companies.length; i++) {
       final company = controller.companies[i];
-
       double lat = company.latitude!;
       double lng = company.longitude!;
       String posKey = "$lat-$lng";
 
-      // If overlapping, apply circular offset
+      // Prevent overlapping markers
       int retry = 0;
       while (usedPositions.contains(posKey)) {
-        double offset = 0.00008 * (retry + 1); // Distance between each ring
-        double angle = (retry % 8) * (45 * 3.1416 / 180); // 8 directions around
-
+        double offset = 0.00008 * (retry + 1);
+        double angle = (retry % 8) * (45 * 3.1416 / 180);
         lat = company.latitude! + offset * Math.sin(angle);
         lng = company.longitude! + offset * Math.cos(angle);
         posKey = "$lat-$lng";
@@ -128,7 +128,6 @@ class _CompanyLocatorMapScreenState extends State<CompanyLocatorMapScreen> {
     return Scaffold(
       body: Stack(
         children: [
-          // MAP + overlay
           Stack(
             children: [
               GoogleMap(
@@ -138,8 +137,6 @@ class _CompanyLocatorMapScreenState extends State<CompanyLocatorMapScreen> {
                 myLocationButtonEnabled: true,
                 onTap: (_) => controller.selectedCompany.value = null,
               ),
-
-              // Overlay when info card visible
               Obx(() {
                 final showOverlay = controller.selectedCompany.value != null;
                 return IgnorePointer(
@@ -149,8 +146,6 @@ class _CompanyLocatorMapScreenState extends State<CompanyLocatorMapScreen> {
               }),
             ],
           ),
-
-          // Dropdown
           Positioned(
             top: 60,
             left: 20,
@@ -182,8 +177,6 @@ class _CompanyLocatorMapScreenState extends State<CompanyLocatorMapScreen> {
               );
             }),
           ),
-
-          // Info card
           Obx(() {
             final company = controller.selectedCompany.value;
             if (company == null) return const SizedBox();

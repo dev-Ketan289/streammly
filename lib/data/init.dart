@@ -5,7 +5,9 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:streammly/controllers/auth_controller.dart';
 import 'package:streammly/controllers/otp_controller.dart';
 import 'package:streammly/data/repository/auth_repo.dart';
+import 'package:streammly/data/repository/category_repo.dart';
 
+import '../controllers/category_controller.dart';
 import '../services/constants.dart';
 import 'api/api_client.dart';
 
@@ -28,7 +30,10 @@ class Init {
 
       //Controller initialization
       Get.lazyPut(() => AuthController(authRepo: Get.find()));
-      Get.lazyPut(() => OtpController(authRepo: Get.find()));
+      Get.lazyPut(() => OtpController());
+      // Category
+      Get.lazyPut(() => CategoryRepo(apiClient: Get.find()));
+      Get.lazyPut(() => CategoryController(categoryRepo: Get.find()));
     } catch (e) {
       log('---- ${e.toString()} ----', name: "ERROR AT initialize()");
     }

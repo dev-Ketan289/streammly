@@ -4,7 +4,7 @@ import 'package:geolocator/geolocator.dart';
 import 'package:get/get.dart';
 import 'package:http/http.dart' as http;
 
-class MapController extends GetxController {
+class CompanyMapController extends GetxController {
   RxList<CompanyLocation> companies = <CompanyLocation>[].obs;
   Rx<CompanyLocation?> selectedCompany = Rx<CompanyLocation?>(null);
   RxInt selectedCategoryId = 1.obs;
@@ -34,7 +34,7 @@ class MapController extends GetxController {
     try {
       userPosition = await _getCurrentLocation();
 
-      final response = await http.get(Uri.parse('http://192.168.1.27:8000/api/v1/basic/getcompanyslocations/$categoryId'));
+      final response = await http.get(Uri.parse('http://192.168.1.10:8000/api/v1/basic/getcompanyslocations/$categoryId'));
 
       if (response.statusCode == 200) {
         final data = json.decode(response.body)['data'] as List;
@@ -63,7 +63,7 @@ class MapController extends GetxController {
 
   Future<void> fetchCompanyById(int companyId) async {
     try {
-      final response = await http.get(Uri.parse("http://192.168.1.27:8000/api/v1/basic/getcompanysprofile/$companyId"));
+      final response = await http.get(Uri.parse("http://192.168.1.10:8000/api/v1/basic/getcompanysprofile/$companyId"));
 
       if (response.statusCode == 200) {
         final jsonData = json.decode(response.body);
