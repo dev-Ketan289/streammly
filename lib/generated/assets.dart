@@ -21,5 +21,6 @@ class Assets {
   static const String recommendedBannerFocuspoint = 'assets/images/recommended_banner/focuspoint.png';
   static const String recommendedBannerPromoSlider = 'assets/images/recommended_banner/PromoSlider.jpg';
   static const String recommendedBannerVelvet = 'assets/images/recommended_banner/velvet.png';
+  static const String vendorCategoryBaby = 'assets/images/category/vendor_category/Baby.jpg';
   static const String vendorCategoryImg = 'assets/images/category/vendor_category/img.png';
 }
