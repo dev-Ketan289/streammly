@@ -1,7 +1,7 @@
 import 'dart:async';
 import 'dart:convert';
 import 'dart:developer';
-';
+
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
@@ -50,16 +50,11 @@ class AuthController extends GetxController implements GetxService {
         return;
       }
 
-      final GoogleSignInAuthentication googleAuth =
-          await googleUser.authentication;
+      final GoogleSignInAuthentication googleAuth = await googleUser.authentication;
 
-      final credential = GoogleAuthProvider.credential(
-        accessToken: googleAuth.accessToken,
-        idToken: googleAuth.idToken,
-      );
+      final credential = GoogleAuthProvider.credential(accessToken: googleAuth.accessToken, idToken: googleAuth.idToken);
 
-      final UserCredential userCredential = await FirebaseAuth.instance
-          .signInWithCredential(credential);
+      final UserCredential userCredential = await FirebaseAuth.instance.signInWithCredential(credential);
       final User? firebaseUser = userCredential.user;
 
       if (firebaseUser == null) {
@@ -76,24 +71,11 @@ class AuthController extends GetxController implements GetxService {
         return;
       }
 
-      final url = Uri.parse(
-        "http://192.168.1.113:8000/api/v1/user/auth/googleLogin",
-      );
+      final url = Uri.parse("http://192.168.1.113:8000/api/v1/user/auth/googleLogin");
 
-      final body = jsonEncode({
-        "token": firebaseProjectId,
-        "device_id": deviceId,
-        "firebase_uid": firebaseUid,
-      });
+      final body = jsonEncode({"token": firebaseProjectId, "device_id": deviceId, "firebase_uid": firebaseUid});
 
-      final response = await http.post(
-        url,
-        headers: {
-          'Content-Type': 'application/json',
-          'Accept': 'application/json',
-        },
-        body: body,
-      );
+      final response = await http.post(url, headers: {'Content-Type': 'application/json', 'Accept': 'application/json'}, body: body);
 
       final jsonResponse = jsonDecode(response.body);
 
@@ -101,8 +83,7 @@ class AuthController extends GetxController implements GetxService {
         Fluttertoast.showToast(msg: "Login Successful");
         Get.offAll(() => WelcomeScreen());
       } else {
-        String errorMessage =
-            jsonResponse['message']?.toString() ?? "Login failed";
+        String errorMessage = jsonResponse['message']?.toString() ?? "Login failed";
         if (errorMessage.length > 100) {
           errorMessage = errorMessage.substring(0, 100) + "...";
         }
@@ -191,14 +172,8 @@ class OtpController extends GetxController {
     }
 
     try {
-      final url = Uri.parse(
-        "http://192.168.1.113:8000/api/v1/user/auth/generateOtp",
-      );
-      final response = await http.post(
-        url,
-        headers: {'Content-Type': 'application/json'},
-        body: jsonEncode({"phone": phone}),
-      );
+      final url = Uri.parse("http://192.168.1.113:8000/api/v1/user/auth/generateOtp");
+      final response = await http.post(url, headers: {'Content-Type': 'application/json'}, body: jsonEncode({"phone": phone}));
 
       final responseBody = jsonDecode(response.body);
 
@@ -210,9 +185,7 @@ class OtpController extends GetxController {
         startTimer();
         Fluttertoast.showToast(msg: "OTP resent: $otpCode");
       } else {
-        Fluttertoast.showToast(
-          msg: responseBody['message'] ?? "Could not resend OTP",
-        );
+        Fluttertoast.showToast(msg: responseBody['message'] ?? "Could not resend OTP");
       }
     } catch (e) {
       Fluttertoast.showToast(msg: "Could not connect to server");
