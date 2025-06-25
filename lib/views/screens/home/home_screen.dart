@@ -88,6 +88,8 @@ class _HomeScreenState extends State<HomeScreen> {
                     ? const CircularProgressIndicator()
                     : CategoryScroller(
                       title: "Categories",
+                    
+                      
                       onSeeAll: () => Get.to(() => CategoryListScreen()),
                       categories: convertToCategoryItems(categoryModels),
                     ),
