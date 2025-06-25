@@ -8,7 +8,7 @@ class VendorDescription extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final company = Get.find<MapController>().selectedCompany.value;
+    final company = Get.find<CompanyMapController>().selectedCompany.value;
 
     return Scaffold(
       body: Stack(

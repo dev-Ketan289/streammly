@@ -25,7 +25,9 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreenState extends State<HomeScreen> {
   final HeaderController headerController = Get.put(HeaderController());
   final LocationController locationController = Get.put(LocationController());
-  final CategoryController categoryController = Get.put(CategoryController());
+
+  // ✅ Using Get.find to get the pre-initialized controller
+  final CategoryController categoryController = Get.find<CategoryController>();
 
   @override
   void initState() {
@@ -35,7 +37,7 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   List<CategoryItem> convertToCategoryItems(List<CategoryModel> models) {
-    const String baseUrl = 'http://192.168.1.27:8000';
+    const String baseUrl = 'http://192.168.1.10:8000';
 
     return models.map((model) {
       String? fullImageUrl;
@@ -63,7 +65,7 @@ class _HomeScreenState extends State<HomeScreen> {
         final isCategoryLoading = categoryController.isLoading.value;
         final categoryModels = categoryController.categories;
 
-        if (slides.isEmpty) {
+        if (slides.isEmpty && isCategoryLoading) {
           return const Center(child: CircularProgressIndicator());
         }
 
@@ -71,7 +73,7 @@ class _HomeScreenState extends State<HomeScreen> {
           child: SingleChildScrollView(
             child: Column(
               children: [
-                HeaderBanner(slides: slides, height: 370, backgroundImage: "assets/images/banner.png", overlayColor: Colors.white.withOpacity(0.3)),
+                HeaderBanner(slides: slides, height: 370, backgroundImage: "assets/images/banner.png", overlayColor: Colors.white.withAlpha(77)),
                 const SizedBox(height: 24),
                 UpcomingOfferCard(),
                 const SizedBox(height: 24),
