@@ -35,6 +35,9 @@ class AppConstants {
 
   // Auth
   static const String sendOtp = 'api/v1/user/auth/generateOtp';
+  static const String verifyOtp = 'api/v1/user/auth/login';
+
+  static const String signInWithGoogle = 'api/v1/user/auth/googleLogin';
 
   static const String extras = 'api/v1/extra';
 

@@ -10,4 +10,13 @@ class AuthRepo {
 
   Future<Response> sendOtp({required String phone}) async =>
       await apiClient.postData(AppConstants.sendOtp, {"phone": phone});
+
+  Future<Response> verifyOtp({
+    required String phone,
+    required String otp,
+  }) async => await apiClient.postData(AppConstants.verifyOtp, {
+    "phone": phone,
+    "otp": otp,
+    "device_id": "fhif",
+  });
 }

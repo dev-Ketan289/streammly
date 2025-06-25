@@ -20,6 +20,7 @@ class AuthController extends GetxController implements GetxService {
   final AuthRepo authRepo;
   AuthController({required this.authRepo});
   final TextEditingController phoneController = TextEditingController();
+
   bool isLoading = false;
   Future<ResponseModel> sendOtp() async {
     isLoading = true;
@@ -50,11 +51,16 @@ class AuthController extends GetxController implements GetxService {
         return;
       }
 
-      final GoogleSignInAuthentication googleAuth = await googleUser.authentication;
+      final GoogleSignInAuthentication googleAuth =
+          await googleUser.authentication;
 
-      final credential = GoogleAuthProvider.credential(accessToken: googleAuth.accessToken, idToken: googleAuth.idToken);
+      final credential = GoogleAuthProvider.credential(
+        accessToken: googleAuth.accessToken,
+        idToken: googleAuth.idToken,
+      );
 
-      final UserCredential userCredential = await FirebaseAuth.instance.signInWithCredential(credential);
+      final UserCredential userCredential = await FirebaseAuth.instance
+          .signInWithCredential(credential);
       final User? firebaseUser = userCredential.user;
 
       if (firebaseUser == null) {
@@ -71,11 +77,24 @@ class AuthController extends GetxController implements GetxService {
         return;
       }
 
-      final url = Uri.parse("http://192.168.1.113:8000/api/v1/user/auth/googleLogin");
+      final url = Uri.parse(
+        "http://192.168.1.113:8000/api/v1/user/auth/googleLogin",
+      );
 
-      final body = jsonEncode({"token": firebaseProjectId, "device_id": deviceId, "firebase_uid": firebaseUid});
+      final body = jsonEncode({
+        "token": firebaseProjectId,
+        "device_id": deviceId,
+        "firebase_uid": firebaseUid,
+      });
 
-      final response = await http.post(url, headers: {'Content-Type': 'application/json', 'Accept': 'application/json'}, body: body);
+      final response = await http.post(
+        url,
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json',
+        },
+        body: body,
+      );
 
       final jsonResponse = jsonDecode(response.body);
 
@@ -83,9 +102,10 @@ class AuthController extends GetxController implements GetxService {
         Fluttertoast.showToast(msg: "Login Successful");
         Get.offAll(() => WelcomeScreen());
       } else {
-        String errorMessage = jsonResponse['message']?.toString() ?? "Login failed";
+        String errorMessage =
+            jsonResponse['message']?.toString() ?? "Login failed";
         if (errorMessage.length > 100) {
-          errorMessage = errorMessage.substring(0, 100) + "...";
+          errorMessage = "${errorMessage.substring(0, 100)}...";
         }
         Fluttertoast.showToast(msg: errorMessage);
       }
@@ -115,87 +135,5 @@ class AuthController extends GetxController implements GetxService {
     } catch (e) {
       return '';
     }
-  }
-}
-
-class OtpController extends GetxController {
-  final TextEditingController otpController = TextEditingController();
-  RxInt secondsRemaining = 30.obs;
-  RxString receivedOTP = ''.obs;
-  RxBool shakeOnError = false.obs;
-
-  Timer? _timer;
-
-  void startTimer() {
-    _timer?.cancel();
-    secondsRemaining.value = 30;
-
-    _timer = Timer.periodic(const Duration(seconds: 1), (timer) {
-      if (secondsRemaining.value > 0) {
-        secondsRemaining.value--;
-      } else {
-        timer.cancel();
-      }
-    });
-  }
-
-  void confirmOTP(String phone, {VoidCallback? onVerified}) {
-    final enteredOTP = otpController.text.trim();
-
-    ///  Bypass check for test number
-    if (phone == "8111111111") {
-      Fluttertoast.showToast(msg: "Test number login successful");
-      onVerified?.call();
-      Get.delete<OtpController>();
-      return;
-    }
-
-    if (enteredOTP.length == 6 && enteredOTP == receivedOTP.value) {
-      Fluttertoast.showToast(msg: "OTP Verified");
-      onVerified?.call();
-      Get.delete<OtpController>();
-    } else {
-      shakeOnError.value = true;
-      Fluttertoast.showToast(msg: "Invalid OTP");
-      Future.delayed(const Duration(milliseconds: 500), () {
-        shakeOnError.value = false;
-      });
-    }
-  }
-
-  void resendOTP(String phone) async {
-    if (phone == "8111111111") {
-      receivedOTP.value = "123456";
-      startTimer();
-      Fluttertoast.showToast(msg: "Test OTP resent: 123456");
-      return;
-    }
-
-    try {
-      final url = Uri.parse("http://192.168.1.113:8000/api/v1/user/auth/generateOtp");
-      final response = await http.post(url, headers: {'Content-Type': 'application/json'}, body: jsonEncode({"phone": phone}));
-
-      final responseBody = jsonDecode(response.body);
-
-      if (response.statusCode == 200 && responseBody['success'] == true) {
-        final otpMessage = responseBody['data'];
-        final otpCode = otpMessage.toString().split(" ").first;
-
-        receivedOTP.value = otpCode;
-        startTimer();
-        Fluttertoast.showToast(msg: "OTP resent: $otpCode");
-      } else {
-        Fluttertoast.showToast(msg: responseBody['message'] ?? "Could not resend OTP");
-      }
-    } catch (e) {
-      Fluttertoast.showToast(msg: "Could not connect to server");
-    }
-  }
-
-  @override
-  void onClose() {
-    otpController.dispose();
-    _timer?.cancel();
-    super.onClose();
   }
 }

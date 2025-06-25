@@ -3,6 +3,7 @@ import 'dart:developer';
 import 'package:get/get.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:streammly/controllers/auth_controller.dart';
+import 'package:streammly/controllers/otp_controller.dart';
 import 'package:streammly/data/repository/auth_repo.dart';
 import 'package:streammly/data/repository/category_repo.dart';
 import 'package:streammly/data/repository/company_repo.dart';
@@ -19,8 +20,15 @@ class Init {
 
     try {
       //Repo initialization
-      Get.lazyPut(() => ApiClient(appBaseUrl: AppConstants.baseUrl, sharedPreferences: Get.find()));
-      Get.lazyPut(() => AuthRepo(apiClient: Get.find(), sharedPreferences: Get.find()));
+      Get.lazyPut(
+        () => ApiClient(
+          appBaseUrl: AppConstants.baseUrl,
+          sharedPreferences: Get.find(),
+        ),
+      );
+      Get.lazyPut(
+        () => AuthRepo(apiClient: Get.find(), sharedPreferences: Get.find()),
+      );
 
       //Controller initialization
       Get.lazyPut(() => AuthController(authRepo: Get.find()));
