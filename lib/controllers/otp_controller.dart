@@ -12,6 +12,7 @@ import 'package:streammly/models/response/response_model.dart';
 import 'auth_controller.dart';
 
 class OtpController extends GetxController implements GetxService {
+  
   final AuthRepo authRepo;
   OtpController({required this.authRepo});
   final TextEditingController otpController = TextEditingController();
@@ -31,7 +32,9 @@ class OtpController extends GetxController implements GetxService {
         phone: Get.find<AuthController>().phoneController.text,
         otp: otpController.text,
       );
-      if (response.statusCode == 200) {
+      if (response.statusCode == 200 &&
+          response.body['data']['token'] != null) {
+        Get.find<AuthController>().setUserToken(response.body['data']['token']);
         responseModel = ResponseModel(true, "verification Sucessfull");
       } else {
         shakeOnError.value = true;

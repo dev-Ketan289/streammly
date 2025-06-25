@@ -10,20 +10,34 @@ import 'package:streammly/views/screens/auth_screens/welcome.dart';
 import '../../../generated/animation/shake_widget.dart';
 import '../../../services/theme.dart' as theme;
 
-class OtpScreen extends StatelessWidget {
+class OtpScreen extends StatefulWidget {
   const OtpScreen({super.key});
 
   @override
+  State<OtpScreen> createState() => _OtpScreenState();
+}
+
+class _OtpScreenState extends State<OtpScreen> {
+  // Get.put()
+  String fullNumber = "";
+  @override
+  void initState() {
+    super.initState();
+
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final String fullPhone = Get.find<AuthController>().phoneController.text;
+      final String phone = fullPhone.replaceAll("+91 ", "");
+      fullNumber = 'Via SMS $fullPhone';
+
+      /// ✅ Auto-fill OTP for test number
+      if (phone == "8111111111") {
+        Get.find<OtpController>().otpController.text = "123456";
+      }
+    });
+  }
+
+  @override
   Widget build(BuildContext context) {
-    final String fullPhone = Get.find<AuthController>().phoneController.text;
-    final String phone = fullPhone.replaceAll("+91 ", "");
-    final String fullNumber = 'Via SMS $fullPhone';
-
-    /// ✅ Auto-fill OTP for test number
-    if (phone == "8111111111") {
-      Get.find<OtpController>().otpController.text = "123456";
-    }
-
     return PopScope(
       canPop: false,
       child: Scaffold(

@@ -11,8 +11,8 @@ import 'views/screens/splash_screen/splash_screen.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  await Init().initialize();
   await Firebase.initializeApp();
+  await Init().initialize();
   runApp(const StreammlyApp());
 }
 
