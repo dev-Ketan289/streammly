@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:streammly/controllers/booking_form_controller.dart';
 import 'package:streammly/views/screens/package/booking/booking_page.dart';
+import 'package:streammly/views/screens/package/booking/thanks_for_booking.dart';
 
 class BookingSummaryController extends GetxController {
   var cutenessPrice = 5999.obs;
@@ -480,7 +481,8 @@ class BookingSummaryPage extends StatelessWidget {
       height: 48,
       margin: const EdgeInsets.only(top: 16),
       child: ElevatedButton(
-        onPressed: controller.proceedToPayment,
+        onPressed: () => Get.to(() => ThanksForBookingPage()),
+        // onPressed: controller.proceedToPayment,
         style: ElevatedButton.styleFrom(
           backgroundColor: const Color(0xFF4A90E2),
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
