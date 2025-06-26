@@ -1,14 +1,18 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:streammly/controllers/company_controller.dart';
-import 'package:streammly/views/screens/vendor/vendor_detail.dart';
+
+import '../../../vendor/vendor_detail.dart';
+import '../../vendor_locator.dart';
 
 class ExploreUs extends StatelessWidget {
-  const ExploreUs({super.key});
+  final int? vendorId;
+
+  const ExploreUs({super.key, this.vendorId});
 
   @override
   Widget build(BuildContext context) {
-    final companyController = Get.find<MapController>();
+    final CompanyController companyController = Get.put(CompanyController());
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -21,7 +25,7 @@ class ExploreUs extends StatelessWidget {
               const Text("Explore Us !!!", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
               InkWell(
                 onTap: () {
-                  // Navigator.push(context, MaterialPageRoute(builder: (_) => CompanyLocatorMapScreen(categoryId: 1)));
+                  Navigator.push(context, MaterialPageRoute(builder: (_) => CompanyLocatorMapScreen(categoryId: 1)));
                 },
                 child: Row(
                   children: const [
@@ -38,40 +42,37 @@ class ExploreUs extends StatelessWidget {
         Obx(() {
           final vendors = companyController.companies;
 
-          if (vendors.isEmpty) {
-            return const Center(child: Text("No vendors found"));
+          final filteredVendors = vendorId != null ? vendors.where((v) => v.id == vendorId).toList() : vendors;
+
+          if (filteredVendors.isEmpty) {
+            return const Padding(padding: EdgeInsets.all(16), child: Center(child: Text("No vendors found")));
           }
 
           return ListView.builder(
-            itemCount: vendors.length,
+            itemCount: filteredVendors.length,
             shrinkWrap: true,
             physics: const NeverScrollableScrollPhysics(),
             padding: const EdgeInsets.symmetric(horizontal: 16),
             itemBuilder: (context, index) {
-              final vendor = vendors[index];
+              final vendor = filteredVendors[index];
 
               return InkWell(
-                borderRadius: BorderRadius.circular(18),
                 onTap: () {
                   Navigator.push(context, MaterialPageRoute(builder: (_) => VendorDetailScreen(company: vendor)));
                 },
                 child: Container(
                   margin: const EdgeInsets.only(bottom: 20),
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(18),
-                    color: Colors.white,
-                    boxShadow: [BoxShadow(blurRadius: 10, color: Colors.black12, offset: const Offset(0, 4))],
-                  ),
+                  decoration: BoxDecoration(borderRadius: BorderRadius.circular(18), color: Colors.white, boxShadow: [BoxShadow(blurRadius: 2, color: Colors.grey)]),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      // Banner Image with Favorite Icon
+                      // Banner
                       Stack(
                         children: [
                           ClipRRect(
                             borderRadius: const BorderRadius.vertical(top: Radius.circular(18)),
                             child:
-                                vendor.bannerImage != null
+                                vendor.bannerImage != null && vendor.bannerImage!.isNotEmpty
                                     ? Image.network('http://192.168.1.10:8000/${vendor.bannerImage}', height: 150, width: double.infinity, fit: BoxFit.cover)
                                     : Image.asset('assets/images/recommended_banner/FocusPointVendor.png', height: 150, width: double.infinity, fit: BoxFit.cover),
                           ),
@@ -83,7 +84,7 @@ class ExploreUs extends StatelessWidget {
                         ],
                       ),
 
-                      // Text Info
+                      // Info
                       Padding(
                         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
                         child: Row(

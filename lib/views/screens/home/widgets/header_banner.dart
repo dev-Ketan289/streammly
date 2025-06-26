@@ -46,7 +46,6 @@ class _HeaderBannerState extends State<HeaderBanner> {
   @override
   void initState() {
     super.initState();
-
     pageController = PageController(initialPage: 1);
 
     if (loopedSlides.isNotEmpty) {
@@ -77,18 +76,29 @@ class _HeaderBannerState extends State<HeaderBanner> {
       width: double.infinity,
       child: Stack(
         children: [
-          // --- Background image ---
-          Image.asset(widget.backgroundImage, fit: BoxFit.cover, width: double.infinity, height: double.infinity),
+          // --- Background image (fixed to support both network and asset) ---
+          widget.backgroundImage.startsWith("http")
+              ? Image.network(
+                widget.backgroundImage,
+                fit: BoxFit.cover,
+                width: double.infinity,
+                height: double.infinity,
+                errorBuilder: (context, error, stackTrace) {
+                  return Image.asset('assets/images/recommended_banner/FocusPointVendor.png', fit: BoxFit.cover, width: double.infinity, height: double.infinity);
+                },
+              )
+              : Image.asset(widget.backgroundImage, fit: BoxFit.cover, width: double.infinity, height: double.infinity),
+
+          // --- Overlay ---
           Container(color: widget.overlayColor),
 
-          // --- PageView carousel ---
+          // --- Carousel effect ---
           if (hasSlides)
             PageView.builder(
               controller: pageController,
               itemCount: loopedSlides.length,
               onPageChanged: (index) {
                 final total = loopedSlides.length;
-
                 if (index == total - 1) {
                   Future.delayed(const Duration(milliseconds: 300), () {
                     pageController.jumpToPage(1);
@@ -104,11 +114,11 @@ class _HeaderBannerState extends State<HeaderBanner> {
                 }
               },
               itemBuilder: (_, index) {
-                return const SizedBox.expand(); // Prevent RangeError & keeps swipe smooth
+                return const SizedBox.expand();
               },
             ),
 
-          // --- Vector image ---
+          // --- Vector image (if any) ---
           if (currentSlide?.vectorImage != null)
             Positioned(
               right: 16,
@@ -119,7 +129,7 @@ class _HeaderBannerState extends State<HeaderBanner> {
                       : Image.network("http://192.168.1.113:8000/${currentSlide.vectorImage}", height: 140),
             ),
 
-          // --- Top Content (location, search, title) ---
+          // --- Top location, search, title and subtitle ---
           if (widget.showContent)
             Padding(
               padding: const EdgeInsets.fromLTRB(16, 20, 16, 0),
@@ -149,6 +159,7 @@ class _HeaderBannerState extends State<HeaderBanner> {
                   ),
                   const SizedBox(height: 16),
 
+                  // Search Bar
                   Row(
                     children: [
                       const Icon(Icons.menu, color: Colors.white),
@@ -172,6 +183,8 @@ class _HeaderBannerState extends State<HeaderBanner> {
                   ),
 
                   const SizedBox(height: 24),
+
+                  // Title and Subtitle
                   if (title.isNotEmpty) Text(title, style: const TextStyle(fontSize: 26, color: Colors.white, fontWeight: FontWeight.bold)),
                   if (subtitle.isNotEmpty) const SizedBox(height: 6),
                   if (subtitle.isNotEmpty) Text(subtitle, style: const TextStyle(color: Colors.white, fontSize: 16), maxLines: 4, overflow: TextOverflow.clip),

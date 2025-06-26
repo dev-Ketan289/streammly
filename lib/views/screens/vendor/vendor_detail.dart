@@ -3,6 +3,7 @@ import 'package:get/get.dart';
 import 'package:streammly/controllers/company_controller.dart';
 
 import '../../../models/category/category_item.dart';
+import '../../../models/company/company_location.dart';
 import '../../../navigation_menu.dart';
 import '../home/widgets/category/review_card.dart';
 import '../home/widgets/category/widgets/category_scroller.dart';
@@ -10,10 +11,23 @@ import '../home/widgets/header_banner.dart';
 import '../home/widgets/horizontal_card.dart';
 import 'vendor_group.dart';
 
-class VendorDetailScreen extends StatelessWidget {
+class VendorDetailScreen extends StatefulWidget {
   final CompanyLocation company;
 
   const VendorDetailScreen({super.key, required this.company});
+
+  @override
+  State<VendorDetailScreen> createState() => _VendorDetailScreenState();
+}
+
+class _VendorDetailScreenState extends State<VendorDetailScreen> {
+  final CompanyController companyController = Get.find();
+
+  @override
+  void initState() {
+    super.initState();
+    companyController.fetchCompanySubCategories(widget.company.id ?? 0);
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -26,29 +40,55 @@ class VendorDetailScreen extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // Dynamic banner from passed company
+              /// ---- Header Banner ----
               HeaderBanner(
                 height: 280,
                 backgroundImage:
-                    company.bannerImage != null && company.bannerImage!.isNotEmpty
-                        ? 'http://192.168.1.10:8000/${company.bannerImage}'
+                    widget.company.bannerImage != null && widget.company.bannerImage!.isNotEmpty
+                        ? 'http://192.168.1.10:8000/${widget.company.bannerImage}'
                         : 'assets/images/recommended_banner/FocusPointVendor.png',
                 overlayColor: Colors.indigo.withValues(alpha: 0.6),
-                overrideTitle: company.companyName,
+                overrideTitle: widget.company.companyName,
+                overrideSubtitle: widget.company.categoryName,
               ),
+
               const SizedBox(height: 6),
 
-              CategoryScroller(
-                categories: [
-                  CategoryItem(label: 'Baby Shoot', imagePath: 'assets/images/category/vendor_category/img.png', onTap: () => Get.to(() => VendorGroup())),
-                  CategoryItem(label: 'Wedding Shoot', imagePath: 'assets/images/category/vendor_category/img.png', onTap: () {}),
-                  CategoryItem(label: 'Portfolio Shoot', imagePath: 'assets/images/category/vendor_category/img.png', onTap: () {}),
-                  CategoryItem(label: 'Maternity Shoot', imagePath: 'assets/images/category/vendor_category/img.png', onTap: () {}),
-                  CategoryItem(label: 'Family Function', imagePath: 'assets/images/category/vendor_category/img.png', onTap: () {}),
-                ],
-              ),
+              /// ---- Category Scroller (Subcategories) ----
+              Obx(() {
+                final subs = companyController.subCategories;
+
+                if (subs.isEmpty) {
+                  return CategoryScroller(
+                    categories: [
+                      CategoryItem(
+                        label: 'Baby Shoot',
+                        imagePath: 'assets/images/category/vendor_category/img.png',
+                        onTap: () => Get.to(() => VendorGroup(company: widget.company, subCategoryId: 2)),
+                      ),
+                      CategoryItem(label: 'Wedding Shoot', imagePath: 'assets/images/category/vendor_category/img.png', onTap: () {}),
+                      CategoryItem(label: 'Portfolio Shoot', imagePath: 'assets/images/category/vendor_category/img.png', onTap: () {}),
+                      CategoryItem(label: 'Maternity Shoot', imagePath: 'assets/images/category/vendor_category/img.png', onTap: () {}),
+                      CategoryItem(label: 'Family Function', imagePath: 'assets/images/category/vendor_category/img.png', onTap: () {}),
+                    ],
+                  );
+                }
+
+                return CategoryScroller(
+                  categories:
+                      subs.map((sub) {
+                        return CategoryItem(
+                          label: sub.title,
+                          imagePath: 'http://192.168.1.10:8000/${sub.image ?? ""}',
+                          onTap: () => Get.to(() => VendorGroup(company: widget.company, subCategoryId: sub.id)),
+                        );
+                      }).toList(),
+                );
+              }),
 
               const SizedBox(height: 10),
+
+              /// ---- Reviews ----
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
                 child: Row(
@@ -101,6 +141,7 @@ class VendorDetailScreen extends StatelessWidget {
 
               const SizedBox(height: 20),
 
+              /// ---- Packages ----
               PackageSection(
                 title: "Popular Packages",
                 onSeeAll: () {},

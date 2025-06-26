@@ -22,7 +22,7 @@ class CompanyLocatorMapScreen extends StatefulWidget {
 }
 
 class _CompanyLocatorMapScreenState extends State<CompanyLocatorMapScreen> {
-  final MapController controller = Get.put(MapController());
+  final CompanyController controller = Get.put(CompanyController());
 
   final CategoryController categoryController = Get.find<CategoryController>();
 

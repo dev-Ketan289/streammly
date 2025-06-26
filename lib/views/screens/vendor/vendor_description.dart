@@ -8,7 +8,7 @@ class VendorDescription extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final company = Get.find<MapController>().selectedCompany.value;
+    final company = Get.find<CompanyController>().selectedCompany.value;
 
     return Scaffold(
       body: Stack(
@@ -24,7 +24,7 @@ class VendorDescription extends StatelessWidget {
           ),
 
           // Overlay
-          Container(height: double.infinity, width: double.infinity, color: Colors.indigo.withOpacity(0.4)),
+          Container(height: double.infinity, width: double.infinity, color: Colors.indigo.withValues(alpha: 0.4)),
 
           // Content
           SafeArea(
