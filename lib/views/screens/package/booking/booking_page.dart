@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:streammly/views/screens/package/booking/booking_summary.dart';
 import 'package:streammly/views/screens/package/booking/widgets/booking_form_page.dart';
 import 'package:streammly/views/screens/package/booking/widgets/booking_personal_info.dart';
 
@@ -79,7 +80,12 @@ class BookingPage extends StatelessWidget {
                                   side: BorderSide(
                                     color:
                                         isSelected
-                                            ? const Color(0xFF4A6CF7)
+                                            ? const Color.fromARGB(
+                                              255,
+                                              0,
+                                              51,
+                                              255,
+                                            )
                                             : Colors.grey.shade300,
                                   ),
                                 ),
@@ -131,7 +137,9 @@ class BookingPage extends StatelessWidget {
               child: SizedBox(
                 width: double.infinity,
                 child: ElevatedButton(
-                  onPressed: () => controller.submitBooking(),
+                  onPressed: () {
+                    Get.to(() => BookingSummaryPage());
+                  },
                   style: ElevatedButton.styleFrom(
                     backgroundColor: const Color(0xFF4A6CF7),
                     padding: const EdgeInsets.symmetric(vertical: 16),
