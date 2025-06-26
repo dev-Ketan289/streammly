@@ -98,7 +98,7 @@ class ExploreUs extends StatelessWidget {
                               child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
-                                  Text(vendor.companyName ?? "Unknown", style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
+                                  Text(vendor.companyName, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
                                   const SizedBox(height: 2),
                                   Text(vendor.categoryName ?? "Unknown", style: const TextStyle(fontSize: 13, color: Colors.grey)),
                                   const SizedBox(height: 6),
