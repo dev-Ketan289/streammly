@@ -1,34 +1,23 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:streammly/controllers/booking_form_controller.dart';
+import 'package:streammly/views/screens/package/booking/booking_page.dart';
 
 class BookingSummaryController extends GetxController {
   var cutenessPrice = 5999.obs;
   var momentsPrice = 1599.obs;
+  var showCutenessDetails = true.obs;
+  var showMomentsDetails = false.obs;
 
   int get totalPayment => cutenessPrice.value + momentsPrice.value;
 
-  void editCuteness() {
-    // Handle edit cuteness package
-    Get.snackbar(
-      'Edit Package',
-      'Editing Cuteness package...',
-      backgroundColor: Colors.blue,
-      colorText: Colors.white,
-    );
-  }
-
-  void editMoments() {
-    // Handle edit moments package
-    Get.snackbar(
-      'Edit Package',
-      'Editing Moments package...',
-      backgroundColor: Colors.blue,
-      colorText: Colors.white,
-    );
+  void editPackage(int index) {
+    final bookingController = Get.find<BookingFormController>();
+    bookingController.currentPage.value = index;
+    Get.to(() => BookingPage());
   }
 
   void proceedToPayment() {
-    // Handle payment process
     Get.snackbar(
       'Payment',
       'Proceeding to payment...',
@@ -36,98 +25,140 @@ class BookingSummaryController extends GetxController {
       colorText: Colors.white,
     );
   }
+
+  void toggleCutenessDetails() {
+    showCutenessDetails.toggle();
+  }
+
+  void toggleMomentsDetails() {
+    showMomentsDetails.toggle();
+  }
 }
 
 class BookingSummaryPage extends StatelessWidget {
   final BookingSummaryController controller = Get.put(
     BookingSummaryController(),
   );
+  final BookingFormController bookingController =
+      Get.find<BookingFormController>();
 
-  BookingSummaryPage({Key? key}) : super(key: key);
+  BookingSummaryPage({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: const Color(0xFFF5F5F7),
-      appBar: AppBar(
+    return PopScope(
+      canPop: true,
+      child: Scaffold(
         backgroundColor: const Color(0xFFF5F5F7),
-        elevation: 0,
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back_ios, color: Colors.black, size: 20),
-          onPressed: () => Get.back(),
-        ),
-        title: const Text(
-          'Booking Summary',
-          style: TextStyle(
-            color: Color(0xFF4A90E2),
-            fontSize: 18,
-            fontWeight: FontWeight.w600,
+        appBar: AppBar(
+          backgroundColor: const Color(0xFFF5F5F7),
+          elevation: 0,
+          leading: IconButton(
+            icon: const Icon(
+              Icons.arrow_back_ios,
+              color: Colors.black,
+              size: 20,
+            ),
+            onPressed: () => Get.back(),
           ),
+          title: const Text(
+            'Booking Summary',
+            style: TextStyle(
+              color: Color(0xFF4A90E2),
+              fontSize: 18,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+          centerTitle: true,
         ),
-        centerTitle: true,
-      ),
-      body: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          children: [
-            Expanded(
-              child: SingleChildScrollView(
-                child: Column(
-                  children: [
-                    // Cuteness Package Card
-                    _buildPackageCard(
-                      title: 'Cuteness',
-                      subtitle: '24 May 2025, 12:00 am to 12:00 PM',
-                      price: controller.cutenessPrice.value,
-                      showLocationDetails: true,
-                      onEdit: controller.editCuteness,
+        body: Padding(
+          padding: const EdgeInsets.all(16),
+          child: Column(
+            children: [
+              Expanded(
+                child: SingleChildScrollView(
+                  child: Container(
+                    padding: const EdgeInsets.all(20),
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(12),
                     ),
-                    const SizedBox(height: 16),
-
-                    // Moments Package Card
-                    _buildPackageCard(
-                      title: 'Moments',
-                      subtitle: '24 May 2025, 1:00 am to 1:00 PM',
-                      price: controller.momentsPrice.value,
-                      showLocationDetails: false,
-                      onEdit: controller.editMoments,
-                    ),
-                    const SizedBox(height: 24),
-
-                    // Total Payment Section
-                    _buildTotalPaymentSection(),
-                    const SizedBox(height: 24),
-
-                    // Payment Method Section
-                    _buildPaymentMethodSection(),
-                  ],
+                    child: Obx(() {
+                      final packages = bookingController.selectedPackages;
+                      return Column(
+                        children: [
+                          for (int i = 0; i < packages.length; i++)
+                            Column(
+                              children: [
+                                _buildPackageCard(
+                                  index: i,
+                                  title: packages[i]['title'],
+                                  subtitle: _getSubtitle(i),
+                                  price:
+                                      i == 0
+                                          ? controller.cutenessPrice.value
+                                          : controller.momentsPrice.value,
+                                  showLocationDetails:
+                                      i == 0
+                                          ? controller.showCutenessDetails.value
+                                          : controller.showMomentsDetails.value,
+                                  onEdit: () => controller.editPackage(i),
+                                  onToggleDetails:
+                                      i == 0
+                                          ? controller.toggleCutenessDetails
+                                          : controller.toggleMomentsDetails,
+                                ),
+                                const SizedBox(height: 16),
+                              ],
+                            ),
+                          const SizedBox(height: 24),
+                          _buildTotalPaymentSection(),
+                          const SizedBox(height: 24),
+                          _buildPaymentMethodSection(),
+                          const SizedBox(height: 24),
+                          _buildContinueButton(),
+                        ],
+                      );
+                    }),
+                  ),
                 ),
               ),
-            ),
-
-            // Continue Button
-            _buildContinueButton(),
-          ],
+            ],
+          ),
         ),
       ),
     );
   }
 
+  String _getSubtitle(int index) {
+    final form = bookingController.packageFormsData[index] ?? {};
+    final date = form['date']?.toString() ?? 'Not set';
+    final startTime = form['startTime']?.toString() ?? 'Not set';
+    final endTime = form['endTime']?.toString() ?? 'Not set';
+    return '$date, $startTime to $endTime';
+  }
+
   Widget _buildPackageCard({
+    required int index,
     required String title,
     required String subtitle,
     required int price,
     required bool showLocationDetails,
     required VoidCallback onEdit,
+    required VoidCallback onToggleDetails,
   }) {
+    final form = bookingController.packageFormsData[index] ?? {};
+    final packageTitle = bookingController.selectedPackages[index]['title'];
+
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
+        border: Border.all(color: const Color.fromARGB(255, 0, 0, 0)),
         color: Colors.white,
         borderRadius: BorderRadius.circular(12),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.05),
+            color: Colors.black.withOpacity(0.05),
             blurRadius: 10,
             offset: const Offset(0, 2),
           ),
@@ -136,12 +167,10 @@ class BookingSummaryPage extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Header Row
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // Title and Subtitle
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -150,73 +179,92 @@ class BookingSummaryPage extends StatelessWidget {
                       title,
                       style: const TextStyle(
                         fontSize: 18,
-                        fontWeight: FontWeight.w600,
+                        fontWeight: FontWeight.w500,
                         color: Colors.black,
                       ),
                     ),
-                    const SizedBox(height: 4),
                     Text(
                       subtitle,
-                      style: const TextStyle(fontSize: 12, color: Colors.grey),
+                      style: const TextStyle(
+                        fontSize: 10,
+                        color: Color(0xFF2864A6),
+                      ),
                     ),
                   ],
                 ),
               ),
-
-              // Price and Actions
               Row(
                 children: [
+                  const SizedBox(width: 8),
                   Text(
                     '₹$price/-',
                     style: const TextStyle(
                       fontSize: 16,
-                      fontWeight: FontWeight.w600,
+                      fontWeight: FontWeight.w700,
+                      color: Color(0xFF2864A6),
+                    ),
+                  ),
+                  IconButton(
+                    icon: Icon(
+                      showLocationDetails
+                          ? Icons.visibility
+                          : Icons.visibility_off,
                       color: Colors.black,
-                    ),
-                  ),
-                  const SizedBox(width: 8),
-                  const Icon(
-                    Icons.visibility_outlined,
-                    size: 20,
-                    color: Colors.grey,
-                  ),
-                  const SizedBox(width: 8),
-                  GestureDetector(
-                    onTap: onEdit,
-                    child: const Icon(
-                      Icons.edit_outlined,
                       size: 20,
-                      color: Colors.grey,
                     ),
+                    onPressed: onToggleDetails,
+                  ),
+                  IconButton(
+                    icon: const Icon(Icons.edit, color: Colors.black, size: 20),
+                    onPressed: onEdit,
                   ),
                 ],
               ),
             ],
           ),
-
-          // Location Details (only for Cuteness package)
           if (showLocationDetails) ...[
             const SizedBox(height: 16),
             const Text(
               'Shoot Location',
               style: TextStyle(
-                fontSize: 14,
+                fontSize: 13,
                 fontWeight: FontWeight.w600,
                 color: Colors.black87,
               ),
             ),
             const SizedBox(height: 8),
-            const Text(
-              '1st Floor, Hiren Industrial Estate, 104 & 105 - B, Mogul Ln, Behind Johnson, Bethany Co Operative Housing Society, Mahim West, Mahim, Maharashtra 400016.',
-              style: TextStyle(
+            Text(
+              bookingController.selectedPackages[index]['address'] ??
+                  '1st Floor, Hiren Industrial Estate, 104 & 105 - B, Mogul Ln, Mahim West, Maharashtra 400016.',
+              style: const TextStyle(
                 fontSize: 12,
                 color: Colors.black54,
                 height: 1.4,
               ),
             ),
             const SizedBox(height: 16),
-
-            // Date and Timing Row
+            if (packageTitle == 'Cuteness')
+              Text(
+                'Baby Info: ${form['babyInfo'] ?? 'Not set'}',
+                style: const TextStyle(fontSize: 12, color: Colors.black54),
+              ),
+            if (packageTitle == 'Moments') ...[
+              Text(
+                'Theme: ${form['theme'] ?? 'Not set'}',
+                style: const TextStyle(fontSize: 12, color: Colors.black54),
+              ),
+              const SizedBox(height: 8),
+              Text(
+                'Outfit Changes: ${form['outfitChanges'] ?? 'Not set'}',
+                style: const TextStyle(fontSize: 12, color: Colors.black54),
+              ),
+            ],
+            if (packageTitle == 'Wonders')
+              Text(
+                'Location Preference: ${form['locationPreference'] ?? 'Not set'}',
+                style: const TextStyle(fontSize: 12, color: Colors.black54),
+              ),
+            const SizedBox(height: 16),
             Container(
               padding: const EdgeInsets.all(12),
               decoration: BoxDecoration(
@@ -224,13 +272,13 @@ class BookingSummaryPage extends StatelessWidget {
                 borderRadius: BorderRadius.circular(8),
                 border: Border.all(color: const Color(0xFFE9ECEF)),
               ),
-              child: const Row(
+              child: Row(
                 children: [
                   Expanded(
                     child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
+                      crossAxisAlignment: CrossAxisAlignment.center,
                       children: [
-                        Text(
+                        const Text(
                           'Date of Shoot',
                           style: TextStyle(
                             fontSize: 12,
@@ -238,23 +286,30 @@ class BookingSummaryPage extends StatelessWidget {
                             fontWeight: FontWeight.w500,
                           ),
                         ),
-                        SizedBox(height: 4),
+                        const SizedBox(height: 4),
                         Text(
-                          'Sat, 24th May 2025',
-                          style: TextStyle(
+                          form['date']?.toString() ?? 'Not set',
+                          style: const TextStyle(
                             fontSize: 14,
-                            color: Colors.black87,
+                            color: Colors.grey,
                             fontWeight: FontWeight.w500,
                           ),
                         ),
                       ],
                     ),
                   ),
+                  Container(
+                    height: 40,
+                    width: 1,
+                    color: Colors.grey.shade300,
+                    padding: const EdgeInsets.symmetric(horizontal: 14),
+                  ),
+                  SizedBox(width: 1),
                   Expanded(
                     child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
+                      crossAxisAlignment: CrossAxisAlignment.center,
                       children: [
-                        Text(
+                        const Text(
                           'Timing',
                           style: TextStyle(
                             fontSize: 12,
@@ -262,12 +317,12 @@ class BookingSummaryPage extends StatelessWidget {
                             fontWeight: FontWeight.w500,
                           ),
                         ),
-                        SizedBox(height: 4),
+                        const SizedBox(height: 4),
                         Text(
-                          '12:00 PM - 01:00 PM',
-                          style: TextStyle(
+                          '${form['startTime']?.toString() ?? 'Not set'} - ${form['endTime']?.toString() ?? 'Not set'}',
+                          style: const TextStyle(
                             fontSize: 14,
-                            color: Colors.black87,
+                            color: Colors.grey,
                             fontWeight: FontWeight.w500,
                           ),
                         ),
@@ -287,15 +342,8 @@ class BookingSummaryPage extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
       decoration: BoxDecoration(
-        color: Colors.white,
         borderRadius: BorderRadius.circular(8),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.05),
-            blurRadius: 10,
-            offset: const Offset(0, 2),
-          ),
-        ],
+        boxShadow: [],
       ),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -327,15 +375,8 @@ class BookingSummaryPage extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: Colors.white,
         borderRadius: BorderRadius.circular(12),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.05),
-            blurRadius: 10,
-            offset: const Offset(0, 2),
-          ),
-        ],
+        boxShadow: [],
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -349,11 +390,8 @@ class BookingSummaryPage extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 16),
-
-          // Payment Method Row
           GestureDetector(
             onTap: () {
-              // Handle payment method selection
               Get.snackbar(
                 'Payment Method',
                 'Select your payment method',
@@ -370,25 +408,12 @@ class BookingSummaryPage extends StatelessWidget {
               ),
               child: Row(
                 children: [
-                  // Card Icon
-                  Container(
-                    width: 40,
-                    height: 28,
-                    decoration: BoxDecoration(
-                      color: const Color(0xFF1976D2),
-                      borderRadius: BorderRadius.circular(4),
-                    ),
-                    child: const Center(
-                      child: Icon(
-                        Icons.credit_card,
-                        color: Colors.white,
-                        size: 16,
-                      ),
-                    ),
+                  const Icon(
+                    Icons.account_balance_wallet,
+                    size: 24,
+                    color: Colors.black54,
                   ),
                   const SizedBox(width: 12),
-
-                  // Payment Text
                   const Expanded(
                     child: Text(
                       'Payment',
@@ -399,8 +424,6 @@ class BookingSummaryPage extends StatelessWidget {
                       ),
                     ),
                   ),
-
-                  // Arrow Icon
                   const Icon(Icons.chevron_right, color: Colors.grey, size: 24),
                 ],
               ),

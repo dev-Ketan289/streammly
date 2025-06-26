@@ -1,25 +1,35 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:intl/intl.dart';
 
 class BookingFormController extends GetxController {
   var currentPage = 0.obs;
   var selectedPackages = <Map<String, dynamic>>[].obs;
-
   final personalInfo = {'name': ''.obs, 'mobile': ''.obs, 'email': ''.obs};
-
   final alternateMobiles = <RxString>[].obs;
   final alternateEmails = <RxString>[].obs;
-
   final packageFormsData = <int, Map<String, dynamic>>{}.obs;
-
-  // Add acceptance of terms
   var acceptTerms = false.obs;
 
   void initSelectedPackages(List<Map<String, dynamic>> packages) {
-    selectedPackages.assignAll(packages);
-    for (int i = 0; i < packages.length; i++) {
-      packageFormsData[i] = {'date': '', 'startTime': '', 'endTime': '', 'babyInfo': null, 'theme': null, 'freeAddOn': null, 'extraAddOn': null};
-    }
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      selectedPackages.assignAll(packages);
+      for (int i = 0; i < packages.length; i++) {
+        final packageTitle = packages[i]['title'];
+        packageFormsData[i] = {
+          'date': '',
+          'startTime': '',
+          'endTime': '',
+          'babyInfo': packageTitle == 'Cuteness' ? null : null,
+          'theme': packageTitle == 'Moments' ? null : null,
+          'outfitChanges': packageTitle == 'Moments' ? null : null,
+          'locationPreference': packageTitle == 'Wonders' ? null : null,
+          'freeAddOn': null,
+          'extraAddOn': null,
+        };
+      }
+      packageFormsData.refresh();
+    });
   }
 
   void updatePersonalInfo(String key, String value) {
@@ -42,10 +52,18 @@ class BookingFormController extends GetxController {
     final data = packageFormsData[index] ?? {};
     data[field] = value;
     packageFormsData[index] = data;
+    if (field == 'date' || field == 'startTime' || field == 'endTime') {
+      packageFormsData.refresh();
+    }
   }
 
   Future<String> selectDate(int index, BuildContext context) async {
-    final picked = await showDatePicker(context: context, initialDate: DateTime.now(), firstDate: DateTime.now(), lastDate: DateTime.now().add(const Duration(days: 365)));
+    final picked = await showDatePicker(
+      context: context,
+      initialDate: DateTime.now(),
+      firstDate: DateTime.now(),
+      lastDate: DateTime.now().add(const Duration(days: 365)),
+    );
     String formatted = "";
     if (picked != null) {
       formatted = "${picked.day} ${_getMonthName(picked.month)} ${picked.year}";
@@ -55,35 +73,22 @@ class BookingFormController extends GetxController {
   }
 
   String _getMonthName(int month) {
-    const months = ['', 'January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+    const months = [
+      '',
+      'January',
+      'February',
+      'March',
+      'April',
+      'May',
+      'June',
+      'July',
+      'August',
+      'September',
+      'October',
+      'November',
+      'December',
+    ];
     return months[month];
-  }
-
-  void pickTime(int index, {required bool isStart, required BuildContext context}) async {
-    final now = TimeOfDay.now();
-    final picked = await showTimePicker(
-      context: context,
-      initialTime: now,
-      builder: (context, child) {
-        return Theme(
-          data: Theme.of(context).copyWith(
-            timePickerTheme: TimePickerThemeData(
-              backgroundColor: const Color(0xFFF0F2FF),
-              hourMinuteColor: Colors.white,
-              hourMinuteTextColor: Colors.black,
-              dialHandColor: const Color(0xFF4A6CF7),
-              dialBackgroundColor: Colors.white,
-            ),
-          ),
-          child: child!,
-        );
-      },
-    );
-
-    if (picked != null) {
-      final formattedTime = picked.format(context);
-      updatePackageForm(index, isStart ? 'startTime' : 'endTime', formattedTime);
-    }
   }
 
   void toggleAddOn(int index, String type) {
@@ -91,6 +96,7 @@ class BookingFormController extends GetxController {
     final key = type == 'free' ? 'freeAddOn' : 'extraAddOn';
     form[key] = form[key] == null ? 'Selected' : null;
     packageFormsData[index] = form;
+    packageFormsData.refresh();
   }
 
   void toggleTermsAcceptance() {
@@ -98,23 +104,33 @@ class BookingFormController extends GetxController {
   }
 
   bool canSubmit() {
-    // Check if personal info is filled
     if (personalInfo['name']?.value.isEmpty ?? true) return false;
     if (personalInfo['mobile']?.value.isEmpty ?? true) return false;
     if (personalInfo['email']?.value.isEmpty ?? true) return false;
-
-    // Check if terms are accepted
     if (!acceptTerms.value) return false;
 
-    // Check if at least one package form has required fields
     for (int i = 0; i < selectedPackages.length; i++) {
       final form = packageFormsData[i] ?? {};
-      if (form['date']?.toString().isNotEmpty == true && form['startTime']?.toString().isNotEmpty == true && form['endTime']?.toString().isNotEmpty == true) {
-        return true;
+      if (form['date']?.toString().isEmpty ?? true) return false;
+      if (form['startTime']?.toString().isEmpty ?? true) return false;
+      if (form['endTime']?.toString().isEmpty ?? true) return false;
+
+      try {
+        final start = DateFormat('h:mm a').parse(form['startTime']);
+        final end = DateFormat('h:mm a').parse(form['endTime']);
+        if (end.isBefore(start)) return false;
+      } catch (e) {
+        return false;
+      }
+
+      final packageTitle = selectedPackages[i]['title'];
+      if (packageTitle == 'Cuteness' && form['babyInfo'] == null) return false;
+      if (packageTitle == 'Moments' && form['theme'] == null) return false;
+      if (packageTitle == 'Wonders' && form['locationPreference'] == null) {
+        return false;
       }
     }
-
-    return false;
+    return true;
   }
 
   void submitBooking() {
@@ -127,7 +143,10 @@ class BookingFormController extends GetxController {
       'personalInfo': personalInfo.map((k, v) => MapEntry(k, v.value)),
       'altMobiles': alternateMobiles.map((e) => e.value).toList(),
       'altEmails': alternateEmails.map((e) => e.value).toList(),
-      'packages': List.generate(selectedPackages.length, (i) => {'info': selectedPackages[i], 'form': packageFormsData[i]}),
+      'packages': List.generate(
+        selectedPackages.length,
+        (i) => {'info': selectedPackages[i], 'form': packageFormsData[i]},
+      ),
       'termsAccepted': acceptTerms.value,
     };
     print('✅ Booking Data Submitted:\n$data');
