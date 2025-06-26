@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:streammly/controllers/booking_form_controller.dart';
 import 'package:streammly/views/screens/package/booking/booking_page.dart';
+import 'package:streammly/views/screens/package/booking/thanks_for_booking.dart';
 
 class BookingSummaryController extends GetxController {
   var cutenessPrice = 5999.obs;
@@ -53,14 +54,7 @@ class BookingSummaryPage extends StatelessWidget {
         appBar: AppBar(
           backgroundColor: const Color(0xFFF5F5F7),
           elevation: 0,
-          leading: IconButton(
-            icon: const Icon(
-              Icons.arrow_back_ios,
-              color: Colors.black,
-              size: 20,
-            ),
-            onPressed: () => Get.back(),
-          ),
+          automaticallyImplyLeading: false,
           title: const Text(
             'Booking Summary',
             style: TextStyle(
@@ -151,179 +145,208 @@ class BookingSummaryPage extends StatelessWidget {
     final packageTitle = bookingController.selectedPackages[index]['title'];
 
     return Container(
-      padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        border: Border.all(color: const Color.fromARGB(255, 0, 0, 0)),
+        border: Border.all(color: const Color(0xFFB5B6B7)),
         color: Colors.white,
         borderRadius: BorderRadius.circular(12),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.05),
-            blurRadius: 10,
-            offset: const Offset(0, 2),
-          ),
-        ],
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Expanded(
-                child: Column(
+          Padding(
+            padding: const EdgeInsets.fromLTRB(16, 16, 16, 0),
+            child: Column(
+              children: [
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(
-                      title,
-                      style: const TextStyle(
-                        fontSize: 18,
-                        fontWeight: FontWeight.w500,
-                        color: Colors.black,
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            title,
+                            style: const TextStyle(
+                              fontSize: 18,
+                              fontWeight: FontWeight.w500,
+                              color: Colors.black,
+                            ),
+                          ),
+                          Text(
+                            subtitle,
+                            style: const TextStyle(
+                              fontSize: 10,
+                              color: Color(0xFF2864A6),
+                            ),
+                          ),
+                        ],
                       ),
                     ),
-                    Text(
-                      subtitle,
-                      style: const TextStyle(
-                        fontSize: 10,
-                        color: Color(0xFF2864A6),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              Row(
-                children: [
-                  const SizedBox(width: 8),
-                  Text(
-                    '₹$price/-',
-                    style: const TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.w700,
-                      color: Color(0xFF2864A6),
-                    ),
-                  ),
-                  IconButton(
-                    icon: Icon(
-                      showLocationDetails
-                          ? Icons.visibility
-                          : Icons.visibility_off,
-                      color: Colors.black,
-                      size: 20,
-                    ),
-                    onPressed: onToggleDetails,
-                  ),
-                  IconButton(
-                    icon: const Icon(Icons.edit, color: Colors.black, size: 20),
-                    onPressed: onEdit,
-                  ),
-                ],
-              ),
-            ],
-          ),
-          if (showLocationDetails) ...[
-            const SizedBox(height: 16),
-            const Text(
-              'Shoot Location',
-              style: TextStyle(
-                fontSize: 13,
-                fontWeight: FontWeight.w600,
-                color: Colors.black87,
-              ),
-            ),
-            const SizedBox(height: 8),
-            Text(
-              bookingController.selectedPackages[index]['address'] ??
-                  '1st Floor, Hiren Industrial Estate, 104 & 105 - B, Mogul Ln, Mahim West, Maharashtra 400016.',
-              style: const TextStyle(
-                fontSize: 12,
-                color: Colors.black54,
-                height: 1.4,
-              ),
-            ),
-            const SizedBox(height: 16),
-            if (packageTitle == 'Cuteness')
-              Text(
-                'Baby Info: ${form['babyInfo'] ?? 'Not set'}',
-                style: const TextStyle(fontSize: 12, color: Colors.black54),
-              ),
-            if (packageTitle == 'Moments') ...[
-              Text(
-                'Theme: ${form['theme'] ?? 'Not set'}',
-                style: const TextStyle(fontSize: 12, color: Colors.black54),
-              ),
-              const SizedBox(height: 8),
-              Text(
-                'Outfit Changes: ${form['outfitChanges'] ?? 'Not set'}',
-                style: const TextStyle(fontSize: 12, color: Colors.black54),
-              ),
-            ],
-            if (packageTitle == 'Wonders')
-              Text(
-                'Location Preference: ${form['locationPreference'] ?? 'Not set'}',
-                style: const TextStyle(fontSize: 12, color: Colors.black54),
-              ),
-            const SizedBox(height: 16),
-            Container(
-              padding: const EdgeInsets.all(12),
-              decoration: BoxDecoration(
-                color: const Color(0xFFF8F9FA),
-                borderRadius: BorderRadius.circular(8),
-                border: Border.all(color: const Color(0xFFE9ECEF)),
-              ),
-              child: Row(
-                children: [
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.center,
+                    Row(
                       children: [
-                        const Text(
-                          'Date of Shoot',
-                          style: TextStyle(
-                            fontSize: 12,
-                            color: Colors.grey,
-                            fontWeight: FontWeight.w500,
+                        const SizedBox(width: 8),
+                        Text(
+                          '₹$price/-',
+                          style: const TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.w700,
+                            color: Color(0xFF2864A6),
                           ),
                         ),
-                        const SizedBox(height: 4),
-                        Text(
-                          form['date']?.toString() ?? 'Not set',
-                          style: const TextStyle(
-                            fontSize: 14,
-                            color: Colors.grey,
-                            fontWeight: FontWeight.w500,
+                        const SizedBox(width: 12),
+                        GestureDetector(
+                          onTap: onToggleDetails,
+                          child: Icon(
+                            showLocationDetails
+                                ? Icons.visibility
+                                : Icons.visibility_off,
+                            color: Colors.black,
+                            size: 20,
+                          ),
+                        ),
+                        const SizedBox(width: 12),
+                        GestureDetector(
+                          onTap: onEdit,
+                          child: const Icon(
+                            Icons.edit,
+                            color: Colors.black,
+                            size: 20,
                           ),
                         ),
                       ],
                     ),
+                  ],
+                ),
+                SizedBox(height: 10),
+              ],
+            ),
+          ),
+
+          if (showLocationDetails) ...[
+            Container(height: 1, color: const Color(0xFFB5B6B7)),
+            const SizedBox(height: 10),
+            Padding(
+              padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Text(
+                    'Shoot Location',
+                    style: TextStyle(
+                      fontSize: 13,
+                      fontWeight: FontWeight.w600,
+                      color: Colors.black87,
+                    ),
                   ),
+                  const SizedBox(height: 8),
+                  Text(
+                    bookingController.selectedPackages[index]['address'] ??
+                        '1st Floor, Hiren Industrial Estate, 104 & 105 - B, Mogul Ln, Mahim West, Maharashtra 400016.',
+                    style: const TextStyle(
+                      fontSize: 12,
+                      color: Colors.black54,
+                      height: 1.4,
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+                  if (packageTitle == 'Cuteness')
+                    Text(
+                      'Baby Info: ${form['babyInfo'] ?? 'Not set'}',
+                      style: const TextStyle(
+                        fontSize: 12,
+                        color: Colors.black54,
+                      ),
+                    ),
+                  if (packageTitle == 'Moments') ...[
+                    Text(
+                      'Theme: ${form['theme'] ?? 'Not set'}',
+                      style: const TextStyle(
+                        fontSize: 12,
+                        color: Colors.black54,
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    Text(
+                      'Outfit Changes: ${form['outfitChanges'] ?? 'Not set'}',
+                      style: const TextStyle(
+                        fontSize: 12,
+                        color: Colors.black54,
+                      ),
+                    ),
+                  ],
+                  if (packageTitle == 'Wonders')
+                    Text(
+                      'Location Preference: ${form['locationPreference'] ?? 'Not set'}',
+                      style: const TextStyle(
+                        fontSize: 12,
+                        color: Colors.black54,
+                      ),
+                    ),
+                  const SizedBox(height: 16),
                   Container(
-                    height: 40,
-                    width: 1,
-                    color: Colors.grey.shade300,
-                    padding: const EdgeInsets.symmetric(horizontal: 14),
-                  ),
-                  SizedBox(width: 1),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.center,
+                    padding: const EdgeInsets.all(12),
+                    decoration: BoxDecoration(
+                      color: const Color(0xFFF8F9FA),
+                      borderRadius: BorderRadius.circular(8),
+                      border: Border.all(color: const Color(0xFFE9ECEF)),
+                    ),
+                    child: Row(
                       children: [
-                        const Text(
-                          'Timing',
-                          style: TextStyle(
-                            fontSize: 12,
-                            color: Colors.grey,
-                            fontWeight: FontWeight.w500,
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.center,
+                            children: [
+                              const Text(
+                                'Date of Shoot',
+                                style: TextStyle(
+                                  fontSize: 12,
+                                  color: Colors.grey,
+                                  fontWeight: FontWeight.w500,
+                                ),
+                              ),
+                              const SizedBox(height: 4),
+
+                              Text(
+                                form['date']?.toString() ?? 'Not set',
+                                style: const TextStyle(
+                                  fontSize: 14,
+                                  color: Colors.grey,
+                                  fontWeight: FontWeight.w500,
+                                ),
+                              ),
+                            ],
                           ),
                         ),
-                        const SizedBox(height: 4),
-                        Text(
-                          '${form['startTime']?.toString() ?? 'Not set'} - ${form['endTime']?.toString() ?? 'Not set'}',
-                          style: const TextStyle(
-                            fontSize: 14,
-                            color: Colors.grey,
-                            fontWeight: FontWeight.w500,
+                        Container(
+                          height: 40,
+                          width: 1,
+                          color: Colors.grey.shade300,
+                          padding: const EdgeInsets.symmetric(horizontal: 14),
+                        ),
+                        SizedBox(width: 5),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.center,
+                            children: [
+                              const Text(
+                                'Timing',
+                                style: TextStyle(
+                                  fontSize: 12,
+                                  color: Colors.grey,
+                                  fontWeight: FontWeight.w500,
+                                ),
+                              ),
+                              const SizedBox(height: 4),
+                              Text(
+                                '${form['startTime']?.toString() ?? 'Not set'} - ${form['endTime']?.toString() ?? 'Not set'}',
+                                style: const TextStyle(
+                                  fontSize: 14,
+                                  color: Colors.grey,
+                                  fontWeight: FontWeight.w500,
+                                ),
+                              ),
+                            ],
                           ),
                         ),
                       ],
@@ -373,63 +396,81 @@ class BookingSummaryPage extends StatelessWidget {
 
   Widget _buildPaymentMethodSection() {
     return Container(
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.all(2),
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(12),
         boxShadow: [],
       ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          const Text(
-            'Payment',
-            style: TextStyle(
-              fontSize: 18,
-              fontWeight: FontWeight.w600,
-              color: Colors.black,
+      child: Container(
+        padding: const EdgeInsets.all(20),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(12),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.grey.withValues(alpha: 0.2),
+              blurRadius: 8,
+              offset: const Offset(0, 2),
             ),
-          ),
-          const SizedBox(height: 16),
-          GestureDetector(
-            onTap: () {
-              Get.snackbar(
-                'Payment Method',
-                'Select your payment method',
-                backgroundColor: Colors.blue,
-                colorText: Colors.white,
-              );
-            },
-            child: Container(
-              padding: const EdgeInsets.all(12),
-              decoration: BoxDecoration(
-                color: const Color(0xFFF8F9FA),
-                borderRadius: BorderRadius.circular(8),
-                border: Border.all(color: const Color(0xFFE9ECEF)),
+          ],
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const Text(
+              'Payment',
+              style: TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.w600,
+                color: Colors.black,
               ),
-              child: Row(
-                children: [
-                  const Icon(
-                    Icons.account_balance_wallet,
-                    size: 24,
-                    color: Colors.black54,
-                  ),
-                  const SizedBox(width: 12),
-                  const Expanded(
-                    child: Text(
-                      'Payment',
-                      style: TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.w500,
-                        color: Colors.black87,
+            ),
+            const SizedBox(height: 16),
+            GestureDetector(
+              onTap: () {
+                Get.snackbar(
+                  'Payment Method',
+                  'Select your payment method',
+                  backgroundColor: Colors.blue,
+                  colorText: Colors.white,
+                );
+              },
+              child: Container(
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color: const Color(0xFFF8F9FA),
+                  borderRadius: BorderRadius.circular(8),
+                  border: Border.all(color: const Color(0xFFE9ECEF)),
+                ),
+                child: Row(
+                  children: [
+                    const Icon(
+                      Icons.account_balance_wallet,
+                      size: 24,
+                      color: Colors.black54,
+                    ),
+                    const SizedBox(width: 12),
+                    const Expanded(
+                      child: Text(
+                        'Payment',
+                        style: TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.w500,
+                          color: Colors.black87,
+                        ),
                       ),
                     ),
-                  ),
-                  const Icon(Icons.chevron_right, color: Colors.grey, size: 24),
-                ],
+                    const Icon(
+                      Icons.chevron_right,
+                      color: Colors.grey,
+                      size: 24,
+                    ),
+                  ],
+                ),
               ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
@@ -440,7 +481,8 @@ class BookingSummaryPage extends StatelessWidget {
       height: 48,
       margin: const EdgeInsets.only(top: 16),
       child: ElevatedButton(
-        onPressed: controller.proceedToPayment,
+        onPressed: () => Get.to(() => ThanksForBookingPage()),
+        // onPressed: controller.proceedToPayment,
         style: ElevatedButton.styleFrom(
           backgroundColor: const Color(0xFF4A90E2),
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
