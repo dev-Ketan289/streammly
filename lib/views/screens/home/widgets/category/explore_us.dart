@@ -62,7 +62,11 @@ class ExploreUs extends StatelessWidget {
                 },
                 child: Container(
                   margin: const EdgeInsets.only(bottom: 20),
-                  decoration: BoxDecoration(borderRadius: BorderRadius.circular(18), color: Colors.white, boxShadow: [BoxShadow(blurRadius: 2, color: Colors.grey)]),
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(18),
+                    color: Colors.white,
+                    boxShadow: [BoxShadow(blurRadius: 10, color: Colors.black12, offset: const Offset(0, 4))],
+                  ),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
