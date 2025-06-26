@@ -16,11 +16,17 @@ class Assets {
   static const String imagesPhotographer = 'assets/images/photographer.png';
   static const String imagesSplash = 'assets/images/splash.gif';
   static const String imagesThumb = 'assets/images/Thumb.gif';
+  static const String navHome = 'assets/images/nav/home.png';
   static const String recommendedBannerFlavor = 'assets/images/recommended_banner/flavor.png';
   static const String recommendedBannerFocusPointVendor = 'assets/images/recommended_banner/FocusPointVendor.png';
   static const String recommendedBannerFocuspoint = 'assets/images/recommended_banner/focuspoint.png';
   static const String recommendedBannerPromoSlider = 'assets/images/recommended_banner/PromoSlider.jpg';
   static const String recommendedBannerVelvet = 'assets/images/recommended_banner/velvet.png';
+  static const String svgBooking = 'assets/svg/booking.svg';
+  static const String svgCart = 'assets/svg/cart.svg';
+  static const String svgHome = 'assets/svg/home.svg';
+  static const String svgMore = 'assets/svg/more.svg';
+  static const String svgShop = 'assets/svg/shop.svg';
   static const String vendorCategoryBaby = 'assets/images/category/vendor_category/Baby.jpg';
   static const String vendorCategoryImg = 'assets/images/category/vendor_category/img.png';
 }

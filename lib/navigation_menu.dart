@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/svg.dart';
 import 'package:get/get.dart';
 import 'package:iconsax/iconsax.dart';
+import 'package:streammly/generated/assets.dart';
 import 'package:streammly/services/theme.dart' as theme;
 import 'package:streammly/views/screens/home/home_screen.dart';
 
@@ -47,11 +49,11 @@ class _NavigationMenuState extends State<NavigationMenu> {
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceAround,
                   children: [
-                    _buildNavItem(icon: Iconsax.home, label: 'Home', index: 0),
-                    _buildNavItem(icon: Iconsax.shop, label: 'Shop', index: 1),
+                    _buildNavItem(icon: Assets.svgHome, label: 'Home', index: 0),
+                    _buildNavItem(icon: Assets.svgShop, label: 'Shop', index: 1),
                     const SizedBox(width: 25), // Space for FAB
-                    _buildNavItem(icon: Iconsax.calendar, label: 'Bookings', index: 3),
-                    _buildNavItem(icon: Iconsax.more, label: 'More', index: 4),
+                    _buildNavItem(icon: Assets.svgBooking, label: 'Bookings', index: 3),
+                    _buildNavItem(icon: Assets.svgMore, label: 'More', index: 4),
                   ],
                 ),
               ),
@@ -62,7 +64,7 @@ class _NavigationMenuState extends State<NavigationMenu> {
     );
   }
 
-  Widget _buildNavItem({required IconData icon, required String label, required int index}) {
+  Widget _buildNavItem({required String icon, required String label, required int index}) {
     final isSelected = controller.selectedIndex.value == index;
 
     return GestureDetector(
@@ -70,7 +72,8 @@ class _NavigationMenuState extends State<NavigationMenu> {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(icon, color: isSelected ? Colors.indigo : Colors.black54),
+          // Icon(icon, color: isSelected ? Colors.indigo : Colors.black54),
+          SvgPicture.asset(icon),
           const SizedBox(height: 4),
           Text(label, style: TextStyle(fontSize: 12, color: isSelected ? Colors.indigo : Colors.black54)),
         ],
