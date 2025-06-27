@@ -74,7 +74,7 @@ class _HomeScreenState extends State<HomeScreen> {
           child: SingleChildScrollView(
             child: Column(
               children: [
-                HeaderBanner(slides: slides, height: 370, backgroundImage: "assets/images/banner.png", overlayColor: Colors.white.withValues(alpha: 0.3)),
+                HeaderBanner(slides: slides, height: 370, backgroundImage: "assets/images/banner.png", overlayColor: Colors.white.withValues(alpha: 0.3), ),
                 const SizedBox(height: 24),
                 UpcomingOfferCard(),
                 const SizedBox(height: 24),
