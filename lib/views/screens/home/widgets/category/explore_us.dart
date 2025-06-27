@@ -14,6 +14,11 @@ class ExploreUs extends StatelessWidget {
   Widget build(BuildContext context) {
     final CompanyController companyController = Get.put(CompanyController());
 
+    // ✅ Fix: Call fetch only if not already loaded
+    if (companyController.companies.isEmpty) {
+      companyController.fetchCompaniesByCategory(companyController.selectedCategoryId.value);
+    }
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -106,7 +111,7 @@ class ExploreUs extends StatelessWidget {
                                     children: [
                                       const Icon(Icons.access_time, size: 14, color: Colors.grey),
                                       const SizedBox(width: 4),
-                                      const Text("31–36 mins", style: TextStyle(fontSize: 12, color: Colors.grey)),
+                                      Text(vendor.estimatedTime ?? "31–36 mins", style: const TextStyle(fontSize: 12, color: Colors.grey)),
                                       const SizedBox(width: 10),
                                       const Icon(Icons.location_on, size: 14, color: Colors.grey),
                                       const SizedBox(width: 4),

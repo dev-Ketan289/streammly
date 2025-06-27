@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:streammly/views/screens/home/vendor_locator.dart';
 
 import '../../../controllers/category_controller.dart';
 import '../../../controllers/home_screen_controller.dart';
@@ -38,7 +39,6 @@ class _HomeScreenState extends State<HomeScreen> {
 
   List<CategoryItem> convertToCategoryItems(List<CategoryModel> models) {
     const String baseUrl = 'http://192.168.1.10:8000';
-
     return models.map((model) {
       String? fullImageUrl;
       if (model.image != null && model.image!.isNotEmpty) {
@@ -50,7 +50,8 @@ class _HomeScreenState extends State<HomeScreen> {
         label: model.title,
         imagePath: fullImageUrl,
         onTap: () {
-          print("Tapped on ${model.title}");
+          //Navigate Directly to vendor Locator
+          Get.to(() => CompanyLocatorMapScreen(categoryId: model.id));
         },
       );
     }).toList();
