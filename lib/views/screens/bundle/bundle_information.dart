@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:streammly/views/screens/bundle/categories_page.dart';
+import 'package:streammly/views/screens/bundle/bundle_categories_page.dart';
 
 import '../package/booking/widgets/time_picker.dart'; // Adjust if needed
 

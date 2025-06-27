@@ -130,8 +130,16 @@ class Categories extends StatelessWidget {
               ),
               const SizedBox(height: 10),
               SingleChildScrollView(
-                scrollDirection: Axis.horizontal,
-                child: Row(children: [VendorRect()]),
+                scrollDirection: Axis.vertical,
+                child: Column(
+                  children: [
+                    VendorRect(),
+                    SizedBox(height: 10),
+                    VendorRect(),
+                    SizedBox(height: 10),
+                    VendorRect(),
+                  ],
+                ),
               ),
 
               /// EVENT TYPE
@@ -264,7 +272,7 @@ class VendorRect extends StatelessWidget {
       height: 178,
       width: 350,
       decoration: BoxDecoration(
-        border: Border.all(color: Colors.blue, width: 2),
+        border: Border.all(color: Colors.grey[200] ?? Colors.grey, width: 2),
         borderRadius: BorderRadius.circular(16),
         color: Colors.white,
       ),
@@ -276,40 +284,84 @@ class VendorRect extends StatelessWidget {
             borderRadius: BorderRadius.circular(12),
             child: Image.asset(
               'assets/images/vendor_demo.png', // Replace with your image asset
-              width: 180,
-              height: 180,
+              width: 150, // Reduced width to give more space for text
+              height: 160,
               fit: BoxFit.cover,
             ),
           ),
-          const SizedBox(width: 16),
-          Column(
-            children: [
-              
-              DecoratedBox(
-                decoration: BoxDecoration(
-                  color: Colors.blue,
-                  borderRadius: BorderRadius.all(Radius.circular(6)),
+          const SizedBox(width: 8),
+          // Text Section
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  children: [
+                    DecoratedBox(
+                      decoration: const BoxDecoration(
+                        color: Colors.blue,
+                        borderRadius: BorderRadius.all(Radius.circular(6)),
+                      ),
+                      child: const Padding(
+                        padding: EdgeInsets.symmetric(
+                          horizontal: 6,
+                          vertical: 2,
+                        ),
+                        child: Text(
+                          '3.9 ★',
+                          style: TextStyle(color: Colors.white, fontSize: 12),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 7),
+                    const Text(
+                      '35-40 mins.4.2 km',
+                      style: TextStyle(
+                        fontSize: 12,
+                        color: Colors.grey,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ),
+                    const SizedBox(width: 2),
+                    Icon(Icons.bookmark, size: 15, color: Colors.grey),
+                  ],
                 ),
-                child: Padding(
-                  padding: EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-                  child: Text(
-                    '3.9 ★',
-                    style: TextStyle(color: Colors.white, fontSize: 12),
+
+                const Text(
+                  "FocusPoint Studios",
+                  style: TextStyle(
+                    fontSize: 13,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.black,
                   ),
                 ),
-              ),
-              Text(
-                "FocusPoint Studios",
-                style: TextStyle(
-                  fontSize: 13,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.black,
+                Text(
+                  "Photography",
+                  style: TextStyle(
+                    fontSize: 10,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.grey[400],
+                  ),
                 ),
-              ),
-            ],
+                Expanded(
+                  child: SingleChildScrollView(
+                    child: Text(
+                      '''FocusPoint Studios is a premium photography and videography studio, offering state-of-the-art facilities for creative professionals and clients.
+Our Services Include:
+ ✅ Studio Rental (Photography / Videography)
+ ✅ Professional Photography Services
+ ✅ Cinematic Videography
+Why Choose Us:
+ ✨ High-end studio environment
+ ✨ Latest photography and video equipment
+ ✨ Experienced creative team''',
+                      style: const TextStyle(fontSize: 6, color: Colors.grey),
+                    ),
+                  ),
+                ),
+              ],
+            ),
           ),
-
-          // Add more widgets here if needed, for example, vendor details
         ],
       ),
     );
