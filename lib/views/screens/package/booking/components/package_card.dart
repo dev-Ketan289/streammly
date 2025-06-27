@@ -250,11 +250,4 @@ class PackageCard extends StatelessWidget {
       );
     });
   }
-
-  String _getSubtitle(Map<String, dynamic> form) {
-    final date = form['date']?.toString() ?? 'Not set';
-    final startTime = form['startTime']?.toString() ?? 'Not set';
-    final endTime = form['endTime']?.toString() ?? 'Not set';
-    return '$date, $startTime to $endTime';
-  }
 }
