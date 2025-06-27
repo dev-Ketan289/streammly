@@ -38,7 +38,7 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   List<CategoryItem> convertToCategoryItems(List<CategoryModel> models) {
-    const String baseUrl = 'http://192.168.1.10:8000';
+    const String baseUrl = 'http://192.168.1.113:8000';
     return models.map((model) {
       String? fullImageUrl;
       if (model.image != null && model.image!.isNotEmpty) {
@@ -88,7 +88,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 const SizedBox(height: 24),
                 RecommendedList(context: context),
                 const SizedBox(height: 24),
-                ExploreUs(vendorId: 17),
+                ExploreUs(vendorId: 1),
                 const SizedBox(height: 26),
                 PromoSlider(),
                 const SizedBox(height: 24),

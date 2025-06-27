@@ -9,6 +9,6 @@ class SubVertical {
     final rawPath = json['image'] ?? '';
     final cleanedPath = rawPath.toString().replaceFirst(RegExp(r'^/+'), ''); // remove leading slashes
 
-    return SubVertical(id: json['id'], title: json['title'] ?? 'Untitled', image: cleanedPath.isNotEmpty ? 'http://192.168.1.10:8000/$cleanedPath' : null);
+    return SubVertical(id: json['id'], title: json['title'] ?? 'Untitled', image: cleanedPath.isNotEmpty ? 'http://192.168.1.113:8000/$cleanedPath' : null);
   }
 }

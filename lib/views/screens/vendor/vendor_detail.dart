@@ -45,7 +45,7 @@ class _VendorDetailScreenState extends State<VendorDetailScreen> {
                 height: 280,
                 backgroundImage:
                     widget.company.bannerImage != null && widget.company.bannerImage!.isNotEmpty
-                        ? 'http://192.168.1.10:8000/${widget.company.bannerImage}'
+                        ? 'http://192.168.1.113:8000/${widget.company.bannerImage}'
                         : 'assets/images/recommended_banner/FocusPointVendor.png',
                 overlayColor: Colors.indigo.withValues(alpha: 0.6),
                 overrideTitle: widget.company.companyName,
@@ -79,7 +79,7 @@ class _VendorDetailScreenState extends State<VendorDetailScreen> {
                       subs.map((sub) {
                         return CategoryItem(
                           label: sub.title,
-                          imagePath: 'http://192.168.1.10:8000/${sub.image ?? ""}',
+                          imagePath: 'http://192.168.1.113:8000/${sub.image ?? ""}',
                           onTap: () => Get.to(() => VendorGroup(company: widget.company, subCategoryId: sub.id)),
                         );
                       }).toList(),

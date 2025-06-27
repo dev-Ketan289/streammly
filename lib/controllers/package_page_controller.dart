@@ -1,60 +1,77 @@
+import 'dart:convert';
+
 import 'package:get/get.dart';
+import 'package:http/http.dart' as http;
 
 class PackagesController extends GetxController {
   var isGridView = false.obs;
   var expandedStates = <int, bool>{}.obs;
   var selectedHours = <int, Set<String>>{}.obs;
 
-  // For billing purposes - multiple packages can be selected
   var selectedPackagesForBilling = <Map<String, dynamic>>[].obs;
-  var selectedPackageIndices = <int>{}.obs; // Track selected package indices
+  var selectedPackageIndices = <int>{}.obs;
 
-  final List<Map<String, dynamic>> packages = [
-    {
-      "title": "Cuteness",
-      "type": "HomeShoot",
-      "price": 5999,
-      "oldPrice": 8999,
-      "hours": ["1hr", "2hrs", "3hrs"],
-      "highlight": "Today 50% discount on all products in Chapter with online orders",
-      "shortDescription": "Excuse me... Who could ever resist a discount feast? 👀",
-      "fullDescription":
-          "Excuse me... Who could ever resist a discount feast? 👀\n\nHear me out. Today, October 21, 2021, Chapter has a 50% discount for any product. What are you waiting for, let's order now before it runs out.",
-      "specialOffer": true,
-    },
-    {
-      "title": "Moments",
-      "type": "StudioShoot",
-      "price": 15999,
-      "oldPrice": 19999,
-      "hours": ["1hr", "2hrs", "3hrs"],
-      "highlight": "",
-      "shortDescription": "",
-      "fullDescription": "",
-      "specialOffer": true,
-    },
-    {
-      "title": "Wonders",
-      "type": "HomeShoot",
-      "price": 13999,
-      "oldPrice": null,
-      "hours": ["1hr", "2hrs", "3hrs"],
-      "highlight": "",
-      "shortDescription": "",
-      "fullDescription": "",
-      "specialOffer": false,
-    },
-  ];
+  RxList<Map<String, dynamic>> packages = <Map<String, dynamic>>[].obs;
+  RxBool isLoading = false.obs;
+
+  // Backend filters (you must set these before calling fetchPackages)
+  late int companyId;
+  late int subCategoryId;
+  late int subVerticalId;
 
   @override
   void onInit() {
     super.onInit();
-    // Initialize selected hours for each package
-    for (int i = 0; i < packages.length; i++) {
-      selectedHours[i] = {"2hrs"}; // Default to 2hrs as shown in image
-      expandedStates[i] = false;
-    }
+    fetchPackages();
   }
+
+  Future<void> fetchPackages() async {
+    isLoading.value = true;
+    try {
+      final response = await http.post(
+        Uri.parse("http://192.168.1.113:8000/api/v1/package/getpackages"),
+        headers: {"Content-Type": "application/json"},
+        body: jsonEncode({"company_id": companyId, "sub_category_id": subCategoryId, "sub_vertical_id": subVerticalId}),
+      );
+
+      if (response.statusCode == 200) {
+        final jsonBody = json.decode(response.body);
+        final List data = jsonBody["data"] ?? [];
+
+        packages.assignAll(
+          data.map<Map<String, dynamic>>((pkg) {
+            return {
+              "title": pkg["title"] ?? "",
+              "type": (pkg["type"] ?? "").toString().toLowerCase() == "studio" ? "StudioShoot" : "HomeShoot",
+              "price": int.tryParse(pkg["packagevariations"]?.first["amount"].toString() ?? "0") ?? 0,
+              "oldPrice": null, // You can populate this if backend gives
+              "hours":
+                  pkg["packagevariations"]?.map<String>((v) => "${v["duration"]}${v["duration_type"].toString().toLowerCase().startsWith("hour") ? "hr" : ""}").toList() ??
+                  ["1hr", "2hrs", "3hrs"],
+              "highlight": pkg["long_description"] ?? "",
+              "shortDescription": pkg["short_description"] ?? "",
+              "fullDescription": pkg["long_description"] ?? "",
+              "specialOffer": (pkg["status"] ?? "").toString().toLowerCase() == "active",
+              "packageIndex": data.indexOf(pkg),
+            };
+          }).toList(),
+        );
+
+        // Initialize default hours and expandedStates
+        for (int i = 0; i < packages.length; i++) {
+          selectedHours[i] = {"2hrs"};
+          expandedStates[i] = false;
+        }
+      } else {
+        Get.snackbar("Error", "Failed to fetch packages");
+      }
+    } catch (e) {
+      Get.snackbar("Exception", e.toString());
+    }
+    isLoading.value = false;
+  }
+
+  // ... rest of your logic below remains 100% unchanged ...
 
   void toggleView() {
     isGridView.value = !isGridView.value;
@@ -66,11 +83,9 @@ class PackagesController extends GetxController {
 
   void togglePackageSelection(int index) {
     if (selectedPackageIndices.contains(index)) {
-      // Remove from selection
       selectedPackageIndices.remove(index);
       selectedPackagesForBilling.removeWhere((pkg) => pkg['packageIndex'] == index);
     } else {
-      // Add to selection
       selectedPackageIndices.add(index);
       _addPackageForBilling(index);
     }
@@ -80,12 +95,7 @@ class PackagesController extends GetxController {
     final pkg = packages[index];
     final selectedHoursForPackage = selectedHours[index] ?? {"2hrs"};
 
-    final billingPackage = {
-      ...pkg,
-      'selectedHours': selectedHoursForPackage.toList(),
-      'packageIndex': index,
-      'finalPrice': pkg["price"], // You can add hour-based pricing logic here
-    };
+    final billingPackage = {...pkg, 'selectedHours': selectedHoursForPackage.toList(), 'packageIndex': index, 'finalPrice': pkg["price"]};
 
     selectedPackagesForBilling.add(billingPackage);
   }
@@ -99,30 +109,24 @@ class PackagesController extends GetxController {
     }
     selectedHours.refresh();
 
-    // Update billing package if this package is selected
     if (selectedPackageIndices.contains(packageIndex)) {
-      // Remove old entry and add updated one
       selectedPackagesForBilling.removeWhere((pkg) => pkg['packageIndex'] == packageIndex);
       _addPackageForBilling(packageIndex);
     }
   }
 
-  // Get all selected packages for billing
   List<Map<String, dynamic>> getSelectedPackagesForBilling() {
     return selectedPackagesForBilling.toList();
   }
 
-  // Check if package is selected for billing
   bool isPackageSelected(int index) {
     return selectedPackageIndices.contains(index);
   }
 
-  // Get total price of all selected packages
   int getTotalPrice() {
     return selectedPackagesForBilling.fold(0, (sum, pkg) => sum + (pkg['finalPrice'] as int));
   }
 
-  // Get count of selected packages
   int getSelectedPackageCount() {
     return selectedPackagesForBilling.length;
   }
@@ -132,18 +136,15 @@ class PackagesController extends GetxController {
     expandedStates.refresh();
   }
 
-  // New method to switch to list view
   void switchToListView() {
     isGridView.value = false;
   }
 
-  // Clear all selections
   void clearAllSelections() {
     selectedPackageIndices.clear();
     selectedPackagesForBilling.clear();
   }
 
-  // Select all packages
   void selectAllPackages() {
     clearAllSelections();
     for (int i = 0; i < packages.length; i++) {
@@ -152,13 +153,11 @@ class PackagesController extends GetxController {
     }
   }
 
-  // Remove specific package from selection
   void removePackageFromSelection(int index) {
     selectedPackageIndices.remove(index);
     selectedPackagesForBilling.removeWhere((pkg) => pkg['packageIndex'] == index);
   }
 
-  // Get package by index
   Map<String, dynamic>? getPackageByIndex(int index) {
     if (index >= 0 && index < packages.length) {
       return packages[index];
@@ -166,30 +165,25 @@ class PackagesController extends GetxController {
     return null;
   }
 
-  // Check if any package is selected
   bool hasSelectedPackages() {
     return selectedPackagesForBilling.isNotEmpty;
   }
 
-  // Get selected hours for a specific package
   Set<String> getSelectedHoursForPackage(int index) {
     return selectedHours[index] ?? {"2hrs"};
   }
 
-  // Update pricing based on hours (you can customize this logic)
   int calculatePriceForPackage(int packageIndex, Set<String> hours) {
     final basePrice = packages[packageIndex]["price"] as int;
-    // Example: add 1000 for each additional hour beyond 2hrs
     int additionalCost = 0;
     if (hours.contains("1hr") && hours.contains("3hrs")) {
-      additionalCost = 2000; // Both 1hr and 3hrs selected
+      additionalCost = 2000;
     } else if (hours.contains("1hr") || hours.contains("3hrs")) {
-      additionalCost = 1000; // Either 1hr or 3hrs selected
+      additionalCost = 1000;
     }
     return basePrice + additionalCost;
   }
 
-  // Update package pricing when hours change
   void updatePackagePricing(int packageIndex) {
     if (selectedPackageIndices.contains(packageIndex)) {
       selectedPackagesForBilling.removeWhere((pkg) => pkg['packageIndex'] == packageIndex);

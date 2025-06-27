@@ -45,7 +45,7 @@ class CompanyController extends GetxController {
     try {
       userPosition = await _getCurrentLocation();
 
-      final response = await http.get(Uri.parse('http://192.168.1.10:8000/api/v1/basic/getcompanyslocations/$categoryId'));
+      final response = await http.get(Uri.parse('http://192.168.1.113:8000/api/v1/company/getcompanyslocations/$categoryId'));
 
       if (response.statusCode == 200) {
         final data = json.decode(response.body)['data'] as List;
@@ -75,7 +75,7 @@ class CompanyController extends GetxController {
   // Fetch company details
   Future<void> fetchCompanyById(int companyId) async {
     try {
-      final response = await http.get(Uri.parse("http://192.168.1.10:8000/api/v1/basic/getcompanysprofile/$companyId"));
+      final response = await http.get(Uri.parse("http://192.168.1.113:8000/api/v1/company/getcompanysprofile/$companyId"));
 
       if (response.statusCode == 200) {
         final jsonData = json.decode(response.body);
@@ -92,7 +92,7 @@ class CompanyController extends GetxController {
   // Fetch subcategories for a company
   Future<void> fetchCompanySubCategories(int companyId) async {
     try {
-      final response = await http.get(Uri.parse("http://192.168.1.10:8000/api/v1/basic/getcompanysubcategories/$companyId"));
+      final response = await http.get(Uri.parse("http://192.168.1.113:8000/api/v1/company/getcompanysubcategories/$companyId"));
 
       if (response.statusCode == 200) {
         final List<dynamic> data = json.decode(response.body)['data'];
@@ -109,7 +109,7 @@ class CompanyController extends GetxController {
   Future<void> fetchSubVerticals(int companyId, int subCategoryId) async {
     try {
       final response = await http.post(
-        Uri.parse("http://192.168.1.10:8000/api/v1/basic/getsubvertical"),
+        Uri.parse("http://192.168.1.113:8000/api/v1/company/getsubvertical"),
         headers: {'Content-Type': 'application/json'},
         body: json.encode({"company_id": companyId, "sub_category_id": subCategoryId}),
       );

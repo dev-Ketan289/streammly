@@ -133,7 +133,7 @@ class _CompanyLocatorMapScreenState extends State<CompanyLocatorMapScreen> {
                 initialCameraPosition: const CameraPosition(target: LatLng(19.2189, 72.9805), zoom: 12),
                 markers: _customMarkers,
                 myLocationEnabled: true,
-                myLocationButtonEnabled: true,
+                myLocationButtonEnabled: false,
                 onTap: (_) => controller.selectedCompany.value = null,
               ),
               Obx(() {
@@ -189,7 +189,7 @@ class _CompanyLocatorMapScreenState extends State<CompanyLocatorMapScreen> {
                   Get.to(() => VendorDescription());
                 },
                 child: VendorInfoCard(
-                  logoImage: "http://192.168.1.10:8000/${company.logo ?? ''}",
+                  logoImage: "http://192.168.1.113:8000/${company.logo ?? ''}",
                   companyName: company.companyName,
                   category: company.categoryName ?? '',
                   description: company.description ?? '',

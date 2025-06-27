@@ -94,7 +94,7 @@ class _BundleInformationState extends State<BundleInformation> {
               /// EVENT TYPE
               GestureDetector(
                 onTap: () => setState(() => isEventDropdownOpen = !isEventDropdownOpen),
-                child: _styledDropdownContainer(
+                child: styledDropdownContainer(
                   child: Row(
                     children: [
                       Expanded(child: Text(selectedEventType ?? "Event Type *", style: TextStyle(color: selectedEventType == null ? Colors.grey : Colors.black, fontSize: 16))),
@@ -104,7 +104,7 @@ class _BundleInformationState extends State<BundleInformation> {
                 ),
               ),
               if (isEventDropdownOpen)
-                _dropdownBox(
+                dropdownBox(
                   children:
                       ['Birthday', 'Wedding', 'Engagement']
                           .map(
@@ -149,7 +149,7 @@ class _BundleInformationState extends State<BundleInformation> {
               /// CATEGORY
               GestureDetector(
                 onTap: () => setState(() => isCategoryDropdownOpen = !isCategoryDropdownOpen),
-                child: _styledDropdownContainer(
+                child: styledDropdownContainer(
                   child: Row(
                     children: [
                       Expanded(
@@ -164,7 +164,7 @@ class _BundleInformationState extends State<BundleInformation> {
                 ),
               ),
               if (isCategoryDropdownOpen)
-                _dropdownBox(
+                dropdownBox(
                   children: [
                     CheckboxListTile(
                       title: const Text("All"),
@@ -240,7 +240,7 @@ class _BundleInformationState extends State<BundleInformation> {
     );
   }
 
-  Widget _dropdownBox({required List<Widget> children}) {
+  Widget dropdownBox({required List<Widget> children}) {
     return Container(
       width: double.infinity,
       margin: const EdgeInsets.only(top: 6),
@@ -255,7 +255,7 @@ class _BundleInformationState extends State<BundleInformation> {
     );
   }
 
-  Widget _styledDropdownContainer({required Widget child}) {
+  Widget styledDropdownContainer({required Widget child}) {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 16),
       decoration: BoxDecoration(border: Border.all(color: Colors.grey.shade400), borderRadius: BorderRadius.circular(10)),

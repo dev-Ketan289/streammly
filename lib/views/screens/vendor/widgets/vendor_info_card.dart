@@ -24,11 +24,7 @@ class VendorInfoCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       margin: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(20),
-        boxShadow: const [BoxShadow(color: Colors.black12, blurRadius: 6)],
-      ),
+      decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(20), boxShadow: const [BoxShadow(color: Colors.black12, blurRadius: 6)]),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -40,11 +36,7 @@ class VendorInfoCard extends StatelessWidget {
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(16),
               color: Colors.grey[200],
-              image: DecorationImage(
-                image: NetworkImage(logoImage),
-                fit: BoxFit.cover,
-                onError: (error, stackTrace) {},
-              ),
+              image: DecorationImage(image: NetworkImage(logoImage), fit: BoxFit.fill, onError: (error, stackTrace) {}),
             ),
           ),
 
@@ -61,63 +53,26 @@ class VendorInfoCard extends StatelessWidget {
                     children: [
                       if (rating != null)
                         Container(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 8,
-                            vertical: 4,
-                          ),
-                          decoration: BoxDecoration(
-                            color: Colors.blue.shade700,
-                            borderRadius: BorderRadius.circular(12),
-                          ),
+                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                          decoration: BoxDecoration(color: Colors.blue.shade700, borderRadius: BorderRadius.circular(12)),
                           child: Row(
                             children: [
-                              const Icon(
-                                Icons.star,
-                                color: Colors.white,
-                                size: 16,
-                              ),
+                              const Icon(Icons.star, color: Colors.white, size: 16),
                               const SizedBox(width: 4),
-                              Text(
-                                rating!,
-                                style: const TextStyle(
-                                  color: Colors.white,
-                                  fontWeight: FontWeight.bold,
-                                ),
-                              ),
+                              Text(rating!, style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
                             ],
                           ),
                         ),
-                      if (estimatedTime != null && distanceKm != null)
-                        Text(
-                          "$estimatedTime • $distanceKm",
-                          style: const TextStyle(
-                            fontSize: 13,
-                            color: Colors.black,
-                          ),
-                        ),
+                      if (estimatedTime != null && distanceKm != null) Text("$estimatedTime • $distanceKm", style: const TextStyle(fontSize: 13, color: Colors.black)),
                     ],
                   ),
                   const SizedBox(height: 8),
 
-                  Text(
-                    companyName,
-                    style: const TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                  Text(
-                    category,
-                    style: const TextStyle(fontSize: 14, color: Colors.grey),
-                  ),
+                  Text(companyName, style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+                  Text(category, style: const TextStyle(fontSize: 14, color: Colors.grey)),
                   const SizedBox(height: 8),
 
-                  Text(
-                    _stripHtml(description),
-                    style: const TextStyle(fontSize: 13, color: Colors.grey),
-                    maxLines: 6,
-                    overflow: TextOverflow.ellipsis,
-                  ),
+                  Text(_stripHtml(description), style: const TextStyle(fontSize: 13, color: Colors.grey), maxLines: 4, overflow: TextOverflow.ellipsis),
                 ],
               ),
             ),

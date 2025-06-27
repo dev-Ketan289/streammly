@@ -26,7 +26,7 @@ class AppConstants {
   set setBaseUrl(String url) => baseUrl = url;
 
   //TODO: Change Base Url
-  static String baseUrl = 'http://192.168.1.10:8000/';
+  static String baseUrl = 'http://192.168.1.113:8000/';
   // static String baseUrl = 'http://192.168.1.113:8000/'; ///USE FOR Second Local in case first not working
   //TODO: Change Base Url
   static String appName = 'App Name';

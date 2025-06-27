@@ -82,7 +82,7 @@ class ExploreUs extends StatelessWidget {
                             borderRadius: const BorderRadius.vertical(top: Radius.circular(18)),
                             child:
                                 vendor.bannerImage != null && vendor.bannerImage!.isNotEmpty
-                                    ? Image.network('http://192.168.1.10:8000/${vendor.bannerImage}', height: 150, width: double.infinity, fit: BoxFit.cover)
+                                    ? Image.network('http://192.168.1.113:8000/${vendor.bannerImage}', height: 150, width: double.infinity, fit: BoxFit.cover)
                                     : Image.asset('assets/images/recommended_banner/FocusPointVendor.png', height: 150, width: double.infinity, fit: BoxFit.cover),
                           ),
                           Positioned(
