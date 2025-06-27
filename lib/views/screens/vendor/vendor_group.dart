@@ -126,7 +126,7 @@ class _VendorGroupState extends State<VendorGroup> {
                 label: "Get Quote",
                 onTap: () {
                   Navigator.pop(context);
-                  Get.to(() => const GetQuotePage());
+                  Get.to(() => GetQuoteScreen());
                 },
               ),
               const SizedBox(height: 12),

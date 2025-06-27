@@ -1,84 +1,342 @@
 import 'package:flutter/material.dart';
-import 'package:get/get.dart';
-import 'package:streammly/controllers/get_quote_controller.dart';
-import 'package:streammly/views/screens/package/booking/booking_summary.dart';
-import 'package:streammly/views/screens/package/booking/widgets/booking_personal_info.dart';
-import 'package:streammly/views/screens/package/booking/widgets/get_quote_personal_info.dart';
 
-class GetQuotePage extends StatelessWidget {
-  const GetQuotePage({super.key});
+import '../package/booking/widgets/time_picker.dart'; // Adjust if needed
+
+class GetQuoteScreen extends StatefulWidget {
+  const GetQuoteScreen({super.key});
+
+  @override
+  State<GetQuoteScreen> createState() => _GetQuoteScreenState();
+}
+
+class _GetQuoteScreenState extends State<GetQuoteScreen> {
+  final TextEditingController eventNameController = TextEditingController();
+  final TextEditingController requirementsController = TextEditingController();
+  final TextEditingController dateController =
+      TextEditingController(); // Controller for date
+
+  String? selectedEventType;
+  bool isEventDropdownOpen = false;
+
+  DateTime selectedDate = DateTime.now();
+  String? startTime = "08:00 AM";
+  String? endTime = "00:00 PM";
+  String? favStartTime = "08:00 AM";
+  String? favEndTime = "00:00 PM";
+  bool showTimePicker = false;
+  bool showFavTimePicker = false;
+  bool isStartTime = true;
+  bool isFavTime = false;
+
+  List<String> allCategories = [
+    'Photographer',
+    'Makeup Artist',
+    'Event Organiser',
+  ];
+  List<String> selectedCategories = [];
+  bool isCategoryDropdownOpen = false;
+
+  double radius = 0.0;
+
+  @override
+  void initState() {
+    super.initState();
+    // Initialize date controller with formatted date
+    dateController.text = _formatDate(selectedDate);
+  }
+
+  void _pickDate() async {
+    final picked = await showDatePicker(
+      context: context,
+      initialDate: selectedDate,
+      firstDate: DateTime.now(),
+      lastDate: DateTime(2100),
+    );
+    if (picked != null) {
+      setState(() {
+        selectedDate = picked;
+        dateController.text = _formatDate(picked); // Update text field
+      });
+    }
+  }
+
+  void _showTimePicker(bool isStart) {
+    setState(() {
+      isStartTime = isStart;
+      showTimePicker = true;
+    });
+  }
+
+  void _showFavTimePicker(bool isStart) {
+    setState(() {
+      isFavTime = isStart;
+      showFavTimePicker = true;
+    });
+  }
+
+  void _onTimeSelected(String value) {
+    setState(() {
+      if (isStartTime) {
+        startTime = value;
+      } else {
+        endTime = value;
+      }
+      showTimePicker = false;
+    });
+  }
+
+  void _onFavTimeSelected(String value) {
+    setState(() {
+      if (isFavTime) {
+        favStartTime = value;
+      } else {
+        favEndTime = value;
+      }
+      showFavTimePicker = false;
+    });
+  }
+
+  // Format date for display
+  String _formatDate(DateTime date) {
+    return '${date.day} ${_monthName(date.month)} ${date.year}';
+  }
 
   @override
   Widget build(BuildContext context) {
-    final controller = Get.put(() => GetQuoteController());
-
     return Scaffold(
+      backgroundColor: const Color(0xFFF1F4FF), // light background
       appBar: AppBar(
-        backgroundColor: Colors.transparent,
         title: const Text(
-          "Get Quote",
+          'Get Quote',
           style: TextStyle(
-            color: Colors.black,
-            fontSize: 18,
-            fontWeight: FontWeight.w600,
+            color: Color(0xFF2E5CDA),
+            fontWeight: FontWeight.bold,
           ),
         ),
-        iconTheme: const IconThemeData(color: Colors.black),
-        elevation: 0,
         centerTitle: true,
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+        foregroundColor: Colors.black,
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back_ios),
+          onPressed: () => Navigator.pop(context),
+        ),
       ),
-
-      backgroundColor: Colors.grey[200],
-      body: Column(
-        children: [
-          Expanded(
-            child: SingleChildScrollView(
-              padding: const EdgeInsets.all(20),
-              child: const Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [GetQuotePersonalInfo(), SizedBox(height: 32)],
+      body: SingleChildScrollView(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const Text(
+              "Baby Shoot / Baby Name",
+              style: TextStyle(
+                fontSize: 20,
+                fontWeight: FontWeight.bold,
+                color: Color(0xFF2864A6),
               ),
             ),
-          ),
-          Container(
-            padding: const EdgeInsets.all(20),
-            decoration: BoxDecoration(
-              color: Colors.white,
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.grey.shade200,
-                  blurRadius: 10,
-                  spreadRadius: 1,
-                  offset: Offset(0, -2),
+            const SizedBox(height: 5),
+            TextField(
+              controller: eventNameController,
+              decoration: InputDecoration(
+                fillColor: Colors.white,
+                filled: true,
+                labelText: 'Name *',
+                hintText: 'Enter name',
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(10),
+                ),
+              ),
+            ),
+            const SizedBox(height: 16),
+            TextField(
+              controller: eventNameController,
+              decoration: InputDecoration(
+                fillColor: Colors.white,
+                filled: true,
+                labelText: 'Mobile No. *',
+                hintText: 'Enter mobile number',
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(10),
+                ),
+              ),
+            ),
+            const SizedBox(height: 16),
+            TextField(
+              controller: eventNameController,
+              decoration: InputDecoration(
+                fillColor: Colors.white,
+                filled: true,
+                labelText: 'Email *',
+                hintText: 'Enter email',
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(10),
+                ),
+              ),
+            ),
+            const SizedBox(height: 16),
+            // Date of Shoot Field
+            _buildTextField(
+              'Date of Shoot *',
+              dateController,
+              readOnly: true,
+              onTap: _pickDate,
+              suffixIcon: Icons.calendar_today,
+            ),
+            const SizedBox(height: 16),
+            Row(
+              children: [
+                Expanded(
+                  child: _buildTextField(
+                    'Start Time *',
+                    TextEditingController(text: startTime),
+                    readOnly: true,
+                    onTap: () => _showTimePicker(true),
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: _buildTextField(
+                    'End Time *',
+                    TextEditingController(text: endTime),
+                    readOnly: true,
+                    onTap: () => _showTimePicker(false),
+                  ),
                 ),
               ],
             ),
-            child: SizedBox(
+            if (showTimePicker)
+              CustomTimePicker(
+                isStart: isStartTime,
+                onCancel: () => setState(() => showTimePicker = false),
+                onTimeSelected: _onTimeSelected,
+              ),
+            const SizedBox(height: 16),
+            TextField(
+              controller: requirementsController,
+              decoration: InputDecoration(
+                fillColor: Colors.white,
+                filled: true,
+                labelText: 'Describe your Requirements *',
+                hintText: 'Enter requirements',
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(10),
+                ),
+              ),
+            ),
+            const SizedBox(height: 16),
+            Row(
+              children: [
+                Expanded(
+                  child: _buildTextField(
+                    'Fav Time *',
+                    TextEditingController(text: favStartTime),
+                    readOnly: true,
+                    onTap: () => _showFavTimePicker(true),
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: _buildTextField(
+                    'Fav Time *',
+                    TextEditingController(text: favEndTime),
+                    readOnly: true,
+                    onTap: () => _showFavTimePicker(false),
+                  ),
+                ),
+              ],
+            ),
+            if (showFavTimePicker)
+              CustomTimePicker(
+                isStart: isFavTime,
+                onCancel: () => setState(() => showFavTimePicker = false),
+                onTimeSelected: _onFavTimeSelected,
+              ),
+            const SizedBox(height: 16),
+            Text.rich(
+              TextSpan(
+                children: [
+                  TextSpan(
+                    text: 'Note: ',
+                    style: TextStyle(fontSize: 13, color: Colors.red),
+                  ),
+                  TextSpan(
+                    text:
+                        'Vendor team will contact you within the favorable Date & Favorable time only',
+                    style: TextStyle(fontSize: 13, color: Colors.grey),
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(height: 16),
+            SizedBox(
               width: double.infinity,
+              height: 48,
               child: ElevatedButton(
-                onPressed: () {
-                  // Get.to(() => BookingSummaryPage());
-                },
+                onPressed: () {},
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xFF4A6CF7),
-                  padding: const EdgeInsets.symmetric(vertical: 16),
+                  backgroundColor: const Color(0xFF2E5CDA),
                   shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12),
+                    borderRadius: BorderRadius.circular(8),
                   ),
                 ),
                 child: const Text(
-                  "Let's Continue",
+                  "Continue",
                   style: TextStyle(
                     fontSize: 16,
-                    fontWeight: FontWeight.w600,
+                    fontWeight: FontWeight.bold,
                     color: Colors.white,
                   ),
                 ),
               ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
+  }
+
+  Widget _buildTextField(
+    String label,
+    TextEditingController controller, {
+    bool readOnly = false,
+    VoidCallback? onTap,
+    IconData? suffixIcon,
+    String? hint,
+  }) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 8),
+      child: TextField(
+        controller: controller,
+        readOnly: readOnly,
+        onTap: onTap,
+        decoration: InputDecoration(
+          fillColor: Colors.white,
+          filled: true,
+          labelText: label,
+          hintText: hint,
+          suffixIcon: suffixIcon != null ? Icon(suffixIcon, size: 18) : null,
+          border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
+        ),
+      ),
+    );
+  }
+
+  String _monthName(int month) {
+    const months = [
+      'January',
+      'February',
+      'March',
+      'April',
+      'May',
+      'June',
+      'July',
+      'August',
+      'September',
+      'October',
+      'November',
+      'December',
+    ];
+    return months[month - 1];
   }
 }
