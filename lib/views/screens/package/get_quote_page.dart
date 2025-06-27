@@ -104,12 +104,12 @@ class _GetQuoteScreenState extends State<GetQuoteScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFF1F4FF), // light background
+      backgroundColor: Colors.grey.shade200, // light background
       appBar: AppBar(
         title: const Text(
           'Get Quote',
           style: TextStyle(
-            color: Color(0xFF2E5CDA),
+            color: Color(0xFF2864A6),
             fontWeight: FontWeight.bold,
           ),
         ),
@@ -139,6 +139,14 @@ class _GetQuoteScreenState extends State<GetQuoteScreen> {
             TextField(
               controller: eventNameController,
               decoration: InputDecoration(
+                enabledBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(10),
+                  borderSide: BorderSide(color: Colors.grey.shade400),
+                ),
+                focusedBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(10),
+                  borderSide: BorderSide(color: Colors.grey.shade400),
+                ),
                 fillColor: Colors.white,
                 filled: true,
                 labelText: 'Name *',
@@ -152,6 +160,14 @@ class _GetQuoteScreenState extends State<GetQuoteScreen> {
             TextField(
               controller: eventNameController,
               decoration: InputDecoration(
+                enabledBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(10),
+                  borderSide: BorderSide(color: Colors.grey.shade400),
+                ),
+                focusedBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(10),
+                  borderSide: BorderSide(color: Colors.grey.shade400),
+                ),
                 fillColor: Colors.white,
                 filled: true,
                 labelText: 'Mobile No. *',
@@ -165,6 +181,15 @@ class _GetQuoteScreenState extends State<GetQuoteScreen> {
             TextField(
               controller: eventNameController,
               decoration: InputDecoration(
+                enabledBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(10),
+                  borderSide: BorderSide(color: Colors.grey.shade400),
+                ),
+                focusedBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(10),
+                  borderSide: BorderSide(color: Colors.grey.shade400),
+                ),
+
                 fillColor: Colors.white,
                 filled: true,
                 labelText: 'Email *',
@@ -215,6 +240,14 @@ class _GetQuoteScreenState extends State<GetQuoteScreen> {
             TextField(
               controller: requirementsController,
               decoration: InputDecoration(
+                enabledBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(10),
+                  borderSide: BorderSide(color: Colors.grey.shade400),
+                ),
+                focusedBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(10),
+                  borderSide: BorderSide(color: Colors.grey.shade400),
+                ),
                 fillColor: Colors.white,
                 filled: true,
                 labelText: 'Describe your Requirements *',
@@ -311,6 +344,14 @@ class _GetQuoteScreenState extends State<GetQuoteScreen> {
         readOnly: readOnly,
         onTap: onTap,
         decoration: InputDecoration(
+          enabledBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(10),
+            borderSide: BorderSide(color: Colors.grey.shade400),
+          ),
+          focusedBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(10),
+            borderSide: BorderSide(color: Colors.grey.shade400),
+          ),
           fillColor: Colors.white,
           filled: true,
           labelText: label,
