@@ -1,171 +1,212 @@
 import 'dart:async';
-import 'dart:convert';
+import 'dart:developer';
 
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:get/get.dart';
 import 'package:google_sign_in/google_sign_in.dart';
-import 'package:http/http.dart' as http;
-import 'package:fluttertoast/fluttertoast.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:streammly/data/repository/auth_repo.dart';
+import 'package:streammly/models/response/response_model.dart';
+import 'package:uuid/uuid.dart';
 
-import '../views/screens/auth_screens/otp_verification_screen.dart';
-import '../views/screens/auth_screens/welcome.dart';
-
-class LoginController extends GetxController {
+class AuthController extends GetxController implements GetxService {
+  final AuthRepo authRepo;
+  AuthController({required this.authRepo});
   final TextEditingController phoneController = TextEditingController();
 
-  void generateOTP() {
-    String phone = phoneController.text.trim();
-
-    if (phone.length != 10) {
-      Fluttertoast.showToast(msg: "Please enter a valid 10-digit phone number");
-      return;
-    }
-
-    // Remove any existing OTP controller
-    if (Get.isRegistered<OtpController>()) {
-      Get.delete<OtpController>();
-    }
-
-    final otpController = Get.put(OtpController());
-
-    // Navigate to OTP screen immediately
-    Get.to(() => OtpScreen(), arguments: "+91 $phone");
-
-    // API call in background
-    Future.delayed(Duration.zero, () async {
-      final url = Uri.parse("http://192.168.1.113:8000/api/v1/user/auth/generateOtp");
-
-      try {
-        final response = await http.post(
-          url,
-          headers: {'Content-Type': 'application/json'},
-          body: jsonEncode({"phone": phone}),
-        );
-
-        final responseBody = jsonDecode(response.body);
-
-        if (response.statusCode == 200 && responseBody['success'] == true) {
-          final otpMessage = responseBody['data'];
-          final otpCode = otpMessage.toString().split(" ").first;
-
-          otpController.receivedOTP.value = otpCode;
-
-          Fluttertoast.showToast(msg: "OTP Sent: $otpCode");
-        } else {
-          Fluttertoast.showToast(msg: responseBody['message'] ?? "Could not send OTP");
-        }
-      } catch (e) {
-        Fluttertoast.showToast(msg: "Could not connect to server");
-      }
-    });
-  }
-///-Google Login Setup
-  void signInWithGoogle() async {
+  bool isLoading = false;
+  Future<ResponseModel> sendOtp() async {
+    isLoading = true;
+    update();
+    ResponseModel responseModel;
     try {
-      final GoogleSignInAccount? googleUser = await GoogleSignIn().signIn();
-      if (googleUser == null) {
-        Fluttertoast.showToast(msg: "Google sign-in cancelled");
-        return;
+      Response response = await authRepo.sendOtp(phone: phoneController.text);
+      if (response.statusCode == 200) {
+        responseModel = ResponseModel(true, "Otp sent successfull");
+      } else {
+        responseModel = ResponseModel(false, "Failed to send OTP");
       }
+    } catch (e) {
+      responseModel = ResponseModel(false, "Error in send OTP");
+      log(e.toString(), name: "***** Error in sendOtp () ******");
+    }
+    isLoading = false;
+    update();
+    return responseModel;
+  }
+
+  Future<ResponseModel?> signInWithGoogle() async {
+    isLoading = true;
+    update();
+    ResponseModel responseModel;
+
+    try {
+      log(name: "googleDebig", "etes");
+
+      final GoogleSignInAccount? googleUser = await GoogleSignIn().signIn();
+      log(name: "googleDebig", "first");
+      if (googleUser == null) {
+        log(name: "googleDebig", "googleUser");
+        Fluttertoast.showToast(msg: "Google sign-in cancelled");
+        return null;
+      }
+      log(name: "googleDebig", "second");
 
       final GoogleSignInAuthentication googleAuth = await googleUser.authentication;
-      final idToken = googleAuth.idToken;
+      log(name: "googleDebig", "thid");
 
-      if (idToken == null) {
-        Fluttertoast.showToast(msg: "Failed to get ID token");
-        return;
+      final credential = GoogleAuthProvider.credential(accessToken: googleAuth.accessToken, idToken: googleAuth.idToken);
+
+      final UserCredential userCredential = await FirebaseAuth.instance.signInWithCredential(credential);
+      final User? firebaseUser = userCredential.user;
+      log(name: "googleDebig", "four");
+      final firebaseIdToken = await userCredential.user?.getIdToken();
+      if (firebaseUser == null) {
+        log(name: "googleDebig", "firebaseUser");
+
+        Fluttertoast.showToast(msg: "Firebase authentication failed");
+        return null;
       }
 
-      // Backend call
-      final url = Uri.parse("http://192.168.1.113:8000/api/v1/user/auth/googleLogin");
-      final response = await http.post(
-        url,
-        headers: {'Content-Type': 'application/json'},
-        body: jsonEncode({'token': idToken}),
+      final String firebaseUid = firebaseUser.uid;
+      // final String firebaseProjectId = Firebase.app().options.projectId;
+      String deviceId = await getOrCreateDeviceId();
+
+      if (deviceId.isEmpty) {
+        log(name: "googleDebig", "deviceId");
+
+        Fluttertoast.showToast(msg: "Device ID not found");
+        return null;
+      }
+      Response response = await authRepo.signInWithGoogle(
+        token: firebaseIdToken ?? "",
+        // token: googleAuth.accessToken ?? "",
+        firebaseUid: firebaseUid,
       );
-
-      final responseData = jsonDecode(response.body);
-
-      if (response.statusCode == 200 && responseData['success'] == true) {
-        Fluttertoast.showToast(msg: "Login Successful");
-
-        // Navigate to WelcomeScreen
-        Get.offAll(() => WelcomeScreen());
+      if (response.statusCode == 200 && response.body["token"] != null) {
+        setUserToken(response.body['token']);
+        responseModel = ResponseModel(true, "Google Sign-In Successful");
       } else {
-        Fluttertoast.showToast(msg: responseData['message'] ?? "Sign-in failed");
+        responseModel = ResponseModel(false, "Failed to Google Sign-In");
       }
     } catch (e) {
-      Fluttertoast.showToast(msg: "Sign-in error: $e");
+      responseModel = ResponseModel(false, "Error in Google Sign-In");
+      log(e.toString(), name: "*****  Error in signInWithGoogle () *****");
     }
+    isLoading = false;
+    update();
+    return responseModel;
   }
-}
+  // /// Google Login Setup
+  // void signInWithGoogle() async {
+  //   try {
+  //     final GoogleSignInAccount? googleUser = await GoogleSignIn().signIn();
+  //     if (googleUser == null) {
+  //       Fluttertoast.showToast(msg: "Google sign-in cancelled");
+  //       return;
+  //     }
 
-class OtpController extends GetxController {
-  final TextEditingController otpController = TextEditingController();
-  RxInt secondsRemaining = 30.obs;
-  RxString receivedOTP = ''.obs;
-  RxBool shakeOnError = false.obs;
+  //     final GoogleSignInAuthentication googleAuth =
+  //         await googleUser.authentication;
 
-  Timer? _timer;
+  //     final credential = GoogleAuthProvider.credential(
+  //       accessToken: googleAuth.accessToken,
+  //       idToken: googleAuth.idToken,
+  //     );
 
-  void startTimer() {
-    _timer?.cancel(); // cancel previous timer if any
-    secondsRemaining.value = 30;
+  //     final UserCredential userCredential = await FirebaseAuth.instance
+  //         .signInWithCredential(credential);
+  //     final User? firebaseUser = userCredential.user;
 
-    _timer = Timer.periodic(const Duration(seconds: 1), (timer) {
-      if (secondsRemaining.value > 0) {
-        secondsRemaining.value--;
-      } else {
-        timer.cancel();
-      }
-    });
-  }
+  //     if (firebaseUser == null) {
+  //       Fluttertoast.showToast(msg: "Firebase authentication failed");
+  //       return;
+  //     }
 
-  void confirmOTP(String phone, {VoidCallback? onVerified}) {
-    final enteredOTP = otpController.text.trim();
-    if (enteredOTP.length == 6 && enteredOTP == receivedOTP.value) {
-      Fluttertoast.showToast(msg: "OTP Verified");
-      onVerified?.call();
-      Get.delete<OtpController>();
-    } else {
-      shakeOnError.value = true;
-      Fluttertoast.showToast(msg: "Invalid OTP");
-      Future.delayed(const Duration(milliseconds: 500), () {
-        shakeOnError.value = false;
-      });
-    }
-  }
+  //     final String firebaseUid = firebaseUser.uid;
+  //     final String firebaseProjectId = Firebase.app().options.projectId;
+  //     String deviceId = await getOrCreateDeviceId();
 
-  void resendOTP(String phone) async {
+  //     if (deviceId.isEmpty) {
+  //       Fluttertoast.showToast(msg: "Device ID not found");
+  //       return;
+  //     }
+
+  //     final url = Uri.parse(
+  //       "http://192.168.1.10:8000/api/v1/user/auth/googleLogin",
+  //     );
+
+  //     final body = jsonEncode({
+  //       "token": firebaseProjectId,
+  //       "device_id": deviceId,
+  //       "firebase_uid": firebaseUid,
+  //     });
+
+  //     final response = await http.post(
+  //       url,
+  //       headers: {
+  //         'Content-Type': 'application/json',
+  //         'Accept': 'application/json',
+  //       },
+  //       body: body,
+  //     );
+
+  //     final jsonResponse = jsonDecode(response.body);
+
+  //     if (response.statusCode == 200 && jsonResponse['success'] == true) {
+  //       Fluttertoast.showToast(msg: "Login Successful");
+  //       Get.offAll(() => WelcomeScreen());
+  //     } else {
+  //       String errorMessage =
+  //           jsonResponse['message']?.toString() ?? "Login failed";
+  //       if (errorMessage.length > 100) {
+  //         errorMessage = "${errorMessage.substring(0, 100)}...";
+  //       }
+  //       Fluttertoast.showToast(msg: errorMessage);
+  //     }
+  //   } catch (e) {
+  //     await FirebaseAuth.instance.signOut();
+  //     await GoogleSignIn().signOut();
+
+  //     Fluttertoast.showToast(msg: "Error: $e");
+  //   }
+  // }
+
+  Future<String> getOrCreateDeviceId() async {
     try {
-      final url = Uri.parse("http://192.168.1.113:8000/api/v1/user/auth/generateOtp");
-      final response = await http.post(
-        url,
-        headers: {'Content-Type': 'application/json'},
-        body: jsonEncode({"phone": phone}),
-      );
+      final prefs = await SharedPreferences.getInstance();
+      String? existingDeviceId = prefs.getString('device_id');
 
-      final responseBody = jsonDecode(response.body);
-
-      if (response.statusCode == 200 && responseBody['success'] == true) {
-        final otpMessage = responseBody['data'];
-        final otpCode = otpMessage.toString().split(" ").first;
-
-        receivedOTP.value = otpCode;
-        Fluttertoast.showToast(msg: "OTP resent");
-        startTimer();
-      } else {
-        Fluttertoast.showToast(msg: responseBody['message'] ?? "Could not resend OTP");
+      if (existingDeviceId != null && existingDeviceId.length == 36) {
+        return existingDeviceId;
       }
+
+      const uuid = Uuid();
+      String newDeviceId = uuid.v4();
+
+      await prefs.setString('device_id', newDeviceId);
+
+      return newDeviceId;
     } catch (e) {
-      Fluttertoast.showToast(msg: "Could not connect to server");
+      return '';
     }
   }
 
-  @override
-  void onClose() {
-    otpController.dispose();
-    _timer?.cancel();
-    super.onClose();
+  bool isLoggedIn() {
+    return authRepo.isLoggedIn();
+  }
+
+  bool clearSharedData() {
+    return authRepo.clearSharedData();
+  }
+
+  String getUserToken() {
+    return authRepo.getUserToken();
+  }
+
+  void setUserToken(String id) {
+    authRepo.saveUserToken(id);
   }
 }

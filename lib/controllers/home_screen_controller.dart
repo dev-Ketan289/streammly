@@ -1,28 +1,33 @@
+import 'dart:convert';
+
 import 'package:get/get.dart';
+import 'package:http/http.dart' as http;
 
-class HomeController extends GetxController {
-  // Observable loading state
-  var isLoading = true.obs;
+import '../models/banner/banner_item.dart';
 
-  // Observable lists for categories and recommendations
-  var categories = <String>[].obs;
-  var recommendedItems = <String>[].obs;
+class HeaderController extends GetxController {
+  RxList<BannerSlideItem> headerSlides = <BannerSlideItem>[].obs;
 
-  @override
-  void onInit() {
-    super.onInit();
-    fetchHomeData();
-  }
+  Future<void> fetchSlides() async {
+    try {
+      final res = await http.get(Uri.parse("http://192.168.1.113:8000/api/v1/basic/header-sliders"));
+      if (res.statusCode == 200) {
+        final json = jsonDecode(res.body);
+        final List data = json['data'];
+        final List<BannerSlideItem> result = [];
 
-  void fetchHomeData() async {
-    // Simulate a delay (API call)
-    await Future.delayed(const Duration(seconds: 2));
+        for (var item in data) {
+          for (var img in item['header_slider_images']) {
+            if (img['header_slider_id'] == item['id']) {
+              result.add(BannerSlideItem.fromJson(parent: item, image: img));
+            }
+          }
+        }
 
-    // Dummy data
-    categories.value = ['Venue', 'Photographer', 'Event Organiser', 'Makeup Artist', 'Food & Caterers'];
-
-    recommendedItems.value = ['FocusPoint Studio', 'Velvet Parlour', 'Flavor Theory', 'Echo Booth'];
-
-    isLoading.value = false;
+        headerSlides.value = result;
+      }
+    } catch (e) {
+      print("Error fetching header slides: $e");
+    }
   }
 }

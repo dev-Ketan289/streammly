@@ -1,25 +1,31 @@
-import 'package:flutter/material.dart';
+import 'dart:async';
 
-import '../../../../models/banner/header_banner_item.dart';
-import '../../../../services/theme.dart' as overlayColor;
+import 'package:flutter/material.dart';
+import 'package:flutter_svg/flutter_svg.dart';
+import 'package:get/get.dart';
+import 'package:google_fonts/google_fonts.dart';
+
+import '../../../../controllers/location_controller.dart';
+import '../../../../models/banner/banner_item.dart';
 
 class HeaderBanner extends StatefulWidget {
-  final List<BannerItem> banners;
+  final List<BannerSlideItem>? slides;
   final double height;
-  final String location;
-  final String address;
-  final bool showSearchBar;
-  final Color color;
-  final double overlayOpacity;
+  final String backgroundImage;
+  final Color overlayColor;
+  final String? overrideTitle;
+  final String? overrideSubtitle;
+  final bool showContent;
 
   const HeaderBanner({
     super.key,
-    required this.banners,
+    this.slides,
     required this.height,
-    required this.location,
-    required this.address,
-    this.showSearchBar = true,
-    required this.color,  required this.overlayOpacity,
+    required this.backgroundImage,
+    this.overlayColor = const Color.fromRGBO(0, 0, 0, 0.3),
+    this.overrideTitle,
+    this.overrideSubtitle,
+    this.showContent = true,
   });
 
   @override
@@ -27,99 +33,229 @@ class HeaderBanner extends StatefulWidget {
 }
 
 class _HeaderBannerState extends State<HeaderBanner> {
-  int currentIndex = 0;
+  late PageController pageController;
+  final LocationController locationController = Get.find();
+  int currentIndex = 1;
+  Timer? autoScrollTimer;
+
+  List<BannerSlideItem> get loopedSlides {
+    if (widget.slides == null || widget.slides!.isEmpty) return [];
+    final realSlides = widget.slides!;
+    return [realSlides.last, ...realSlides, realSlides.first];
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    pageController = PageController(initialPage: 1);
+
+    if (loopedSlides.isNotEmpty) {
+      autoScrollTimer = Timer.periodic(const Duration(seconds: 4), (_) {
+        if (pageController.hasClients) {
+          pageController.nextPage(
+            duration: const Duration(milliseconds: 500),
+            curve: Curves.easeInOut,
+          );
+        }
+      });
+    }
+  }
+
+  @override
+  void dispose() {
+    autoScrollTimer?.cancel();
+    pageController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
-    final currentBanner = widget.banners[currentIndex];
+    final hasSlides = loopedSlides.isNotEmpty;
+    final currentSlide = hasSlides ? loopedSlides[currentIndex] : null;
+    final title = widget.overrideTitle ?? currentSlide?.title ?? '';
+    final subtitle = widget.overrideSubtitle ?? currentSlide?.description ?? '';
 
     return SizedBox(
-      width: double.infinity,
       height: widget.height,
+      width: double.infinity,
       child: Stack(
         children: [
-          // PageView with background images
-          PageView.builder(
-            itemCount: widget.banners.length,
-            onPageChanged: (index) => setState(() => currentIndex = index),
-            itemBuilder: (context, index) {
-              final banner = widget.banners[index];
-              return Container(
-                decoration: BoxDecoration(
-                  image: DecorationImage(image: AssetImage(banner.image), fit: BoxFit.fill),
-                ),
-                child:Container(color: widget.color.withValues(alpha: (widget.overlayOpacity))),
+          // --- Background image (fixed to support both network and asset) ---
+          widget.backgroundImage.startsWith("http")
+              ? Image.network(
+                widget.backgroundImage,
+                fit: BoxFit.cover,
+                width: double.infinity,
+                height: double.infinity,
+                errorBuilder: (context, error, stackTrace) {
+                  return Image.asset(
+                    'assets/images/recommended_banner/FocusPointVendor.png',
+                    fit: BoxFit.cover,
+                    width: double.infinity,
+                    height: double.infinity,
+                  );
+                },
+              )
+              : Image.asset(
+                widget.backgroundImage,
+                fit: BoxFit.cover,
+                width: double.infinity,
+                height: double.infinity,
+              ),
 
-              );
-            },
-          ),
+          // --- Overlay ---
+          Container(color: widget.overlayColor),
 
-          // Vector image overlay (e.g., woman with camera)
-          if (currentBanner.vectorImage != null)
+          // --- Carousel effect ---
+          if (hasSlides)
+            PageView.builder(
+              controller: pageController,
+              itemCount: loopedSlides.length,
+              onPageChanged: (index) {
+                final total = loopedSlides.length;
+                if (index == total - 1) {
+                  Future.delayed(const Duration(milliseconds: 300), () {
+                    pageController.jumpToPage(1);
+                  });
+                  setState(() => currentIndex = 1);
+                } else if (index == 0) {
+                  Future.delayed(const Duration(milliseconds: 300), () {
+                    pageController.jumpToPage(total - 2);
+                  });
+                  setState(() => currentIndex = total - 2);
+                } else {
+                  setState(() => currentIndex = index);
+                }
+              },
+              itemBuilder: (_, index) {
+                return const SizedBox.expand();
+              },
+            ),
+
+          // --- Vector image (if any) ---
+          if (currentSlide?.vectorImage != null)
             Positioned(
               right: 16,
               bottom: 20,
-              child: Image.asset(
-                currentBanner.vectorImage!,
-                height: 140, // Adjust as needed
-              ),
+              child:
+                  currentSlide!.isSvg
+                      ? SvgPicture.network(
+                        "http://192.168.1.113:8000/${currentSlide.vectorImage}",
+                        height: 140,
+                      )
+                      : Image.network(
+                        "http://192.168.1.113:8000/${currentSlide.vectorImage}",
+                        height: 140,
+                      ),
             ),
 
-          // Static top content
-          Padding(
-            padding: const EdgeInsets.fromLTRB(16, 20, 16, 0),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                // Location row
-                Row(
-                  children: [
-                    const Icon(Icons.location_on, color: Colors.white, size: 20),
-                    const SizedBox(width: 8),
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
+          // --- Top location, search, title and subtitle ---
+          if (widget.showContent)
+            Padding(
+              padding: const EdgeInsets.fromLTRB(16, 20, 16, 0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Obx(
+                    () => Row(
                       children: [
-                        Text(widget.location, style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 13)),
-                        Text(widget.address, style: const TextStyle(color: Colors.white, fontSize: 10)),
+                        const Icon(Icons.location_on, color: Colors.white),
+                        const SizedBox(width: 8),
+                        Flexible(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              const Text(
+                                "Current Location",
+                                style: TextStyle(
+                                  color: Colors.white,
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 13,
+                                ),
+                              ),
+                              Text(
+                                locationController
+                                        .selectedAddress
+                                        .value
+                                        .isNotEmpty
+                                    ? locationController.selectedAddress.value
+                                    : "Fetching...",
+                                style: const TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 10,
+                                ),
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                            ],
+                          ),
+                        ),
                       ],
                     ),
-                  ],
-                ),
+                  ),
+                  const SizedBox(height: 16),
 
-                const SizedBox(height: 16),
-
-                // Search bar
-                Row(
-                  children: [
-                    const Icon(Icons.menu, color: Colors.white),
-                    const SizedBox(width: 8),
-                    if (widget.showSearchBar)
+                  // Search Bar
+                  Row(
+                    children: [
+                      const Icon(Icons.menu, color: Colors.white),
+                      const SizedBox(width: 8),
                       Expanded(
                         child: Container(
-                          decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(30)),
+                          decoration: BoxDecoration(
+                            color: Colors.white,
+                            borderRadius: BorderRadius.circular(30),
+                          ),
                           child: const TextField(
                             decoration: InputDecoration(
-                              hintText: "What are you looking for",
+                              hintText: "What are you looking for?",
                               prefixIcon: Icon(Icons.search),
                               border: InputBorder.none,
-                              contentPadding: EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+                              contentPadding: EdgeInsets.symmetric(
+                                horizontal: 16,
+                                vertical: 16,
+                              ),
                             ),
                           ),
                         ),
                       ),
-                    if (widget.showSearchBar) const SizedBox(width: 8),
-                    const CircleAvatar(radius: 16, backgroundColor: Colors.white, child: Icon(Icons.diamond_outlined, color: Colors.amber)),
-                  ],
-                ),
+                      const SizedBox(width: 8),
+                      const CircleAvatar(
+                        radius: 16,
+                        backgroundColor: Colors.white,
+                        child: Icon(
+                          Icons.diamond_outlined,
+                          color: Colors.amber,
+                        ),
+                      ),
+                    ],
+                  ),
 
-                const SizedBox(height: 24),
+                  const SizedBox(height: 24),
 
-                Text(currentBanner.title, style: const TextStyle(fontSize: 24, color: Colors.white, fontWeight: FontWeight.bold)),
-                const SizedBox(height: 6),
-                Text(currentBanner.subtitle, style: const TextStyle(color: Colors.white, fontSize: 13)),
-              ],
+                  // Title and Subtitle
+                  if (title.isNotEmpty)
+                    Text(
+                      title,
+                      style: GoogleFonts.playfairDisplay(
+                        fontSize: 29,
+                        fontWeight: FontWeight.w700,
+                        color: Colors.white,
+                      ),
+                    ),
+                  if (subtitle.isNotEmpty) const SizedBox(height: 6),
+                  if (subtitle.isNotEmpty)
+                    Text(
+                      subtitle,
+                      style: GoogleFonts.playfairDisplay(
+                        color: Colors.white,
+                        fontSize: 16,
+                      ),
+                      maxLines: 4,
+                      overflow: TextOverflow.clip,
+                    ),
+                ],
+              ),
             ),
-          ),
         ],
       ),
     );

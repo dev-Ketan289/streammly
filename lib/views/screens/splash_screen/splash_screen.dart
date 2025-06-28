@@ -1,6 +1,11 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
+import 'package:streammly/controllers/auth_controller.dart';
+import 'package:streammly/navigation_menu.dart';
+import 'package:streammly/services/route_helper.dart';
+import 'package:streammly/views/screens/auth_screens/login_screen.dart';
 // Add your custom image widget if needed
 
 class SplashScreen extends StatefulWidget {
@@ -17,7 +22,17 @@ class _SplashScreenState extends State<SplashScreen> {
 
     Timer(const Duration(seconds: 3), () {
       // Navigate to next screen after splash
-      Navigator.pushReplacementNamed(context, '/login'); // change route as needed
+      if (Get.find<AuthController>().isLoggedIn()) {
+        Navigator.push(context, getCustomRoute(child: NavigationMenu()));
+
+        // Navigator.pushReplacementNamed(context, '/home'); //
+      } else {
+        // Navigator.pushReplacementNamed(
+        //   context,
+        //   '/login',
+        // ); // change route as needed
+        Navigator.push(context, getCustomRoute(child: LoginScreen()));
+      }
     });
   }
 
@@ -34,7 +49,12 @@ class _SplashScreenState extends State<SplashScreen> {
           crossAxisAlignment: CrossAxisAlignment.end,
           children: [
             // App Logo or GIF
-            Image.asset('assets/images/splash.gif', height: size.height, width: size.height, fit: BoxFit.cover),
+            Image.asset(
+              'assets/images/splash.gif',
+              height: size.height,
+              width: size.height,
+              fit: BoxFit.cover,
+            ),
           ],
         ),
       ),

@@ -4,15 +4,14 @@
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION"/>
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE"/>
     <uses-permission android:name="android.permission.INTERNET"/>
-
-
-    <uses-permission android:name="android.permission.ACCESS_BACKGROUND_LOCATION"/>
-
+    
     <application
         android:label="streammly"
         android:name="${applicationName}"
-        android:icon="@mipmap/ic_launcher">
-        <meta-data android:name="com.google.android.geo.API_KEY" android:value="AIzaSyAnS9NpkIPNlyXcVYfnxmRQZcf3ArRtYHM"/>
+        android:icon="@mipmap/ic_launcher"
+        android:usesCleartextTraffic="true"
+        >
+        <meta-data android:name="com.google.android.geo.API_KEY" android:value="AIzaSyDC392D0em2z_kvN5qjga51hhtIrFqzp8Q"/>
 
         <activity
             android:name=".MainActivity"
@@ -31,7 +30,7 @@
               android:name="io.flutter.embedding.android.NormalTheme"
               android:resource="@style/NormalTheme"
               />
-            <meta-data android:name="com.google.android.geo.API_KEY" android:value="AIzaSyAnS9NpkIPNlyXcVYfnxmRQZcf3ArRtYHM"/>
+            <meta-data android:name="com.google.android.geo.API_KEY" android:value="AIzaSyDC392D0em2z_kvN5qjga51hhtIrFqzp8Q"/>
 
             <intent-filter>
                 <action android:name="android.intent.action.MAIN"/>
@@ -56,4 +55,3 @@
         </intent>
     </queries>
 </manifest>
-

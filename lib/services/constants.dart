@@ -26,20 +26,23 @@ class AppConstants {
   set setBaseUrl(String url) => baseUrl = url;
 
   //TODO: Change Base Url
-  static String baseUrl = 'https://www.base-url.in/';
-  // static String baseUrl = 'http://192.168.1.5:9000/'; ///USE FOR LOCAL
+  static String baseUrl = 'http://192.168.1.113:8000/';
+  // static String baseUrl = 'http://192.168.1.113:8000/'; ///USE FOR Second Local in case first not working
   //TODO: Change Base Url
   static String appName = 'App Name';
 
   static const String agoraAppId = 'c87b710048c049f59570bd1895b7e561';
 
   // Auth
-  static const String loginUri = 'api/v1/user/login';
-  static const String logoutUri = '';
-  static const String profileUri = 'api/v1/user/profile';
+  static const String sendOtp = 'api/v1/user/auth/generateOtp';
+  static const String verifyOtp = 'api/v1/user/auth/login';
 
+  static const String signInWithGoogle = 'api/v1/user/auth/googleLogin';
 
   static const String extras = 'api/v1/extra';
+
+  // Category
+  static const String categoriesUrl = 'api/v1/basic/categories';
 
   //
   static const double horizontalPadding = 16;

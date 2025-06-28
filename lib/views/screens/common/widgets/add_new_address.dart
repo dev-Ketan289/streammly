@@ -5,9 +5,6 @@ class AddNewAddressScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: const Text("Add New Address")),
-      body: const Center(child: Text("Address form coming soon...")),
-    );
+    return Scaffold(appBar: AppBar(title: const Text("Add New Address")), body: const Center(child: Text("Address form coming soon...")));
   }
 }

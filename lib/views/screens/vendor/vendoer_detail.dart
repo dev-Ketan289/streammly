@@ -1,22 +1,38 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:streammly/models/category/category_item.dart';
-import 'package:streammly/views/screens/home/widgets/category/category_scroller.dart';
-import 'package:streammly/views/screens/home/widgets/header_banner.dart';
-import 'package:streammly/views/screens/vendor/vendor_group.dart';
+import 'package:streammly/controllers/company_controller.dart';
 
-import '../../../models/banner/header_banner_item.dart';
+import '../../../models/category/category_item.dart';
+import '../../../models/company/company_location.dart';
 import '../../../navigation_menu.dart';
 import '../home/widgets/category/review_card.dart';
+import '../home/widgets/category/widgets/category_scroller.dart';
+import '../home/widgets/header_banner.dart';
 import '../home/widgets/horizontal_card.dart';
+import 'vendor_group.dart';
 
-class VendorDetailScreen extends StatelessWidget {
-  const VendorDetailScreen({super.key});
+class VendorDetailScreen extends StatefulWidget {
+  final CompanyLocation company;
+
+  const VendorDetailScreen({super.key, required this.company});
+
+  @override
+  State<VendorDetailScreen> createState() => _VendorDetailScreenState();
+}
+
+class _VendorDetailScreenState extends State<VendorDetailScreen> {
+  final CompanyController companyController = Get.find();
+
+  @override
+  void initState() {
+    super.initState();
+    companyController.fetchCompanySubCategories(widget.company.id ?? 0);
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      bottomNavigationBar: NavigationHelper.buildBottomNav(), // Use the helper method
+      bottomNavigationBar: NavigationHelper.buildBottomNav(),
       floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
       floatingActionButton: NavigationHelper.buildFloatingButton(),
       body: SafeArea(
@@ -24,37 +40,55 @@ class VendorDetailScreen extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // Cover Image & Name
+              /// ---- Header Banner ----
               HeaderBanner(
-                banners: [
-                  BannerItem(
-                    image: "assets/images/recommended_banner/FocusPointVendor.png",
-                    title: "Photography",
-                    subtitle: "Capture your moments perfectly.",
-                  ),
-                ],
                 height: 280,
-                location: "Mahim",
-                address: "MTNL Telephone Colony, VSNL Colony",
-                color: Colors.indigo.withValues(alpha: 0.4), overlayOpacity: 0.7,
+                backgroundImage:
+                widget.company.bannerImage != null && widget.company.bannerImage!.isNotEmpty
+                    ? 'http://192.168.1.113:8000/${widget.company.bannerImage}'
+                    : 'assets/images/recommended_banner/FocusPointVendor.png',
+                overlayColor: Colors.indigo.withValues(alpha: 0.6),
+                overrideTitle: widget.company.companyName,
+                overrideSubtitle: widget.company.categoryName,
               ),
+
               const SizedBox(height: 6),
-              CategoryScroller(
-                categories: [
-                  CategoryItem(
-                    label: 'Baby Shoot',
-                    imagePath: 'assets/images/category/vendor_category/img.png',
-                    onTap: () {
-                      Get.to(() => VendorGroup());
-                    },
-                  ),
-                  CategoryItem(label: 'wedding Shoot', imagePath: 'assets/images/category/vendor_category/img.png', onTap: () {}),
-                  CategoryItem(label: 'Portfolio Shoot', imagePath: 'assets/images/category/vendor_category/img.png', onTap: () {}),
-                  CategoryItem(label: 'Maternity Shoot', imagePath: 'assets/images/category/vendor_category/img.png', onTap: () {}),
-                  CategoryItem(label: 'Family Function', imagePath: 'assets/images/category/vendor_category/img.png', onTap: () {}),
-                ],
-              ),
+
+              /// ---- Category Scroller (Subcategories) ----
+              Obx(() {
+                final subs = companyController.subCategories;
+
+                if (subs.isEmpty) {
+                  return CategoryScroller(
+                    categories: [
+                      CategoryItem(
+                        label: 'Baby Shoot',
+                        imagePath: 'assets/images/category/vendor_category/img.png',
+                        onTap: () => Get.to(() => VendorGroup(company: widget.company, subCategoryId: 2)),
+                      ),
+                      CategoryItem(label: 'Wedding Shoot', imagePath: 'assets/images/category/vendor_category/img.png', onTap: () {}),
+                      CategoryItem(label: 'Portfolio Shoot', imagePath: 'assets/images/category/vendor_category/img.png', onTap: () {}),
+                      CategoryItem(label: 'Maternity Shoot', imagePath: 'assets/images/category/vendor_category/img.png', onTap: () {}),
+                      CategoryItem(label: 'Family Function', imagePath: 'assets/images/category/vendor_category/img.png', onTap: () {}),
+                    ],
+                  );
+                }
+
+                return CategoryScroller(
+                  categories:
+                  subs.map((sub) {
+                    return CategoryItem(
+                      label: sub.title,
+                      imagePath: 'http://192.168.1.113:8000/${sub.image ?? ""}',
+                      onTap: () => Get.to(() => VendorGroup(company: widget.company, subCategoryId: sub.id)),
+                    );
+                  }).toList(),
+                );
+              }),
+
               const SizedBox(height: 10),
+
+              /// ---- Reviews ----
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
                 child: Row(
@@ -74,6 +108,7 @@ class VendorDetailScreen extends StatelessWidget {
                   ],
                 ),
               ),
+
               SizedBox(
                 height: 210,
                 child: ListView(
@@ -97,7 +132,6 @@ class VendorDetailScreen extends StatelessWidget {
                     ReviewCard(
                       name: "Ravi K.",
                       dateTime: "09 April 2025 09:45 AM",
-
                       review: "Highly recommend FocusPoint Studios! They were professional, and delivered quality.",
                       rating: 5,
                     ),
@@ -106,6 +140,8 @@ class VendorDetailScreen extends StatelessWidget {
               ),
 
               const SizedBox(height: 20),
+
+              /// ---- Packages ----
               PackageSection(
                 title: "Popular Packages",
                 onSeeAll: () {},

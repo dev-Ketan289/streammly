@@ -1,28 +1,23 @@
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
+import 'package:streammly/controllers/company_controller.dart';
 
-import '../../../vendor/vendor_description.dart';
-
+import '../../../vendor/vendor_detail.dart';
+import '../../vendor_locator.dart';
 
 class ExploreUs extends StatelessWidget {
-  const ExploreUs({
-    super.key,
-    required this.context,
-  });
+  final int? vendorId;
 
-  final BuildContext context;
+  const ExploreUs({super.key, this.vendorId});
 
   @override
   Widget build(BuildContext context) {
-    final vendors = [
-      {
-        "image": "assets/images/recommended_banner/FocusPointVendor.png",
-        "name": "FocusPoint Studios",
-        "type": "Photographer",
-        "time": "31–36 mins",
-        "distance": "4.0 km",
-        "rating": "3.9",
-      },
-    ];
+    final CompanyController companyController = Get.put(CompanyController());
+
+    // ✅ Fix: Call fetch only if not already loaded
+    if (companyController.companies.isEmpty) {
+      companyController.fetchCompaniesByCategory(companyController.selectedCategoryId.value);
+    }
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -35,7 +30,7 @@ class ExploreUs extends StatelessWidget {
               const Text("Explore Us !!!", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
               InkWell(
                 onTap: () {
-                  // TODO: Navigate to map screen
+                  Navigator.push(context, MaterialPageRoute(builder: (_) => CompanyLocatorMapScreen(categoryId: 1)));
                 },
                 child: Row(
                   children: const [
@@ -48,91 +43,104 @@ class ExploreUs extends StatelessWidget {
             ],
           ),
         ),
-        ListView.builder(
-          itemCount: vendors.length,
-          shrinkWrap: true,
-          physics: const NeverScrollableScrollPhysics(),
-          padding: const EdgeInsets.symmetric(horizontal: 16),
-          itemBuilder: (context, index) {
-            final vendor = vendors[index];
-            return InkWell(
-              borderRadius: BorderRadius.circular(18),
-              onTap: () {
-                // ✅ Navigate to detailed screen
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (_) => const VendorDescription(), // Replace with your screen
-                  ),
-                );
-              },
-              child: Container(
-                margin: const EdgeInsets.only(bottom: 20),
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(18),
-                  color: Colors.white,
-                  boxShadow: [BoxShadow(blurRadius: 10, color: Colors.black12, offset: const Offset(0, 4))],
-                ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    // Banner Image with Favorite Icon
-                    Stack(
-                      children: [
-                        ClipRRect(
-                          borderRadius: const BorderRadius.vertical(top: Radius.circular(18)),
-                          child: Image.asset(vendor["image"]!, height: 150, width: double.infinity, fit: BoxFit.cover),
-                        ),
-                        Positioned(
-                          top: 10,
-                          right: 10,
-                          child: CircleAvatar(backgroundColor: Colors.white, radius: 14, child: const Icon(Icons.favorite_border, size: 16, color: Colors.red)),
-                        ),
-                      ],
-                    ),
 
-                    // Text Info
-                    Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-                      child: Row(
-                        crossAxisAlignment: CrossAxisAlignment.start,
+        Obx(() {
+          final vendors = companyController.companies;
+
+          final filteredVendors = vendorId != null ? vendors.where((v) => v.id == vendorId).toList() : vendors;
+
+          if (filteredVendors.isEmpty) {
+            return const Padding(padding: EdgeInsets.all(16), child: Center(child: Text("No vendors found")));
+          }
+
+          return ListView.builder(
+            itemCount: filteredVendors.length,
+            shrinkWrap: true,
+            physics: const NeverScrollableScrollPhysics(),
+            padding: const EdgeInsets.symmetric(horizontal: 16),
+            itemBuilder: (context, index) {
+              final vendor = filteredVendors[index];
+
+              return InkWell(
+                onTap: () {
+                  Navigator.push(context, MaterialPageRoute(builder: (_) => VendorDetailScreen(company: vendor)));
+                },
+                child: Container(
+                  margin: const EdgeInsets.only(bottom: 20),
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(18),
+                    color: Colors.white,
+                    boxShadow: [BoxShadow(blurRadius: 10, color: Colors.black12, offset: const Offset(0, 4))],
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      // Banner
+                      Stack(
                         children: [
-                          Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(vendor["name"]!, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
-                                const SizedBox(height: 2),
-                                Text(vendor["type"]!, style: const TextStyle(fontSize: 13, color: Colors.grey)),
-                                const SizedBox(height: 6),
-                                Row(
-                                  children: [
-                                    const Icon(Icons.access_time, size: 14, color: Colors.grey),
-                                    const SizedBox(width: 4),
-                                    Text(vendor["time"]!, style: const TextStyle(fontSize: 12, color: Colors.grey)),
-                                    const SizedBox(width: 10),
-                                    const Icon(Icons.location_on, size: 14, color: Colors.grey),
-                                    const SizedBox(width: 4),
-                                    Text(vendor["distance"]!, style: const TextStyle(fontSize: 12, color: Colors.grey)),
-                                  ],
-                                ),
-                              ],
-                            ),
+                          ClipRRect(
+                            borderRadius: const BorderRadius.vertical(top: Radius.circular(18)),
+                            child:
+                                vendor.bannerImage != null && vendor.bannerImage!.isNotEmpty
+                                    ? Image.network('http://192.168.1.113:8000/${vendor.bannerImage}', height: 150, width: double.infinity, fit: BoxFit.cover)
+                                    : Image.asset('assets/images/recommended_banner/FocusPointVendor.png', height: 150, width: double.infinity, fit: BoxFit.cover),
                           ),
-                          Container(
-                            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                            decoration: BoxDecoration(color: Colors.blue.shade700, borderRadius: BorderRadius.circular(8)),
-                            child: Text("${vendor["rating"]} ★", style: const TextStyle(color: Colors.white, fontSize: 12)),
+                          Positioned(
+                            top: 10,
+                            right: 10,
+                            child: CircleAvatar(backgroundColor: Colors.white, radius: 14, child: const Icon(Icons.favorite_border, size: 16, color: Colors.red)),
                           ),
                         ],
                       ),
-                    ),
-                  ],
+
+                      // Info
+                      Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                        child: Row(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(vendor.companyName, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
+                                  const SizedBox(height: 2),
+                                  Text(vendor.categoryName ?? "Unknown", style: const TextStyle(fontSize: 13, color: Colors.grey)),
+                                  const SizedBox(height: 6),
+                                  Row(
+                                    children: [
+                                      const Icon(Icons.access_time, size: 14, color: Colors.grey),
+                                      const SizedBox(width: 4),
+                                      Text(vendor.estimatedTime ?? "31–36 mins", style: const TextStyle(fontSize: 12, color: Colors.grey)),
+                                      const SizedBox(width: 10),
+                                      const Icon(Icons.location_on, size: 14, color: Colors.grey),
+                                      const SizedBox(width: 4),
+                                      Text(
+                                        vendor.distanceKm != null && vendor.distanceKm! > 1
+                                            ? "${vendor.distanceKm!.toStringAsFixed(1)} km"
+                                            : "${(vendor.distanceKm ?? 0) * 1000 ~/ 1} m",
+                                        style: const TextStyle(fontSize: 12, color: Colors.grey),
+                                      ),
+                                    ],
+                                  ),
+                                ],
+                              ),
+                            ),
+                            Container(
+                              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                              decoration: BoxDecoration(color: Colors.blue.shade700, borderRadius: BorderRadius.circular(8)),
+                              child: Text("${vendor.rating?.toStringAsFixed(1) ?? "0.0"} ★", style: const TextStyle(color: Colors.white, fontSize: 12)),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
-              ),
-            );
-          },
-        ),
+              );
+            },
+          );
+        }),
       ],
     );
   }
