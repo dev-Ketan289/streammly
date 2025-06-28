@@ -27,9 +27,7 @@ class Init {
       // Category
       Get.lazyPut(() => CategoryRepo(apiClient: Get.find()));
       Get.lazyPut(() => CategoryController(categoryRepo: Get.find()));
-      //Company
-      // Get.lazyPut(() => CompanyRepo(apiClient: Get.find()));
-      // Get.lazyPut(() => CompanyMapController(companyRepo: Get.find()));
+
     } catch (e) {
       log('---- ${e.toString()} ----', name: "ERROR AT initialize()");
     }

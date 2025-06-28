@@ -26,72 +26,71 @@ class CategoryListScreen extends StatelessWidget {
         title: const Text("Categories", style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Colors.black)),
         centerTitle: true,
       ),
-      body: Obx(() {
-        if (controller.isLoading.value) {
-          return const Center(child: CircularProgressIndicator());
-        } else if (controller.categories.isEmpty) {
-          return const Center(child: Text("No categories found."));
-        }
+      body: GetBuilder<CategoryController>(
+        builder: (controller) {
+          if (controller.isLoading) {
+            return const Center(child: CircularProgressIndicator());
+          } else if (controller.categories.isEmpty) {
+            return const Center(child: Text("No categories found."));
+          }
 
-        return ListView.builder(
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-          itemCount: controller.categories.length,
-          itemBuilder: (context, index) {
-            final cat = controller.categories[index];
+          return ListView.builder(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+            itemCount: controller.categories.length,
+            itemBuilder: (context, index) {
+              final cat = controller.categories[index];
 
-            return GestureDetector(
-              onTap: () {
-                Get.to(() => CompanyLocatorMapScreen(categoryId: cat.id));
-              },
-              child: Container(
-                margin: const EdgeInsets.only(bottom: 16),
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(16),
-                  boxShadow: [BoxShadow(color: Colors.grey.withAlpha(40), blurRadius: 8, offset: const Offset(0, 4))],
-                ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    // Image
-                    Stack(
-                      children: [
-                        Center(
-                          child: Padding(
-                            padding: const EdgeInsets.only(top: 8.0),
-                            child: TRoundedImage(
-                              imageUrl: "${AppConstants.baseUrl}${cat.image}",
-                              height: 100,
-                              width: 380,
-                              fit: BoxFit.cover,
-                              borderRadius: 16,
-                              isNetworkImage: true,
+              return GestureDetector(
+                onTap: () {
+                  Get.to(() => CompanyLocatorMapScreen(categoryId: cat.id));
+                },
+                child: Container(
+                  margin: const EdgeInsets.only(bottom: 16),
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(16),
+                    boxShadow: [BoxShadow(color: Colors.grey.withAlpha(40), blurRadius: 8, offset: const Offset(0, 4))],
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Stack(
+                        children: [
+                          Center(
+                            child: Padding(
+                              padding: const EdgeInsets.only(top: 8.0),
+                              child: TRoundedImage(
+                                imageUrl: "${AppConstants.baseUrl}${cat.image}",
+                                height: 100,
+                                width: 380,
+                                fit: BoxFit.cover,
+                                borderRadius: 16,
+                                isNetworkImage: true,
+                              ),
                             ),
                           ),
-                        ),
-                        const Positioned(top: 10, right: 10, child: Icon(Icons.bookmark, size: 25, color: Colors.red)),
-                      ],
-                    ),
-
-                    // Text
-                    Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(cat.title, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
-                          const SizedBox(height: 4),
-                          Text(cat.shortDescription ?? "No description available", style: const TextStyle(fontSize: 13, color: Colors.grey)),
+                          const Positioned(top: 10, right: 10, child: Icon(Icons.bookmark, size: 25, color: Colors.red)),
                         ],
                       ),
-                    ),
-                  ],
+                      Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(cat.title, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+                            const SizedBox(height: 4),
+                            Text(cat.shortDescription ?? "No description available", style: const TextStyle(fontSize: 13, color: Colors.grey)),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
-              ),
-            );
-          },
-        );
-      }),
+              );
+            },
+          );
+        },
+      ),
     );
   }
 }

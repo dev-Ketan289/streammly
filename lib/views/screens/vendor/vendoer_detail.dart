@@ -55,7 +55,7 @@ class _VendorDetailScreenState extends State<VendorDetailScreen> {
               const SizedBox(height: 6),
 
               /// ---- Category Scroller (Subcategories) ----
-              Obx(() {
+              GetBuilder<CompanyController>(builder: (_) {
                 final subs = companyController.subCategories;
 
                 if (subs.isEmpty) {
@@ -75,8 +75,7 @@ class _VendorDetailScreenState extends State<VendorDetailScreen> {
                 }
 
                 return CategoryScroller(
-                  categories:
-                  subs.map((sub) {
+                  categories: subs.map((sub) {
                     return CategoryItem(
                       label: sub.title,
                       imagePath: 'http://192.168.1.113:8000/${sub.image ?? ""}',

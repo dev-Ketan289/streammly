@@ -42,7 +42,8 @@ class _HomeScreenState extends State<HomeScreen> {
     return models.map((model) {
       String? fullImageUrl;
       if (model.image != null && model.image!.isNotEmpty) {
-        final path = model.image!.startsWith('/') ? model.image! : '/${model.image!}';
+        final path = model.image!.startsWith('/') ? model.image! : '/${model
+            .image!}';
         fullImageUrl = '$baseUrl$path';
       }
 
@@ -61,42 +62,53 @@ class _HomeScreenState extends State<HomeScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.white,
-      body: Obx(() {
-        final slides = headerController.headerSlides;
-        final isCategoryLoading = categoryController.isLoading.value;
-        final categoryModels = categoryController.categories;
+      body: GetBuilder<CategoryController>(
+        builder: (controller) {
+          final slides = headerController.headerSlides;
+          final isCategoryLoading = controller.isLoading;
+          final categoryModels = controller.categories;
 
-        if (slides.isEmpty && isCategoryLoading) {
-          return const Center(child: CircularProgressIndicator());
-        }
+          if (slides.isEmpty && isCategoryLoading) {
+            return const Center(child: CircularProgressIndicator());
+          }
 
-        return SafeArea(
-          child: SingleChildScrollView(
-            child: Column(
-              children: [
-                HeaderBanner(slides: slides, height: 370, backgroundImage: "assets/images/banner.png", overlayColor: Colors.white.withValues(alpha: 0.3), ),
-                const SizedBox(height: 24),
-                UpcomingOfferCard(),
-                const SizedBox(height: 24),
+          return SafeArea(
+            child: SingleChildScrollView(
+              child: Column(
+                children: [
+                  HeaderBanner(
+                    slides: slides,
+                    height: 370,
+                    backgroundImage: "assets/images/banner.png",
+                    overlayColor: Colors.white.withOpacity(0.3),
+                  ),
+                  const SizedBox(height: 24),
+                  UpcomingOfferCard(),
+                  const SizedBox(height: 24),
 
-                isCategoryLoading
-                    ? const CircularProgressIndicator()
-                    : CategoryScroller(title: "Categories", onSeeAll: () => Get.to(() => CategoryListScreen()), categories: convertToCategoryItems(categoryModels)),
+                  isCategoryLoading
+                      ? const CircularProgressIndicator()
+                      : CategoryScroller(
+                    title: "Categories",
+                    onSeeAll: () => Get.to(() => CategoryListScreen()),
+                    categories: convertToCategoryItems(categoryModels),
+                  ),
 
-                const SizedBox(height: 24),
-                PageNav(),
-                const SizedBox(height: 24),
-                RecommendedList(context: context),
-                const SizedBox(height: 24),
-                ExploreUs(vendorId: 1),
-                const SizedBox(height: 26),
-                PromoSlider(),
-                const SizedBox(height: 24),
-              ],
+                  const SizedBox(height: 24),
+                  PageNav(),
+                  const SizedBox(height: 24),
+                  RecommendedList(context: context),
+                  const SizedBox(height: 24),
+                  ExploreUs(vendorId: 1),
+                  const SizedBox(height: 26),
+                  PromoSlider(),
+                  const SizedBox(height: 24),
+                ],
+              ),
             ),
-          ),
-        );
-      }),
+          );
+        },
+      ),
     );
   }
 }
