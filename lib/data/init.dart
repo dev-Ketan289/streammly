@@ -32,6 +32,9 @@ class Init {
       //Company
       Get.lazyPut(() => CompanyRepo(apiClient: Get.find()));
       Get.lazyPut(() => CompanyController(companyRepo: Get.find()));
+      // Package
+      // Get.lazyPut(() => PackagesRepo(apiClient: Get.find()));
+      // Get.lazyPut(() => PackagesController(packagesRepo: Get.find()));
     } catch (e) {
       log('---- ${e.toString()} ----', name: "ERROR AT initialize()");
     }

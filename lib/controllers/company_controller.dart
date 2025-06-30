@@ -72,7 +72,15 @@ class CompanyController extends GetxController {
 
   Future<void> fetchCompanyById(int companyId) async {
     try {
-      selectedCompany = await companyRepo.fetchCompanyById(companyId);
+      userPosition ??= await _getCurrentLocation();
+      final company = await companyRepo.fetchCompanyById(companyId);
+
+      if (company?.latitude != null && company?.longitude != null && userPosition != null) {
+        company?.distanceKm = calculateDistance(userPosition!.latitude, userPosition!.longitude, company.latitude!, company.longitude!);
+        company?.estimatedTime = _estimateTimeFromDistance(company.distanceKm!);
+      }
+
+      selectedCompany = company;
       update();
     } catch (e) {
       Get.snackbar("Error", "Something went wrong: $e");

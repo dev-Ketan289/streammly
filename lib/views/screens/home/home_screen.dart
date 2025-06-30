@@ -24,16 +24,15 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
-  final HeaderController headerController = Get.put(HeaderController());
+  final HomeController headerController = Get.put(HomeController());
   final LocationController locationController = Get.put(LocationController());
-
-  // Using Get.find to get the pre-initialized controller
   final CategoryController categoryController = Get.find<CategoryController>();
 
   @override
   void initState() {
     super.initState();
     headerController.fetchSlides();
+    headerController.fetchRecommendedCompanies();
     categoryController.fetchCategories();
   }
 
@@ -50,7 +49,6 @@ class _HomeScreenState extends State<HomeScreen> {
         label: model.title,
         imagePath: fullImageUrl,
         onTap: () {
-          //Navigate Directly to vendor Locator
           Get.to(() => CompanyLocatorMapScreen(categoryId: model.id));
         },
       );
@@ -87,7 +85,20 @@ class _HomeScreenState extends State<HomeScreen> {
                   const SizedBox(height: 24),
                   PageNav(),
                   const SizedBox(height: 24),
-                  RecommendedList(context: context),
+
+                  // ✅ RECOMMENDED LIST (DYNAMIC)
+                  GetBuilder<HomeController>(
+                    builder: (headerCtrl) {
+                      if (headerCtrl.isRecommendedLoading) {
+                        return const Center(child: CircularProgressIndicator());
+                      } else if (headerCtrl.recommendedCompanies.isEmpty) {
+                        return const Center(child: Text("No recommended vendors found."));
+                      } else {
+                        return RecommendedList(context: context, recommendedCompanies: headerCtrl.recommendedCompanies);
+                      }
+                    },
+                  ),
+
                   const SizedBox(height: 24),
                   ExploreUs(vendorId: 1),
                   const SizedBox(height: 26),

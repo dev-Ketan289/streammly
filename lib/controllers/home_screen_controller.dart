@@ -5,10 +5,24 @@ import 'package:http/http.dart' as http;
 
 import '../models/banner/banner_item.dart';
 
-class HeaderController extends GetxController {
-  RxList<BannerSlideItem> headerSlides = <BannerSlideItem>[].obs;
+class HomeController extends GetxController {
+  List<BannerSlideItem> headerSlides = [];
+  List<Map<String, dynamic>> recommendedCompanies = [];
+
+  bool isHeaderLoading = true;
+  bool isRecommendedLoading = true;
+
+  @override
+  void onInit() {
+    super.onInit();
+    fetchSlides();
+    fetchRecommendedCompanies();
+  }
 
   Future<void> fetchSlides() async {
+    isHeaderLoading = true;
+    update();
+
     try {
       final res = await http.get(Uri.parse("http://192.168.1.113:8000/api/v1/basic/header-sliders"));
       if (res.statusCode == 200) {
@@ -24,10 +38,35 @@ class HeaderController extends GetxController {
           }
         }
 
-        headerSlides.value = result;
+        headerSlides = result;
       }
     } catch (e) {
       print("Error fetching header slides: $e");
     }
+
+    isHeaderLoading = false;
+    update();
+  }
+
+  Future<void> fetchRecommendedCompanies() async {
+    isRecommendedLoading = true;
+    update();
+
+    const url = "http://192.168.1.113:8000/api/v1/company/getratingbasedrecomendedcompanies";
+
+    try {
+      final response = await http.get(Uri.parse(url));
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
+        final List allCompanies = data["data"] ?? [];
+
+        recommendedCompanies = allCompanies.where((c) => (c["rating"] ?? 0) >= 4).cast<Map<String, dynamic>>().toList();
+      }
+    } catch (e) {
+      print("Error fetching recommended companies: $e");
+    }
+
+    isRecommendedLoading = false;
+    update();
   }
 }

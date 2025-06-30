@@ -3,6 +3,7 @@ import 'package:fluttertoast/fluttertoast.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:pin_code_fields/pin_code_fields.dart';
+import 'package:sms_autofill/sms_autofill.dart';
 import 'package:streammly/controllers/auth_controller.dart';
 import 'package:streammly/controllers/otp_controller.dart';
 import 'package:streammly/views/screens/auth_screens/welcome.dart';
@@ -18,26 +19,38 @@ class OtpScreen extends StatefulWidget {
 }
 
 class _OtpScreenState extends State<OtpScreen> {
-  // Get.put()
   String fullNumber = "";
+  late String phone;
+
   @override
   void initState() {
     super.initState();
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
       final String fullPhone = Get.find<AuthController>().phoneController.text;
-      final String phone = fullPhone.replaceAll("+91 ", "");
+      phone = fullPhone.replaceAll("+91 ", "");
       fullNumber = 'Via SMS $fullPhone';
 
-      /// ✅ Auto-fill OTP for test number
+      /// ✅ Auto-fill test number OTP
       if (phone == "8111111111") {
         Get.find<OtpController>().otpController.text = "123456";
       }
+
+      /// ✅ Start listening for SMS autofill
+      SmsAutoFill().listenForCode();
     });
   }
 
   @override
+  void dispose() {
+    SmsAutoFill().unregisterListener();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
+    // final otpController = Get.find<OtpController>();
+
     return PopScope(
       canPop: false,
       child: Scaffold(
@@ -57,6 +70,8 @@ class _OtpScreenState extends State<OtpScreen> {
                           const SizedBox(height: 20),
                           Padding(padding: const EdgeInsets.symmetric(horizontal: 40.0), child: Image.asset("assets/images/loginpage.gif", height: 300)),
                           const SizedBox(height: 20),
+
+                          /// OTP Section
                           Padding(
                             padding: const EdgeInsets.symmetric(horizontal: 24),
                             child: GetBuilder<OtpController>(
@@ -92,8 +107,35 @@ class _OtpScreenState extends State<OtpScreen> {
                                         onChanged: (value) {},
                                       ),
                                     ),
-
                                     const SizedBox(height: 10),
+
+                                    /// Timer & Resend
+                                    Row(
+                                      mainAxisAlignment: MainAxisAlignment.center,
+                                      children: [
+                                        const Icon(Icons.watch_later_outlined, size: 16, color: Colors.grey),
+                                        const SizedBox(width: 4),
+                                        Obx(() {
+                                          return Text(
+                                            "Resend code in 00:${otpController.secondsRemaining.value.toString().padLeft(2, '0')}",
+                                            style: const TextStyle(fontSize: 13, color: Colors.grey),
+                                          );
+                                        }),
+                                        const SizedBox(width: 10),
+                                        GestureDetector(
+                                          onTap: otpController.secondsRemaining.value == 0 ? () => otpController.resendOTP(phone) : null,
+                                          child: Text(
+                                            "Resend OTP",
+                                            style: TextStyle(
+                                              color: otpController.secondsRemaining.value == 0 ? Colors.indigo : Colors.grey,
+                                              fontWeight: FontWeight.bold,
+                                              fontSize: 13,
+                                            ),
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+
                                     const SizedBox(height: 30),
 
                                     /// Confirm OTP Button
@@ -106,14 +148,6 @@ class _OtpScreenState extends State<OtpScreen> {
                                             otpController.isLoading
                                                 ? null
                                                 : () {
-                                                  // otpController.confirmOTP(
-                                                  //   phone,
-                                                  //   onVerified: () {
-                                                  //     Get.offAll(
-                                                  //       () => const WelcomeScreen(),
-                                                  //     );
-                                                  //   },
-                                                  // );
                                                   otpController.verifyOtp().then((value) {
                                                     if (value.isSuccess) {
                                                       Get.offAll(() => const WelcomeScreen());
@@ -131,6 +165,8 @@ class _OtpScreenState extends State<OtpScreen> {
                             ),
                           ),
                           const Spacer(),
+
+                          /// Footer
                           Padding(
                             padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 20),
                             child: Text.rich(

@@ -8,17 +8,32 @@ import '../home/widgets/header_banner.dart';
 import '../package/get_quote_page.dart';
 import '../package/package_page.dart';
 
-class VendorGroup extends StatelessWidget {
+class VendorGroup extends StatefulWidget {
   final CompanyLocation company;
   final int subCategoryId;
 
   const VendorGroup({super.key, required this.company, required this.subCategoryId});
 
   @override
-  Widget build(BuildContext context) {
-    final CompanyController controller = Get.find<CompanyController>();
-    controller.fetchSubVerticalCards(company.id ?? 0, subCategoryId);
+  State<VendorGroup> createState() => _VendorGroupState();
+}
 
+class _VendorGroupState extends State<VendorGroup> {
+  late CompanyController controller;
+
+  @override
+  void initState() {
+    super.initState();
+    controller = Get.find<CompanyController>();
+
+    // Run fetch only once after build
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      controller.fetchSubVerticalCards(widget.company.id ?? 0, widget.subCategoryId);
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: const Color(0xFFF7F9FD),
       bottomNavigationBar: NavigationHelper.buildBottomNav(),
@@ -30,10 +45,12 @@ class VendorGroup extends StatelessWidget {
             HeaderBanner(
               height: 280,
               backgroundImage:
-                  company.bannerImage?.isNotEmpty == true ? 'http://192.168.1.113:8000/${company.bannerImage}' : 'assets/images/recommended_banner/FocusPointVendor.png',
+                  widget.company.bannerImage?.isNotEmpty == true
+                      ? 'http://192.168.1.113:8000/${widget.company.bannerImage}'
+                      : 'assets/images/recommended_banner/FocusPointVendor.png',
               overlayColor: Colors.indigo.withValues(alpha: 0.6),
-              overrideTitle: company.companyName,
-              overrideSubtitle: company.categoryName,
+              overrideTitle: widget.company.companyName,
+              overrideSubtitle: widget.company.categoryName,
             ),
             const SizedBox(height: 10),
             Expanded(
@@ -60,7 +77,7 @@ class VendorGroup extends StatelessWidget {
                       final id = int.tryParse(item['id'] ?? '') ?? 0;
 
                       return GestureDetector(
-                        onTap: () => _showShootOptionsBottomSheet(context, label, id, company.id ?? 0, subCategoryId),
+                        onTap: () => _showShootOptionsBottomSheet(context, label, id, widget.company.id ?? 0, widget.subCategoryId),
                         child: Column(
                           children: [
                             Expanded(

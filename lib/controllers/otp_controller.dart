@@ -14,6 +14,7 @@ import 'auth_controller.dart';
 class OtpController extends GetxController implements GetxService {
   final AuthRepo authRepo;
   OtpController({required this.authRepo});
+
   final TextEditingController otpController = TextEditingController();
 
   RxInt secondsRemaining = 30.obs;
@@ -22,15 +23,29 @@ class OtpController extends GetxController implements GetxService {
   bool isLoading = false;
 
   Timer? _timer;
+
   Future<ResponseModel> verifyOtp() async {
     isLoading = true;
     update();
     ResponseModel responseModel;
+
+    final phone = Get.find<AuthController>().phoneController.text.trim();
+
+    /// ✅ Bypass check for test number
+    if (phone == "8111111111") {
+      Get.find<AuthController>().setUserToken("test-token");
+      Fluttertoast.showToast(msg: "Test number login successful");
+      isLoading = false;
+      update();
+      return ResponseModel(true, "Verification Successful");
+    }
+
     try {
-      Response response = await authRepo.verifyOtp(phone: Get.find<AuthController>().phoneController.text, otp: otpController.text);
+      Response response = await authRepo.verifyOtp(phone: phone, otp: otpController.text);
+
       if (response.statusCode == 200 && response.body['data']['token'] != null) {
         Get.find<AuthController>().setUserToken(response.body['data']['token']);
-        responseModel = ResponseModel(true, "verification Sucessfull");
+        responseModel = ResponseModel(true, "Verification Successful");
       } else {
         shakeOnError.value = true;
         Future.delayed(const Duration(milliseconds: 500), () {
@@ -40,8 +55,9 @@ class OtpController extends GetxController implements GetxService {
       }
     } catch (e) {
       responseModel = ResponseModel(false, "Error in Verification");
-      log(e.toString(), name: "***** Error in Send Otp () *****");
+      log(e.toString(), name: "***** Error in verifyOtp() *****");
     }
+
     isLoading = false;
     update();
     return responseModel;
@@ -99,12 +115,16 @@ class OtpController extends GetxController implements GetxService {
       final responseBody = jsonDecode(response.body);
 
       if (response.statusCode == 200 && responseBody['success'] == true) {
-        final otpMessage = responseBody['data'];
-        final otpCode = otpMessage.toString().split(" ").first;
+        final otpMessage = responseBody['data'] ?? '';
+        final otpCode = RegExp(r'\d{6}').firstMatch(otpMessage)?.group(0) ?? '';
 
-        receivedOTP.value = otpCode;
-        startTimer();
-        Fluttertoast.showToast(msg: "OTP resent: $otpCode");
+        if (otpCode.isNotEmpty) {
+          receivedOTP.value = otpCode;
+          startTimer();
+          Fluttertoast.showToast(msg: "OTP resent: $otpCode");
+        } else {
+          Fluttertoast.showToast(msg: "OTP format error");
+        }
       } else {
         Fluttertoast.showToast(msg: responseBody['message'] ?? "Could not resend OTP");
       }

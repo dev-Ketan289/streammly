@@ -190,16 +190,17 @@ class _CompanyLocatorMapScreenState extends State<CompanyLocatorMapScreen> {
                 left: 0,
                 right: 0,
                 child: GestureDetector(
-                  onTap: () {
+                  onTap: () async {
+                    await controller.fetchCompanyById(company.id!);
                     Get.to(() => const VendorDescription());
                   },
                   child: VendorInfoCard(
-                    logoImage: "http://192.168.1.113:8000/${company.logo ?? ''}",
+                    logoImage: company.logo ?? '',
                     companyName: company.companyName,
                     category: company.categoryName ?? '',
                     description: company.description ?? '',
                     rating: company.rating?.toStringAsFixed(1) ?? '3.9',
-                    estimatedTime: "31–36 mins",
+                    estimatedTime: company.estimatedTime,
                     distanceKm:
                         company.distanceKm != null
                             ? (company.distanceKm! < 1 ? "${(company.distanceKm! * 1000).toStringAsFixed(0)} m" : "${company.distanceKm!.toStringAsFixed(1)} km")

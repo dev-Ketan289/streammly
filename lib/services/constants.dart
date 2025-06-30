@@ -49,6 +49,9 @@ class AppConstants {
   static const String getCompanyProfile = 'api/v1/company/getcompanysprofile/';
   static const String getCompanySubCategories = 'api/v1/company/getcompanysubcategories/';
   static const String getSubVerticals = 'api/v1/company/getsubvertical';
+
+  // Package
+  static const String getPackagesUrl = "/api/v1/package/getpackages";
   //
   static const double horizontalPadding = 16;
   static const double verticalPadding = 20;
