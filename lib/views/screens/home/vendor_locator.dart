@@ -22,8 +22,7 @@ class CompanyLocatorMapScreen extends StatefulWidget {
 }
 
 class _CompanyLocatorMapScreenState extends State<CompanyLocatorMapScreen> {
-  final CompanyController controller = Get.put(CompanyController());
-
+  final CompanyController controller = Get.find<CompanyController>();
   final CategoryController categoryController = Get.find<CategoryController>();
 
   final Set<Marker> _customMarkers = {};
@@ -31,14 +30,14 @@ class _CompanyLocatorMapScreenState extends State<CompanyLocatorMapScreen> {
   @override
   void initState() {
     super.initState();
-    controller.selectedCategoryId.value = widget.categoryId;
+    controller.setCategoryId(widget.categoryId);
     _loadData();
   }
 
   Future<void> _loadData() async {
     _customMarkers.clear();
     setState(() {});
-    await controller.fetchCompaniesByCategory(controller.selectedCategoryId.value);
+    await controller.fetchCompaniesByCategory(controller.selectedCategoryId);
     await _generateCustomMarkers();
   }
 
@@ -52,7 +51,6 @@ class _CompanyLocatorMapScreenState extends State<CompanyLocatorMapScreen> {
       double lng = company.longitude!;
       String posKey = "$lat-$lng";
 
-      // Prevent overlapping markers
       int retry = 0;
       while (usedPositions.contains(posKey)) {
         double offset = 0.00008 * (retry + 1);
@@ -85,7 +83,6 @@ class _CompanyLocatorMapScreenState extends State<CompanyLocatorMapScreen> {
 
   Future<Uint8List> _createCustomMarkerBitmap(BuildContext context, String title, String distance) async {
     final key = GlobalKey();
-
     final markerWidget = Material(type: MaterialType.transparency, child: RepaintBoundary(key: key, child: _buildCustomMarker(title, distance)));
 
     final overlay = Overlay.of(context);
@@ -134,75 +131,84 @@ class _CompanyLocatorMapScreenState extends State<CompanyLocatorMapScreen> {
                 markers: _customMarkers,
                 myLocationEnabled: true,
                 myLocationButtonEnabled: false,
-                onTap: (_) => controller.selectedCompany.value = null,
+                onTap: (_) => controller.clearSelectedCompany(),
               ),
-              Obx(() {
-                final showOverlay = controller.selectedCompany.value != null;
-                return IgnorePointer(
-                  ignoring: true,
-                  child: AnimatedOpacity(opacity: showOverlay ? 0.2 : 0.0, duration: const Duration(milliseconds: 300), child: Container(color: Colors.indigo)),
-                );
-              }),
+              GetBuilder<CompanyController>(
+                builder: (_) {
+                  final showOverlay = controller.selectedCompany != null;
+                  return IgnorePointer(
+                    ignoring: true,
+                    child: AnimatedOpacity(opacity: showOverlay ? 0.2 : 0.0, duration: const Duration(milliseconds: 300), child: Container(color: Colors.indigo)),
+                  );
+                },
+              ),
             ],
           ),
+
+          // ✅ FIXED: Replaced Obx with GetBuilder
           Positioned(
             top: 60,
             left: 20,
             right: 20,
-            child: Obx(() {
-              if (categoryController.isLoading.value) {
-                return const Center(child: CircularProgressIndicator());
-              }
+            child: GetBuilder<CategoryController>(
+              builder: (_) {
+                if (categoryController.isLoading) {
+                  return const Center(child: CircularProgressIndicator());
+                }
 
-              return Container(
-                padding: const EdgeInsets.symmetric(horizontal: 16),
-                decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(12)),
-                child: DropdownButton<int>(
-                  value: controller.selectedCategoryId.value,
-                  isExpanded: true,
-                  underline: const SizedBox(),
-                  items:
-                      categoryController.categories
-                          .map((category) => DropdownMenuItem<int>(value: category.id, child: Center(child: Text(category.title, textAlign: TextAlign.center))))
-                          .toList(),
-                  onChanged: (int? newId) {
-                    if (newId != null) {
-                      controller.selectedCategoryId.value = newId;
-                      controller.selectedCompany.value = null;
-                      _loadData();
-                    }
+                return Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 16),
+                  decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(12)),
+                  child: DropdownButton<int>(
+                    value: controller.selectedCategoryId,
+                    isExpanded: true,
+                    underline: const SizedBox(),
+                    items:
+                        categoryController.categories
+                            .map((category) => DropdownMenuItem<int>(value: category.id, child: Center(child: Text(category.title, textAlign: TextAlign.center))))
+                            .toList(),
+                    onChanged: (int? newId) {
+                      if (newId != null) {
+                        controller.setCategoryId(newId);
+                        controller.clearSelectedCompany();
+                        _loadData();
+                      }
+                    },
+                  ),
+                );
+              },
+            ),
+          ),
+
+          GetBuilder<CompanyController>(
+            builder: (_) {
+              final company = controller.selectedCompany;
+              if (company == null) return const SizedBox();
+
+              return Positioned(
+                bottom: 0,
+                left: 0,
+                right: 0,
+                child: GestureDetector(
+                  onTap: () {
+                    Get.to(() => const VendorDescription());
                   },
+                  child: VendorInfoCard(
+                    logoImage: "http://192.168.1.113:8000/${company.logo ?? ''}",
+                    companyName: company.companyName,
+                    category: company.categoryName ?? '',
+                    description: company.description ?? '',
+                    rating: company.rating?.toStringAsFixed(1) ?? '3.9',
+                    estimatedTime: "31–36 mins",
+                    distanceKm:
+                        company.distanceKm != null
+                            ? (company.distanceKm! < 1 ? "${(company.distanceKm! * 1000).toStringAsFixed(0)} m" : "${company.distanceKm!.toStringAsFixed(1)} km")
+                            : null,
+                  ),
                 ),
               );
-            }),
+            },
           ),
-          Obx(() {
-            final company = controller.selectedCompany.value;
-            if (company == null) return const SizedBox();
-
-            return Positioned(
-              bottom: 0,
-              left: 0,
-              right: 0,
-              child: GestureDetector(
-                onTap: () {
-                  Get.to(() => VendorDescription());
-                },
-                child: VendorInfoCard(
-                  logoImage: "http://192.168.1.113:8000/${company.logo ?? ''}",
-                  companyName: company.companyName,
-                  category: company.categoryName ?? '',
-                  description: company.description ?? '',
-                  rating: company.rating?.toStringAsFixed(1) ?? '3.9',
-                  estimatedTime: "31–36 mins",
-                  distanceKm:
-                      company.distanceKm != null
-                          ? (company.distanceKm! < 1 ? "${(company.distanceKm! * 1000).toStringAsFixed(0)} m" : "${company.distanceKm!.toStringAsFixed(1)} km")
-                          : null,
-                ),
-              ),
-            );
-          }),
         ],
       ),
     );

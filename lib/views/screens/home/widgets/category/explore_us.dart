@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:shimmer/shimmer.dart';
 import 'package:streammly/controllers/company_controller.dart';
 
 import '../../../vendor/vendor_detail.dart';
@@ -12,12 +13,7 @@ class ExploreUs extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final CompanyController companyController = Get.put(CompanyController());
-
-    // ✅ Fix: Call fetch only if not already loaded
-    if (companyController.companies.isEmpty) {
-      companyController.fetchCompaniesByCategory(companyController.selectedCategoryId.value);
-    }
+    final CompanyController companyController = Get.find<CompanyController>();
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -45,6 +41,10 @@ class ExploreUs extends StatelessWidget {
         ),
 
         Obx(() {
+          if (companyController.isLoading.value) {
+            return _buildShimmerList();
+          }
+
           final vendors = companyController.companies;
 
           final filteredVendors = vendorId != null ? vendors.where((v) => v.id == vendorId).toList() : vendors;
@@ -142,6 +142,22 @@ class ExploreUs extends StatelessWidget {
           );
         }),
       ],
+    );
+  }
+
+  Widget _buildShimmerList() {
+    return ListView.builder(
+      itemCount: 3,
+      shrinkWrap: true,
+      physics: const NeverScrollableScrollPhysics(),
+      padding: const EdgeInsets.symmetric(horizontal: 16),
+      itemBuilder: (context, index) {
+        return Shimmer.fromColors(
+          baseColor: Colors.grey.shade300,
+          highlightColor: Colors.grey.shade100,
+          child: Container(margin: const EdgeInsets.only(bottom: 20), height: 220, decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(18))),
+        );
+      },
     );
   }
 }

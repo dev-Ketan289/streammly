@@ -27,7 +27,7 @@ class AppConstants {
 
   //TODO: Change Base Url
   static String baseUrl = 'http://192.168.1.113:8000/';
-  // static String baseUrl = 'http://192.168.1.113:8000/'; ///USE FOR Second Local in case first not working
+  // static String baseUrl = 'http://192.168.1.10:8000/'; ///USE FOR Second Local in case first not working
   //TODO: Change Base Url
   static String appName = 'App Name';
 
@@ -44,6 +44,11 @@ class AppConstants {
   // Category
   static const String categoriesUrl = 'api/v1/basic/categories';
 
+  // Company
+  static const String getCompanyLocations = 'api/v1/company/getcompanyslocations/';
+  static const String getCompanyProfile = 'api/v1/company/getcompanysprofile/';
+  static const String getCompanySubCategories = 'api/v1/company/getcompanysubcategories/';
+  static const String getSubVerticals = 'api/v1/company/getsubvertical';
   //
   static const double horizontalPadding = 16;
   static const double verticalPadding = 20;
