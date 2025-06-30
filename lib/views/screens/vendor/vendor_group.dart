@@ -20,15 +20,17 @@ class VendorGroup extends StatefulWidget {
 
 class _VendorGroupState extends State<VendorGroup> {
   late CompanyController controller;
+  int selectedSubCategoryId = -1;
 
   @override
   void initState() {
     super.initState();
     controller = Get.find<CompanyController>();
+    selectedSubCategoryId = widget.subCategoryId;
 
-    // Run fetch only once after build
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      controller.fetchSubVerticalCards(widget.company.id ?? 0, widget.subCategoryId);
+      controller.fetchCompanySubCategories(widget.company.id ?? 0);
+      controller.fetchSubVerticalCards(widget.company.id ?? 0, selectedSubCategoryId);
     });
   }
 
@@ -42,6 +44,7 @@ class _VendorGroupState extends State<VendorGroup> {
       body: SafeArea(
         child: Column(
           children: [
+            /// Header Banner
             HeaderBanner(
               height: 280,
               backgroundImage:
@@ -52,7 +55,84 @@ class _VendorGroupState extends State<VendorGroup> {
               overrideTitle: widget.company.companyName,
               overrideSubtitle: widget.company.categoryName,
             ),
+
             const SizedBox(height: 10),
+
+            /// Category Scroller with selection
+            GetBuilder<CompanyController>(
+              builder: (_) {
+                final subs = controller.subCategories;
+
+                if (subs.isEmpty) {
+                  return const SizedBox();
+                }
+
+                return SizedBox(
+                  height: 120,
+                  child: ListView.separated(
+                    scrollDirection: Axis.horizontal,
+                    padding: const EdgeInsets.symmetric(horizontal: 16),
+                    itemCount: subs.length,
+                    separatorBuilder: (_, __) => const SizedBox(width: 12),
+                    itemBuilder: (context, index) {
+                      final sub = subs[index];
+                      final isSelected = selectedSubCategoryId == sub.id;
+
+                      return GestureDetector(
+                        onTap: () {
+                          setState(() {
+                            selectedSubCategoryId = sub.id;
+                          });
+                          controller.fetchSubVerticalCards(widget.company.id ?? 0, sub.id);
+                        },
+                        child: Column(
+                          children: [
+                            Container(
+                              width: 70,
+                              height: 70,
+                              decoration: BoxDecoration(shape: BoxShape.rectangle, border: Border.all(color: isSelected ? Colors.indigo : Colors.grey.shade300, width: 2)),
+                              child: Stack(
+                                children: [
+                                  ClipRRect(
+                                    child: Image.network(
+                                      'http://192.168.1.113:8000/${sub.image ?? ""}',
+                                      width: 70,
+                                      height: 70,
+                                      fit: BoxFit.cover,
+                                      errorBuilder: (_, __, ___) => Image.asset("assets/images/category/vendor_category/img.png", fit: BoxFit.cover),
+                                    ),
+                                  ),
+                                  if (isSelected)
+                                    const Positioned(
+                                      right: 4,
+                                      top: 4,
+                                      child: CircleAvatar(backgroundColor: Colors.white, radius: 10, child: Icon(Icons.check, color: Colors.indigo, size: 14)),
+                                    ),
+                                ],
+                              ),
+                            ),
+                            const SizedBox(height: 6),
+                            SizedBox(
+                              width: 70,
+                              child: Text(
+                                sub.title,
+                                maxLines: 2,
+                                textAlign: TextAlign.center,
+                                style: TextStyle(fontSize: 12, color: isSelected ? Colors.indigo : Colors.black, fontWeight: isSelected ? FontWeight.bold : FontWeight.normal),
+                              ),
+                            ),
+                          ],
+                        ),
+                      );
+                    },
+                  ),
+                );
+              },
+            ),
+
+            const SizedBox(height: 10),
+
+            /// Sub-verticals Grid
             Expanded(
               child: GetBuilder<CompanyController>(
                 builder: (controller) {
@@ -77,7 +157,7 @@ class _VendorGroupState extends State<VendorGroup> {
                       final id = int.tryParse(item['id'] ?? '') ?? 0;
 
                       return GestureDetector(
-                        onTap: () => _showShootOptionsBottomSheet(context, label, id, widget.company.id ?? 0, widget.subCategoryId),
+                        onTap: () => _showShootOptionsBottomSheet(context, label, id, widget.company.id ?? 0, selectedSubCategoryId),
                         child: Column(
                           children: [
                             Expanded(

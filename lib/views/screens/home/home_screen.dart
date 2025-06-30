@@ -86,7 +86,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   PageNav(),
                   const SizedBox(height: 24),
 
-                  // ✅ RECOMMENDED LIST (DYNAMIC)
+                  // RECOMMENDED LIST
                   GetBuilder<HomeController>(
                     builder: (headerCtrl) {
                       if (headerCtrl.isRecommendedLoading) {

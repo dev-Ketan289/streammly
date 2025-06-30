@@ -34,7 +34,7 @@ class CompanyController extends GetxController {
   }
 
   String _estimateTimeFromDistance(double distanceKm) {
-    const speed = 25.0;
+    const speed = 15.0;
     final timeInHours = distanceKm / speed;
     final minutes = (timeInHours * 60).round();
 

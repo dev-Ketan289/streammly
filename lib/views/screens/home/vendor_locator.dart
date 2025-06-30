@@ -26,12 +26,15 @@ class _CompanyLocatorMapScreenState extends State<CompanyLocatorMapScreen> {
   final CategoryController categoryController = Get.find<CategoryController>();
 
   final Set<Marker> _customMarkers = {};
-
   @override
   void initState() {
     super.initState();
-    controller.setCategoryId(widget.categoryId);
-    _loadData();
+
+    // Avoid setState or update during widget build
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      controller.setCategoryId(widget.categoryId);
+      _loadData();
+    });
   }
 
   Future<void> _loadData() async {

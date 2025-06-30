@@ -29,14 +29,14 @@ class RecommendedList extends StatelessWidget {
           final rating = vendor["rating"]?.toStringAsFixed(1) ?? "--";
           final companyName = vendor["company_name"] ?? "Unknown";
 
-          // ✅ Correct category name (fallback to "Service")
+          // Correct category name (fallback to "Service")
           final category = vendor["category_name"] ?? "Service";
 
-          // ✅ Distance (use provided distance_km if exists)
+          // Distance (use provided distance_km if exists)
           final distanceKm = vendor["distance_km"];
           final distanceText = distanceKm != null ? (distanceKm < 1 ? "${(distanceKm * 1000).toStringAsFixed(0)} m" : "${distanceKm.toStringAsFixed(1)} km") : "--";
 
-          // ✅ Time estimate based on distance (e.g., 7 mins/km)
+          // Time estimate based on distance (e.g., 7 mins/km)
           final time = distanceKm != null ? "${(distanceKm * 7).round()} mins" : "--";
 
           return InkWell(
