@@ -128,28 +128,18 @@ class _CategoriesState extends State<Categories> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Center(
-                child: Text.rich(
-                  TextSpan(
-                    children: [
-                      TextSpan(
-                        text: 'View Categories',
-                        style: TextStyle(
-                          fontSize: 15,
-                          color: Colors.black.withOpacity(0.8),
-                        ),
-                      ),
-                      TextSpan(
-                        text: ' / Categories',
-                        style: TextStyle(
-                          fontSize: 15,
-                          fontWeight: FontWeight.bold,
-                          color: const Color(0xFF2E5CDA),
-                        ),
-                      ),
-                    ],
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Text(
+                    'View Categories ',
+                    style: TextStyle(fontSize: 15, color: Color(0xFF997D15)),
                   ),
-                ),
+                  Text(
+                    '/ View Map',
+                    style: TextStyle(fontSize: 15, color: Colors.black),
+                  ),
+                ],
               ),
               const SizedBox(height: 20),
               Obx(() {
@@ -243,48 +233,28 @@ class _CategoriesState extends State<Categories> {
                 return Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children:
-                      _selectedCategories.map((categoryTitle) {
+                      _selectedCategories.expand((categoryTitle) {
                         final companies =
                             companiesByCategory[categoryTitle] ?? [];
-                        return Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              categoryTitle,
-                              style: TextStyle(
-                                fontSize: 15,
-                                fontWeight: FontWeight.w600,
-                                color: const Color(0xFF2E5CDA),
-                              ),
+                        return companies.map((company) {
+                          return Padding(
+                            padding: const EdgeInsets.only(bottom: 10),
+                            child: VendorRect(
+                              companyName: company.companyName,
+                              rating: '3.9 ★',
+                              timeDistance:
+                                  '${company.estimatedTime ?? '35-40 mins'} . ${company.distanceKm?.toStringAsFixed(1) ?? '4.2'} km',
+                              category: categoryTitle,
+                              description:
+                                  'Our services include premium photography and video facilities for creative professionals and clients.\nStudio rental (Photography/Video/Graphic)\ncinematic videography\nWhy Choose Us: environment\nExperienced studio team',
+                              imageUrl:
+                                  company.bannerImage != null &&
+                                          company.bannerImage!.isNotEmpty
+                                      ? company.bannerImage!
+                                      : 'assets/images/demo.png',
                             ),
-                            const SizedBox(height: 10),
-                            SingleChildScrollView(
-                              scrollDirection: Axis.horizontal,
-                              child: Row(
-                                children: [
-                                  for (var company in companies)
-                                    VendorCard(
-                                      companyName: company.companyName,
-                                      rating: '3.9 ★',
-                                      timeDistance:
-                                          '${company.estimatedTime ?? '35-40 mins'} . ${company.distanceKm?.toStringAsFixed(1) ?? '4.2'} km',
-                                      category: categoryTitle,
-                                      imageUrl:
-                                          company.bannerImage != null &&
-                                                  company
-                                                      .bannerImage!
-                                                      .isNotEmpty
-                                              ? company.bannerImage!
-                                              : 'assets/images/demo.png',
-                                      isSelected: true,
-                                    ),
-                                  const SizedBox(width: 10),
-                                ],
-                              ),
-                            ),
-                            const SizedBox(height: 20),
-                          ],
-                        );
+                          );
+                        }).toList();
                       }).toList(),
                 );
               }),
@@ -519,6 +489,7 @@ class VendorRect extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Row(
+                  mainAxisAlignment: MainAxisAlignment.start,
                   children: [
                     DecoratedBox(
                       decoration: const BoxDecoration(
@@ -539,7 +510,12 @@ class VendorRect extends StatelessWidget {
                         ),
                       ),
                     ),
-                    const SizedBox(width: 7),
+                    SizedBox(width: 5),
+                    Icon(
+                      Icons.location_on,
+                      size: 15,
+                      color: Colors.grey.shade300,
+                    ),
                     Text(
                       timeDistance,
                       style: const TextStyle(
@@ -548,31 +524,57 @@ class VendorRect extends StatelessWidget {
                         overflow: TextOverflow.ellipsis,
                       ),
                     ),
-                    const SizedBox(width: 2),
-                    const Icon(Icons.bookmark, size: 15, color: Colors.grey),
                   ],
                 ),
+                const SizedBox(height: 4),
                 Text(
                   companyName,
                   style: const TextStyle(
-                    fontSize: 13,
+                    fontSize: 16,
                     fontWeight: FontWeight.bold,
                     color: Colors.black,
                   ),
                 ),
+                const SizedBox(height: 4),
                 Text(
                   category,
-                  style: TextStyle(
-                    fontSize: 10,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.grey[400],
-                  ),
+                  style: TextStyle(fontSize: 12, color: Colors.grey[600]),
                 ),
+                const SizedBox(height: 8),
+                // Description list (simulated as text for now)
                 Expanded(
                   child: SingleChildScrollView(
-                    child: Text(
-                      description,
-                      style: const TextStyle(fontSize: 6, color: Colors.grey),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children:
+                          description
+                              .split('\n')
+                              .map(
+                                (line) => Padding(
+                                  padding: const EdgeInsets.only(bottom: 4),
+                                  child: Row(
+                                    children: [
+                                      const Icon(
+                                        Icons.check,
+                                        size: 14,
+                                        color: Colors.green,
+                                      ),
+                                      const SizedBox(width: 4),
+                                      Expanded(
+                                        child: Text(
+                                          line.trim(),
+                                          style: const TextStyle(
+                                            fontSize: 12,
+                                            color: Colors.black87,
+                                          ),
+                                          overflow: TextOverflow.ellipsis,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              )
+                              .toList(),
                     ),
                   ),
                 ),
