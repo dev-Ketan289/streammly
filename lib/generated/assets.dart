@@ -30,6 +30,14 @@ class Assets {
   /// assets/images/category/venue.png
   static const String imagesCategoryVenue = "assets/images/category/venue.png";
 
+  /// Assets for imagesCommonBackground
+  /// assets/images/common-background.png
+  static const String imagesCommonBackground = "assets/images/common-background.png";
+
+  /// Assets for imagesDemo
+  /// assets/images/demo.png
+  static const String imagesDemo = "assets/images/demo.png";
+
   /// Assets for imagesImg
   /// assets/images/img.png
   static const String imagesImg = "assets/images/img.png";
@@ -90,6 +98,10 @@ class Assets {
   /// assets/images/Thumb.gif
   static const String imagesThumb = "assets/images/Thumb.gif";
 
+  /// Assets for imagesVendorDemo
+  /// assets/images/vendor_demo.png
+  static const String imagesVendorDemo = "assets/images/vendor_demo.png";
+
   /// Assets for svgBooking
   /// assets/svg/booking.svg
   static const String svgBooking = "assets/svg/booking.svg";
@@ -97,6 +109,10 @@ class Assets {
   /// Assets for svgCart
   /// assets/svg/cart.svg
   static const String svgCart = "assets/svg/cart.svg";
+
+  /// Assets for svgDiamond
+  /// assets/svg/diamond.svg
+  static const String svgDiamond = "assets/svg/diamond.svg";
 
   /// Assets for svgEye
   /// assets/svg/eye.svg
