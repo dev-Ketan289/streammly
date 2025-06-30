@@ -8,7 +8,7 @@ class CategoryController extends GetxController implements GetxService {
 
   CategoryController({required this.categoryRepo});
 
-  List<CategoryModel> categories = [];
+  List<CategoryModel> categories = [];  
   bool isLoading = true;
 
   @override

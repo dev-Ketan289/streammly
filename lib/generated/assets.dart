@@ -102,13 +102,25 @@ class Assets {
   /// assets/images/vendor_demo.png
   static const String imagesVendorDemo = "assets/images/vendor_demo.png";
 
+  /// Assets for svgBell
+  /// assets/svg/bell.svg
+  static const String svgBell = "assets/svg/bell.svg";
+
   /// Assets for svgBooking
   /// assets/svg/booking.svg
   static const String svgBooking = "assets/svg/booking.svg";
 
+  /// Assets for svgCancellation
+  /// assets/svg/cancellation.svg
+  static const String svgCancellation = "assets/svg/cancellation.svg";
+
   /// Assets for svgCart
   /// assets/svg/cart.svg
   static const String svgCart = "assets/svg/cart.svg";
+
+  /// Assets for svgChat
+  /// assets/svg/chat.svg
+  static const String svgChat = "assets/svg/chat.svg";
 
   /// Assets for svgDiamond
   /// assets/svg/diamond.svg
@@ -122,24 +134,84 @@ class Assets {
   /// assets/svg/eye_close.svg
   static const String svgEyeClose = "assets/svg/eye_close.svg";
 
+  /// Assets for svgFacebook
+  /// assets/svg/facebook.svg
+  static const String svgFacebook = "assets/svg/facebook.svg";
+
+  /// Assets for svgFaq
+  /// assets/svg/faq.svg
+  static const String svgFaq = "assets/svg/faq.svg";
+
+  /// Assets for svgGmail
+  /// assets/svg/gmail.svg
+  static const String svgGmail = "assets/svg/gmail.svg";
+
+  /// Assets for svgGoogle
+  /// assets/svg/google.svg
+  static const String svgGoogle = "assets/svg/google.svg";
+
   /// Assets for svgHome
   /// assets/svg/home.svg
   static const String svgHome = "assets/svg/home.svg";
+
+  /// Assets for svgInstagram
+  /// assets/svg/instagram.svg
+  static const String svgInstagram = "assets/svg/instagram.svg";
+
+  /// Assets for svgLanguage
+  /// assets/svg/language.svg
+  static const String svgLanguage = "assets/svg/language.svg";
+
+  /// Assets for svgLinked
+  /// assets/svg/linked.svg
+  static const String svgLinked = "assets/svg/linked.svg";
 
   /// Assets for svgMore
   /// assets/svg/more.svg
   static const String svgMore = "assets/svg/more.svg";
 
+  /// Assets for svgMybookings
+  /// assets/svg/mybookings.svg
+  static const String svgMybookings = "assets/svg/mybookings.svg";
+
   /// Assets for svgPen
   /// assets/svg/pen.svg
   static const String svgPen = "assets/svg/pen.svg";
+
+  /// Assets for svgPromo
+  /// assets/svg/promo.svg
+  static const String svgPromo = "assets/svg/promo.svg";
+
+  /// Assets for svgRate
+  /// assets/svg/rate.svg
+  static const String svgRate = "assets/svg/rate.svg";
+
+  /// Assets for svgRefer
+  /// assets/svg/refer.svg
+  static const String svgRefer = "assets/svg/refer.svg";
+
+  /// Assets for svgReport
+  /// assets/svg/report.svg
+  static const String svgReport = "assets/svg/report.svg";
+
+  /// Assets for svgSaved
+  /// assets/svg/saved.svg
+  static const String svgSaved = "assets/svg/saved.svg";
 
   /// Assets for svgShop
   /// assets/svg/shop.svg
   static const String svgShop = "assets/svg/shop.svg";
 
+  /// Assets for svgTransaction
+  /// assets/svg/transaction.svg
+  static const String svgTransaction = "assets/svg/transaction.svg";
+
   /// Assets for svgWallet
   /// assets/svg/wallet.svg
   static const String svgWallet = "assets/svg/wallet.svg";
+
+  /// Assets for svgWorks
+  /// assets/svg/works.svg
+  static const String svgWorks = "assets/svg/works.svg";
 }
 

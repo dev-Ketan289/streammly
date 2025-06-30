@@ -1,6 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:get/get.dart';
 import 'package:streammly/generated/assets.dart';
+import 'package:streammly/views/screens/profile/components/profile_section_widget.dart';
+import 'package:streammly/views/screens/profile/language_preferences.dart';
+import 'package:streammly/views/screens/profile/linked_pages.dart';
+import 'package:streammly/views/screens/profile/notifications_page.dart';
+
+import 'components/profile_item_widget.dart';
 
 class ProfileScreen extends StatelessWidget {
   const ProfileScreen({super.key});
@@ -11,7 +18,12 @@ class ProfileScreen extends StatelessWidget {
       backgroundColor: Colors.grey[100],
       appBar: AppBar(
         backgroundColor: Colors.transparent,
-        leading: const Icon(Icons.arrow_back_ios_new, color: Colors.black),
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back_ios_new, color: Colors.black),
+          onPressed: () {
+            Get.back();
+          },
+        ),
         title: const Text(
           'Profile',
           style: TextStyle(
@@ -88,61 +100,131 @@ class ProfileScreen extends StatelessWidget {
           ),
 
           const SizedBox(height: 24),
-          buildSectionTitle("Profile & Settings"),
-          buildTile(Icons.language, "Language Preferences"),
-          buildTile(Icons.notifications, "Notification"),
-          buildTile(Icons.chat_bubble_outline, "Chat"),
-          buildTile(Icons.link, "Linked Accounts"),
+          ProfileSectionWidget(title: "Profile & Settings"),
+          ProfileItemWidget(
+            icon: SvgPicture.asset(Assets.svgLanguage, height: 26, width: 26),
+            title: "Language Preferences",
+            onTap: () {
+              Get.to(() => LanguagePreferencesScreen());
+            },
+          ),
+          ProfileItemWidget(
+            icon: SvgPicture.asset(Assets.svgBell, height: 26, width: 26),
+            title: "Notification",
+            onTap: () {
+              Get.to(() => NotificationsPage());
+            },
+          ),
+          ProfileItemWidget(
+            icon: SvgPicture.asset(Assets.svgBell, height: 26, width: 26),
+            title: "Chat",
+            onTap: () {},
+          ),
+          ProfileItemWidget(
+            icon: SvgPicture.asset(Assets.svgLinked, height: 26, width: 26),
+            title: "Linked Accounts",
+            onTap: () {
+              Get.to(() => LinkedPages());
+            },
+          ),
 
           const SizedBox(height: 24),
-          buildSectionTitle("Bookings & Orders"),
-          buildTile(Icons.book_online, "My Bookings"),
-          buildTile(Icons.cancel_outlined, "Cancellation History"),
+          ProfileSectionWidget(title: "Bookings & Orders"),
+          ProfileItemWidget(
+            icon: SvgPicture.asset(Assets.svgMybookings, height: 26, width: 26),
+            title: "My Bookings",
+            onTap: () {},
+          ),
+          ProfileItemWidget(
+            icon: SvgPicture.asset(
+              Assets.svgCancellation,
+              height: 26,
+              width: 26,
+            ),
+            title: "Cancellation History",
+            onTap: () {},
+          ),
 
           const SizedBox(height: 24),
-          buildSectionTitle("Offers & Wishlist"),
-          buildTile(Icons.local_offer_outlined, "Saved Offers"),
-          buildTile(Icons.favorite_border, "WishList"),
+          ProfileSectionWidget(title: "Offers & Wishlist"),
+          ProfileItemWidget(
+            icon: SvgPicture.asset(Assets.svgSaved, height: 26, width: 26),
+            title: "Saved Offers",
+            onTap: () {},
+          ),
+          ProfileItemWidget(
+            icon: SvgPicture.asset(Assets.svgSaved, height: 26, width: 26),
+            title: "WishList",
+            onTap: () {},
+          ),
 
           const SizedBox(height: 24),
-          buildSectionTitle("Payments & Wallet"),
-          buildTile(Icons.account_balance_wallet, "My Wallet"),
-          buildTile(Icons.receipt_long, "Transaction History"),
-          buildTile(Icons.receipt, "Invoice"),
-          buildTile(Icons.redeem, "Refer & Earn"),
-          buildTile(Icons.percent, "Apply Promo Code"),
+          ProfileSectionWidget(title: "Payments & Wallet"),
+          ProfileItemWidget(
+            icon: SvgPicture.asset(Assets.svgSaved, height: 26, width: 26),
+            title: "My Wallet",
+            onTap: () {},
+          ),
+          ProfileItemWidget(
+            icon: SvgPicture.asset(
+              Assets.svgTransaction,
+              height: 26,
+              width: 26,
+            ),
+            title: "Transaction History",
+            onTap: () {},
+          ),
+          ProfileItemWidget(
+            icon: SvgPicture.asset(
+              Assets.svgTransaction,
+              height: 26,
+              width: 26,
+            ),
+            title: "Invoice",
+            onTap: () {},
+          ),
+          ProfileItemWidget(
+            icon: SvgPicture.asset(Assets.svgRefer, height: 26, width: 26),
+            title: "Refer & Earn",
+            onTap: () {},
+          ),
+          ProfileItemWidget(
+            icon: SvgPicture.asset(Assets.svgPromo, height: 26, width: 26),
+            title: "Apply Promo Code",
+            onTap: () {},
+          ),
+          const SizedBox(height: 24),
+
+          ProfileSectionWidget(title: "Rating & Reviews"),
+          ProfileItemWidget(
+            icon: SvgPicture.asset(Assets.svgRate, height: 26, width: 26),
+            title: "Rate your Experience",
+            onTap: () {},
+          ),
+          const SizedBox(height: 24),
+
+          ProfileSectionWidget(title: "Help & Support"),
+          ProfileItemWidget(
+            icon: SvgPicture.asset(Assets.svgChat, height: 26, width: 26),
+            title: "Chat with Support",
+            onTap: () {},
+          ),
+          ProfileItemWidget(
+            icon: SvgPicture.asset(Assets.svgFaq, height: 26, width: 26),
+            title: "FAQ's",
+            onTap: () {},
+          ),
+          ProfileItemWidget(
+            icon: SvgPicture.asset(Assets.svgReport, height: 26, width: 26),
+            title: "Report an Issue",
+            onTap: () {},
+          ),
+          ProfileItemWidget(
+            icon: SvgPicture.asset(Assets.svgWorks, height: 26, width: 26),
+            title: "How it Works",
+            onTap: () {},
+          ),
         ],
-      ),
-    );
-  }
-
-  // List tile widget
-  Widget buildTile(IconData icon, String title) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 4),
-      child: ListTile(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-        tileColor: Colors.white,
-        leading: Icon(icon, color: Colors.blue),
-        title: Text(title),
-        trailing: const Icon(Icons.arrow_forward_ios, size: 16),
-        contentPadding: const EdgeInsets.symmetric(horizontal: 8),
-        onTap: () {},
-      ),
-    );
-  }
-
-  // Section header
-  Widget buildSectionTitle(String title) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 8),
-      child: Text(
-        title,
-        style: const TextStyle(
-          fontSize: 14,
-          fontWeight: FontWeight.bold,
-          color: Colors.black,
-        ),
       ),
     );
   }

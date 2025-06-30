@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:streammly/controllers/category_controller.dart';
 import 'package:streammly/views/screens/bundle/bundle_categories_page.dart';
-
 import '../package/booking/widgets/time_picker.dart'; // Adjust if needed
 
 class BundleInformation extends StatefulWidget {
@@ -24,14 +24,19 @@ class _BundleInformationState extends State<BundleInformation> {
   bool showTimePicker = false;
   bool isStartTime = true;
 
-  List<String> allCategories = ['Photographer', 'Makeup Artist', 'Event Organiser'];
+  final CategoryController _categoryController = Get.find<CategoryController>();
   List<String> selectedCategories = [];
   bool isCategoryDropdownOpen = false;
 
   double radius = 0.0;
 
   void _pickDate() async {
-    final picked = await showDatePicker(context: context, initialDate: selectedDate, firstDate: DateTime.now(), lastDate: DateTime(2100));
+    final picked = await showDatePicker(
+      context: context,
+      initialDate: selectedDate,
+      firstDate: DateTime.now(),
+      lastDate: DateTime(2100),
+    );
     if (picked != null) {
       setState(() => selectedDate = picked);
     }
@@ -67,7 +72,10 @@ class _BundleInformationState extends State<BundleInformation> {
 
   void _toggleSelectAll(bool value) {
     setState(() {
-      selectedCategories = value ? List.from(allCategories) : [];
+      selectedCategories =
+          value
+              ? List.from(_categoryController.categories.map((e) => e.title))
+              : [];
     });
   }
 
@@ -76,31 +84,67 @@ class _BundleInformationState extends State<BundleInformation> {
     return Scaffold(
       backgroundColor: const Color(0xFFF1F4FF), // light background
       appBar: AppBar(
-        title: const Text('Bundle Information', style: TextStyle(color: Color(0xFF2E5CDA), fontWeight: FontWeight.bold)),
+        title: const Text(
+          'Bundle Information',
+          style: TextStyle(
+            color: Color(0xFF2E5CDA),
+            fontWeight: FontWeight.bold,
+          ),
+        ),
         centerTitle: true,
         backgroundColor: Colors.transparent,
         elevation: 0,
         foregroundColor: Colors.black,
-        leading: IconButton(icon: const Icon(Icons.arrow_back_ios), onPressed: () => Navigator.pop(context)),
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back_ios),
+          onPressed: () => Navigator.pop(context),
+        ),
       ),
       body: Container(
-        decoration: const BoxDecoration(color: Colors.white, borderRadius: BorderRadius.only(topLeft: Radius.circular(30), topRight: Radius.circular(30))),
+        decoration: const BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.only(
+            topLeft: Radius.circular(30),
+            topRight: Radius.circular(30),
+          ),
+        ),
         child: SingleChildScrollView(
           padding: const EdgeInsets.all(16),
           child: Column(
             children: [
               const SizedBox(height: 12),
-              const Text('Please Fill this following Details', style: TextStyle(fontSize: 16)),
+              const Text(
+                'Please Fill this following Details',
+                style: TextStyle(fontSize: 16),
+              ),
               const SizedBox(height: 20),
 
               /// EVENT TYPE
               GestureDetector(
-                onTap: () => setState(() => isEventDropdownOpen = !isEventDropdownOpen),
+                onTap:
+                    () => setState(
+                      () => isEventDropdownOpen = !isEventDropdownOpen,
+                    ),
                 child: _styledDropdownContainer(
                   child: Row(
                     children: [
-                      Expanded(child: Text(selectedEventType ?? "Event Type *", style: TextStyle(color: selectedEventType == null ? Colors.grey : Colors.black, fontSize: 16))),
-                      Icon(isEventDropdownOpen ? Icons.keyboard_arrow_up : Icons.keyboard_arrow_down),
+                      Expanded(
+                        child: Text(
+                          selectedEventType ?? "Event Type *",
+                          style: TextStyle(
+                            color:
+                                selectedEventType == null
+                                    ? Colors.grey
+                                    : Colors.black,
+                            fontSize: 16,
+                          ),
+                        ),
+                      ),
+                      Icon(
+                        isEventDropdownOpen
+                            ? Icons.keyboard_arrow_up
+                            : Icons.keyboard_arrow_down,
+                      ),
                     ],
                   ),
                 ),
@@ -127,71 +171,130 @@ class _BundleInformationState extends State<BundleInformation> {
 
               _buildTextField(
                 'Event Date *',
-                TextEditingController(text: "${selectedDate.day} ${_monthName(selectedDate.month)} ${selectedDate.year}"),
+                TextEditingController(
+                  text:
+                      "${selectedDate.day} ${_monthName(selectedDate.month)} ${selectedDate.year}",
+                ),
                 readOnly: true,
                 onTap: _pickDate,
                 suffixIcon: Icons.calendar_today,
               ),
 
-              _buildTextField('Location *', locationController, hint: 'Room No, Building Name, Area, City, Pincode', suffixIcon: Icons.location_on),
+              _buildTextField(
+                'Location *',
+                locationController,
+                hint: 'Room No, Building Name, Area, City, Pincode',
+                suffixIcon: Icons.location_on,
+              ),
 
               const SizedBox(height: 10),
 
               Row(
                 children: [
-                  Expanded(child: _buildTextField('Start Time *', TextEditingController(text: startTime), readOnly: true, onTap: () => _showTimePicker(true))),
+                  Expanded(
+                    child: _buildTextField(
+                      'Start Time *',
+                      TextEditingController(text: startTime),
+                      readOnly: true,
+                      onTap: () => _showTimePicker(true),
+                    ),
+                  ),
                   const SizedBox(width: 12),
-                  Expanded(child: _buildTextField('End Time *', TextEditingController(text: endTime), readOnly: true, onTap: () => _showTimePicker(false))),
+                  Expanded(
+                    child: _buildTextField(
+                      'End Time *',
+                      TextEditingController(text: endTime),
+                      readOnly: true,
+                      onTap: () => _showTimePicker(false),
+                    ),
+                  ),
                 ],
               ),
-              if (showTimePicker) CustomTimePicker(isStart: isStartTime, onCancel: () => setState(() => showTimePicker = false), onTimeSelected: _onTimeSelected),
+              if (showTimePicker)
+                CustomTimePicker(
+                  isStart: isStartTime,
+                  onCancel: () => setState(() => showTimePicker = false),
+                  onTimeSelected: _onTimeSelected,
+                ),
 
               const SizedBox(height: 20),
 
               /// CATEGORY
-              GestureDetector(
-                onTap: () => setState(() => isCategoryDropdownOpen = !isCategoryDropdownOpen),
-                child: _styledDropdownContainer(
-                  child: Row(
+              GetBuilder<CategoryController>(
+                builder: (controller) {
+                  return Column(
                     children: [
-                      Expanded(
-                        child: Text(
-                          selectedCategories.isEmpty ? "Category *" : selectedCategories.join(', '),
-                          style: TextStyle(color: selectedCategories.isEmpty ? Colors.grey : Colors.black, fontSize: 16),
+                      GestureDetector(
+                        onTap:
+                            () => setState(
+                              () =>
+                                  isCategoryDropdownOpen =
+                                      !isCategoryDropdownOpen,
+                            ),
+                        child: _styledDropdownContainer(
+                          child: Row(
+                            children: [
+                              Expanded(
+                                child: Text(
+                                  selectedCategories.isEmpty
+                                      ? "Category *"
+                                      : selectedCategories.join(', '),
+                                  style: TextStyle(
+                                    color:
+                                        selectedCategories.isEmpty
+                                            ? Colors.grey
+                                            : Colors.black,
+                                    fontSize: 16,
+                                  ),
+                                ),
+                              ),
+                              Icon(
+                                isCategoryDropdownOpen
+                                    ? Icons.keyboard_arrow_up
+                                    : Icons.keyboard_arrow_down,
+                              ),
+                            ],
+                          ),
                         ),
                       ),
-                      Icon(isCategoryDropdownOpen ? Icons.keyboard_arrow_up : Icons.keyboard_arrow_down),
+                      if (isCategoryDropdownOpen)
+                        _dropdownBox(
+                          children: [
+                            CheckboxListTile(
+                              title: const Text("All"),
+                              value:
+                                  selectedCategories.length ==
+                                  controller.categories.length,
+                              onChanged:
+                                  (val) => _toggleSelectAll(val ?? false),
+                              controlAffinity: ListTileControlAffinity.trailing,
+                              contentPadding: EdgeInsets.zero,
+                            ),
+                            const Divider(),
+                            ...controller.categories.map((cat) {
+                              return CheckboxListTile(
+                                title: Text(cat.title),
+                                value: selectedCategories.contains(cat.title),
+                                onChanged: (_) => _toggleCategory(cat.title),
+                                controlAffinity:
+                                    ListTileControlAffinity.trailing,
+                                contentPadding: EdgeInsets.zero,
+                              );
+                            }).toList(),
+                          ],
+                        ),
                     ],
-                  ),
-                ),
+                  );
+                },
               ),
-              if (isCategoryDropdownOpen)
-                _dropdownBox(
-                  children: [
-                    CheckboxListTile(
-                      title: const Text("All"),
-                      value: selectedCategories.length == allCategories.length,
-                      onChanged: (val) => _toggleSelectAll(val ?? false),
-                      controlAffinity: ListTileControlAffinity.trailing,
-                      contentPadding: EdgeInsets.zero,
-                    ),
-                    const Divider(),
-                    ...allCategories.map((cat) {
-                      return CheckboxListTile(
-                        title: Text(cat),
-                        value: selectedCategories.contains(cat),
-                        onChanged: (_) => _toggleCategory(cat),
-                        controlAffinity: ListTileControlAffinity.trailing,
-                        contentPadding: EdgeInsets.zero,
-                      );
-                    }).toList(),
-                  ],
-                ),
 
               const SizedBox(height: 20),
 
               /// RADIUS
-              const Text('Radius', style: TextStyle(fontWeight: FontWeight.w600)),
+              const Text(
+                'Radius',
+                style: TextStyle(fontWeight: FontWeight.w600),
+              ),
               Slider(
                 value: radius,
                 onChanged: (val) => setState(() => radius = val),
@@ -202,7 +305,13 @@ class _BundleInformationState extends State<BundleInformation> {
                 activeColor: Colors.blue,
                 inactiveColor: Colors.grey.shade300,
               ),
-              Align(alignment: Alignment.centerRight, child: Text("${radius.round()} KM", style: const TextStyle(color: Colors.grey))),
+              Align(
+                alignment: Alignment.centerRight,
+                child: Text(
+                  "${radius.round()} KM",
+                  style: const TextStyle(color: Colors.grey),
+                ),
+              ),
 
               const SizedBox(height: 20),
 
@@ -211,11 +320,18 @@ class _BundleInformationState extends State<BundleInformation> {
                 height: 48,
                 child: ElevatedButton(
                   onPressed: () {
-                    Get.to(const Categories());
+                    Get.to(
+                      () => Categories(selectedCategories: selectedCategories),
+                    );
                     debugPrint("Selected Event: $selectedEventType");
                     debugPrint("Selected Categories: $selectedCategories");
                   },
-                  style: ElevatedButton.styleFrom(backgroundColor: const Color(0xFF2E5CDA), shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8))),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: const Color(0xFF2E5CDA),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                  ),
                   child: const Text("Next Step"),
                 ),
               ),
@@ -226,7 +342,14 @@ class _BundleInformationState extends State<BundleInformation> {
     );
   }
 
-  Widget _buildTextField(String label, TextEditingController controller, {bool readOnly = false, VoidCallback? onTap, IconData? suffixIcon, String? hint}) {
+  Widget _buildTextField(
+    String label,
+    TextEditingController controller, {
+    bool readOnly = false,
+    VoidCallback? onTap,
+    IconData? suffixIcon,
+    String? hint,
+  }) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 8),
       child: TextField(
@@ -261,13 +384,29 @@ class _BundleInformationState extends State<BundleInformation> {
   Widget _styledDropdownContainer({required Widget child}) {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 16),
-      decoration: BoxDecoration(border: Border.all(color: Colors.grey.shade400), borderRadius: BorderRadius.circular(10)),
+      decoration: BoxDecoration(
+        border: Border.all(color: Colors.grey.shade400),
+        borderRadius: BorderRadius.circular(10),
+      ),
       child: child,
     );
   }
 
   String _monthName(int month) {
-    const months = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+    const months = [
+      'January',
+      'February',
+      'March',
+      'April',
+      'May',
+      'June',
+      'July',
+      'August',
+      'September',
+      'October',
+      'November',
+      'December',
+    ];
     return months[month - 1];
   }
 }
