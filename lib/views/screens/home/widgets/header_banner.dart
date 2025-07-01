@@ -202,7 +202,7 @@ class _HeaderBannerState extends State<HeaderBanner> {
                         icon: const Icon(Icons.menu, color: Colors.white),
                         onPressed: () {
                           Get.to(
-                            () => const ProfileScreen(),
+                            () => const ProfilePage(),
                             transition: Transition.leftToRight,
                             duration: const Duration(milliseconds: 800),
                           );
