@@ -11,6 +11,7 @@ class CompanyLocation {
   final String? description;
   final String? categoryName;
   final double? rating;
+  final List<String> specialities;
 
   CompanyLocation({
     this.id,
@@ -24,19 +25,26 @@ class CompanyLocation {
     this.description,
     this.categoryName,
     this.rating,
+    this.specialities = const [],
   });
 
   factory CompanyLocation.fromJson(Map<String, dynamic> json) {
+    String _fullUrl(String? path) {
+      if (path == null || path.isEmpty) return '';
+      return 'http://192.168.1.113:8000/${path.replaceFirst(RegExp(r'^/+'), '')}';
+    }
+
     return CompanyLocation(
       id: json['id'],
       companyName: json['company_name'] ?? 'Unknown',
       latitude: json['latitude'] != null ? double.tryParse(json['latitude'].toString()) : null,
       longitude: json['longitude'] != null ? double.tryParse(json['longitude'].toString()) : null,
-      bannerImage: json['banner_image'],
-      logo: json['logo'],
+      bannerImage: _fullUrl(json['banner_image']),
+      logo: _fullUrl(json['logo']),
       description: json['description'],
       categoryName: json['category_name'],
-      rating: json['rating'] != null ? double.tryParse(json['rating'].toString()) : 3.9,
+      rating: json['rating'] != null ? double.tryParse(json['rating'].toString()) ?? 3.9 : 3.9,
+      specialities: json['specialitise'] != null ? List<String>.from(json['specialitise']) : [],
     );
   }
 }

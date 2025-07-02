@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:streammly/views/screens/profile/profile_page.dart';
 
 import '../../../../controllers/location_controller.dart';
 import '../../../../models/banner/banner_item.dart';
@@ -197,7 +198,16 @@ class _HeaderBannerState extends State<HeaderBanner> {
                   // Search Bar
                   Row(
                     children: [
-                      const Icon(Icons.menu, color: Colors.white),
+                      IconButton(
+                        icon: const Icon(Icons.menu, color: Colors.white),
+                        onPressed: () {
+                          Get.to(
+                            () => const ProfilePage(),
+                            transition: Transition.leftToRight,
+                            duration: const Duration(milliseconds: 800),
+                          );
+                        },
+                      ),
                       const SizedBox(width: 8),
                       Expanded(
                         child: Container(

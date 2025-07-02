@@ -33,10 +33,18 @@ class VendorInfoCard extends StatelessWidget {
             width: 180,
             height: 180,
             margin: const EdgeInsets.all(12),
-            decoration: BoxDecoration(
+            child: ClipRRect(
               borderRadius: BorderRadius.circular(16),
-              color: Colors.grey[200],
-              image: DecorationImage(image: NetworkImage(logoImage), fit: BoxFit.fill, onError: (error, stackTrace) {}),
+              child: Image.network(
+                logoImage,
+                fit: BoxFit.fill,
+                errorBuilder: (context, error, stackTrace) {
+                  return Image.asset(
+                    'assets/images/default_logo.png', // Make sure this image exists and is declared in pubspec.yaml
+                    fit: BoxFit.cover,
+                  );
+                },
+              ),
             ),
           ),
 

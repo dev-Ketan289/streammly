@@ -24,16 +24,15 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
-  final HeaderController headerController = Get.put(HeaderController());
+  final HomeController headerController = Get.put(HomeController());
   final LocationController locationController = Get.put(LocationController());
-
-  // Using Get.find to get the pre-initialized controller
   final CategoryController categoryController = Get.find<CategoryController>();
 
   @override
   void initState() {
     super.initState();
     headerController.fetchSlides();
+    headerController.fetchRecommendedCompanies();
     categoryController.fetchCategories();
   }
 
@@ -42,8 +41,7 @@ class _HomeScreenState extends State<HomeScreen> {
     return models.map((model) {
       String? fullImageUrl;
       if (model.image != null && model.image!.isNotEmpty) {
-        final path = model.image!.startsWith('/') ? model.image! : '/${model
-            .image!}';
+        final path = model.image!.startsWith('/') ? model.image! : '/${model.image!}';
         fullImageUrl = '$baseUrl$path';
       }
 
@@ -51,7 +49,6 @@ class _HomeScreenState extends State<HomeScreen> {
         label: model.title,
         imagePath: fullImageUrl,
         onTap: () {
-          //Navigate Directly to vendor Locator
           Get.to(() => CompanyLocatorMapScreen(categoryId: model.id));
         },
       );
@@ -76,28 +73,32 @@ class _HomeScreenState extends State<HomeScreen> {
             child: SingleChildScrollView(
               child: Column(
                 children: [
-                  HeaderBanner(
-                    slides: slides,
-                    height: 370,
-                    backgroundImage: "assets/images/banner.png",
-                    overlayColor: Colors.white.withOpacity(0.3),
-                  ),
+                  HeaderBanner(slides: slides, height: 370, backgroundImage: "assets/images/banner.png", overlayColor: Colors.white.withValues(alpha: 0.3)),
                   const SizedBox(height: 24),
                   UpcomingOfferCard(),
                   const SizedBox(height: 24),
 
                   isCategoryLoading
                       ? const CircularProgressIndicator()
-                      : CategoryScroller(
-                    title: "Categories",
-                    onSeeAll: () => Get.to(() => CategoryListScreen()),
-                    categories: convertToCategoryItems(categoryModels),
-                  ),
+                      : CategoryScroller(title: "Categories", onSeeAll: () => Get.to(() => CategoryListScreen()), categories: convertToCategoryItems(categoryModels)),
 
                   const SizedBox(height: 24),
                   PageNav(),
                   const SizedBox(height: 24),
-                  RecommendedList(context: context),
+
+                  // RECOMMENDED LIST
+                  GetBuilder<HomeController>(
+                    builder: (headerCtrl) {
+                      if (headerCtrl.isRecommendedLoading) {
+                        return const Center(child: CircularProgressIndicator());
+                      } else if (headerCtrl.recommendedCompanies.isEmpty) {
+                        return const Center(child: Text("No recommended vendors found."));
+                      } else {
+                        return RecommendedList(context: context, recommendedCompanies: headerCtrl.recommendedCompanies);
+                      }
+                    },
+                  ),
+
                   const SizedBox(height: 24),
                   ExploreUs(vendorId: 1),
                   const SizedBox(height: 26),

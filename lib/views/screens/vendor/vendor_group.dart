@@ -1,23 +1,41 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:streammly/controllers/company_controller.dart';
+
 import '../../../models/company/company_location.dart';
 import '../../../navigation_menu.dart';
 import '../home/widgets/header_banner.dart';
 import '../package/get_quote_page.dart';
 import '../package/package_page.dart';
 
-class VendorGroup extends StatelessWidget {
+class VendorGroup extends StatefulWidget {
   final CompanyLocation company;
   final int subCategoryId;
 
   const VendorGroup({super.key, required this.company, required this.subCategoryId});
 
   @override
-  Widget build(BuildContext context) {
-    final CompanyController controller = Get.find<CompanyController>();
-    controller.fetchSubVerticalCards(company.id ?? 0, subCategoryId);
+  State<VendorGroup> createState() => _VendorGroupState();
+}
 
+class _VendorGroupState extends State<VendorGroup> {
+  late CompanyController controller;
+  int selectedSubCategoryId = -1;
+
+  @override
+  void initState() {
+    super.initState();
+    controller = Get.find<CompanyController>();
+    selectedSubCategoryId = widget.subCategoryId;
+
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      controller.fetchCompanySubCategories(widget.company.id ?? 0);
+      controller.fetchSubVerticalCards(widget.company.id ?? 0, selectedSubCategoryId);
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: const Color(0xFFF7F9FD),
       bottomNavigationBar: NavigationHelper.buildBottomNav(),
@@ -26,16 +44,95 @@ class VendorGroup extends StatelessWidget {
       body: SafeArea(
         child: Column(
           children: [
+            /// Header Banner
             HeaderBanner(
               height: 280,
-              backgroundImage: company.bannerImage?.isNotEmpty == true
-                  ? 'http://192.168.1.113:8000/${company.bannerImage}'
-                  : 'assets/images/recommended_banner/FocusPointVendor.png',
+              backgroundImage:
+                  widget.company.bannerImage?.isNotEmpty == true
+                      ? 'http://192.168.1.113:8000/${widget.company.bannerImage}'
+                      : 'assets/images/recommended_banner/FocusPointVendor.png',
               overlayColor: Colors.indigo.withValues(alpha: 0.6),
-              overrideTitle: company.companyName,
-              overrideSubtitle: company.categoryName,
+              overrideTitle: widget.company.companyName,
+              overrideSubtitle: widget.company.categoryName,
             ),
+
             const SizedBox(height: 10),
+
+            /// Category Scroller with selection
+            GetBuilder<CompanyController>(
+              builder: (_) {
+                final subs = controller.subCategories;
+
+                if (subs.isEmpty) {
+                  return const SizedBox();
+                }
+
+                return SizedBox(
+                  height: 120,
+                  child: ListView.separated(
+                    scrollDirection: Axis.horizontal,
+                    padding: const EdgeInsets.symmetric(horizontal: 16),
+                    itemCount: subs.length,
+                    separatorBuilder: (_, __) => const SizedBox(width: 12),
+                    itemBuilder: (context, index) {
+                      final sub = subs[index];
+                      final isSelected = selectedSubCategoryId == sub.id;
+
+                      return GestureDetector(
+                        onTap: () {
+                          setState(() {
+                            selectedSubCategoryId = sub.id;
+                          });
+                          controller.fetchSubVerticalCards(widget.company.id ?? 0, sub.id);
+                        },
+                        child: Column(
+                          children: [
+                            Container(
+                              width: 70,
+                              height: 70,
+                              decoration: BoxDecoration(shape: BoxShape.rectangle, border: Border.all(color: isSelected ? Colors.indigo : Colors.grey.shade300, width: 2)),
+                              child: Stack(
+                                children: [
+                                  ClipRRect(
+                                    child: Image.network(
+                                      'http://192.168.1.113:8000/${sub.image ?? ""}',
+                                      width: 70,
+                                      height: 70,
+                                      fit: BoxFit.cover,
+                                      errorBuilder: (_, __, ___) => Image.asset("assets/images/category/vendor_category/img.png", fit: BoxFit.cover),
+                                    ),
+                                  ),
+                                  if (isSelected)
+                                    const Positioned(
+                                      right: 4,
+                                      top: 4,
+                                      child: CircleAvatar(backgroundColor: Colors.white, radius: 10, child: Icon(Icons.check, color: Colors.indigo, size: 14)),
+                                    ),
+                                ],
+                              ),
+                            ),
+                            const SizedBox(height: 6),
+                            SizedBox(
+                              width: 70,
+                              child: Text(
+                                sub.title,
+                                maxLines: 2,
+                                textAlign: TextAlign.center,
+                                style: TextStyle(fontSize: 12, color: isSelected ? Colors.indigo : Colors.black, fontWeight: isSelected ? FontWeight.bold : FontWeight.normal),
+                              ),
+                            ),
+                          ],
+                        ),
+                      );
+                    },
+                  ),
+                );
+              },
+            ),
+
+            const SizedBox(height: 10),
+
+            /// Sub-verticals Grid
             Expanded(
               child: GetBuilder<CompanyController>(
                 builder: (controller) {
@@ -46,21 +143,13 @@ class VendorGroup extends StatelessWidget {
                   final subVerticals = controller.subVerticalCards;
 
                   if (subVerticals.isEmpty) {
-                    return const Padding(
-                      padding: EdgeInsets.all(16),
-                      child: Text("No sub-verticals available.", style: TextStyle(color: Colors.grey)),
-                    );
+                    return const Padding(padding: EdgeInsets.all(16), child: Text("No sub-verticals available.", style: TextStyle(color: Colors.grey)));
                   }
 
                   return GridView.builder(
                     padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
                     itemCount: subVerticals.length,
-                    gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                      crossAxisCount: 3,
-                      crossAxisSpacing: 16,
-                      mainAxisSpacing: 16,
-                      childAspectRatio: 0.65,
-                    ),
+                    gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount: 3, crossAxisSpacing: 16, mainAxisSpacing: 16, childAspectRatio: 0.65),
                     itemBuilder: (context, index) {
                       final item = subVerticals[index];
                       final imageUrl = item['image'] ?? '';
@@ -68,17 +157,22 @@ class VendorGroup extends StatelessWidget {
                       final id = int.tryParse(item['id'] ?? '') ?? 0;
 
                       return GestureDetector(
-                        onTap: () => _showShootOptionsBottomSheet(context, label, id, company.id ?? 0, subCategoryId),
+                        onTap: () => _showShootOptionsBottomSheet(context, label, id, widget.company.id ?? 0, selectedSubCategoryId),
                         child: Column(
                           children: [
                             Expanded(
                               child: ClipRRect(
                                 borderRadius: BorderRadius.circular(12),
-                                child: imageUrl.isNotEmpty
-                                    ? Image.network(imageUrl, fit: BoxFit.cover, errorBuilder: (_, __, ___) {
-                                  return Image.asset("assets/images/category/vendor_category/img.png", fit: BoxFit.cover);
-                                })
-                                    : Image.asset("assets/images/category/vendor_category/img.png", fit: BoxFit.cover),
+                                child:
+                                    imageUrl.isNotEmpty
+                                        ? Image.network(
+                                          imageUrl,
+                                          fit: BoxFit.cover,
+                                          errorBuilder: (_, __, ___) {
+                                            return Image.asset("assets/images/category/vendor_category/img.png", fit: BoxFit.cover);
+                                          },
+                                        )
+                                        : Image.asset("assets/images/category/vendor_category/img.png", fit: BoxFit.cover),
                               ),
                             ),
                             const SizedBox(height: 8),

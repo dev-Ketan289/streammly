@@ -1,10 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:streammly/navigation_menu.dart';
 import 'package:streammly/views/screens/auth_screens/otp_verification_screen.dart';
 import 'package:streammly/views/screens/auth_screens/welcome.dart';
-import 'package:streammly/views/screens/home/home_screen.dart';
 
 import '../../../controllers/auth_controller.dart';
 
@@ -100,18 +98,18 @@ class LoginScreen extends StatelessWidget {
                                   width: double.infinity,
                                   height: 50,
                                   child: OutlinedButton.icon(
-                                    onPressed: (){
-                                      Get.to(() => NavigationMenu());
+                                    onPressed: () {
+                                      authController.isLoading
+                                          ? null
+                                          : () {
+                                            authController.signInWithGoogle().then((value) {
+                                              if (value?.isSuccess ?? false) {
+                                                Get.to(() => WelcomeScreen());
+                                              }
+                                            });
+                                          };
                                     },
-                                        // authController.isLoading
-                                        //     ? null
-                                        //     : () {
-                                        //       authController.signInWithGoogle().then((value) {
-                                        //         if (value?.isSuccess ?? false) {
-                                        //           Get.to(() => WelcomeScreen());
-                                        //         }
-                                        //       });
-                                        //     },
+
                                     icon: Image.asset('assets/images/img.png', height: 24),
                                     label: Text("Continue with Google", style: theme.textTheme.bodySmall),
                                     style: OutlinedButton.styleFrom(

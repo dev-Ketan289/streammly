@@ -25,6 +25,7 @@ class StreammlyApp extends StatelessWidget {
       debugShowCheckedModeBanner: false,
       title: 'Streammly',
       theme: ThemeData(
+        appBarTheme: AppBarTheme(surfaceTintColor: Colors.white),
         primarySwatch: Colors.indigo,
         scaffoldBackgroundColor: Colors.white,
         textTheme: const TextTheme(

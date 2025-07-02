@@ -1,31 +1,29 @@
-import 'dart:convert';
-import 'package:get/get.dart';
-import 'package:http/http.dart' as http;
+import '../../models/company/company_location.dart';
+import '../api/api_client.dart';
 
 class CompanyRepo {
-  final String baseUrl = 'http://192.168.1.113:8000/api/v1/company';
+  final ApiClient apiClient;
+  CompanyRepo({required this.apiClient});
 
-  Future<Response> fetchCompaniesByCategory(int categoryId) async {
-    final url = Uri.parse('$baseUrl/getcompanyslocations/$categoryId');
-    return await http.get(url).then((r) => Response(statusCode: r.statusCode, body: r.body));
+  Future<List<CompanyLocation>> fetchCompaniesByCategory(int categoryId) async {
+    final response = await apiClient.getData("api/v1/company/getcompanyslocations/$categoryId");
+
+    final List<dynamic> data = response.body['data'] ?? [];
+    return data.map((e) => CompanyLocation.fromJson(e)).toList();
   }
 
-  Future<Response> fetchCompanyById(int companyId) async {
-    final url = Uri.parse('$baseUrl/getcompanysprofile/$companyId');
-    return await http.get(url).then((r) => Response(statusCode: r.statusCode, body: r.body));
+  Future<CompanyLocation?> fetchCompanyById(int companyId) async {
+    final response = await apiClient.getData("api/v1/company/getcompanysprofile/$companyId");
+    return CompanyLocation.fromJson(response.body['data']);
   }
 
-  Future<Response> fetchCompanySubCategories(int companyId) async {
-    final url = Uri.parse('$baseUrl/getcompanysubcategories/$companyId');
-    return await http.get(url).then((r) => Response(statusCode: r.statusCode, body: r.body));
+  Future<List<dynamic>> fetchCompanySubCategories(int companyId) async {
+    final response = await apiClient.getData("api/v1/company/getcompanysubcategories/$companyId");
+    return response.body['data'];
   }
 
-  Future<Response> fetchSubVerticals({required int companyId, required int subCategoryId}) async {
-    final url = Uri.parse('$baseUrl/getsubvertical');
-    return await http.post(
-      url,
-      headers: {'Content-Type': 'application/json'},
-      body: json.encode({"company_id": companyId, "sub_category_id": subCategoryId}),
-    ).then((r) => Response(statusCode: r.statusCode, body: r.body));
+  Future<List<dynamic>> fetchSubVerticals({required int companyId, required int subCategoryId}) async {
+    final response = await apiClient.postData("api/v1/company/getsubvertical", {"company_id": companyId, "sub_category_id": subCategoryId});
+    return response.body['data'];
   }
 }

@@ -40,15 +40,24 @@ class PackagesController extends GetxController {
 
         packages.assignAll(
           data.map<Map<String, dynamic>>((pkg) {
+            final List<dynamic>? variations = pkg["packagevariations"];
+            final firstVariation = (variations != null && variations.isNotEmpty) ? variations[0] : null;
+
             return {
               "title": pkg["title"] ?? "",
-              "type": (pkg["type"] ?? "").toString().toLowerCase() == "studio" ? "StudioShoot" : "HomeShoot",
-              "price": int.tryParse(pkg["packagevariations"]?.first["amount"].toString() ?? "0") ?? 0,
-              "oldPrice": null, // You can populate this if backend gives
+              "type": pkg["type"] ?? "N/A", // ✅ Directly from backend
+              "price": int.tryParse(firstVariation?["amount"]?.toString() ?? "0") ?? 0,
+              "oldPrice": null, // Optional, handle from backend if needed
               "hours":
-                  pkg["packagevariations"]?.map<String>((v) => "${v["duration"]}${v["duration_type"].toString().toLowerCase().startsWith("hour") ? "hr" : ""}").toList() ??
-                  ["1hr", "2hrs", "3hrs"],
-              "highlight": pkg["long_description"] ?? "",
+                  variations != null
+                      ? variations.map<String>((v) {
+                        final duration = v["duration"] ?? "";
+                        final type = (v["duration_type"] ?? "").toString().toLowerCase();
+                        final suffix = type.startsWith("hour") ? "hr" : "";
+                        return "$duration$suffix";
+                      }).toList()
+                      : ["1hr", "2hrs", "3hrs"], // fallback
+              "highlight": pkg["short_description"] ?? "",
               "shortDescription": pkg["short_description"] ?? "",
               "fullDescription": pkg["long_description"] ?? "",
               "specialOffer": (pkg["status"] ?? "").toString().toLowerCase() == "active",
@@ -57,7 +66,7 @@ class PackagesController extends GetxController {
           }).toList(),
         );
 
-        // Initialize default hours and expandedStates
+        // Initialize selected hours and expansion states
         for (int i = 0; i < packages.length; i++) {
           selectedHours[i] = {"2hrs"};
           expandedStates[i] = false;

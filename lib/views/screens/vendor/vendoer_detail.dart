@@ -44,9 +44,9 @@ class _VendorDetailScreenState extends State<VendorDetailScreen> {
               HeaderBanner(
                 height: 280,
                 backgroundImage:
-                widget.company.bannerImage != null && widget.company.bannerImage!.isNotEmpty
-                    ? 'http://192.168.1.113:8000/${widget.company.bannerImage}'
-                    : 'assets/images/recommended_banner/FocusPointVendor.png',
+                    widget.company.bannerImage != null && widget.company.bannerImage!.isNotEmpty
+                        ? 'http://192.168.1.113:8000/${widget.company.bannerImage}'
+                        : 'assets/images/recommended_banner/FocusPointVendor.png',
                 overlayColor: Colors.indigo.withValues(alpha: 0.6),
                 overrideTitle: widget.company.companyName,
                 overrideSubtitle: widget.company.categoryName,
@@ -55,35 +55,38 @@ class _VendorDetailScreenState extends State<VendorDetailScreen> {
               const SizedBox(height: 6),
 
               /// ---- Category Scroller (Subcategories) ----
-              GetBuilder<CompanyController>(builder: (_) {
-                final subs = companyController.subCategories;
+              GetBuilder<CompanyController>(
+                builder: (_) {
+                  final subs = companyController.subCategories;
 
-                if (subs.isEmpty) {
-                  return CategoryScroller(
-                    categories: [
-                      CategoryItem(
-                        label: 'Baby Shoot',
-                        imagePath: 'assets/images/category/vendor_category/img.png',
-                        onTap: () => Get.to(() => VendorGroup(company: widget.company, subCategoryId: 2)),
-                      ),
-                      CategoryItem(label: 'Wedding Shoot', imagePath: 'assets/images/category/vendor_category/img.png', onTap: () {}),
-                      CategoryItem(label: 'Portfolio Shoot', imagePath: 'assets/images/category/vendor_category/img.png', onTap: () {}),
-                      CategoryItem(label: 'Maternity Shoot', imagePath: 'assets/images/category/vendor_category/img.png', onTap: () {}),
-                      CategoryItem(label: 'Family Function', imagePath: 'assets/images/category/vendor_category/img.png', onTap: () {}),
-                    ],
-                  );
-                }
-
-                return CategoryScroller(
-                  categories: subs.map((sub) {
-                    return CategoryItem(
-                      label: sub.title,
-                      imagePath: 'http://192.168.1.113:8000/${sub.image ?? ""}',
-                      onTap: () => Get.to(() => VendorGroup(company: widget.company, subCategoryId: sub.id)),
+                  if (subs.isEmpty) {
+                    return CategoryScroller(
+                      categories: [
+                        CategoryItem(
+                          label: 'Baby Shoot',
+                          imagePath: 'assets/images/category/vendor_category/img.png',
+                          onTap: () => Get.to(() => VendorGroup(company: widget.company, subCategoryId: 2)),
+                        ),
+                        CategoryItem(label: 'Wedding Shoot', imagePath: 'assets/images/category/vendor_category/img.png', onTap: () {}),
+                        CategoryItem(label: 'Portfolio Shoot', imagePath: 'assets/images/category/vendor_category/img.png', onTap: () {}),
+                        CategoryItem(label: 'Maternity Shoot', imagePath: 'assets/images/category/vendor_category/img.png', onTap: () {}),
+                        CategoryItem(label: 'Family Function', imagePath: 'assets/images/category/vendor_category/img.png', onTap: () {}),
+                      ],
                     );
-                  }).toList(),
-                );
-              }),
+                  }
+
+                  return CategoryScroller(
+                    categories:
+                        subs.map((sub) {
+                          return CategoryItem(
+                            label: sub.title,
+                            imagePath: 'http://192.168.1.113:8000/${sub.image ?? ""}',
+                            onTap: () => Get.to(() => VendorGroup(company: widget.company, subCategoryId: sub.id)),
+                          );
+                        }).toList(),
+                  );
+                },
+              ),
 
               const SizedBox(height: 10),
 

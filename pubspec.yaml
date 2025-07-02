@@ -65,6 +65,7 @@ dependencies:
   flutter_html: ^3.0.0
   dotted_border: ^3.0.1
   shimmer: ^3.0.0
+  sms_autofill: ^2.4.1
 
 
 dev_dependencies:
