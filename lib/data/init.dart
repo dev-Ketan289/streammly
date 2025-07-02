@@ -7,9 +7,11 @@ import 'package:streammly/controllers/otp_controller.dart';
 import 'package:streammly/data/repository/auth_repo.dart';
 import 'package:streammly/data/repository/category_repo.dart';
 import 'package:streammly/data/repository/company_repo.dart';
+import 'package:streammly/data/repository/promo_slider_repo.dart';
 
 import '../controllers/category_controller.dart';
 import '../controllers/company_controller.dart';
+import '../controllers/promo_slider_controller.dart';
 import '../services/constants.dart';
 import 'api/api_client.dart';
 
@@ -29,6 +31,9 @@ class Init {
       // Category
       Get.lazyPut(() => CategoryRepo(apiClient: Get.find()));
       Get.lazyPut(() => CategoryController(categoryRepo: Get.find()));
+      // Promo Slider
+      Get.lazyPut(() => PromoSliderRepo(apiClient: Get.find()));
+      Get.lazyPut(() => PromoSliderController(promoSliderRepo: Get.find()));
       //Company
       Get.lazyPut(() => CompanyRepo(apiClient: Get.find()));
       Get.lazyPut(() => CompanyController(companyRepo: Get.find()));
