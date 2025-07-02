@@ -7,6 +7,7 @@ import '../../../controllers/home_screen_controller.dart';
 import '../../../controllers/location_controller.dart';
 import '../../../models/category/category_item.dart';
 import '../../../models/category/category_model.dart';
+import '../../../services/constants.dart';
 import '../home/widgets/category/category.dart';
 import '../home/widgets/category/explore_us.dart';
 import '../home/widgets/category/page_nav.dart';
@@ -24,9 +25,9 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
-  final HomeController headerController = Get.put(HomeController());
-  final LocationController locationController = Get.put(LocationController());
+  final HomeController headerController = Get.find<HomeController>();
   final CategoryController categoryController = Get.find<CategoryController>();
+  final LocationController locationController = Get.put(LocationController());
 
   @override
   void initState() {
@@ -37,7 +38,7 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   List<CategoryItem> convertToCategoryItems(List<CategoryModel> models) {
-    const String baseUrl = 'http://192.168.1.113:8000';
+    final String baseUrl = AppConstants.baseUrl;
     return models.map((model) {
       String? fullImageUrl;
       if (model.image != null && model.image!.isNotEmpty) {
@@ -73,15 +74,22 @@ class _HomeScreenState extends State<HomeScreen> {
             child: SingleChildScrollView(
               child: Column(
                 children: [
-                  HeaderBanner(slides: slides, height: 370, backgroundImage: "assets/images/banner.png", overlayColor: Colors.white.withValues(alpha: 0.3)),
+                  HeaderBanner(
+                    slides: slides,
+                    height: 370,
+                    backgroundImage: "assets/images/banner.png",
+                    overlayColor: Colors.white.withValues(alpha: 0.3),
+                  ),
                   const SizedBox(height: 24),
                   UpcomingOfferCard(),
                   const SizedBox(height: 24),
-
                   isCategoryLoading
                       ? const CircularProgressIndicator()
-                      : CategoryScroller(title: "Categories", onSeeAll: () => Get.to(() => CategoryListScreen()), categories: convertToCategoryItems(categoryModels)),
-
+                      : CategoryScroller(
+                    title: "Categories",
+                    onSeeAll: () => Get.to(() => CategoryListScreen()),
+                    categories: convertToCategoryItems(categoryModels),
+                  ),
                   const SizedBox(height: 24),
                   PageNav(),
                   const SizedBox(height: 24),
@@ -94,7 +102,10 @@ class _HomeScreenState extends State<HomeScreen> {
                       } else if (headerCtrl.recommendedCompanies.isEmpty) {
                         return const Center(child: Text("No recommended vendors found."));
                       } else {
-                        return RecommendedList(context: context, recommendedCompanies: headerCtrl.recommendedCompanies);
+                        return RecommendedList(
+                          context: context,
+                          recommendedCompanies: headerCtrl.recommendedCompanies,
+                        );
                       }
                     },
                   ),

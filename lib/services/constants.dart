@@ -41,6 +41,12 @@ class AppConstants {
 
   static const String extras = 'api/v1/extra';
 
+  // Home
+  static const String headerSliderUrl = 'api/v1/basic/header-sliders';
+  static const String recommendedCompaniesUrl = 'api/v1/company/getratingbasedrecomendedcompanies';
+
+
+
   // Category
   static const String categoriesUrl = 'api/v1/basic/categories';
 

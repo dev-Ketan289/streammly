@@ -8,9 +8,11 @@ import 'package:streammly/data/repository/auth_repo.dart';
 import 'package:streammly/data/repository/category_repo.dart';
 import 'package:streammly/data/repository/company_repo.dart';
 import 'package:streammly/data/repository/promo_slider_repo.dart';
+import 'package:streammly/models/banner/home_repo.dart';
 
 import '../controllers/category_controller.dart';
 import '../controllers/company_controller.dart';
+import '../controllers/home_screen_controller.dart';
 import '../controllers/promo_slider_controller.dart';
 import '../services/constants.dart';
 import 'api/api_client.dart';
@@ -28,6 +30,10 @@ class Init {
       //Controller initialization
       Get.lazyPut(() => AuthController(authRepo: Get.find()));
       Get.lazyPut(() => OtpController(authRepo: Get.find()));
+      // Home
+      Get.lazyPut(() => HomeRepo(apiClient: Get.find()));
+      Get.lazyPut(() => HomeController(homeRepo: Get.find()));
+
       // Category
       Get.lazyPut(() => CategoryRepo(apiClient: Get.find()));
       Get.lazyPut(() => CategoryController(categoryRepo: Get.find()));

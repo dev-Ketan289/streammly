@@ -1,11 +1,12 @@
-import 'dart:convert';
-
 import 'package:get/get.dart';
-import 'package:http/http.dart' as http;
-
 import '../models/banner/banner_item.dart';
+import '../models/banner/home_repo.dart';
 
 class HomeController extends GetxController {
+  final HomeRepo homeRepo;
+
+  HomeController({required this.homeRepo});
+
   List<BannerSlideItem> headerSlides = [];
   List<Map<String, dynamic>> recommendedCompanies = [];
 
@@ -24,24 +25,10 @@ class HomeController extends GetxController {
     update();
 
     try {
-      final res = await http.get(Uri.parse("http://192.168.1.113:8000/api/v1/basic/header-sliders"));
-      if (res.statusCode == 200) {
-        final json = jsonDecode(res.body);
-        final List data = json['data'];
-        final List<BannerSlideItem> result = [];
-
-        for (var item in data) {
-          for (var img in item['header_slider_images']) {
-            if (img['header_slider_id'] == item['id']) {
-              result.add(BannerSlideItem.fromJson(parent: item, image: img));
-            }
-          }
-        }
-
-        headerSlides = result;
-      }
+      headerSlides = await homeRepo.fetchHeaderSlides();
     } catch (e) {
       print("Error fetching header slides: $e");
+      headerSlides = [];
     }
 
     isHeaderLoading = false;
@@ -52,18 +39,11 @@ class HomeController extends GetxController {
     isRecommendedLoading = true;
     update();
 
-    const url = "http://192.168.1.113:8000/api/v1/company/getratingbasedrecomendedcompanies";
-
     try {
-      final response = await http.get(Uri.parse(url));
-      if (response.statusCode == 200) {
-        final data = jsonDecode(response.body);
-        final List allCompanies = data["data"] ?? [];
-
-        recommendedCompanies = allCompanies.where((c) => (c["rating"] ?? 0) >= 4).cast<Map<String, dynamic>>().toList();
-      }
+      recommendedCompanies = await homeRepo.fetchRecommendedCompanies();
     } catch (e) {
       print("Error fetching recommended companies: $e");
+      recommendedCompanies = [];
     }
 
     isRecommendedLoading = false;
