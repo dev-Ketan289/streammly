@@ -50,6 +50,7 @@ class _VendorDetailScreenState extends State<VendorDetailScreen> {
                 overlayColor: Colors.indigo.withValues(alpha: 0.6),
                 overrideTitle: widget.company.companyName,
                 overrideSubtitle: widget.company.categoryName,
+                specialities: widget.company.specialities,
               ),
 
               const SizedBox(height: 6),

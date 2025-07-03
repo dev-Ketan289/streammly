@@ -14,7 +14,8 @@ class PackagesController extends GetxController {
   RxList<Map<String, dynamic>> packages = <Map<String, dynamic>>[].obs;
   RxBool isLoading = false.obs;
 
-  // Backend filters (you must set these before calling fetchPackages)
+  RxList<Map<String, dynamic>> popularPackagesList = <Map<String, dynamic>>[].obs;
+
   late int companyId;
   late int subCategoryId;
   late int subVerticalId;
@@ -45,9 +46,9 @@ class PackagesController extends GetxController {
 
             return {
               "title": pkg["title"] ?? "",
-              "type": pkg["type"] ?? "N/A", // ✅ Directly from backend
+              "type": pkg["type"] ?? "N/A",
               "price": int.tryParse(firstVariation?["amount"]?.toString() ?? "0") ?? 0,
-              "oldPrice": null, // Optional, handle from backend if needed
+              "oldPrice": null,
               "hours":
                   variations != null
                       ? variations.map<String>((v) {
@@ -56,8 +57,8 @@ class PackagesController extends GetxController {
                         final suffix = type.startsWith("hour") ? "hr" : "";
                         return "$duration$suffix";
                       }).toList()
-                      : ["1hr", "2hrs", "3hrs"], // fallback
-              "highlight": pkg["short_description"] ?? "",
+                      : ["1hr", "2hrs", "3hrs"],
+              "highlight": pkg["long_description"] ?? "",
               "shortDescription": pkg["short_description"] ?? "",
               "fullDescription": pkg["long_description"] ?? "",
               "specialOffer": (pkg["status"] ?? "").toString().toLowerCase() == "active",
@@ -66,7 +67,6 @@ class PackagesController extends GetxController {
           }).toList(),
         );
 
-        // Initialize selected hours and expansion states
         for (int i = 0; i < packages.length; i++) {
           selectedHours[i] = {"2hrs"};
           expandedStates[i] = false;
@@ -80,8 +80,42 @@ class PackagesController extends GetxController {
     isLoading.value = false;
   }
 
-  // ... rest of your logic below remains 100% unchanged ...
+  Future<void> fetchPopularPackages() async {
+    try {
+      final response = await http.get(Uri.parse("http://192.168.1.113:8000/api/v1/package/getpopularpackages"), headers: {"Content-Type": "application/json"});
 
+      if (response.statusCode == 200) {
+        final jsonBody = json.decode(response.body);
+        final List data = jsonBody["data"] ?? [];
+
+        popularPackagesList.assignAll(
+          data.map<Map<String, dynamic>>((pkg) {
+            final List<dynamic>? variations = pkg["packagevariations"];
+            final firstVariation = (variations != null && variations.isNotEmpty) ? variations[0] : null;
+
+            return {
+              "title": pkg["title"] ?? "",
+              "type": pkg["type"] ?? "N/A",
+              "price": int.tryParse(firstVariation?["amount"]?.toString() ?? "0") ?? 0,
+              "shortDescription": pkg["short_description"] ?? "",
+              "highlight": pkg["short_description"] ?? "",
+              "packageIndex": data.indexOf(pkg),
+              "image":
+                  pkg["image_upload"] != null && pkg["image_upload"].isNotEmpty
+                      ? 'http://192.168.1.113:8000/${pkg["image_upload"]}'
+                      : 'assets/images/category/vendor_category/Baby.jpg',
+            };
+          }).toList(),
+        );
+      } else {
+        Get.snackbar("Error", "Failed to fetch popular packages");
+      }
+    } catch (e) {
+      Get.snackbar("Exception", e.toString());
+    }
+  }
+
+  // Other methods (toggleView, togglePackageSelection, etc.) remain unchanged...
   void toggleView() {
     isGridView.value = !isGridView.value;
   }
@@ -103,9 +137,7 @@ class PackagesController extends GetxController {
   void _addPackageForBilling(int index) {
     final pkg = packages[index];
     final selectedHoursForPackage = selectedHours[index] ?? {"2hrs"};
-
     final billingPackage = {...pkg, 'selectedHours': selectedHoursForPackage.toList(), 'packageIndex': index, 'finalPrice': pkg["price"]};
-
     selectedPackagesForBilling.add(billingPackage);
   }
 
@@ -117,7 +149,6 @@ class PackagesController extends GetxController {
       selectedHours[packageIndex]!.add(hour);
     }
     selectedHours.refresh();
-
     if (selectedPackageIndices.contains(packageIndex)) {
       selectedPackagesForBilling.removeWhere((pkg) => pkg['packageIndex'] == packageIndex);
       _addPackageForBilling(packageIndex);
@@ -196,13 +227,10 @@ class PackagesController extends GetxController {
   void updatePackagePricing(int packageIndex) {
     if (selectedPackageIndices.contains(packageIndex)) {
       selectedPackagesForBilling.removeWhere((pkg) => pkg['packageIndex'] == packageIndex);
-
       final pkg = packages[packageIndex];
       final selectedHoursForPackage = selectedHours[packageIndex] ?? {"2hrs"};
       final calculatedPrice = calculatePriceForPackage(packageIndex, selectedHoursForPackage);
-
       final billingPackage = {...pkg, 'selectedHours': selectedHoursForPackage.toList(), 'packageIndex': packageIndex, 'finalPrice': calculatedPrice};
-
       selectedPackagesForBilling.add(billingPackage);
     }
   }

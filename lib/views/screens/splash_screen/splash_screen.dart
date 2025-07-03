@@ -5,7 +5,7 @@ import 'package:get/get.dart';
 import 'package:streammly/controllers/auth_controller.dart';
 import 'package:streammly/navigation_menu.dart';
 import 'package:streammly/services/route_helper.dart';
-import 'package:streammly/views/screens/auth_screens/login_screen.dart';
+import 'package:streammly/views/screens/common/location_screen.dart';
 // Add your custom image widget if needed
 
 class SplashScreen extends StatefulWidget {
@@ -31,7 +31,7 @@ class _SplashScreenState extends State<SplashScreen> {
         //   context,
         //   '/login',
         // ); // change route as needed
-        Navigator.push(context, getCustomRoute(child: LoginScreen()));
+        Navigator.push(context, getCustomRoute(child: LocationScreen()));
       }
     });
   }
@@ -49,12 +49,7 @@ class _SplashScreenState extends State<SplashScreen> {
           crossAxisAlignment: CrossAxisAlignment.end,
           children: [
             // App Logo or GIF
-            Image.asset(
-              'assets/images/splash.gif',
-              height: size.height,
-              width: size.height,
-              fit: BoxFit.cover,
-            ),
+            Image.asset('assets/images/splash.gif', height: size.height, width: size.height, fit: BoxFit.cover),
           ],
         ),
       ),

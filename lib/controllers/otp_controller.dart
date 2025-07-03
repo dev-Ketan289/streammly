@@ -8,7 +8,9 @@ import 'package:get/get.dart';
 import 'package:http/http.dart' as http;
 import 'package:streammly/data/repository/auth_repo.dart';
 import 'package:streammly/models/response/response_model.dart';
+import 'package:streammly/views/screens/auth_screens/welcome.dart';
 
+import '../views/screens/auth_screens/cretae_user.dart';
 import 'auth_controller.dart';
 
 class OtpController extends GetxController implements GetxService {
@@ -45,6 +47,21 @@ class OtpController extends GetxController implements GetxService {
 
       if (response.statusCode == 200 && response.body['data']['token'] != null) {
         Get.find<AuthController>().setUserToken(response.body['data']['token']);
+
+        /// ✅ Fetch user profile after login
+        await Get.find<AuthController>().fetchUserProfile();
+
+        /// Check if user is new or existing
+        if (Get.find<AuthController>().userProfile.value == null ||
+            Get.find<AuthController>().userProfile.value!.name == null ||
+            Get.find<AuthController>().userProfile.value!.email == null) {
+          // New User → Show Profile Form
+          Get.offAll(() => const ProfileFormScreen());
+        } else {
+          // Existing User → Go to Welcome Screen
+          Get.offAll(() => const WelcomeScreen());
+        }
+
         responseModel = ResponseModel(true, "Verification Successful");
       } else {
         shakeOnError.value = true;

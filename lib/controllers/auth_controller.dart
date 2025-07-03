@@ -11,12 +11,33 @@ import 'package:streammly/data/repository/auth_repo.dart';
 import 'package:streammly/models/response/response_model.dart';
 import 'package:uuid/uuid.dart';
 
+import '../models/profile/user_profile.dart';
+
 class AuthController extends GetxController implements GetxService {
   final AuthRepo authRepo;
   AuthController({required this.authRepo});
   final TextEditingController phoneController = TextEditingController();
 
   bool isLoading = false;
+
+  // --- User Profile ---
+  var userProfile = Rxn<UserProfile>();
+
+  Future<void> fetchUserProfile() async {
+    try {
+      Response response = await authRepo.getUserProfile();
+      if (response.statusCode == 200 && response.body['data'] != null) {
+        userProfile.value = UserProfile.fromJson(response.body['data']);
+      } else {
+        userProfile.value = null;
+        Fluttertoast.showToast(msg: "Failed to fetch profile");
+      }
+    } catch (e) {
+      userProfile.value = null;
+      Fluttertoast.showToast(msg: "Error fetching profile");
+    }
+  }
+
   Future<ResponseModel> sendOtp() async {
     isLoading = true;
     update();
@@ -87,6 +108,7 @@ class AuthController extends GetxController implements GetxService {
       );
       if (response.statusCode == 200 && response.body["token"] != null) {
         setUserToken(response.body['token']);
+        await fetchUserProfile(); // <-- fetch user profile after login
         responseModel = ResponseModel(true, "Google Sign-In Successful");
       } else {
         responseModel = ResponseModel(false, "Failed to Google Sign-In");
@@ -99,6 +121,7 @@ class AuthController extends GetxController implements GetxService {
     update();
     return responseModel;
   }
+
   // /// Google Login Setup
   // void signInWithGoogle() async {
   //   try {
