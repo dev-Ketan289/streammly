@@ -98,17 +98,15 @@ class LoginScreen extends StatelessWidget {
                                   width: double.infinity,
                                   height: 50,
                                   child: OutlinedButton.icon(
-                                    onPressed: () {
-                                      authController.isLoading
-                                          ? null
-                                          : () {
-                                            authController.signInWithGoogle().then((value) {
-                                              if (value?.isSuccess ?? false) {
+                                    onPressed:
+                                        authController.isLoading
+                                            ? null
+                                            : () async {
+                                              final result = await authController.signInWithGoogle();
+                                              if (result?.isSuccess ?? false) {
                                                 Get.to(() => WelcomeScreen());
                                               }
-                                            });
-                                          };
-                                    },
+                                            },
 
                                     icon: Image.asset('assets/images/img.png', height: 24),
                                     label: Text("Continue with Google", style: theme.textTheme.bodySmall),

@@ -28,7 +28,9 @@ class PromoSliderController extends GetxController {
       if (response.statusCode == 200) {
         final jsonData = json.decode(response.body);
         final List data = jsonData['data'];
-        promoList.value = data.map((item) => PromoSliderModel.fromJson(item)).toList();
+
+        // Filter out entries with missing or empty image
+        promoList.value = data.where((item) => item['image'] != null && item['image'].toString().trim().isNotEmpty).map((item) => PromoSliderModel.fromJson(item)).toList();
       } else {
         Get.snackbar("Error", "Failed to load sliders");
       }

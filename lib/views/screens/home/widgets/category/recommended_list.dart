@@ -41,7 +41,7 @@ class RecommendedList extends StatelessWidget {
 
           return InkWell(
             onTap: () {
-              // TODO: Navigate to detail screen with vendor
+              // Navigator.push(context, MaterialPageRoute(builder: (_) => VendorDetailScreen(company: vendor)));
             },
             child: Container(
               width: itemWidth,
