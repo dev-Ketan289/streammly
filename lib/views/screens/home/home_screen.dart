@@ -24,9 +24,9 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
-  final HomeController headerController = Get.put(HomeController());
-  final LocationController locationController = Get.put(LocationController());
+  final HomeController headerController = Get.find<HomeController>();
   final CategoryController categoryController = Get.find<CategoryController>();
+  final LocationController locationController = Get.put(LocationController());
 
   @override
   void initState() {
@@ -37,7 +37,7 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   List<CategoryItem> convertToCategoryItems(List<CategoryModel> models) {
-    const String baseUrl = 'http://192.168.1.113:8000';
+    final String baseUrl = 'http://192.168.1.113:8000';
     return models.map((model) {
       String? fullImageUrl;
       if (model.image != null && model.image!.isNotEmpty) {
@@ -77,11 +77,9 @@ class _HomeScreenState extends State<HomeScreen> {
                   const SizedBox(height: 24),
                   UpcomingOfferCard(),
                   const SizedBox(height: 24),
-
                   isCategoryLoading
                       ? const CircularProgressIndicator()
                       : CategoryScroller(title: "Categories", onSeeAll: () => Get.to(() => CategoryListScreen()), categories: convertToCategoryItems(categoryModels)),
-
                   const SizedBox(height: 24),
                   PageNav(),
                   const SizedBox(height: 24),

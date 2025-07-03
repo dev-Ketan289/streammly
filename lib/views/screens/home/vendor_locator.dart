@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:math' as Math;
 import 'dart:typed_data';
 import 'dart:ui' as ui;
@@ -6,10 +7,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:get/get.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
-import 'package:streammly/views/screens/vendor/vendor_description.dart';
+import 'package:permission_handler/permission_handler.dart';
 
 import '../../../controllers/category_controller.dart';
 import '../../../controllers/company_controller.dart';
+import '../vendor/vendor_description.dart';
 import '../vendor/widgets/vendor_info_card.dart';
 
 class CompanyLocatorMapScreen extends StatefulWidget {
@@ -26,11 +28,11 @@ class _CompanyLocatorMapScreenState extends State<CompanyLocatorMapScreen> {
   final CategoryController categoryController = Get.find<CategoryController>();
 
   final Set<Marker> _customMarkers = {};
+  final Completer<GoogleMapController> _mapController = Completer();
+
   @override
   void initState() {
     super.initState();
-
-    // Avoid setState or update during widget build
     WidgetsBinding.instance.addPostFrameCallback((_) {
       controller.setCategoryId(widget.categoryId);
       _loadData();
@@ -40,8 +42,30 @@ class _CompanyLocatorMapScreenState extends State<CompanyLocatorMapScreen> {
   Future<void> _loadData() async {
     _customMarkers.clear();
     setState(() {});
+
+    final status = await Permission.location.request();
+    if (status.isDenied) {
+      Get.snackbar("Location Required", "Please allow location access.");
+      return;
+    } else if (status.isPermanentlyDenied) {
+      Get.snackbar("Permission Blocked", "Enable location in app settings.");
+      await openAppSettings();
+      return;
+    }
+
+    // Always use current selected category
     await controller.fetchCompaniesByCategory(controller.selectedCategoryId);
     await _generateCustomMarkers();
+
+    final gMap = await _mapController.future;
+
+    if (controller.userPosition != null) {
+      final userLatLng = LatLng(controller.userPosition!.latitude, controller.userPosition!.longitude);
+      gMap.animateCamera(CameraUpdate.newCameraPosition(CameraPosition(target: userLatLng, zoom: 12)));
+    } else if (_customMarkers.isNotEmpty) {
+      final first = _customMarkers.first.position;
+      gMap.animateCamera(CameraUpdate.newLatLngZoom(first, 13));
+    }
   }
 
   Future<void> _generateCustomMarkers() async {
@@ -50,6 +74,8 @@ class _CompanyLocatorMapScreenState extends State<CompanyLocatorMapScreen> {
 
     for (int i = 0; i < controller.companies.length; i++) {
       final company = controller.companies[i];
+      if (company.latitude == null || company.longitude == null) continue;
+
       double lat = company.latitude!;
       double lng = company.longitude!;
       String posKey = "$lat-$lng";
@@ -127,28 +153,25 @@ class _CompanyLocatorMapScreenState extends State<CompanyLocatorMapScreen> {
     return Scaffold(
       body: Stack(
         children: [
-          Stack(
-            children: [
-              GoogleMap(
-                initialCameraPosition: const CameraPosition(target: LatLng(19.2189, 72.9805), zoom: 12),
-                markers: _customMarkers,
-                myLocationEnabled: true,
-                myLocationButtonEnabled: false,
-                onTap: (_) => controller.clearSelectedCompany(),
-              ),
-              GetBuilder<CompanyController>(
-                builder: (_) {
-                  final showOverlay = controller.selectedCompany != null;
-                  return IgnorePointer(
-                    ignoring: true,
-                    child: AnimatedOpacity(opacity: showOverlay ? 0.2 : 0.0, duration: const Duration(milliseconds: 300), child: Container(color: Colors.indigo)),
-                  );
-                },
-              ),
-            ],
+          GoogleMap(
+            initialCameraPosition: const CameraPosition(target: LatLng(19.2189, 72.9805), zoom: 12),
+            onMapCreated: (controller) => _mapController.complete(controller),
+            markers: _customMarkers,
+            myLocationEnabled: true,
+            myLocationButtonEnabled: false,
+            onTap: (_) => controller.clearSelectedCompany(),
           ),
 
-          // ✅ FIXED: Replaced Obx with GetBuilder
+          GetBuilder<CompanyController>(
+            builder: (_) {
+              final showOverlay = controller.selectedCompany != null;
+              return IgnorePointer(
+                ignoring: true,
+                child: AnimatedOpacity(opacity: showOverlay ? 0.2 : 0.0, duration: const Duration(milliseconds: 300), child: Container(color: Colors.indigo)),
+              );
+            },
+          ),
+
           Positioned(
             top: 60,
             left: 20,
@@ -166,15 +189,12 @@ class _CompanyLocatorMapScreenState extends State<CompanyLocatorMapScreen> {
                     value: controller.selectedCategoryId,
                     isExpanded: true,
                     underline: const SizedBox(),
-                    items:
-                        categoryController.categories
-                            .map((category) => DropdownMenuItem<int>(value: category.id, child: Center(child: Text(category.title, textAlign: TextAlign.center))))
-                            .toList(),
+                    items: categoryController.categories.map((category) => DropdownMenuItem<int>(value: category.id, child: Center(child: Text(category.title)))).toList(),
                     onChanged: (int? newId) {
                       if (newId != null) {
                         controller.setCategoryId(newId);
                         controller.clearSelectedCompany();
-                        _loadData();
+                        _loadData(); // ✅ Reload for new category
                       }
                     },
                   ),
