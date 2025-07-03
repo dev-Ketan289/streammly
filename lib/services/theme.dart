@@ -5,7 +5,7 @@ import 'package:google_fonts/google_fonts.dart';
 // Color primaryColor = const Color(0xFF941f37);
 // Color secondaryColor = const Color(0xFF941f37).withOpacity(.47);
 Color primaryColor = const Color(0xFF2864A6);
-Color secondaryColor = const Color(0xFF052C57);
+Color secondaryColor = const Color(0xFF4867B7);
 Color backgroundDark = const Color(0xff231F20);
 Color backgroundLight = const Color(0xffffffff);
 
@@ -68,19 +68,23 @@ class CustomTheme {
     ),
     typography: Typography.material2021(),
     textTheme: TextTheme(
-      labelLarge: GoogleFonts.openSans(fontWeight: FontWeight.w400, color: textSecondary, fontSize: 14.0),
+      labelLarge: GoogleFonts.openSans(
+        fontWeight: FontWeight.w400,
+        color: textSecondary,
+        fontSize: 14.0,
+      ),
       headlineLarge: GoogleFonts.openSans(),
       headlineMedium: GoogleFonts.openSans(),
       headlineSmall: GoogleFonts.openSans(),
       displayLarge: GoogleFonts.openSans(),
       displayMedium: GoogleFonts.openSans(),
       displaySmall: GoogleFonts.openSans(),
-      titleLarge: GoogleFonts.openSans(),
-      titleMedium: GoogleFonts.openSans(),
-      titleSmall: GoogleFonts.openSans(),
-      bodyLarge: GoogleFonts.openSans(),
-      bodyMedium: GoogleFonts.openSans(),
-      bodySmall: GoogleFonts.openSans(),
+      titleLarge: GoogleFonts.publicSans(),
+      titleMedium: GoogleFonts.publicSans(fontSize: 20),
+      titleSmall: GoogleFonts.publicSans(fontSize: 18),
+      bodyLarge: GoogleFonts.openSans(fontSize: 16),
+      bodyMedium: GoogleFonts.openSans(fontSize: 14),
+      bodySmall: GoogleFonts.openSans(fontSize: 12),
     ),
   );
   static ThemeData dark = ThemeData(
@@ -124,7 +128,11 @@ class CustomTheme {
     ),
     typography: Typography.material2021(),
     textTheme: TextTheme(
-      labelLarge: GoogleFonts.cinzelDecorative(fontWeight: FontWeight.w400, color: textSecondary, fontSize: 14.0),
+      labelLarge: GoogleFonts.cinzelDecorative(
+        fontWeight: FontWeight.w400,
+        color: textSecondary,
+        fontSize: 14.0,
+      ),
       labelMedium: GoogleFonts.cinzelDecorative(),
       headlineLarge: GoogleFonts.openSans(),
       headlineMedium: GoogleFonts.openSans(),

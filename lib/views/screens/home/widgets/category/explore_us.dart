@@ -46,8 +46,8 @@ class ExploreUs extends StatelessWidget {
         ),
 
         /// ---- Shimmer or Vendor List ----
-        Obx(() {
-          if (companyController.isLoading.value) {
+        GetBuilder<CompanyController>(builder: (controller) {
+          if (companyController.isLoading) {
             return _buildShimmerList();
           }
 

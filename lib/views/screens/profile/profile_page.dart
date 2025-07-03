@@ -9,6 +9,7 @@ import 'package:streammly/views/screens/profile/language_preferences.dart';
 import 'package:streammly/views/screens/profile/linked_pages.dart';
 import 'package:streammly/views/screens/profile/notifications_page.dart';
 import 'package:streammly/views/screens/profile/profile_screen.dart';
+import 'package:streammly/views/screens/wishlist/wishlistpage.dart';
 
 import 'components/profile_item_widget.dart';
 
@@ -159,12 +160,14 @@ class ProfilePage extends StatelessWidget {
           ProfileItemWidget(
             icon: SvgPicture.asset(Assets.svgSaved, height: 26, width: 26),
             title: "Saved Offers",
-            onTap: () {},
+            // onTap: () {Get.to(SavedOffersPage())},
           ),
           ProfileItemWidget(
             icon: SvgPicture.asset(Assets.svgSaved, height: 26, width: 26),
             title: "WishList",
-            onTap: () {},
+            onTap: () {
+              Get.to(Wishlistpage());
+            },
           ),
 
           const SizedBox(height: 24),
