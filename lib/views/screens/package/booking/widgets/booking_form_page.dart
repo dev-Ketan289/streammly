@@ -29,7 +29,7 @@ class _PackageFormCardState extends State<PackageFormCard> {
   @override
   void initState() {
     super.initState();
-    final controller = Get.find<BookingFormController>();
+    final controller = Get.find<BookingController>();
     final form = controller.packageFormsData[widget.index] ?? {};
 
     startTimeController = TextEditingController(text: form['startTime'] ?? '');
@@ -58,7 +58,7 @@ class _PackageFormCardState extends State<PackageFormCard> {
   @override
   Widget build(BuildContext context) {
     TextEditingController studioAddController = TextEditingController(text: widget.package['address'] ?? '305/A, Navneet Building, Saivihar Road, Bhandup (W), Mumbai 400078.');
-    final controller = Get.find<BookingFormController>();
+    final controller = Get.find<BookingController>();
     final packageTitle = widget.package['title'] as String;
 
     return Obx(() {
@@ -220,7 +220,7 @@ class _PackageFormCardState extends State<PackageFormCard> {
     });
   }
 
-  List<Widget> _buildExtraQuestions(BookingFormController controller) {
+  List<Widget> _buildExtraQuestions(BookingController controller) {
     final extraQuestions = widget.package['extraQuestions'] ?? widget.package['packageextra_questions'] ?? [];
     List<Widget> fields = [];
 

@@ -11,7 +11,7 @@ class BookingPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final controller = Get.put(BookingFormController());
+    final controller = Get.put(BookingController());
 
     // Receive selected packages from previous screen
     final packages = Get.arguments as List<Map<String, dynamic>>;
@@ -21,14 +21,8 @@ class BookingPage extends StatelessWidget {
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         title: Text(
-          controller.selectedPackages.isNotEmpty
-              ? controller.selectedPackages[0]['title'] ?? "Booking"
-              : "Booking",
-          style: const TextStyle(
-            color: Colors.black,
-            fontSize: 18,
-            fontWeight: FontWeight.w600,
-          ),
+          controller.selectedPackages.isNotEmpty ? controller.selectedPackages[0]['title'] ?? "Booking" : "Booking",
+          style: const TextStyle(color: Colors.black, fontSize: 18, fontWeight: FontWeight.w600),
         ),
         iconTheme: const IconThemeData(color: Colors.black),
         elevation: 0,
@@ -55,51 +49,22 @@ class BookingPage extends StatelessWidget {
                           scrollDirection: Axis.horizontal,
                           itemCount: controller.selectedPackages.length,
                           itemBuilder: (context, index) {
-                            final isSelected =
-                                controller.currentPage.value == index;
+                            final isSelected = controller.currentPage.value == index;
                             return ElevatedButton(
-                              onPressed:
-                                  () => controller.currentPage.value = index,
+                              onPressed: () => controller.currentPage.value = index,
                               style: ElevatedButton.styleFrom(
-                                backgroundColor:
-                                    isSelected
-                                        ? const Color(0xFF4A6CF7)
-                                        : Colors.grey.shade100,
-                                foregroundColor:
-                                    isSelected ? Colors.white : Colors.black87,
-                                padding: const EdgeInsets.symmetric(
-                                  horizontal: 20,
-                                  vertical: 12,
-                                ),
+                                backgroundColor: isSelected ? const Color(0xFF4A6CF7) : Colors.grey.shade100,
+                                foregroundColor: isSelected ? Colors.white : Colors.black87,
+                                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
                                 elevation: 0,
                                 shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.only(
-                                    topLeft: Radius.circular(10),
-                                    topRight: Radius.circular(10),
-                                  ),
-                                  side: BorderSide(
-                                    color:
-                                        isSelected
-                                            ? const Color.fromARGB(
-                                              255,
-                                              0,
-                                              51,
-                                              255,
-                                            )
-                                            : Colors.grey.shade300,
-                                  ),
+                                  borderRadius: BorderRadius.only(topLeft: Radius.circular(10), topRight: Radius.circular(10)),
+                                  side: BorderSide(color: isSelected ? const Color.fromARGB(255, 0, 51, 255) : Colors.grey.shade300),
                                 ),
                               ),
                               child: Text(
-                                controller.selectedPackages[index]['title'] ??
-                                    'Package ${index + 1}',
-                                style: TextStyle(
-                                  fontSize: 14,
-                                  fontWeight:
-                                      isSelected
-                                          ? FontWeight.w600
-                                          : FontWeight.w500,
-                                ),
+                                controller.selectedPackages[index]['title'] ?? 'Package ${index + 1}',
+                                style: TextStyle(fontSize: 14, fontWeight: isSelected ? FontWeight.w600 : FontWeight.w500),
                               ),
                             );
                           },
@@ -108,13 +73,7 @@ class BookingPage extends StatelessWidget {
                     ],
 
                     // Active Form
-                    PackageFormCard(
-                      index: controller.currentPage.value,
-                      package:
-                          controller.selectedPackages[controller
-                              .currentPage
-                              .value],
-                    ),
+                    PackageFormCard(index: controller.currentPage.value, package: controller.selectedPackages[controller.currentPage.value]),
                   ],
                 ),
               ),
@@ -123,17 +82,7 @@ class BookingPage extends StatelessWidget {
             // Bottom Button
             Container(
               padding: const EdgeInsets.all(20),
-              decoration: BoxDecoration(
-                color: Colors.white,
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.grey.shade200,
-                    blurRadius: 10,
-                    spreadRadius: 1,
-                    offset: const Offset(0, -2),
-                  ),
-                ],
-              ),
+              decoration: BoxDecoration(color: Colors.white, boxShadow: [BoxShadow(color: Colors.grey.shade200, blurRadius: 10, spreadRadius: 1, offset: const Offset(0, -2))]),
               child: SizedBox(
                 width: double.infinity,
                 child: ElevatedButton(
@@ -143,18 +92,9 @@ class BookingPage extends StatelessWidget {
                   style: ElevatedButton.styleFrom(
                     backgroundColor: const Color(0xFF4A6CF7),
                     padding: const EdgeInsets.symmetric(vertical: 16),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12),
-                    ),
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                   ),
-                  child: const Text(
-                    "Let's Continue",
-                    style: TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.w600,
-                      color: Colors.white,
-                    ),
-                  ),
+                  child: const Text("Let's Continue", style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600, color: Colors.white)),
                 ),
               ),
             ),

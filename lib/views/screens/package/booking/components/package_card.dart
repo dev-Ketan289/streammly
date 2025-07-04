@@ -4,7 +4,7 @@ import 'package:streammly/controllers/booking_form_controller.dart';
 
 class PackageCard extends StatelessWidget {
   final int index;
-  final BookingFormController formController = Get.find<BookingFormController>();
+  final BookingController formController = Get.find<BookingController>();
 
   PackageCard({super.key, required this.index});
 

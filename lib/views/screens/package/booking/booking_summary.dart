@@ -6,7 +6,7 @@ import 'package:streammly/views/screens/package/booking/thanks_for_booking.dart'
 import '../../../../controllers/package_page_controller.dart';
 
 class BookingSummaryPage extends StatelessWidget {
-  final BookingFormController controller = Get.find<BookingFormController>();
+  final BookingController controller = Get.find<BookingController>();
   final PackagesController packagesController = Get.find<PackagesController>();
 
   BookingSummaryPage({super.key});

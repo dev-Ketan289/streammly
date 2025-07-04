@@ -3,7 +3,7 @@ import 'package:get/get.dart';
 import 'package:intl/intl.dart';
 import 'package:streammly/views/screens/package/booking/booking_page.dart';
 
-class BookingFormController extends GetxController {
+class BookingController extends GetxController {
   var currentPage = 0.obs;
   var selectedPackages = <Map<String, dynamic>>[].obs;
   final personalInfo = {'name': ''.obs, 'mobile': ''.obs, 'email': ''.obs};

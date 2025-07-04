@@ -9,7 +9,7 @@ class PersonalInfoSection extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final controller = Get.find<BookingFormController>();
+    final controller = Get.find<BookingController>();
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,

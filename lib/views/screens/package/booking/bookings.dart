@@ -6,7 +6,7 @@ import 'package:streammly/views/screens/package/booking/components/package_card.
 class Bookings extends StatelessWidget {
   Bookings({super.key});
 
-  final BookingFormController formController = Get.find<BookingFormController>();
+  final BookingController formController = Get.find<BookingController>();
 
   @override
   Widget build(BuildContext context) {
