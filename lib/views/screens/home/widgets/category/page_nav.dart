@@ -47,7 +47,7 @@ class PageNav extends StatelessWidget {
                                     1; // Return to 'Recommended'
                               } else if (filters[index] == 'Wishlist') {
                                 await Get.to(() => Wishlistpage());
-                                selectedIndex.value == 1;
+                                selectedIndex.value = 1;
                               }
                             },
                             child: Container(

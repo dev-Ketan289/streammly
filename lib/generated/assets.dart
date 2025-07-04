@@ -2,6 +2,10 @@
 class Assets {
   Assets._();
   
+  /// Assets for images8cbc0c3e032e4e7aA5e16f6bcd737b7f
+  /// assets/images/8cbc0c3e-032e-4e7a-a5e1-6f6bcd737b7f.jfif
+  static const String images8cbc0c3e032e4e7aA5e16f6bcd737b7f = "assets/images/8cbc0c3e-032e-4e7a-a5e1-6f6bcd737b7f.jfif";
+
   /// Assets for imagesBanner
   /// assets/images/banner.png
   static const String imagesBanner = "assets/images/banner.png";
