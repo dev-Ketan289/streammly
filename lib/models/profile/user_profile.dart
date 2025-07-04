@@ -6,8 +6,9 @@ class UserProfile {
   final String status;
   final String? profileImage;
   final int userType;
+  final String? dob;
 
-  UserProfile({required this.id, this.phone, this.name, this.email, required this.status, this.profileImage, required this.userType});
+  UserProfile({required this.id, this.phone, this.name, this.email, required this.status, this.profileImage, required this.userType, this.dob});
 
   factory UserProfile.fromJson(Map<String, dynamic> json) {
     return UserProfile(
@@ -18,6 +19,7 @@ class UserProfile {
       status: json['status'],
       profileImage: json['profile_image'],
       userType: json['user_type'],
+      dob: json['dob'],
     );
   }
 }

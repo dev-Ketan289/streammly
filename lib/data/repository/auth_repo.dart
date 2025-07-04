@@ -15,20 +15,20 @@ class AuthRepo {
     return await apiClient.postData(AppConstants.sendOtp, {"phone": phone});
   }
 
-  Future<Response> verifyOtp({required String phone, required String otp}) async {
-    return await apiClient.postData(AppConstants.verifyOtp, {"phone": phone, "otp": otp, "device_id": "fhif"});
+  Future<Response> verifyOtp({required String phone, required String otp, required String deviceId}) async {
+    return await apiClient.postData(AppConstants.verifyOtp, {"phone": phone, "otp": otp, "device_id": deviceId});
   }
 
-  Future<Response> signInWithGoogle({required String token, required String firebaseUid}) async {
-    return await apiClient.postData(AppConstants.signInWithGoogle, {
-      "token": token,
-      "device_id": "fiukjfkhskjahfkljshfkljhsdkjfhksjdfkjhskjhfkshdkfhksjhdfkjhskjh",
-      "firebase_uid": firebaseUid,
-    });
+  Future<Response> signInWithGoogle({required String token, required String firebaseUid, required String deviceId}) async {
+    return await apiClient.postData(AppConstants.signInWithGoogle, {"token": token, "device_id": deviceId, "firebase_uid": firebaseUid});
   }
 
   Future<Response> getUserProfile() async {
     return await apiClient.getData(AppConstants.getUserProfile);
+  }
+
+  Future<Response> saveUserProfile({required String name, required String email, String? dob, String? gender}) async {
+    return await apiClient.postData("/api/v1/user", {"name": name, "email": email, "dob": dob, "gender": gender});
   }
 
   Future<bool> saveUserToken(String token) async {

@@ -10,7 +10,6 @@ import 'package:streammly/views/screens/auth_screens/welcome.dart';
 
 import '../../../generated/animation/shake_widget.dart';
 import '../../../services/theme.dart' as theme;
-import 'cretae_user.dart';
 
 class OtpScreen extends StatefulWidget {
   const OtpScreen({super.key});
@@ -149,14 +148,14 @@ class _OtpScreenState extends State<OtpScreen> {
                                                 : () {
                                                   otpController.verifyOtp().then((value) async {
                                                     if (value.isSuccess) {
-                                                      /// ✅ Check if user is new or old
+                                                      /// Check if user is new or old
                                                       await Get.find<AuthController>().fetchUserProfile();
 
                                                       if (Get.find<AuthController>().userProfile.value == null ||
                                                           Get.find<AuthController>().userProfile.value!.name == null ||
                                                           Get.find<AuthController>().userProfile.value!.email == null) {
                                                         /// New User → Show Profile Form
-                                                        Get.offAll(() => const ProfileFormScreen());
+                                                        Get.offAll(() => const WelcomeScreen());
                                                       } else {
                                                         /// Old User → Go to Welcome Screen
                                                         Get.offAll(() => const WelcomeScreen());

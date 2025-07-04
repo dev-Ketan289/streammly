@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:streammly/controllers/company_controller.dart';
 
+import '../../../controllers/package_page_controller.dart';
 import '../../../models/company/company_location.dart';
 import '../../../navigation_menu.dart';
 import '../home/widgets/header_banner.dart';
@@ -54,6 +55,7 @@ class _VendorGroupState extends State<VendorGroup> {
               overlayColor: Colors.indigo.withValues(alpha: 0.6),
               overrideTitle: widget.company.companyName,
               overrideSubtitle: widget.company.categoryName,
+              specialities: widget.company.specialities,
             ),
 
             const SizedBox(height: 10),
@@ -224,9 +226,15 @@ class _VendorGroupState extends State<VendorGroup> {
                 iconColor: Colors.amber,
                 onTap: () {
                   Navigator.pop(context);
-                  Get.to(() => PackagesPage(companyId: companyId, subCategoryId: subCategoryId, subVerticalId: subVerticalId));
+                  Get.to(
+                    () => PackagesPage(companyId: companyId, subCategoryId: subCategoryId, subVerticalId: subVerticalId),
+                    binding: BindingsBuilder(() {
+                      Get.put(PackagesController());
+                    }),
+                  );
                 },
               ),
+
               const SizedBox(height: 24),
               Row(
                 children: const [

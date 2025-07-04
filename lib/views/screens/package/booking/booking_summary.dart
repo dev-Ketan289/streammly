@@ -1,47 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:streammly/controllers/booking_form_controller.dart';
-import 'package:streammly/views/screens/package/booking/booking_page.dart';
 import 'package:streammly/views/screens/package/booking/thanks_for_booking.dart';
 
-class BookingSummaryController extends GetxController {
-  var cutenessPrice = 5999.obs;
-  var momentsPrice = 1599.obs;
-  var showCutenessDetails = true.obs;
-  var showMomentsDetails = false.obs;
-
-  int get totalPayment => cutenessPrice.value + momentsPrice.value;
-
-  void editPackage(int index) {
-    final bookingController = Get.find<BookingFormController>();
-    bookingController.currentPage.value = index;
-    Get.to(() => BookingPage());
-  }
-
-  void proceedToPayment() {
-    Get.snackbar(
-      'Payment',
-      'Proceeding to payment...',
-      backgroundColor: Colors.green,
-      colorText: Colors.white,
-    );
-  }
-
-  void toggleCutenessDetails() {
-    showCutenessDetails.toggle();
-  }
-
-  void toggleMomentsDetails() {
-    showMomentsDetails.toggle();
-  }
-}
+import '../../../../controllers/package_page_controller.dart';
 
 class BookingSummaryPage extends StatelessWidget {
-  final BookingSummaryController controller = Get.put(
-    BookingSummaryController(),
-  );
-  final BookingFormController bookingController =
-      Get.find<BookingFormController>();
+  final BookingFormController controller = Get.find<BookingFormController>();
+  final PackagesController packagesController = Get.find<PackagesController>();
 
   BookingSummaryPage({super.key});
 
@@ -55,14 +21,7 @@ class BookingSummaryPage extends StatelessWidget {
           backgroundColor: const Color(0xFFF5F5F7),
           elevation: 0,
           automaticallyImplyLeading: false,
-          title: const Text(
-            'Booking Summary',
-            style: TextStyle(
-              color: Color(0xFF4A90E2),
-              fontSize: 18,
-              fontWeight: FontWeight.w600,
-            ),
-          ),
+          title: const Text('Booking Summary', style: TextStyle(color: Color(0xFF4A90E2), fontSize: 18, fontWeight: FontWeight.w600)),
           centerTitle: true,
         ),
         body: Padding(
@@ -73,12 +32,9 @@ class BookingSummaryPage extends StatelessWidget {
                 child: SingleChildScrollView(
                   child: Container(
                     padding: const EdgeInsets.all(20),
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.circular(12),
-                    ),
+                    decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(12)),
                     child: Obx(() {
-                      final packages = bookingController.selectedPackages;
+                      final packages = controller.selectedPackages;
                       return Column(
                         children: [
                           for (int i = 0; i < packages.length; i++)
@@ -88,19 +44,10 @@ class BookingSummaryPage extends StatelessWidget {
                                   index: i,
                                   title: packages[i]['title'],
                                   subtitle: _getSubtitle(i),
-                                  price:
-                                      i == 0
-                                          ? controller.cutenessPrice.value
-                                          : controller.momentsPrice.value,
-                                  showLocationDetails:
-                                      i == 0
-                                          ? controller.showCutenessDetails.value
-                                          : controller.showMomentsDetails.value,
+                                  price: packagesController.getSelectedPackagesForBilling()[i]['finalPrice'] ?? 0,
+                                  showLocationDetails: controller.showPackageDetails[i],
                                   onEdit: () => controller.editPackage(i),
-                                  onToggleDetails:
-                                      i == 0
-                                          ? controller.toggleCutenessDetails
-                                          : controller.toggleMomentsDetails,
+                                  onToggleDetails: () => controller.toggleDetails(i),
                                 ),
                                 const SizedBox(height: 16),
                               ],
@@ -125,7 +72,7 @@ class BookingSummaryPage extends StatelessWidget {
   }
 
   String _getSubtitle(int index) {
-    final form = bookingController.packageFormsData[index] ?? {};
+    final form = controller.packageFormsData[index] ?? {};
     final date = form['date']?.toString() ?? 'Not set';
     final startTime = form['startTime']?.toString() ?? 'Not set';
     final endTime = form['endTime']?.toString() ?? 'Not set';
@@ -141,15 +88,11 @@ class BookingSummaryPage extends StatelessWidget {
     required VoidCallback onEdit,
     required VoidCallback onToggleDetails,
   }) {
-    final form = bookingController.packageFormsData[index] ?? {};
-    final packageTitle = bookingController.selectedPackages[index]['title'];
+    final form = controller.packageFormsData[index] ?? {};
+    final packageTitle = controller.selectedPackages[index]['title'];
 
     return Container(
-      decoration: BoxDecoration(
-        border: Border.all(color: const Color(0xFFB5B6B7)),
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(12),
-      ),
+      decoration: BoxDecoration(border: Border.all(color: const Color(0xFFB5B6B7)), color: Colors.white, borderRadius: BorderRadius.circular(12)),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -165,64 +108,27 @@ class BookingSummaryPage extends StatelessWidget {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text(
-                            title,
-                            style: const TextStyle(
-                              fontSize: 18,
-                              fontWeight: FontWeight.w500,
-                              color: Colors.black,
-                            ),
-                          ),
-                          Text(
-                            subtitle,
-                            style: const TextStyle(
-                              fontSize: 10,
-                              color: Color(0xFF2864A6),
-                            ),
-                          ),
+                          Text(title, style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w500, color: Colors.black)),
+                          Text(subtitle, style: const TextStyle(fontSize: 10, color: Color(0xFF2864A6))),
                         ],
                       ),
                     ),
                     Row(
                       children: [
                         const SizedBox(width: 8),
-                        Text(
-                          '₹$price/-',
-                          style: const TextStyle(
-                            fontSize: 16,
-                            fontWeight: FontWeight.w700,
-                            color: Color(0xFF2864A6),
-                          ),
-                        ),
+                        Text('₹$price/-', style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w700, color: Color(0xFF2864A6))),
                         const SizedBox(width: 12),
-                        GestureDetector(
-                          onTap: onToggleDetails,
-                          child: Icon(
-                            showLocationDetails
-                                ? Icons.visibility
-                                : Icons.visibility_off,
-                            color: Colors.black,
-                            size: 20,
-                          ),
-                        ),
+                        GestureDetector(onTap: onToggleDetails, child: Icon(showLocationDetails ? Icons.visibility : Icons.visibility_off, color: Colors.black, size: 20)),
                         const SizedBox(width: 12),
-                        GestureDetector(
-                          onTap: onEdit,
-                          child: const Icon(
-                            Icons.edit,
-                            color: Colors.black,
-                            size: 20,
-                          ),
-                        ),
+                        GestureDetector(onTap: onEdit, child: const Icon(Icons.edit, color: Colors.black, size: 20)),
                       ],
                     ),
                   ],
                 ),
-                SizedBox(height: 10),
+                const SizedBox(height: 10),
               ],
             ),
           ),
-
           if (showLocationDetails) ...[
             Container(height: 1, color: const Color(0xFFB5B6B7)),
             const SizedBox(height: 10),
@@ -231,120 +137,48 @@ class BookingSummaryPage extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Text(
-                    'Shoot Location',
-                    style: TextStyle(
-                      fontSize: 13,
-                      fontWeight: FontWeight.w600,
-                      color: Colors.black87,
-                    ),
-                  ),
+                  const Text('Shoot Location', style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600, color: Colors.black87)),
                   const SizedBox(height: 8),
                   Text(
-                    bookingController.selectedPackages[index]['address'] ??
-                        '1st Floor, Hiren Industrial Estate, 104 & 105 - B, Mogul Ln, Mahim West, Maharashtra 400016.',
-                    style: const TextStyle(
-                      fontSize: 12,
-                      color: Colors.black54,
-                      height: 1.4,
-                    ),
+                    controller.selectedPackages[index]['address'] ?? '1st Floor, Hiren Industrial Estate, 104 & 105 - B, Mogul Ln, Mahim West, Maharashtra 400016.',
+                    style: const TextStyle(fontSize: 12, color: Colors.black54, height: 1.4),
                   ),
                   const SizedBox(height: 16),
-                  if (packageTitle == 'Cuteness')
-                    Text(
-                      'Baby Info: ${form['babyInfo'] ?? 'Not set'}',
-                      style: const TextStyle(
-                        fontSize: 12,
-                        color: Colors.black54,
-                      ),
-                    ),
+                  if (packageTitle == 'Cuteness') Text('Baby Info: ${form['babyInfo'] ?? 'Not set'}', style: const TextStyle(fontSize: 12, color: Colors.black54)),
                   if (packageTitle == 'Moments') ...[
-                    Text(
-                      'Theme: ${form['theme'] ?? 'Not set'}',
-                      style: const TextStyle(
-                        fontSize: 12,
-                        color: Colors.black54,
-                      ),
-                    ),
+                    Text('Theme: ${form['theme'] ?? 'Not set'}', style: const TextStyle(fontSize: 12, color: Colors.black54)),
                     const SizedBox(height: 8),
-                    Text(
-                      'Outfit Changes: ${form['outfitChanges'] ?? 'Not set'}',
-                      style: const TextStyle(
-                        fontSize: 12,
-                        color: Colors.black54,
-                      ),
-                    ),
+                    Text('Outfit Changes: ${form['outfitChanges'] ?? 'Not set'}', style: const TextStyle(fontSize: 12, color: Colors.black54)),
                   ],
                   if (packageTitle == 'Wonders')
-                    Text(
-                      'Location Preference: ${form['locationPreference'] ?? 'Not set'}',
-                      style: const TextStyle(
-                        fontSize: 12,
-                        color: Colors.black54,
-                      ),
-                    ),
+                    Text('Location Preference: ${form['locationPreference'] ?? 'Not set'}', style: const TextStyle(fontSize: 12, color: Colors.black54)),
                   const SizedBox(height: 16),
                   Container(
                     padding: const EdgeInsets.all(12),
-                    decoration: BoxDecoration(
-                      color: const Color(0xFFF8F9FA),
-                      borderRadius: BorderRadius.circular(8),
-                      border: Border.all(color: const Color(0xFFE9ECEF)),
-                    ),
+                    decoration: BoxDecoration(color: const Color(0xFFF8F9FA), borderRadius: BorderRadius.circular(8), border: Border.all(color: const Color(0xFFE9ECEF))),
                     child: Row(
                       children: [
                         Expanded(
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.center,
                             children: [
-                              const Text(
-                                'Date of Shoot',
-                                style: TextStyle(
-                                  fontSize: 12,
-                                  color: Colors.grey,
-                                  fontWeight: FontWeight.w500,
-                                ),
-                              ),
+                              const Text('Date of Shoot', style: TextStyle(fontSize: 12, color: Colors.grey, fontWeight: FontWeight.w500)),
                               const SizedBox(height: 4),
-
-                              Text(
-                                form['date']?.toString() ?? 'Not set',
-                                style: const TextStyle(
-                                  fontSize: 14,
-                                  color: Colors.grey,
-                                  fontWeight: FontWeight.w500,
-                                ),
-                              ),
+                              Text(form['date']?.toString() ?? 'Not set', style: const TextStyle(fontSize: 14, color: Colors.grey, fontWeight: FontWeight.w500)),
                             ],
                           ),
                         ),
-                        Container(
-                          height: 40,
-                          width: 1,
-                          color: Colors.grey.shade300,
-                          padding: const EdgeInsets.symmetric(horizontal: 14),
-                        ),
-                        SizedBox(width: 5),
+                        Container(height: 40, width: 1, color: Colors.grey.shade300, padding: const EdgeInsets.symmetric(horizontal: 14)),
+                        const SizedBox(width: 5),
                         Expanded(
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.center,
                             children: [
-                              const Text(
-                                'Timing',
-                                style: TextStyle(
-                                  fontSize: 12,
-                                  color: Colors.grey,
-                                  fontWeight: FontWeight.w500,
-                                ),
-                              ),
+                              const Text('Timing', style: TextStyle(fontSize: 12, color: Colors.grey, fontWeight: FontWeight.w500)),
                               const SizedBox(height: 4),
                               Text(
                                 '${form['startTime']?.toString() ?? 'Not set'} - ${form['endTime']?.toString() ?? 'Not set'}',
-                                style: const TextStyle(
-                                  fontSize: 14,
-                                  color: Colors.grey,
-                                  fontWeight: FontWeight.w500,
-                                ),
+                                style: const TextStyle(fontSize: 14, color: Colors.grey, fontWeight: FontWeight.w500),
                               ),
                             ],
                           ),
@@ -362,32 +196,17 @@ class BookingSummaryPage extends StatelessWidget {
   }
 
   Widget _buildTotalPaymentSection() {
+    final totalPrice = packagesController.getSelectedPackagesForBilling().fold<int>(0, (sum, pkg) => sum + (pkg['finalPrice'] as int));
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(8),
-        boxShadow: [],
-      ),
+      decoration: BoxDecoration(borderRadius: BorderRadius.circular(8)),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          const Text(
-            'Total Payment',
-            style: TextStyle(
-              fontSize: 16,
-              fontWeight: FontWeight.w600,
-              color: Colors.black87,
-            ),
-          ),
-          Obx(
-            () => Text(
-              'Rs. ${controller.totalPayment.toString().replaceAllMapped(RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'), (Match m) => '${m[1]},')}',
-              style: const TextStyle(
-                fontSize: 16,
-                fontWeight: FontWeight.w600,
-                color: Colors.black,
-              ),
-            ),
+          const Text('Total Payment', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600, color: Colors.black87)),
+          Text(
+            'Rs. ${totalPrice.toString().replaceAllMapped(RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'), (Match m) => '${m[1]},')}',
+            style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600, color: Colors.black),
           ),
         ],
       ),
@@ -397,74 +216,32 @@ class BookingSummaryPage extends StatelessWidget {
   Widget _buildPaymentMethodSection() {
     return Container(
       padding: const EdgeInsets.all(2),
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(12),
-        boxShadow: [],
-      ),
+      decoration: BoxDecoration(borderRadius: BorderRadius.circular(12)),
       child: Container(
         padding: const EdgeInsets.all(20),
         decoration: BoxDecoration(
           color: Colors.white,
           borderRadius: BorderRadius.circular(12),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.grey.withValues(alpha: 0.2),
-              blurRadius: 8,
-              offset: const Offset(0, 2),
-            ),
-          ],
+          boxShadow: [BoxShadow(color: Colors.grey.withValues(alpha: 0.2), blurRadius: 8, offset: const Offset(0, 2))],
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Text(
-              'Payment',
-              style: TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.w600,
-                color: Colors.black,
-              ),
-            ),
+            const Text('Payment', style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600, color: Colors.black)),
             const SizedBox(height: 16),
             GestureDetector(
               onTap: () {
-                Get.snackbar(
-                  'Payment Method',
-                  'Select your payment method',
-                  backgroundColor: Colors.blue,
-                  colorText: Colors.white,
-                );
+                Get.snackbar('Payment Method', 'Select your payment method', backgroundColor: Colors.blue, colorText: Colors.white);
               },
               child: Container(
                 padding: const EdgeInsets.all(12),
-                decoration: BoxDecoration(
-                  color: const Color(0xFFF8F9FA),
-                  borderRadius: BorderRadius.circular(8),
-                  border: Border.all(color: const Color(0xFFE9ECEF)),
-                ),
+                decoration: BoxDecoration(color: const Color(0xFFF8F9FA), borderRadius: BorderRadius.circular(8), border: Border.all(color: const Color(0xFFE9ECEF))),
                 child: Row(
-                  children: [
-                    const Icon(
-                      Icons.account_balance_wallet,
-                      size: 24,
-                      color: Colors.black54,
-                    ),
-                    const SizedBox(width: 12),
-                    const Expanded(
-                      child: Text(
-                        'Payment',
-                        style: TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.w500,
-                          color: Colors.black87,
-                        ),
-                      ),
-                    ),
-                    const Icon(
-                      Icons.chevron_right,
-                      color: Colors.grey,
-                      size: 24,
-                    ),
+                  children: const [
+                    Icon(Icons.account_balance_wallet, size: 24, color: Colors.black54),
+                    SizedBox(width: 12),
+                    Expanded(child: Text('Payment', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500, color: Colors.black87))),
+                    Icon(Icons.chevron_right, color: Colors.grey, size: 24),
                   ],
                 ),
               ),
@@ -482,20 +259,8 @@ class BookingSummaryPage extends StatelessWidget {
       margin: const EdgeInsets.only(top: 16),
       child: ElevatedButton(
         onPressed: () => Get.to(() => ThanksForBookingPage()),
-        // onPressed: controller.proceedToPayment,
-        style: ElevatedButton.styleFrom(
-          backgroundColor: const Color(0xFF4A90E2),
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-          elevation: 0,
-        ),
-        child: const Text(
-          'Let\'s Continue',
-          style: TextStyle(
-            fontSize: 16,
-            fontWeight: FontWeight.w600,
-            color: Colors.white,
-          ),
-        ),
+        style: ElevatedButton.styleFrom(backgroundColor: const Color(0xFF4A90E2), shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)), elevation: 0),
+        child: const Text('Let\'s Continue', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600, color: Colors.white)),
       ),
     );
   }

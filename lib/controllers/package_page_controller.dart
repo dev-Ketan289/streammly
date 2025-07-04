@@ -20,14 +20,16 @@ class PackagesController extends GetxController {
   late int subCategoryId;
   late int subVerticalId;
 
-  @override
-  void onInit() {
-    super.onInit();
+  void initialize({required int companyId, required int subCategoryId, required int subVerticalId}) {
+    this.companyId = companyId;
+    this.subCategoryId = subCategoryId;
+    this.subVerticalId = subVerticalId;
     fetchPackages();
   }
 
   Future<void> fetchPackages() async {
     isLoading.value = true;
+    packages.clear();
     try {
       final response = await http.post(
         Uri.parse("http://192.168.1.113:8000/api/v1/package/getpackages"),
@@ -39,8 +41,10 @@ class PackagesController extends GetxController {
         final jsonBody = json.decode(response.body);
         final List data = jsonBody["data"] ?? [];
 
+        final filteredData = data.where((pkg) => pkg['sub_vertical_id'] == subVerticalId).toList();
+
         packages.assignAll(
-          data.map<Map<String, dynamic>>((pkg) {
+          filteredData.map<Map<String, dynamic>>((pkg) {
             final List<dynamic>? variations = pkg["packagevariations"];
             final firstVariation = (variations != null && variations.isNotEmpty) ? variations[0] : null;
 
@@ -48,7 +52,6 @@ class PackagesController extends GetxController {
               "title": pkg["title"] ?? "",
               "type": pkg["type"] ?? "N/A",
               "price": int.tryParse(firstVariation?["amount"]?.toString() ?? "0") ?? 0,
-              "oldPrice": null,
               "hours":
                   variations != null
                       ? variations.map<String>((v) {
@@ -61,8 +64,10 @@ class PackagesController extends GetxController {
               "highlight": pkg["long_description"] ?? "",
               "shortDescription": pkg["short_description"] ?? "",
               "fullDescription": pkg["long_description"] ?? "",
+              "termsAndCondition": pkg["terms_and_condition"] ?? "",
               "specialOffer": (pkg["status"] ?? "").toString().toLowerCase() == "active",
               "packageIndex": data.indexOf(pkg),
+              "extraQuestions": pkg["packageextra_questions"] ?? [],
             };
           }).toList(),
         );
@@ -80,42 +85,6 @@ class PackagesController extends GetxController {
     isLoading.value = false;
   }
 
-  Future<void> fetchPopularPackages() async {
-    try {
-      final response = await http.get(Uri.parse("http://192.168.1.113:8000/api/v1/package/getpopularpackages"), headers: {"Content-Type": "application/json"});
-
-      if (response.statusCode == 200) {
-        final jsonBody = json.decode(response.body);
-        final List data = jsonBody["data"] ?? [];
-
-        popularPackagesList.assignAll(
-          data.map<Map<String, dynamic>>((pkg) {
-            final List<dynamic>? variations = pkg["packagevariations"];
-            final firstVariation = (variations != null && variations.isNotEmpty) ? variations[0] : null;
-
-            return {
-              "title": pkg["title"] ?? "",
-              "type": pkg["type"] ?? "N/A",
-              "price": int.tryParse(firstVariation?["amount"]?.toString() ?? "0") ?? 0,
-              "shortDescription": pkg["short_description"] ?? "",
-              "highlight": pkg["short_description"] ?? "",
-              "packageIndex": data.indexOf(pkg),
-              "image":
-                  pkg["image_upload"] != null && pkg["image_upload"].isNotEmpty
-                      ? 'http://192.168.1.113:8000/${pkg["image_upload"]}'
-                      : 'assets/images/category/vendor_category/Baby.jpg',
-            };
-          }).toList(),
-        );
-      } else {
-        Get.snackbar("Error", "Failed to fetch popular packages");
-      }
-    } catch (e) {
-      Get.snackbar("Exception", e.toString());
-    }
-  }
-
-  // Other methods (toggleView, togglePackageSelection, etc.) remain unchanged...
   void toggleView() {
     isGridView.value = !isGridView.value;
   }
@@ -232,6 +201,41 @@ class PackagesController extends GetxController {
       final calculatedPrice = calculatePriceForPackage(packageIndex, selectedHoursForPackage);
       final billingPackage = {...pkg, 'selectedHours': selectedHoursForPackage.toList(), 'packageIndex': packageIndex, 'finalPrice': calculatedPrice};
       selectedPackagesForBilling.add(billingPackage);
+    }
+  }
+
+  Future<void> fetchPopularPackages() async {
+    try {
+      final response = await http.get(Uri.parse("http://192.168.1.113:8000/api/v1/package/getpopularpackages"), headers: {"Content-Type": "application/json"});
+
+      if (response.statusCode == 200) {
+        final jsonBody = json.decode(response.body);
+        final List data = jsonBody["data"] ?? [];
+
+        popularPackagesList.assignAll(
+          data.map<Map<String, dynamic>>((pkg) {
+            final List<dynamic>? variations = pkg["packagevariations"];
+            final firstVariation = (variations != null && variations.isNotEmpty) ? variations[0] : null;
+
+            return {
+              "title": pkg["title"] ?? "",
+              "type": pkg["type"] ?? "N/A",
+              "price": int.tryParse(firstVariation?["amount"]?.toString() ?? "0") ?? 0,
+              "shortDescription": pkg["short_description"] ?? "",
+              "highlight": pkg["fullDescription"] ?? "",
+              "packageIndex": data.indexOf(pkg),
+              "image":
+                  pkg["image_upload"] != null && pkg["image_upload"].isNotEmpty
+                      ? 'http://192.168.1.113:8000/${pkg["image_upload"]}'
+                      : 'assets/images/category/vendor_category/Baby.jpg',
+            };
+          }).toList(),
+        );
+      } else {
+        Get.snackbar("Error", "Failed to fetch popular packages");
+      }
+    } catch (e) {
+      Get.snackbar("Exception", e.toString());
     }
   }
 }

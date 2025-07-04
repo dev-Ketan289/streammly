@@ -1,15 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:streammly/controllers/booking_form_controller.dart';
-import 'package:streammly/views/screens/package/booking/booking_summary.dart';
 import 'package:streammly/views/screens/package/booking/components/package_card.dart';
 
 class Bookings extends StatelessWidget {
   Bookings({super.key});
-  final BookingFormController formController =
-      Get.find<BookingFormController>();
-  final BookingSummaryController summaryController =
-      Get.find<BookingSummaryController>();
+
+  final BookingFormController formController = Get.find<BookingFormController>();
 
   @override
   Widget build(BuildContext context) {
@@ -21,9 +18,7 @@ class Bookings extends StatelessWidget {
           backgroundColor: Colors.transparent,
           title: const Text('Bookings'),
           centerTitle: true,
-          bottom: const TabBar(
-            tabs: [Tab(text: 'Packages'), Tab(text: 'Quotations')],
-          ),
+          bottom: const TabBar(tabs: [Tab(text: 'Packages'), Tab(text: 'Quotations')]),
         ),
         body: TabBarView(
           children: [
@@ -32,13 +27,7 @@ class Bookings extends StatelessWidget {
                 () => Column(
                   children: List.generate(
                     formController.selectedPackages.length,
-                    (index) => Padding(
-                      padding: const EdgeInsets.symmetric(vertical: 8),
-                      child: Padding(
-                        padding: const EdgeInsets.all(8.0),
-                        child: PackageCard(index: index),
-                      ),
-                    ),
+                    (index) => Padding(padding: const EdgeInsets.symmetric(vertical: 8), child: Padding(padding: const EdgeInsets.all(8.0), child: PackageCard(index: index))),
                   ),
                 ),
               ),

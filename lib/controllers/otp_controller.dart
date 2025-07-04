@@ -33,7 +33,7 @@ class OtpController extends GetxController implements GetxService {
 
     final phone = Get.find<AuthController>().phoneController.text.trim();
 
-    /// ✅ Bypass check for test number
+    /// Bypass check for test number
     if (phone == "8111111111") {
       Get.find<AuthController>().setUserToken("test-token");
       Fluttertoast.showToast(msg: "Test number login successful");
@@ -43,22 +43,26 @@ class OtpController extends GetxController implements GetxService {
     }
 
     try {
-      Response response = await authRepo.verifyOtp(phone: phone, otp: otpController.text);
+      /// Fetch device ID
+      String deviceId = await Get.find<AuthController>().getOrCreateDeviceId();
+
+      /// Verify OTP with device ID
+      Response response = await authRepo.verifyOtp(phone: phone, otp: otpController.text, deviceId: deviceId);
 
       if (response.statusCode == 200 && response.body['data']['token'] != null) {
         Get.find<AuthController>().setUserToken(response.body['data']['token']);
 
-        /// ✅ Fetch user profile after login
+        /// Fetch user profile after login
         await Get.find<AuthController>().fetchUserProfile();
 
         /// Check if user is new or existing
         if (Get.find<AuthController>().userProfile.value == null ||
             Get.find<AuthController>().userProfile.value!.name == null ||
             Get.find<AuthController>().userProfile.value!.email == null) {
-          // New User → Show Profile Form
+          /// New User → Show Profile Form
           Get.offAll(() => const ProfileFormScreen());
         } else {
-          // Existing User → Go to Welcome Screen
+          /// Existing User → Go to Welcome Screen
           Get.offAll(() => const WelcomeScreen());
         }
 

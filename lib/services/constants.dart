@@ -34,7 +34,7 @@ class AppConstants {
   static const String agoraAppId = 'c87b710048c049f59570bd1895b7e561';
 
   // Auth
-  static const String getUserProfile = '/api/v1/user/getuserprofile/';
+  static const String getUserProfile = 'api/v1/user/getuserprofile/';
 
   static const String sendOtp = 'api/v1/user/auth/generateOtp';
   static const String verifyOtp = 'api/v1/user/auth/login';
@@ -60,7 +60,7 @@ class AppConstants {
   static const String getSubVerticals = 'api/v1/company/getsubvertical';
 
   // Package
-  static const String getPackagesUrl = "/api/v1/package/getpackages";
+  static const String getPackagesUrl = "api/v1/package/getpackages";
   //
   static const double horizontalPadding = 16;
   static const double verticalPadding = 20;

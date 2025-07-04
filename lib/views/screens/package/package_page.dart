@@ -17,15 +17,12 @@ class PackagesPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final controller = Get.put(PackagesController());
+    final controller = Get.find<PackagesController>();
 
-    // Assign backend filter values
-    controller.companyId = companyId;
-    controller.subCategoryId = subCategoryId;
-    controller.subVerticalId = subVerticalId;
-
-    // Fetch packages after setting filter data
-    controller.fetchPackages();
+    // Initialize ONCE in post-frame (to prevent re-execution on rebuilds)
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      controller.initialize(companyId: companyId, subCategoryId: subCategoryId, subVerticalId: subVerticalId);
+    });
 
     return Scaffold(
       backgroundColor: const Color(0xFFFFFFFF),

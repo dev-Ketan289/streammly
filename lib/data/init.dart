@@ -26,10 +26,12 @@ class Init {
       //Repo initialization
       Get.lazyPut(() => ApiClient(appBaseUrl: AppConstants.baseUrl, sharedPreferences: Get.find()));
       Get.lazyPut(() => AuthRepo(apiClient: Get.find(), sharedPreferences: Get.find()));
-
-      // Home
       Get.lazyPut(() => CategoryRepo(apiClient: Get.find()));
       Get.lazyPut(() => HomeRepo(apiClient: Get.find()));
+      Get.lazyPut(() => PromoSliderRepo(apiClient: Get.find()));
+      Get.lazyPut(() => CompanyRepo(apiClient: Get.find()));
+
+      // Home
       Get.lazyPut(() => HomeController(homeRepo: Get.find()));
 
       //Controller initialization
@@ -39,10 +41,8 @@ class Init {
 
       Get.lazyPut(() => CategoryController(categoryRepo: Get.find()));
       // Promo Slider
-      Get.lazyPut(() => PromoSliderRepo(apiClient: Get.find()));
       Get.lazyPut(() => PromoSliderController(promoSliderRepo: Get.find()));
       //Company
-      Get.lazyPut(() => CompanyRepo(apiClient: Get.find()));
       Get.lazyPut(() => CompanyController(companyRepo: Get.find()));
       // Package
       // Get.lazyPut(() => PackageRepo(apiClient: Get.find()));
