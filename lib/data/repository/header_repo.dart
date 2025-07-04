@@ -1,3 +1,5 @@
+import 'package:get/get.dart';
+
 import '../../../models/banner/banner_item.dart';
 import '../../../services/constants.dart';
 import '../../data/api/api_client.dart';
@@ -6,6 +8,8 @@ class HomeRepo {
   final ApiClient apiClient;
 
   HomeRepo({required this.apiClient});
+  Future<Response> fetchHeader() async =>
+      await apiClient.getData(AppConstants.headerSliderUrl);
 
   Future<List<BannerSlideItem>> fetchHeaderSlides() async {
     final res = await apiClient.getData(AppConstants.headerSliderUrl);
@@ -27,6 +31,9 @@ class HomeRepo {
     final res = await apiClient.getData(AppConstants.recommendedCompaniesUrl);
     final List data = res.body['data'] ?? [];
 
-    return data.where((c) => (c["rating"] ?? 0) >= 4).cast<Map<String, dynamic>>().toList();
+    return data
+        .where((c) => (c["rating"] ?? 0) >= 4)
+        .cast<Map<String, dynamic>>()
+        .toList();
   }
 }

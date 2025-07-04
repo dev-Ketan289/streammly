@@ -59,6 +59,10 @@ class AppConstants {
   static const String getCompanySubCategories = 'api/v1/company/getcompanysubcategories/';
   static const String getSubVerticals = 'api/v1/company/getsubvertical';
 
+  // Bookmark
+  static const String postBookmark = 'api/v1/user/togglebookmark/';
+  static const String getBookMark = 'api/v1/user/getbookmark/';
+
   // Package
   static const String getPackagesUrl = "/api/v1/package/getpackages";
   //

@@ -23,7 +23,14 @@ class CategoryListScreen extends StatelessWidget {
         elevation: 0,
         backgroundColor: Colors.transparent,
         leading: const BackButton(color: Colors.black),
-        title: const Text("Categories", style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Colors.black)),
+        title: const Text(
+          "Categories",
+          style: TextStyle(
+            fontSize: 20,
+            fontWeight: FontWeight.bold,
+            color: Colors.black,
+          ),
+        ),
         centerTitle: true,
       ),
       body: GetBuilder<CategoryController>(
@@ -49,7 +56,13 @@ class CategoryListScreen extends StatelessWidget {
                   decoration: BoxDecoration(
                     color: Colors.white,
                     borderRadius: BorderRadius.circular(16),
-                    boxShadow: [BoxShadow(color: Colors.grey.withAlpha(40), blurRadius: 8, offset: const Offset(0, 4))],
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.grey.withAlpha(40),
+                        blurRadius: 8,
+                        offset: const Offset(0, 4),
+                      ),
+                    ],
                   ),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -69,17 +82,44 @@ class CategoryListScreen extends StatelessWidget {
                               ),
                             ),
                           ),
-                          const Positioned(top: 10, right: 10, child: Icon(Icons.bookmark, size: 25, color: Colors.red)),
+                          Positioned(
+                            top: 10,
+                            right: 10,
+                            child: GestureDetector(
+                              onTap: () {},
+                              child: Icon(
+                                Icons.bookmark,
+                                size: 25,
+                                color: Colors.red,
+                              ),
+                            ),
+                          ),
                         ],
                       ),
                       Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 16,
+                          vertical: 12,
+                        ),
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Text(cat.title, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+                            Text(
+                              cat.title,
+                              style: const TextStyle(
+                                fontSize: 16,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
                             const SizedBox(height: 4),
-                            Text(cat.shortDescription ?? "No description available", style: const TextStyle(fontSize: 13, color: Colors.grey)),
+                            Text(
+                              cat.shortDescription ??
+                                  "No description available",
+                              style: const TextStyle(
+                                fontSize: 13,
+                                color: Colors.grey,
+                              ),
+                            ),
                           ],
                         ),
                       ),

@@ -4,6 +4,7 @@ import 'package:get/get.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:streammly/controllers/auth_controller.dart';
 import 'package:streammly/controllers/otp_controller.dart';
+import 'package:streammly/controllers/wishlist_controller.dart';
 import 'package:streammly/data/repository/auth_repo.dart';
 import 'package:streammly/data/repository/category_repo.dart';
 import 'package:streammly/data/repository/company_repo.dart';
@@ -24,8 +25,15 @@ class Init {
 
     try {
       //Repo initialization
-      Get.lazyPut(() => ApiClient(appBaseUrl: AppConstants.baseUrl, sharedPreferences: Get.find()));
-      Get.lazyPut(() => AuthRepo(apiClient: Get.find(), sharedPreferences: Get.find()));
+      Get.lazyPut(
+        () => ApiClient(
+          appBaseUrl: AppConstants.baseUrl,
+          sharedPreferences: Get.find(),
+        ),
+      );
+      Get.lazyPut(
+        () => AuthRepo(apiClient: Get.find(), sharedPreferences: Get.find()),
+      );
 
       // Home
       Get.lazyPut(() => CategoryRepo(apiClient: Get.find()));
@@ -35,15 +43,20 @@ class Init {
       //Controller initialization
       Get.lazyPut(() => AuthController(authRepo: Get.find()));
       Get.lazyPut(() => OtpController(authRepo: Get.find()));
-      // Category
 
+      // Category
       Get.lazyPut(() => CategoryController(categoryRepo: Get.find()));
+
       // Promo Slider
       Get.lazyPut(() => PromoSliderRepo(apiClient: Get.find()));
       Get.lazyPut(() => PromoSliderController(promoSliderRepo: Get.find()));
+
       //Company
       Get.lazyPut(() => CompanyRepo(apiClient: Get.find()));
       Get.lazyPut(() => CompanyController(companyRepo: Get.find()));
+
+      //Wishlist
+      Get.lazyPut(() => WishlistController(categoryRepo: Get.find()));
       // Package
       // Get.lazyPut(() => PackageRepo(apiClient: Get.find()));
       // Get.lazyPut(() => PackagesController(packageRepo: Get.find()));
