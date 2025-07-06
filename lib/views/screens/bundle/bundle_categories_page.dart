@@ -307,7 +307,7 @@ class VendorCard extends StatelessWidget {
             isSelected ? Border.all(color: Color(0xFF2E5CDA), width: 2) : null,
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.04),
+            color: Colors.black.withValues(alpha: 0.04),
             blurRadius: 3,
             offset: const Offset(1, 2),
           ),

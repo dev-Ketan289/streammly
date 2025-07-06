@@ -13,6 +13,7 @@ class ExploreUs extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     final CompanyController companyController = Get.find<CompanyController>();
 
     if (companyController.companies.isEmpty) {
@@ -28,16 +29,25 @@ class ExploreUs extends StatelessWidget {
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              const Text("Explore Us !!!", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
+              Text(
+                "Explore Us !!!",
+                style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold, fontSize: 18),
+              ),
               InkWell(
                 onTap: () {
                   Navigator.push(context, MaterialPageRoute(builder: (_) => CompanyLocatorMapScreen(categoryId: 1)));
                 },
                 child: Row(
-                  children: const [
-                    Text("View Map", style: TextStyle(color: Colors.blue, fontWeight: FontWeight.w500)),
-                    SizedBox(width: 4),
-                    Icon(Icons.map_outlined, color: Colors.blue, size: 18),
+                  children: [
+                    Text(
+                      "View Map",
+                      style: theme.textTheme.bodyMedium?.copyWith(
+                        color: theme.colorScheme.primary,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                    const SizedBox(width: 4),
+                    Icon(Icons.map_outlined, color: theme.colorScheme.primary, size: 18),
                   ],
                 ),
               ),
@@ -58,7 +68,10 @@ class ExploreUs extends StatelessWidget {
                 final filtered = vendorId != null ? vendors.where((v) => v.id == vendorId).toList() : vendors;
 
                 if (filtered.isEmpty) {
-                  return const Padding(padding: EdgeInsets.all(16), child: Center(child: Text("No vendors found")));
+                  return const Padding(
+                    padding: EdgeInsets.all(16),
+                    child: Center(child: Text("No vendors found")),
+                  );
                 }
 
                 return ListView.builder(
@@ -78,16 +91,27 @@ class ExploreUs extends StatelessWidget {
                         decoration: BoxDecoration(
                           borderRadius: BorderRadius.circular(18),
                           color: Colors.white,
-                          boxShadow: [BoxShadow(blurRadius: 10, color: Colors.black12, offset: const Offset(0, 4))],
+                          boxShadow: [
+                            BoxShadow(blurRadius: 10, color: Colors.black12, offset: const Offset(0, 4)),
+                          ],
                         ),
                         child: Column(
                           children: [
                             ClipRRect(
                               borderRadius: const BorderRadius.vertical(top: Radius.circular(18)),
-                              child:
-                                  vendor.bannerImage != null && vendor.bannerImage!.isNotEmpty
-                                      ? Image.network('http://192.168.1.113:8000/${vendor.bannerImage}', height: 150, width: double.infinity, fit: BoxFit.cover)
-                                      : Image.asset('assets/images/recommended_banner/FocusPointVendor.png', height: 150, width: double.infinity, fit: BoxFit.cover),
+                              child: vendor.bannerImage != null && vendor.bannerImage!.isNotEmpty
+                                  ? Image.network(
+                                'http://192.168.1.113:8000/${vendor.bannerImage}',
+                                height: 150,
+                                width: double.infinity,
+                                fit: BoxFit.cover,
+                              )
+                                  : Image.asset(
+                                'assets/images/recommended_banner/FocusPointVendor.png',
+                                height: 150,
+                                width: double.infinity,
+                                fit: BoxFit.cover,
+                              ),
                             ),
                             Padding(
                               padding: const EdgeInsets.all(12),
@@ -98,15 +122,24 @@ class ExploreUs extends StatelessWidget {
                                     child: Column(
                                       crossAxisAlignment: CrossAxisAlignment.start,
                                       children: [
-                                        Text(vendor.companyName, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
+                                        Text(
+                                          vendor.companyName,
+                                          style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
+                                        ),
                                         const SizedBox(height: 4),
-                                        Text(vendor.categoryName ?? "Unknown", style: const TextStyle(fontSize: 13, color: Colors.grey)),
+                                        Text(
+                                          vendor.categoryName ?? "Unknown",
+                                          style: theme.textTheme.bodySmall?.copyWith(color: Colors.grey),
+                                        ),
                                         const SizedBox(height: 6),
                                         Row(
                                           children: [
                                             const Icon(Icons.access_time, size: 14, color: Colors.grey),
                                             const SizedBox(width: 4),
-                                            Text(vendor.estimatedTime ?? "N/A", style: const TextStyle(fontSize: 12, color: Colors.grey)),
+                                            Text(
+                                              vendor.estimatedTime ?? "N/A",
+                                              style: theme.textTheme.bodySmall?.copyWith(color: Colors.grey, fontSize: 12),
+                                            ),
                                             const SizedBox(width: 10),
                                             const Icon(Icons.location_on, size: 14, color: Colors.grey),
                                             const SizedBox(width: 4),
@@ -114,7 +147,7 @@ class ExploreUs extends StatelessWidget {
                                               vendor.distanceKm != null && vendor.distanceKm! > 1
                                                   ? "${vendor.distanceKm!.toStringAsFixed(1)} km"
                                                   : "${(vendor.distanceKm ?? 0) * 1000 ~/ 1} m",
-                                              style: const TextStyle(fontSize: 12, color: Colors.grey),
+                                              style: theme.textTheme.bodySmall?.copyWith(color: Colors.grey, fontSize: 12),
                                             ),
                                           ],
                                         ),
@@ -123,8 +156,11 @@ class ExploreUs extends StatelessWidget {
                                   ),
                                   Container(
                                     padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                                    decoration: BoxDecoration(color: Colors.blue, borderRadius: BorderRadius.circular(8)),
-                                    child: Text("${vendor.rating?.toStringAsFixed(1) ?? "0.0"} ★", style: const TextStyle(color: Colors.white, fontSize: 12)),
+                                    decoration: BoxDecoration(color: theme.colorScheme.primary, borderRadius: BorderRadius.circular(8)),
+                                    child: Text(
+                                      "${vendor.rating?.toStringAsFixed(1) ?? "0.0"} ★",
+                                      style: theme.textTheme.bodySmall?.copyWith(color: Colors.white, fontSize: 12),
+                                    ),
                                   ),
                                 ],
                               ),

@@ -2,6 +2,7 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:streammly/data/init.dart';
+import 'package:streammly/services/theme.dart';
 import 'package:streammly/views/screens/auth_screens/login_screen.dart';
 import 'package:streammly/views/screens/common/location_screen.dart';
 import 'package:streammly/views/screens/common/webview_screen.dart';
@@ -25,12 +26,9 @@ class StreammlyApp extends StatelessWidget {
     return GetMaterialApp(
       debugShowCheckedModeBanner: false,
       title: 'Streammly',
-      theme: ThemeData(
-        appBarTheme: AppBarTheme(surfaceTintColor: Colors.white),
-        primarySwatch: Colors.indigo,
-        scaffoldBackgroundColor: Colors.white,
-        textTheme: const TextTheme(bodyLarge: TextStyle(fontFamily: 'Open Sans', color: Colors.black), bodyMedium: TextStyle(fontFamily: 'Open Sans', color: Colors.black54)),
-      ),
+      theme: CustomTheme.light,
+      darkTheme: CustomTheme.dark,
+      themeMode: ThemeMode.system,
       initialRoute: '/splash',
       getPages: [
         GetPage(name: '/splash', page: () => const SplashScreen()),

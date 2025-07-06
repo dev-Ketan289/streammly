@@ -6,6 +6,7 @@ class UpcomingOfferCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16),
       child: ClipRRect(
@@ -14,7 +15,7 @@ class UpcomingOfferCard extends StatelessWidget {
           children: [
             Container(
               width: double.infinity,
-              color: const Color(0xFFF0F6FF), // Light blue background
+              color: const Color(0xFFF0F6FF), // Keep original background color as per your design
               padding: const EdgeInsets.all(16),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -23,32 +24,80 @@ class UpcomingOfferCard extends StatelessWidget {
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      Text("Upcoming", style: GoogleFonts.poppins(fontWeight: FontWeight.bold, fontSize: 14, color: Colors.black87)),
-                      Text("View All", style: GoogleFonts.poppins(fontSize: 12, color: Colors.black54)),
+                      Text(
+                        "Upcoming",
+                        style: GoogleFonts.poppins(
+                          textStyle: theme.textTheme.bodyMedium?.copyWith(
+                            fontWeight: FontWeight.bold,
+                            fontSize: 14,
+                            color: theme.colorScheme.onSurface,
+                          ),
+                        ),
+                      ),
+                      Text(
+                        "View All",
+                        style: GoogleFonts.poppins(
+                          textStyle: theme.textTheme.bodySmall?.copyWith(
+                            fontSize: 12,
+                            color: theme.colorScheme.onSurfaceVariant,
+                          ),
+                        ),
+                      ),
                     ],
                   ),
                   const SizedBox(height: 10),
 
                   // Title
-                  Text("Wedding Photography Special", style: GoogleFonts.playfairDisplay(fontSize: 20, fontWeight: FontWeight.w700, color: Colors.black87)),
+                  Text(
+                    "Wedding Photography Special",
+                    style: GoogleFonts.playfairDisplay(
+                      textStyle: theme.textTheme.titleLarge?.copyWith(
+                        fontSize: 20,
+                        fontWeight: FontWeight.w700,
+                        color: theme.colorScheme.onSurface,
+                      ),
+                    ),
+                  ),
 
                   const SizedBox(height: 20),
 
                   // Date, Time and Photographers
                   Row(
                     children: [
-                      const Icon(Icons.calendar_today, size: 16, color: Colors.black54),
+                      Icon(Icons.calendar_today, size: 16, color: theme.iconTheme.color),
                       const SizedBox(width: 6),
-                      const Text("15 June, Saturday", style: TextStyle(fontSize: 12, color: Colors.black87), overflow: TextOverflow.ellipsis),
+                      Text(
+                        "15 June, Saturday",
+                        style: theme.textTheme.bodySmall?.copyWith(
+                          fontSize: 12,
+                          color: theme.colorScheme.onSurface,
+                        ),
+                        overflow: TextOverflow.ellipsis,
+                      ),
                       const SizedBox(width: 16),
-                      const Icon(Icons.access_time, size: 16, color: Colors.black54),
+                      Icon(Icons.access_time, size: 16, color: theme.iconTheme.color),
                       const SizedBox(width: 6),
-                      const Text("12:30 pm", style: TextStyle(fontSize: 12, color: Colors.black87)),
+                      Text(
+                        "12:30 pm",
+                        style: theme.textTheme.bodySmall?.copyWith(
+                          fontSize: 12,
+                          color: theme.colorScheme.onSurface,
+                        ),
+                      ),
                     ],
                   ),
                   const SizedBox(height: 30),
-                  // const Spacer(),
-                  const Text("3 Photographers", style: TextStyle(fontSize: 12, color: Colors.black87), maxLines: 2, overflow: TextOverflow.ellipsis), // For bottom corner design
+
+                  // Photographer Text (you didn't want theme here originally)
+                  Text(
+                    "3 Photographers",
+                    style: theme.textTheme.bodySmall?.copyWith(
+                      fontSize: 12,
+                      color: theme.colorScheme.onSurface,
+                    ),
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                  ),
                 ],
               ),
             ),
@@ -60,10 +109,17 @@ class UpcomingOfferCard extends StatelessWidget {
               child: Container(
                 height: 60,
                 width: 140,
-                decoration: const BoxDecoration(color: Color(0xFF2356C8), borderRadius: BorderRadius.only(topLeft: Radius.circular(40))),
+                decoration: BoxDecoration(
+                  color: theme.colorScheme.primary,
+                  borderRadius: const BorderRadius.only(topLeft: Radius.circular(40)),
+                ),
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.center,
-                  children: const [Icon(Icons.favorite_border, color: Colors.white), SizedBox(width: 16), Icon(Icons.notifications_none, color: Colors.white)],
+                  children: [
+                    Icon(Icons.favorite_border, color: theme.colorScheme.onPrimary),
+                    const SizedBox(width: 16),
+                    Icon(Icons.notifications_none, color: theme.colorScheme.onPrimary),
+                  ],
                 ),
               ),
             ),

@@ -53,7 +53,6 @@ class _CompanyLocatorMapScreenState extends State<CompanyLocatorMapScreen> {
       return;
     }
 
-    // Always use current selected category
     await controller.fetchCompaniesByCategory(controller.selectedCategoryId);
     await _generateCustomMarkers();
 
@@ -92,8 +91,11 @@ class _CompanyLocatorMapScreenState extends State<CompanyLocatorMapScreen> {
 
       usedPositions.add(posKey);
 
-      final distanceText =
-          company.distanceKm != null ? (company.distanceKm! < 1 ? "${(company.distanceKm! * 1000).toStringAsFixed(0)} m" : "${company.distanceKm!.toStringAsFixed(1)} km") : "--";
+      final distanceText = company.distanceKm != null
+          ? (company.distanceKm! < 1
+          ? "${(company.distanceKm! * 1000).toStringAsFixed(0)} m"
+          : "${company.distanceKm!.toStringAsFixed(1)} km")
+          : "--";
 
       final bytes = await _createCustomMarkerBitmap(context, company.companyName, distanceText);
 
@@ -112,7 +114,13 @@ class _CompanyLocatorMapScreenState extends State<CompanyLocatorMapScreen> {
 
   Future<Uint8List> _createCustomMarkerBitmap(BuildContext context, String title, String distance) async {
     final key = GlobalKey();
-    final markerWidget = Material(type: MaterialType.transparency, child: RepaintBoundary(key: key, child: _buildCustomMarker(title, distance)));
+    final markerWidget = Material(
+      type: MaterialType.transparency,
+      child: RepaintBoundary(
+        key: key,
+        child: _buildCustomMarker(context, title, distance),
+      ),
+    );
 
     final overlay = Overlay.of(context);
     final entry = OverlayEntry(builder: (_) => Center(child: markerWidget));
@@ -128,21 +136,36 @@ class _CompanyLocatorMapScreenState extends State<CompanyLocatorMapScreen> {
     return pngBytes;
   }
 
-  Widget _buildCustomMarker(String title, String distance) {
+  Widget _buildCustomMarker(BuildContext context, String title, String distance) {
+    final theme = Theme.of(context);
     return Column(
       mainAxisSize: MainAxisSize.min,
       children: [
         Container(
           padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
-          decoration: BoxDecoration(color: Colors.blueAccent, borderRadius: BorderRadius.circular(20)),
-          child: Text(distance, style: const TextStyle(color: Colors.white, fontSize: 12, fontWeight: FontWeight.bold)),
+          decoration: BoxDecoration(
+            color: theme.colorScheme.primary,
+            borderRadius: BorderRadius.circular(20),
+          ),
+          child: Text(
+            distance,
+            style: const TextStyle(color: Colors.white, fontSize: 12, fontWeight: FontWeight.bold),
+          ),
         ),
         const SizedBox(height: 2),
         Container(
           constraints: const BoxConstraints(minWidth: 80),
           padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-          decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(12), boxShadow: const [BoxShadow(color: Colors.black26, blurRadius: 4)]),
-          child: Text(title, textAlign: TextAlign.center, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14)),
+          decoration: BoxDecoration(
+            color: theme.colorScheme.surface,
+            borderRadius: BorderRadius.circular(12),
+            boxShadow: const [BoxShadow(color: Colors.black26, blurRadius: 4)],
+          ),
+          child: Text(
+            title,
+            textAlign: TextAlign.center,
+            style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14, color: theme.colorScheme.onSurface),
+          ),
         ),
       ],
     );
@@ -167,7 +190,13 @@ class _CompanyLocatorMapScreenState extends State<CompanyLocatorMapScreen> {
               final showOverlay = controller.selectedCompany != null;
               return IgnorePointer(
                 ignoring: true,
-                child: AnimatedOpacity(opacity: showOverlay ? 0.2 : 0.0, duration: const Duration(milliseconds: 300), child: Container(color: Colors.indigo)),
+                child: AnimatedOpacity(
+                  opacity: showOverlay ? 0.2 : 0.0,
+                  duration: const Duration(milliseconds: 300),
+                  child: Container(
+                    color: Theme.of(context).colorScheme.primary,
+                  ),
+                ),
               );
             },
           ),
@@ -184,17 +213,30 @@ class _CompanyLocatorMapScreenState extends State<CompanyLocatorMapScreen> {
 
                 return Container(
                   padding: const EdgeInsets.symmetric(horizontal: 16),
-                  decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(12)),
+                  decoration: BoxDecoration(
+                    color: Theme.of(context).colorScheme.surface,
+                    borderRadius: BorderRadius.circular(12),
+                  ),
                   child: DropdownButton<int>(
                     value: controller.selectedCategoryId,
                     isExpanded: true,
                     underline: const SizedBox(),
-                    items: categoryController.categories.map((category) => DropdownMenuItem<int>(value: category.id, child: Center(child: Text(category.title)))).toList(),
+                    items: categoryController.categories
+                        .map((category) => DropdownMenuItem<int>(
+                      value: category.id,
+                      child: Center(
+                        child: Text(
+                          category.title,
+                          style: TextStyle(color: Theme.of(context).colorScheme.onSurface),
+                        ),
+                      ),
+                    ))
+                        .toList(),
                     onChanged: (int? newId) {
                       if (newId != null) {
                         controller.setCategoryId(newId);
                         controller.clearSelectedCompany();
-                        _loadData(); // ✅ Reload for new category
+                        _loadData();
                       }
                     },
                   ),
@@ -224,10 +266,9 @@ class _CompanyLocatorMapScreenState extends State<CompanyLocatorMapScreen> {
                     description: company.description ?? '',
                     rating: company.rating?.toStringAsFixed(1) ?? '3.9',
                     estimatedTime: company.estimatedTime,
-                    distanceKm:
-                        company.distanceKm != null
-                            ? (company.distanceKm! < 1 ? "${(company.distanceKm! * 1000).toStringAsFixed(0)} m" : "${company.distanceKm!.toStringAsFixed(1)} km")
-                            : null,
+                    distanceKm: company.distanceKm != null
+                        ? (company.distanceKm! < 1 ? "${(company.distanceKm! * 1000).toStringAsFixed(0)} m" : "${company.distanceKm!.toStringAsFixed(1)} km")
+                        : null,
                   ),
                 ),
               );

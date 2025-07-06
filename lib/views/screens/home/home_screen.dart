@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:streammly/views/screens/home/vendor_locator.dart';
+import 'package:streammly/views/screens/home/widgets/page_nav.dart';
 
 import '../../../controllers/category_controller.dart';
 import '../../../controllers/home_screen_controller.dart';
@@ -9,7 +10,6 @@ import '../../../models/category/category_item.dart';
 import '../../../models/category/category_model.dart';
 import '../home/widgets/category/category.dart';
 import '../home/widgets/category/explore_us.dart';
-import '../home/widgets/category/page_nav.dart';
 import '../home/widgets/category/recommended_list.dart';
 import '../home/widgets/category/widgets/category_scroller.dart';
 import '../home/widgets/header_banner.dart';
@@ -73,7 +73,7 @@ class _HomeScreenState extends State<HomeScreen> {
             child: SingleChildScrollView(
               child: Column(
                 children: [
-                  HeaderBanner(slides: slides, height: 370, backgroundImage: "assets/images/banner.png", overlayColor: Colors.white.withValues(alpha: 0.3)),
+                  HeaderBanner(slides: slides, height: 370, backgroundImage: "assets/images/banner.png", overlayColor: Colors.white.withValues(alpha: 0.1)),
                   const SizedBox(height: 24),
                   UpcomingOfferCard(),
                   const SizedBox(height: 24),

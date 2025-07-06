@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-
 import '../../../../../models/category/category_item.dart';
 
 class CategoryScroller extends StatelessWidget {
@@ -11,6 +10,7 @@ class CategoryScroller extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
       child: Column(
@@ -20,15 +20,28 @@ class CategoryScroller extends StatelessWidget {
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Text(title!, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 17)),
+                Text(
+                  title!,
+                  style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
+                ),
                 if (onSeeAll != null)
                   InkWell(
                     onTap: onSeeAll,
                     child: Row(
-                      children: const [
-                        Text("See all", style: TextStyle(color: Colors.blue, fontSize: 13)),
-                        SizedBox(width: 4),
-                        Icon(Icons.arrow_forward_ios, size: 14, color: Colors.blue),
+                      children: [
+                        Text(
+                          "See all",
+                          style: theme.textTheme.bodySmall?.copyWith(
+                            color: theme.colorScheme.primary,
+                            fontSize: 13,
+                          ),
+                        ),
+                        const SizedBox(width: 4),
+                        Icon(
+                          Icons.arrow_forward_ios,
+                          size: 14,
+                          color: theme.colorScheme.primary,
+                        ),
                       ],
                     ),
                   ),
@@ -57,11 +70,16 @@ class CategoryScroller extends StatelessWidget {
                         child: Ink(
                           width: 60,
                           height: 60,
-                          decoration: BoxDecoration(color: const Color(0xFFF0F6FF), borderRadius: BorderRadius.circular(16)),
-                          child:
-                              item.imagePath != null
-                                  ? ClipRRect(borderRadius: BorderRadius.circular(16), child: Image.asset(item.imagePath!, fit: BoxFit.cover))
-                                  : Icon(item.icon, size: 28, color: Colors.blue),
+                          decoration: BoxDecoration(
+                            color: const Color(0xFFF0F6FF),
+                            borderRadius: BorderRadius.circular(16),
+                          ),
+                          child: item.imagePath != null
+                              ? ClipRRect(
+                            borderRadius: BorderRadius.circular(16),
+                            child: Image.asset(item.imagePath!, fit: BoxFit.cover),
+                          )
+                              : Icon(item.icon, size: 28, color: theme.colorScheme.primary),
                         ),
                       ),
                     ),
@@ -69,7 +87,11 @@ class CategoryScroller extends StatelessWidget {
                     Flexible(
                       child: Padding(
                         padding: const EdgeInsets.symmetric(horizontal: 4),
-                        child: Text(item.label, style: const TextStyle(fontSize: 9, fontWeight: FontWeight.bold), textAlign: TextAlign.center),
+                        child: Text(
+                          item.label,
+                          style: theme.textTheme.bodySmall?.copyWith(fontSize: 9, fontWeight: FontWeight.bold),
+                          textAlign: TextAlign.center,
+                        ),
                       ),
                     ),
                   ],

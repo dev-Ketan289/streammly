@@ -37,8 +37,11 @@ class _VendorGroupState extends State<VendorGroup> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final screenWidth = MediaQuery.of(context).size.width;
+
     return Scaffold(
-      backgroundColor: const Color(0xFFF7F9FD),
+      backgroundColor: theme.scaffoldBackgroundColor,
       bottomNavigationBar: NavigationHelper.buildBottomNav(),
       floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
       floatingActionButton: NavigationHelper.buildFloatingButton(),
@@ -47,11 +50,10 @@ class _VendorGroupState extends State<VendorGroup> {
           children: [
             /// Header Banner
             HeaderBanner(
-              height: 280,
-              backgroundImage:
-                  widget.company.bannerImage?.isNotEmpty == true
-                      ? 'http://192.168.1.113:8000/${widget.company.bannerImage}'
-                      : 'assets/images/recommended_banner/FocusPointVendor.png',
+              height: screenWidth * 0.7,
+              backgroundImage: widget.company.bannerImage?.isNotEmpty == true
+                  ? 'http://192.168.1.113:8000/${widget.company.bannerImage}'
+                  : 'assets/images/recommended_banner/FocusPointVendor.png',
               overlayColor: Colors.indigo.withValues(alpha: 0.6),
               overrideTitle: widget.company.companyName,
               overrideSubtitle: widget.company.categoryName,
@@ -92,7 +94,13 @@ class _VendorGroupState extends State<VendorGroup> {
                             Container(
                               width: 70,
                               height: 70,
-                              decoration: BoxDecoration(shape: BoxShape.rectangle, border: Border.all(color: isSelected ? Colors.indigo : Colors.grey.shade300, width: 2)),
+                              decoration: BoxDecoration(
+                                shape: BoxShape.rectangle,
+                                border: Border.all(
+                                  color: isSelected ? theme.primaryColor : Colors.grey.shade300,
+                                  width: 2,
+                                ),
+                              ),
                               child: Stack(
                                 children: [
                                   ClipRRect(
@@ -108,7 +116,11 @@ class _VendorGroupState extends State<VendorGroup> {
                                     const Positioned(
                                       right: 4,
                                       top: 4,
-                                      child: CircleAvatar(backgroundColor: Colors.white, radius: 10, child: Icon(Icons.check, color: Colors.indigo, size: 14)),
+                                      child: CircleAvatar(
+                                        backgroundColor: Colors.white,
+                                        radius: 10,
+                                        child: Icon(Icons.check, color: Colors.indigo, size: 14),
+                                      ),
                                     ),
                                 ],
                               ),
@@ -120,7 +132,11 @@ class _VendorGroupState extends State<VendorGroup> {
                                 sub.title,
                                 maxLines: 2,
                                 textAlign: TextAlign.center,
-                                style: TextStyle(fontSize: 12, color: isSelected ? Colors.indigo : Colors.black, fontWeight: isSelected ? FontWeight.bold : FontWeight.normal),
+                                style: TextStyle(
+                                  fontSize: 12,
+                                  color: isSelected ? theme.primaryColor : Colors.black,
+                                  fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+                                ),
                               ),
                             ),
                           ],
@@ -145,13 +161,21 @@ class _VendorGroupState extends State<VendorGroup> {
                   final subVerticals = controller.subVerticalCards;
 
                   if (subVerticals.isEmpty) {
-                    return const Padding(padding: EdgeInsets.all(16), child: Text("No sub-verticals available.", style: TextStyle(color: Colors.grey)));
+                    return const Padding(
+                      padding: EdgeInsets.all(16),
+                      child: Text("No sub-verticals available.", style: TextStyle(color: Colors.grey)),
+                    );
                   }
 
                   return GridView.builder(
                     padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
                     itemCount: subVerticals.length,
-                    gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount: 3, crossAxisSpacing: 16, mainAxisSpacing: 16, childAspectRatio: 0.65),
+                    gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                      crossAxisCount: 3,
+                      crossAxisSpacing: 16,
+                      mainAxisSpacing: 16,
+                      childAspectRatio: 0.65,
+                    ),
                     itemBuilder: (context, index) {
                       final item = subVerticals[index];
                       final imageUrl = item['image'] ?? '';
@@ -165,20 +189,26 @@ class _VendorGroupState extends State<VendorGroup> {
                             Expanded(
                               child: ClipRRect(
                                 borderRadius: BorderRadius.circular(12),
-                                child:
-                                    imageUrl.isNotEmpty
-                                        ? Image.network(
-                                          imageUrl,
-                                          fit: BoxFit.cover,
-                                          errorBuilder: (_, __, ___) {
-                                            return Image.asset("assets/images/category/vendor_category/img.png", fit: BoxFit.cover);
-                                          },
-                                        )
-                                        : Image.asset("assets/images/category/vendor_category/img.png", fit: BoxFit.cover),
+                                child: imageUrl.isNotEmpty
+                                    ? Image.network(
+                                  imageUrl,
+                                  fit: BoxFit.cover,
+                                  errorBuilder: (_, __, ___) {
+                                    return Image.asset("assets/images/category/vendor_category/img.png", fit: BoxFit.cover);
+                                  },
+                                )
+                                    : Image.asset("assets/images/category/vendor_category/img.png", fit: BoxFit.cover),
                               ),
                             ),
                             const SizedBox(height: 8),
-                            Text(label, textAlign: TextAlign.center, style: const TextStyle(fontWeight: FontWeight.bold, color: Colors.indigo)),
+                            Text(
+                              label,
+                              textAlign: TextAlign.center,
+                              style: TextStyle(
+                                fontWeight: FontWeight.bold,
+                                color: theme.primaryColor,
+                              ),
+                            ),
                           ],
                         ),
                       );
@@ -194,6 +224,7 @@ class _VendorGroupState extends State<VendorGroup> {
   }
 
   void _showShootOptionsBottomSheet(BuildContext context, String shootTitle, int subVerticalId, int companyId, int subCategoryId) {
+    final theme = Theme.of(context);
     showModalBottomSheet(
       context: context,
       shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(16))),
@@ -209,7 +240,10 @@ class _VendorGroupState extends State<VendorGroup> {
                 margin: const EdgeInsets.only(bottom: 12),
                 decoration: BoxDecoration(color: Colors.grey[400], borderRadius: BorderRadius.circular(2)),
               ),
-              Align(alignment: Alignment.centerLeft, child: Text(shootTitle, style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold))),
+              Align(
+                alignment: Alignment.centerLeft,
+                child: Text(shootTitle, style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold)),
+              ),
               const SizedBox(height: 16),
               _buildOptionTile(
                 icon: Icons.request_quote,
@@ -227,14 +261,13 @@ class _VendorGroupState extends State<VendorGroup> {
                 onTap: () {
                   Navigator.pop(context);
                   Get.to(
-                    () => PackagesPage(companyId: companyId, subCategoryId: subCategoryId, subVerticalId: subVerticalId),
+                        () => PackagesPage(companyId: companyId, subCategoryId: subCategoryId, subVerticalId: subVerticalId),
                     binding: BindingsBuilder(() {
                       Get.put(PackagesController());
                     }),
                   );
                 },
               ),
-
               const SizedBox(height: 24),
               Row(
                 children: const [
@@ -263,15 +296,26 @@ class _VendorGroupState extends State<VendorGroup> {
     );
   }
 
-  Widget _buildOptionTile({required IconData icon, required String label, required VoidCallback onTap, Color iconColor = Colors.blue}) {
+  Widget _buildOptionTile({
+    required IconData icon,
+    required String label,
+    required VoidCallback onTap,
+    Color iconColor = Colors.blue,
+  }) {
     return GestureDetector(
       onTap: onTap,
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-        decoration: BoxDecoration(border: Border.all(color: Colors.grey.shade300), borderRadius: BorderRadius.circular(10)),
+        decoration: BoxDecoration(
+          border: Border.all(color: Colors.grey.shade300),
+          borderRadius: BorderRadius.circular(10),
+        ),
         child: Row(
           children: [
-            CircleAvatar(backgroundColor: iconColor.withValues(alpha: 0.1), child: Icon(icon, color: iconColor)),
+            CircleAvatar(
+              backgroundColor: iconColor.withValues(alpha: 0.1),
+              child: Icon(icon, color: iconColor),
+            ),
             const SizedBox(width: 16),
             Expanded(child: Text(label, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w500))),
             const Icon(Icons.chevron_right),
@@ -290,9 +334,14 @@ class _FacilityIcon extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     return Column(
       children: [
-        CircleAvatar(backgroundColor: Colors.indigo.withValues(alpha: 0.1), radius: 22, child: Icon(icon, color: Colors.indigo, size: 20)),
+        CircleAvatar(
+          backgroundColor: theme.primaryColor.withValues(alpha: 0.1),
+          radius: 22,
+          child: Icon(icon, color: theme.primaryColor, size: 20),
+        ),
         const SizedBox(height: 4),
         Text(label, style: const TextStyle(fontSize: 10), textAlign: TextAlign.center),
       ],

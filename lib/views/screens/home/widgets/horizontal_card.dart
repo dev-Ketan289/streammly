@@ -16,6 +16,10 @@ class PackageSection extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+    final textTheme = theme.textTheme;
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -27,26 +31,24 @@ class PackageSection extends StatelessWidget {
             children: [
               Text(
                 title,
-                style: const TextStyle(
-                  fontSize: 15,
+                style: textTheme.titleSmall?.copyWith(
                   fontWeight: FontWeight.w600,
-                  color: Colors.blue,
+                  color: colorScheme.primary,
                 ),
               ),
               InkWell(
                 onTap: onSeeAll,
                 child: Row(
-                  children: const [
+                  children: [
                     Text(
                       "See All",
-                      style: TextStyle(
-                        color: Colors.grey,
+                      style: textTheme.bodySmall?.copyWith(
+                        color: theme.hintColor,
                         fontWeight: FontWeight.w500,
-                        fontSize: 12,
                       ),
                     ),
-                    SizedBox(width: 4),
-                    Icon(Icons.arrow_forward_ios, size: 12, color: Colors.grey),
+                    const SizedBox(width: 4),
+                    Icon(Icons.arrow_forward_ios, size: 12, color: theme.hintColor),
                   ],
                 ),
               ),
@@ -64,8 +66,8 @@ class PackageSection extends StatelessWidget {
             itemBuilder: (context, index) {
               final pkg = packages[index];
               return isPopular
-                  ? _buildPopularCard(pkg)
-                  : _buildExclusiveCard(pkg);
+                  ? _buildPopularCard(pkg, theme)
+                  : _buildExclusiveCard(pkg, theme);
             },
           ),
         ),
@@ -73,8 +75,8 @@ class PackageSection extends StatelessWidget {
     );
   }
 
-  // 🎯 Popular Package Card
-  Widget _buildPopularCard(Map<String, String> pkg) {
+  // Popular Package Card
+  Widget _buildPopularCard(Map<String, String> pkg, ThemeData theme) {
     return Container(
       width: 130,
       margin: const EdgeInsets.only(right: 12),
@@ -91,26 +93,26 @@ class PackageSection extends StatelessWidget {
           margin: const EdgeInsets.all(8),
           padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
           decoration: BoxDecoration(
-            color: Colors.white70,
+            color: theme.colorScheme.surface.withValues(alpha: 0.7),
             borderRadius: BorderRadius.circular(8),
           ),
           child: Text(
             pkg['label']!,
-            style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w500),
+            style: theme.textTheme.bodySmall?.copyWith(fontWeight: FontWeight.w500),
           ),
         ),
       ),
     );
   }
 
-  //  Exclusive Offer Card
-  Widget _buildExclusiveCard(Map<String, String> pkg) {
+  // Exclusive Offer Card
+  Widget _buildExclusiveCard(Map<String, String> pkg, ThemeData theme) {
     return Container(
       width: 200,
       margin: const EdgeInsets.only(right: 12),
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(14),
-        color: Colors.white,
+        color: theme.colorScheme.surface,
         boxShadow: const [
           BoxShadow(color: Colors.black12, blurRadius: 6, offset: Offset(0, 3)),
         ],
@@ -136,17 +138,13 @@ class PackageSection extends StatelessWidget {
               children: [
                 Text(
                   pkg['label']!,
-                  style: const TextStyle(
-                    fontWeight: FontWeight.w600,
-                    fontSize: 13,
-                  ),
+                  style: theme.textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.w600),
                 ),
                 const SizedBox(height: 4),
                 Text(
                   pkg['price']!,
-                  style: const TextStyle(
-                    fontSize: 12,
-                    color: Colors.grey,
+                  style: theme.textTheme.bodySmall?.copyWith(
+                    color: theme.hintColor,
                     fontWeight: FontWeight.w500,
                   ),
                 ),

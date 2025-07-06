@@ -12,8 +12,7 @@ class GetQuoteScreen extends StatefulWidget {
 class _GetQuoteScreenState extends State<GetQuoteScreen> {
   final TextEditingController eventNameController = TextEditingController();
   final TextEditingController requirementsController = TextEditingController();
-  final TextEditingController dateController =
-      TextEditingController(); // Controller for date
+  final TextEditingController dateController = TextEditingController();
 
   String? selectedEventType;
   bool isEventDropdownOpen = false;
@@ -41,7 +40,6 @@ class _GetQuoteScreenState extends State<GetQuoteScreen> {
   @override
   void initState() {
     super.initState();
-    // Initialize date controller with formatted date
     dateController.text = _formatDate(selectedDate);
   }
 
@@ -55,7 +53,7 @@ class _GetQuoteScreenState extends State<GetQuoteScreen> {
     if (picked != null) {
       setState(() {
         selectedDate = picked;
-        dateController.text = _formatDate(picked); // Update text field
+        dateController.text = _formatDate(picked);
       });
     }
   }
@@ -96,7 +94,6 @@ class _GetQuoteScreenState extends State<GetQuoteScreen> {
     });
   }
 
-  // Format date for display
   String _formatDate(DateTime date) {
     return '${date.day} ${_monthName(date.month)} ${date.year}';
   }
@@ -104,12 +101,12 @@ class _GetQuoteScreenState extends State<GetQuoteScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.grey.shade200, // light background
+      backgroundColor: Colors.grey.shade200,
       appBar: AppBar(
-        title: const Text(
+        title: Text(
           'Get Quote',
-          style: TextStyle(
-            color: Color(0xFF2864A6),
+          style: Theme.of(context).textTheme.titleLarge?.copyWith(
+            color: const Color(0xFF2864A6),
             fontWeight: FontWeight.bold,
           ),
         ),
@@ -189,7 +186,6 @@ class _GetQuoteScreenState extends State<GetQuoteScreen> {
                   borderRadius: BorderRadius.circular(10),
                   borderSide: BorderSide(color: Colors.grey.shade400),
                 ),
-
                 fillColor: Colors.white,
                 filled: true,
                 labelText: 'Email *',
@@ -200,7 +196,6 @@ class _GetQuoteScreenState extends State<GetQuoteScreen> {
               ),
             ),
             const SizedBox(height: 16),
-            // Date of Shoot Field
             _buildTextField(
               'Date of Shoot *',
               dateController,
@@ -291,12 +286,18 @@ class _GetQuoteScreenState extends State<GetQuoteScreen> {
                 children: [
                   TextSpan(
                     text: 'Note: ',
-                    style: TextStyle(fontSize: 13, color: Colors.red),
+                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                      color: Colors.red,
+                      fontSize: 13,
+                    ),
                   ),
                   TextSpan(
                     text:
-                        'Vendor team will contact you within the favorable Date & Favorable time only',
-                    style: TextStyle(fontSize: 13, color: Colors.grey),
+                    'Vendor team will contact you within the favorable Date & Favorable time only',
+                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                      color: Colors.grey,
+                      fontSize: 13,
+                    ),
                   ),
                 ],
               ),
@@ -330,13 +331,13 @@ class _GetQuoteScreenState extends State<GetQuoteScreen> {
   }
 
   Widget _buildTextField(
-    String label,
-    TextEditingController controller, {
-    bool readOnly = false,
-    VoidCallback? onTap,
-    IconData? suffixIcon,
-    String? hint,
-  }) {
+      String label,
+      TextEditingController controller, {
+        bool readOnly = false,
+        VoidCallback? onTap,
+        IconData? suffixIcon,
+        String? hint,
+      }) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 8),
       child: TextField(

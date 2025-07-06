@@ -12,6 +12,7 @@ class RecommendedList extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     final screenWidth = MediaQuery.of(context).size.width;
     final itemWidth = (screenWidth * 0.45).clamp(140.0, 180.0);
     final itemHeight = itemWidth * 1.7;
@@ -31,29 +32,22 @@ class RecommendedList extends StatelessWidget {
         itemBuilder: (_, index) {
           final vendor = recommendedCompanies[index];
 
-          final imageUrl =
-              vendor["banner_image"] != null
-                  ? baseUrl + vendor["banner_image"]
-                  : "assets/images/placeholder.jpg";
+          final imageUrl = vendor["banner_image"] != null
+              ? baseUrl + vendor["banner_image"]
+              : "assets/images/placeholder.jpg";
 
           final rating = vendor["rating"]?.toStringAsFixed(1) ?? "--";
           final companyName = vendor["company_name"] ?? "Unknown";
-
-          // Correct category name (fallback to "Service")
           final category = vendor["category_name"] ?? "Service";
 
-          // Distance (use provided distance_km if exists)
           final distanceKm = vendor["distance_km"];
-          final distanceText =
-              distanceKm != null
-                  ? (distanceKm < 1
-                      ? "${(distanceKm * 1000).toStringAsFixed(0)} m"
-                      : "${distanceKm.toStringAsFixed(1)} km")
-                  : "--";
-
-          // Time estimate based on distance (e.g., 7 mins/km)
+          final distanceText = distanceKm != null
+              ? (distanceKm < 1
+              ? "${(distanceKm * 1000).toStringAsFixed(0)} m"
+              : "${distanceKm.toStringAsFixed(1)} km")
+              : "--";
           final time =
-              distanceKm != null ? "${(distanceKm * 7).round()} mins" : "--";
+          distanceKm != null ? "${(distanceKm * 7).round()} mins" : "--";
 
           return InkWell(
             onTap: () {
@@ -63,10 +57,10 @@ class RecommendedList extends StatelessWidget {
               width: itemWidth,
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(16),
-                color: Colors.white,
+                color: theme.colorScheme.surface, // Theme-based background
                 boxShadow: [
                   BoxShadow(
-                    color: Colors.black.withValues(alpha: 0.04),
+                    color: theme.shadowColor.withValues(alpha: .05),
                     blurRadius: 3,
                     offset: const Offset(1, 2),
                   ),
@@ -100,11 +94,11 @@ class RecommendedList extends StatelessWidget {
                         top: 8,
                         right: 8,
                         child: GestureDetector(
-                          onTap: (){},
+                          onTap: () {},
                           child: Icon(
                             Icons.favorite,
                             size: itemWidth * 0.12,
-                            color: Colors.white,
+                            color: theme.colorScheme.onPrimary,
                           ),
                         ),
                       ),
@@ -123,6 +117,7 @@ class RecommendedList extends StatelessWidget {
                                 style: TextStyle(
                                   fontWeight: FontWeight.bold,
                                   fontSize: itemWidth * 0.09,
+                                  color: theme.colorScheme.onSurface,
                                   overflow: TextOverflow.ellipsis,
                                 ),
                               ),
@@ -133,13 +128,13 @@ class RecommendedList extends StatelessWidget {
                                 vertical: itemWidth * 0.015,
                               ),
                               decoration: BoxDecoration(
-                                color: Colors.blue.shade600,
+                                color: theme.colorScheme.primary,
                                 borderRadius: BorderRadius.circular(6),
                               ),
                               child: Text(
                                 "$rating ★",
                                 style: TextStyle(
-                                  color: Colors.white,
+                                  color: theme.colorScheme.onPrimary,
                                   fontSize: itemWidth * 0.075,
                                 ),
                               ),
@@ -151,7 +146,7 @@ class RecommendedList extends StatelessWidget {
                           category,
                           style: TextStyle(
                             fontSize: itemWidth * 0.075,
-                            color: Colors.grey,
+                            color: theme.colorScheme.onSurfaceVariant,
                           ),
                           overflow: TextOverflow.ellipsis,
                         ),
@@ -161,7 +156,7 @@ class RecommendedList extends StatelessWidget {
                             Icon(
                               Icons.access_time,
                               size: itemWidth * 0.085,
-                              color: Colors.grey,
+                              color: theme.colorScheme.onSurfaceVariant,
                             ),
                             SizedBox(width: itemWidth * 0.025),
                             Expanded(
@@ -169,7 +164,7 @@ class RecommendedList extends StatelessWidget {
                                 time,
                                 style: TextStyle(
                                   fontSize: itemWidth * 0.075,
-                                  color: Colors.grey,
+                                  color: theme.colorScheme.onSurfaceVariant,
                                 ),
                                 overflow: TextOverflow.ellipsis,
                               ),
@@ -182,7 +177,7 @@ class RecommendedList extends StatelessWidget {
                             Icon(
                               Icons.location_on,
                               size: itemWidth * 0.085,
-                              color: Colors.grey,
+                              color: theme.colorScheme.onSurfaceVariant,
                             ),
                             SizedBox(width: itemWidth * 0.025),
                             Expanded(
@@ -190,7 +185,7 @@ class RecommendedList extends StatelessWidget {
                                 distanceText,
                                 style: TextStyle(
                                   fontSize: itemWidth * 0.075,
-                                  color: Colors.grey,
+                                  color: theme.colorScheme.onSurfaceVariant,
                                 ),
                                 overflow: TextOverflow.ellipsis,
                               ),
