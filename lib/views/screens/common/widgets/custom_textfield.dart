@@ -1,4 +1,3 @@
-// CustomTextField widget
 import 'package:flutter/material.dart';
 
 class CustomTextField extends StatelessWidget {
@@ -34,6 +33,7 @@ class CustomTextField extends StatelessWidget {
     return TextFormField(
       onTap: onTap,
       controller: controller,
+      initialValue: controller == null ? initialValue : null,
       obscureText: obscureText,
       onChanged: onChanged,
       validator: validator,

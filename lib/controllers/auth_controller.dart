@@ -11,12 +11,33 @@ import 'package:streammly/data/repository/auth_repo.dart';
 import 'package:streammly/models/response/response_model.dart';
 import 'package:uuid/uuid.dart';
 
+import '../models/profile/user_profile.dart';
+
 class AuthController extends GetxController implements GetxService {
   final AuthRepo authRepo;
   AuthController({required this.authRepo});
   final TextEditingController phoneController = TextEditingController();
 
   bool isLoading = false;
+
+  // --- User Profile ---
+  var userProfile = Rxn<UserProfile>();
+
+  Future<void> fetchUserProfile() async {
+    try {
+      Response response = await authRepo.getUserProfile();
+      if (response.statusCode == 200 && response.body['data'] != null) {
+        userProfile.value = UserProfile.fromJson(response.body['data']);
+      } else {
+        userProfile.value = null;
+        Fluttertoast.showToast(msg: "Failed to fetch profile");
+      }
+    } catch (e) {
+      userProfile.value = null;
+      Fluttertoast.showToast(msg: "Error fetching profile");
+    }
+  }
+
   Future<ResponseModel> sendOtp() async {
     isLoading = true;
     update();
@@ -24,7 +45,7 @@ class AuthController extends GetxController implements GetxService {
     try {
       Response response = await authRepo.sendOtp(phone: phoneController.text);
       if (response.statusCode == 200) {
-        responseModel = ResponseModel(true, "Otp sent successfull");
+        responseModel = ResponseModel(true, "Otp sent successfully");
       } else {
         responseModel = ResponseModel(false, "Failed to send OTP");
       }
@@ -43,50 +64,37 @@ class AuthController extends GetxController implements GetxService {
     ResponseModel responseModel;
 
     try {
-      log(name: "googleDebig", "etes");
-
       final GoogleSignInAccount? googleUser = await GoogleSignIn().signIn();
-      log(name: "googleDebig", "first");
       if (googleUser == null) {
-        log(name: "googleDebig", "googleUser");
         Fluttertoast.showToast(msg: "Google sign-in cancelled");
         return null;
       }
-      log(name: "googleDebig", "second");
 
       final GoogleSignInAuthentication googleAuth = await googleUser.authentication;
-      log(name: "googleDebig", "thid");
-
       final credential = GoogleAuthProvider.credential(accessToken: googleAuth.accessToken, idToken: googleAuth.idToken);
 
       final UserCredential userCredential = await FirebaseAuth.instance.signInWithCredential(credential);
       final User? firebaseUser = userCredential.user;
-      log(name: "googleDebig", "four");
       final firebaseIdToken = await userCredential.user?.getIdToken();
-      if (firebaseUser == null) {
-        log(name: "googleDebig", "firebaseUser");
 
+      if (firebaseUser == null) {
         Fluttertoast.showToast(msg: "Firebase authentication failed");
         return null;
       }
 
       final String firebaseUid = firebaseUser.uid;
-      // final String firebaseProjectId = Firebase.app().options.projectId;
       String deviceId = await getOrCreateDeviceId();
 
       if (deviceId.isEmpty) {
-        log(name: "googleDebig", "deviceId");
-
         Fluttertoast.showToast(msg: "Device ID not found");
         return null;
       }
-      Response response = await authRepo.signInWithGoogle(
-        token: firebaseIdToken ?? "",
-        // token: googleAuth.accessToken ?? "",
-        firebaseUid: firebaseUid,
-      );
+
+      Response response = await authRepo.signInWithGoogle(token: firebaseIdToken ?? "", firebaseUid: firebaseUid, deviceId: deviceId);
+
       if (response.statusCode == 200 && response.body["token"] != null) {
         setUserToken(response.body['token']);
+        await fetchUserProfile();
         responseModel = ResponseModel(true, "Google Sign-In Successful");
       } else {
         responseModel = ResponseModel(false, "Failed to Google Sign-In");
@@ -95,10 +103,12 @@ class AuthController extends GetxController implements GetxService {
       responseModel = ResponseModel(false, "Error in Google Sign-In");
       log(e.toString(), name: "*****  Error in signInWithGoogle () *****");
     }
+
     isLoading = false;
     update();
     return responseModel;
   }
+
   // /// Google Login Setup
   // void signInWithGoogle() async {
   //   try {

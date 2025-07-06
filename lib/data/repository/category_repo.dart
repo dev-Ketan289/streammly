@@ -10,4 +10,12 @@ class CategoryRepo {
   Future<Response> getCategories() async {
     return await apiClient.getData(AppConstants.categoriesUrl);
   }
+
+  Future<Response> getBookMark() async {
+    return await apiClient.getData(AppConstants.getBookMark);
+  }
+
+  Future<Response> postBookmark(dynamic data) async {
+    return await apiClient.postData(AppConstants.postBookmark, data);
+  }
 }

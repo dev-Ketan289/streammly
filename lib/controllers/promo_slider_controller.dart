@@ -1,4 +1,5 @@
 import 'package:get/get.dart';
+
 import '../../models/banner/promo_slider_model.dart';
 import '../data/repository/promo_slider_repo.dart';
 

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:streammly/views/screens/bundle/bundle_information.dart';
+import 'package:streammly/views/screens/wishlist/wishlistpage.dart';
 
 class PageNav extends StatelessWidget {
   const PageNav({super.key});
@@ -23,8 +24,14 @@ class PageNav extends StatelessWidget {
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     Container(
-                      decoration: BoxDecoration(color: Colors.grey.shade200, borderRadius: BorderRadius.circular(40)),
-                      padding: const EdgeInsets.symmetric(horizontal: 1, vertical: 4),
+                      decoration: BoxDecoration(
+                        color: Colors.grey.shade200,
+                        borderRadius: BorderRadius.circular(40),
+                      ),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 1,
+                        vertical: 4,
+                      ),
                       child: Row(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: List.generate(filters.length, (index) {
@@ -36,17 +43,47 @@ class PageNav extends StatelessWidget {
 
                               if (filters[index] == 'Bundles') {
                                 await Get.to(() => const BundleInformation());
-                                selectedIndex.value = 1; // Return to 'Recommended'
+                                selectedIndex.value =
+                                    1; // Return to 'Recommended'
+                              } else if (filters[index] == 'Wishlist') {
+                                await Get.to(() => Wishlistpage());
+                                selectedIndex.value = 1;
                               }
                             },
                             child: Container(
-                              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 5),
-                              decoration: BoxDecoration(color: isSelected ? Colors.blue : Colors.transparent, borderRadius: BorderRadius.circular(30)),
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 8,
+                                vertical: 5,
+                              ),
+                              decoration: BoxDecoration(
+                                color:
+                                    isSelected
+                                        ? Colors.blue
+                                        : Colors.transparent,
+                                borderRadius: BorderRadius.circular(30),
+                              ),
                               child: Row(
                                 children: [
-                                  Icon(icons[index], size: 16, color: isSelected ? Colors.white : Colors.black54),
+                                  Icon(
+                                    icons[index],
+                                    size: 16,
+                                    color:
+                                        isSelected
+                                            ? Colors.white
+                                            : Colors.black54,
+                                  ),
                                   const SizedBox(width: 4),
-                                  Text(filters[index], style: TextStyle(fontSize: 9, color: isSelected ? Colors.white : Colors.black87, fontWeight: FontWeight.w500)),
+                                  Text(
+                                    filters[index],
+                                    style: TextStyle(
+                                      fontSize: 9,
+                                      color:
+                                          isSelected
+                                              ? Colors.white
+                                              : Colors.black87,
+                                      fontWeight: FontWeight.w500,
+                                    ),
+                                  ),
                                 ],
                               ),
                             ),
@@ -90,7 +127,14 @@ class PageNav extends StatelessWidget {
             },
             child: Row(
               children: const [
-                Text("See all", style: TextStyle(color: Colors.blue, fontWeight: FontWeight.w500, fontSize: 13)),
+                Text(
+                  "See all",
+                  style: TextStyle(
+                    color: Colors.blue,
+                    fontWeight: FontWeight.w500,
+                    fontSize: 13,
+                  ),
+                ),
                 SizedBox(width: 4),
                 Icon(Icons.arrow_forward_ios, size: 14, color: Colors.blue),
               ],

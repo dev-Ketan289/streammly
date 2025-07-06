@@ -1,9 +1,6 @@
-import 'dart:convert';
-import 'package:http/http.dart' as http;
 import '../../models/banner/promo_slider_model.dart';
 import '../../services/constants.dart';
 import '../api/api_client.dart';
-
 
 class PromoSliderRepo {
   final ApiClient apiClient;

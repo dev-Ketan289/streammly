@@ -3,6 +3,7 @@ import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:streammly/views/screens/auth_screens/otp_verification_screen.dart';
 import 'package:streammly/views/screens/auth_screens/welcome.dart';
+
 import '../../../controllers/auth_controller.dart';
 
 class LoginScreen extends StatelessWidget {
@@ -97,18 +98,15 @@ class LoginScreen extends StatelessWidget {
                                   width: double.infinity,
                                   height: 50,
                                   child: OutlinedButton.icon(
-                                    onPressed: () {
-                                      // authController.isLoading
-                                      //     ? null
-                                      //     : () {
-                                      //       authController.signInWithGoogle().then((value) {
-                                      //         if (value?.isSuccess ?? false) {
-                                      //           Get.to(() => WelcomeScreen());
-                                      //         }
-                                      //       });
-                                      //     };
-                                      Get.to(() => WelcomeScreen());
-                                    },
+                                    onPressed:
+                                        authController.isLoading
+                                            ? null
+                                            : () async {
+                                              final result = await authController.signInWithGoogle();
+                                              if (result?.isSuccess ?? false) {
+                                                Get.to(() => WelcomeScreen());
+                                              }
+                                            },
 
                                     icon: Image.asset('assets/images/img.png', height: 24),
                                     label: Text("Continue with Google", style: theme.textTheme.bodySmall),

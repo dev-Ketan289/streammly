@@ -13,9 +13,6 @@ class Categories extends StatefulWidget {
 }
 
 class _CategoriesState extends State<Categories> {
-  final CompanyController controller = Get.put(
-    CompanyController(companyRepo: Get.find()),
-  );
   final CategoryController categoryController = Get.find<CategoryController>();
   final Map<String, List<CompanyLocation>> companiesByCategory = {};
   final List<String> _selectedCategories =
@@ -50,13 +47,17 @@ class _CategoriesState extends State<Categories> {
           (cat) => cat.title == newCategory,
         );
         if (category != null) {
-          controller.setCategoryId(category.id);
+          Get.find<CompanyController>().setCategoryId(category.id);
           print(
             "Fetching companies for category: $newCategory (ID: ${category.id})",
           );
-          await controller.fetchCompaniesByCategory(category.id);
+          await Get.find<CompanyController>().fetchCompaniesByCategory(
+            category.id,
+          );
           setState(() {
-            companiesByCategory[newCategory] = List.from(controller.companies);
+            companiesByCategory[newCategory] = List.from(
+              Get.find<CompanyController>().companies,
+            );
             _selectedCategories.add(newCategory); // Add to selected categories
           });
         } else {
@@ -71,13 +72,15 @@ class _CategoriesState extends State<Categories> {
             (cat) => cat.title == categoryTitle,
           );
           if (category != null) {
-            controller.setCategoryId(category.id);
+            Get.find<CompanyController>().setCategoryId(category.id);
             print(
               "Fetching companies for category: $categoryTitle (ID: ${category.id})",
             );
-            await controller.fetchCompaniesByCategory(category.id);
+            await Get.find<CompanyController>().fetchCompaniesByCategory(
+              category.id,
+            );
             companiesByCategory[categoryTitle] = List.from(
-              controller.companies,
+              Get.find<CompanyController>().companies,
             );
           } else {
             print("Category not found: $categoryTitle");
@@ -142,69 +145,75 @@ class _CategoriesState extends State<Categories> {
                 ],
               ),
               const SizedBox(height: 20),
-              Obx(() {
-                if (controller.isLoading.value) {
-                  return const Center(child: CircularProgressIndicator());
-                }
-                if (companiesByCategory.isEmpty) {
-                  return const Center(
-                    child: Text("No companies found for selected categories."),
-                  );
-                }
-                return Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children:
-                      companiesByCategory.entries.map((entry) {
-                        final categoryTitle = entry.key;
-                        final companies = entry.value;
-                        return Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              categoryTitle,
-                              style: TextStyle(
-                                fontSize: 17,
-                                fontWeight: FontWeight.bold,
-                                color: const Color(0xFF4867B7),
+              GetBuilder<CompanyController>(
+                builder: (controller) {
+                  if (controller.isLoading) {
+                    return const Center(child: CircularProgressIndicator());
+                  }
+                  if (companiesByCategory.isEmpty) {
+                    return const Center(
+                      child: Text(
+                        "No companies found for selected categories.",
+                      ),
+                    );
+                  }
+                  return Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children:
+                        companiesByCategory.entries.map((entry) {
+                          final categoryTitle = entry.key;
+                          final companies = entry.value;
+                          return Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                categoryTitle,
+                                style: TextStyle(
+                                  fontSize: 17,
+                                  fontWeight: FontWeight.bold,
+                                  color: const Color(0xFF4867B7),
+                                ),
                               ),
-                            ),
-                            const SizedBox(height: 10),
-                            SingleChildScrollView(
-                              scrollDirection: Axis.horizontal,
-                              child: Row(
-                                children: [
-                                  for (var company in companies)
-                                    GestureDetector(
-                                      onTap: () {
-                                        _fetchData(newCategory: categoryTitle);
-                                      },
-                                      child: VendorCard(
-                                        companyName: company.companyName,
-                                        rating: '3.9 ★',
-                                        timeDistance:
-                                            '${company.estimatedTime ?? '35-40 mins'} . ${company.distanceKm?.toStringAsFixed(1) ?? '4.2'} km',
-                                        category: categoryTitle,
-                                        imageUrl:
-                                            company.bannerImage != null &&
-                                                    company
-                                                        .bannerImage!
-                                                        .isNotEmpty
-                                                ? company.bannerImage!
-                                                : 'assets/images/demo.png',
-                                        isSelected: _selectedCategories
-                                            .contains(categoryTitle),
+                              const SizedBox(height: 10),
+                              SingleChildScrollView(
+                                scrollDirection: Axis.horizontal,
+                                child: Row(
+                                  children: [
+                                    for (var company in companies)
+                                      GestureDetector(
+                                        onTap: () {
+                                          _fetchData(
+                                            newCategory: categoryTitle,
+                                          );
+                                        },
+                                        child: VendorCard(
+                                          companyName: company.companyName,
+                                          rating: '3.9 ★',
+                                          timeDistance:
+                                              '${company.estimatedTime ?? '35-40 mins'} . ${company.distanceKm?.toStringAsFixed(1) ?? '4.2'} km',
+                                          category: categoryTitle,
+                                          imageUrl:
+                                              company.bannerImage != null &&
+                                                      company
+                                                          .bannerImage!
+                                                          .isNotEmpty
+                                                  ? company.bannerImage!
+                                                  : 'assets/images/demo.png',
+                                          isSelected: _selectedCategories
+                                              .contains(categoryTitle),
+                                        ),
                                       ),
-                                    ),
-                                  const SizedBox(width: 10),
-                                ],
+                                    const SizedBox(width: 10),
+                                  ],
+                                ),
                               ),
-                            ),
-                            const SizedBox(height: 20),
-                          ],
-                        );
-                      }).toList(),
-                );
-              }),
+                              const SizedBox(height: 20),
+                            ],
+                          );
+                        }).toList(),
+                  );
+                },
+              ),
               // Selected Categories Section
               const SizedBox(height: 20),
               Center(
@@ -218,46 +227,48 @@ class _CategoriesState extends State<Categories> {
                 ),
               ),
               const SizedBox(height: 10),
-              Obx(() {
-                if (controller.isLoading.value) {
-                  return const Center(child: CircularProgressIndicator());
-                }
-                if (_selectedCategories.isEmpty) {
-                  return const Center(
-                    child: Text(
-                      "No Vendors selected.",
-                      style: TextStyle(fontSize: 14, color: Colors.grey),
-                    ),
+              GetBuilder<CompanyController>(
+                builder: (controller) {
+                  if (controller.isLoading) {
+                    return const Center(child: CircularProgressIndicator());
+                  }
+                  if (_selectedCategories.isEmpty) {
+                    return const Center(
+                      child: Text(
+                        "No Vendors selected.",
+                        style: TextStyle(fontSize: 14, color: Colors.grey),
+                      ),
+                    );
+                  }
+                  return Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children:
+                        _selectedCategories.expand((categoryTitle) {
+                          final companies =
+                              companiesByCategory[categoryTitle] ?? [];
+                          return companies.map((company) {
+                            return Padding(
+                              padding: const EdgeInsets.only(bottom: 10),
+                              child: VendorRect(
+                                companyName: company.companyName,
+                                rating: '3.9 ★',
+                                timeDistance:
+                                    '${company.estimatedTime ?? '35-40 mins'} . ${company.distanceKm?.toStringAsFixed(1) ?? '4.2'} km',
+                                category: categoryTitle,
+                                description:
+                                    'Our services include premium photography and video facilities for creative professionals and clients.\nStudio rental (Photography/Video/Graphic)\ncinematic videography\nWhy Choose Us: environment\nExperienced studio team',
+                                imageUrl:
+                                    company.bannerImage != null &&
+                                            company.bannerImage!.isNotEmpty
+                                        ? company.bannerImage!
+                                        : 'assets/images/demo.png',
+                              ),
+                            );
+                          }).toList();
+                        }).toList(),
                   );
-                }
-                return Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children:
-                      _selectedCategories.expand((categoryTitle) {
-                        final companies =
-                            companiesByCategory[categoryTitle] ?? [];
-                        return companies.map((company) {
-                          return Padding(
-                            padding: const EdgeInsets.only(bottom: 10),
-                            child: VendorRect(
-                              companyName: company.companyName,
-                              rating: '3.9 ★',
-                              timeDistance:
-                                  '${company.estimatedTime ?? '35-40 mins'} . ${company.distanceKm?.toStringAsFixed(1) ?? '4.2'} km',
-                              category: categoryTitle,
-                              description:
-                                  'Our services include premium photography and video facilities for creative professionals and clients.\nStudio rental (Photography/Video/Graphic)\ncinematic videography\nWhy Choose Us: environment\nExperienced studio team',
-                              imageUrl:
-                                  company.bannerImage != null &&
-                                          company.bannerImage!.isNotEmpty
-                                      ? company.bannerImage!
-                                      : 'assets/images/demo.png',
-                            ),
-                          );
-                        }).toList();
-                      }).toList(),
-                );
-              }),
+                },
+              ),
             ],
           ),
         ),
@@ -287,6 +298,7 @@ class VendorCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
+      margin: EdgeInsets.only(left: 10),
       width: 160,
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(16),

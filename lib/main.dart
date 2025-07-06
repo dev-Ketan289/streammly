@@ -2,11 +2,12 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:streammly/data/init.dart';
+import 'package:streammly/views/screens/auth_screens/login_screen.dart';
+import 'package:streammly/views/screens/common/location_screen.dart';
 import 'package:streammly/views/screens/common/webview_screen.dart';
 import 'package:streammly/views/screens/home/widgets/category/category.dart';
 
 import 'navigation_menu.dart';
-import 'views/screens/auth_screens/login_screen.dart';
 import 'views/screens/splash_screen/splash_screen.dart';
 
 void main() async {
@@ -28,16 +29,14 @@ class StreammlyApp extends StatelessWidget {
         appBarTheme: AppBarTheme(surfaceTintColor: Colors.white),
         primarySwatch: Colors.indigo,
         scaffoldBackgroundColor: Colors.white,
-        textTheme: const TextTheme(
-          bodyLarge: TextStyle(fontFamily: 'Open Sans', color: Colors.black),
-          bodyMedium: TextStyle(fontFamily: 'Open Sans', color: Colors.black54),
-        ),
+        textTheme: const TextTheme(bodyLarge: TextStyle(fontFamily: 'Open Sans', color: Colors.black), bodyMedium: TextStyle(fontFamily: 'Open Sans', color: Colors.black54)),
       ),
       initialRoute: '/splash',
       getPages: [
         GetPage(name: '/splash', page: () => const SplashScreen()),
-        GetPage(name: '/login', page: () => LoginScreen()),
+        GetPage(name: '/Location', page: () => const LocationScreen()),
         GetPage(name: '/home', page: () => NavigationMenu()),
+        GetPage(name: '/login', page: () => LoginScreen()),
 
         // Promo slider redirection routes
         GetPage(name: '/webview', page: () => const WebViewScreen()),

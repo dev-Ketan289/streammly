@@ -121,7 +121,7 @@ class PackagesListView extends StatelessWidget {
                               /// HIGHLIGHT
                               if ((pkg["highlight"] ?? '').isNotEmpty) ...[
                                 const SizedBox(height: 12),
-                                Text(pkg["highlight"], style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w600, color: Colors.black87)),
+                                Text(pkg["fullDescription"], style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w600, color: Colors.black87)),
                               ],
 
                               /// SHORT / FULL DESCRIPTION

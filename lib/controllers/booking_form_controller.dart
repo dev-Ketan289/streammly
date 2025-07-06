@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
+import 'package:streammly/views/screens/package/booking/booking_page.dart';
 
-class BookingFormController extends GetxController {
+class BookingController extends GetxController {
   var currentPage = 0.obs;
   var selectedPackages = <Map<String, dynamic>>[].obs;
   final personalInfo = {'name': ''.obs, 'mobile': ''.obs, 'email': ''.obs};
@@ -11,11 +12,30 @@ class BookingFormController extends GetxController {
   final packageFormsData = <int, Map<String, dynamic>>{}.obs;
   var acceptTerms = false.obs;
 
+  /// Summary-specific data
+  late RxList<int> packagePrices;
+  late RxList<bool> showPackageDetails;
+
   void initSelectedPackages(List<Map<String, dynamic>> packages) {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       selectedPackages.assignAll(packages);
+
+      // Initialize prices & detail toggles
+      packagePrices = List<int>.generate(packages.length, (index) => int.tryParse(packages[index]['packagevariations']?[0]?['amount']?.toString() ?? '0') ?? 0).obs;
+
+      showPackageDetails = List<bool>.filled(packages.length, false).obs;
+
       for (int i = 0; i < packages.length; i++) {
-        final packageTitle = packages[i]['title'];
+        final package = packages[i];
+        final packageTitle = package['title'];
+
+        Map<String, String> extraAnswers = {};
+        final extraQuestions = package['extraQuestions'] ?? package['packageextra_questions'] ?? [];
+        for (var question in extraQuestions) {
+          final uniqueKey = "${i}_${question['id']}";
+          extraAnswers[uniqueKey] = '';
+        }
+
         packageFormsData[i] = {
           'date': '',
           'startTime': '',
@@ -26,12 +46,27 @@ class BookingFormController extends GetxController {
           'locationPreference': packageTitle == 'Wonders' ? null : null,
           'freeAddOn': null,
           'extraAddOn': null,
+          'termsAccepted': false,
+          'extraAnswers': extraAnswers,
         };
       }
       packageFormsData.refresh();
     });
   }
 
+  /// Summary Logic Methods
+  int get totalPayment => packagePrices.fold(0, (sum, price) => sum + price);
+
+  void editPackage(int index) {
+    currentPage.value = index;
+    Get.to(() => BookingPage());
+  }
+
+  void toggleDetails(int index) {
+    showPackageDetails[index] = !showPackageDetails[index];
+  }
+
+  /// Form Methods (your existing ones)
   void updatePersonalInfo(String key, String value) {
     if (personalInfo.containsKey(key)) {
       personalInfo[key]?.value = value;
@@ -57,13 +92,17 @@ class BookingFormController extends GetxController {
     }
   }
 
+  void updateExtraAnswer(int index, String questionId, String answer) {
+    final data = packageFormsData[index] ?? {};
+    final extraAnswers = Map<String, String>.from(data['extraAnswers'] ?? {});
+    final uniqueKey = "${index}_$questionId";
+    extraAnswers[uniqueKey] = answer;
+    data['extraAnswers'] = extraAnswers;
+    packageFormsData[index] = data;
+  }
+
   Future<String> selectDate(int index, BuildContext context) async {
-    final picked = await showDatePicker(
-      context: context,
-      initialDate: DateTime.now(),
-      firstDate: DateTime.now(),
-      lastDate: DateTime.now().add(const Duration(days: 365)),
-    );
+    final picked = await showDatePicker(context: context, initialDate: DateTime.now(), firstDate: DateTime.now(), lastDate: DateTime.now().add(const Duration(days: 365)));
     String formatted = "";
     if (picked != null) {
       formatted = "${picked.day} ${_getMonthName(picked.month)} ${picked.year}";
@@ -73,21 +112,7 @@ class BookingFormController extends GetxController {
   }
 
   String _getMonthName(int month) {
-    const months = [
-      '',
-      'January',
-      'February',
-      'March',
-      'April',
-      'May',
-      'June',
-      'July',
-      'August',
-      'September',
-      'October',
-      'November',
-      'December',
-    ];
+    const months = ['', 'January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
     return months[month];
   }
 
@@ -101,6 +126,13 @@ class BookingFormController extends GetxController {
 
   void toggleTermsAcceptance() {
     acceptTerms.value = !acceptTerms.value;
+  }
+
+  void togglePackageTerms(int index) {
+    final form = packageFormsData[index] ?? {};
+    form['termsAccepted'] = !(form['termsAccepted'] ?? false);
+    packageFormsData[index] = form;
+    packageFormsData.refresh();
   }
 
   bool canSubmit() {
@@ -126,8 +158,12 @@ class BookingFormController extends GetxController {
       final packageTitle = selectedPackages[i]['title'];
       if (packageTitle == 'Cuteness' && form['babyInfo'] == null) return false;
       if (packageTitle == 'Moments' && form['theme'] == null) return false;
-      if (packageTitle == 'Wonders' && form['locationPreference'] == null) {
-        return false;
+      if (packageTitle == 'Wonders' && form['locationPreference'] == null) return false;
+      if (!(form['termsAccepted'] ?? false)) return false;
+
+      final extraAnswers = Map<String, String>.from(form['extraAnswers'] ?? {});
+      for (var answer in extraAnswers.values) {
+        if (answer.trim().isEmpty) return false;
       }
     }
     return true;
@@ -135,7 +171,7 @@ class BookingFormController extends GetxController {
 
   void submitBooking() {
     if (!canSubmit()) {
-      Get.snackbar('Error', 'Please fill all required fields and accept terms');
+      Get.snackbar('Error', 'Please fill all required fields and accept terms for each package');
       return;
     }
 
@@ -143,12 +179,12 @@ class BookingFormController extends GetxController {
       'personalInfo': personalInfo.map((k, v) => MapEntry(k, v.value)),
       'altMobiles': alternateMobiles.map((e) => e.value).toList(),
       'altEmails': alternateEmails.map((e) => e.value).toList(),
-      'packages': List.generate(
-        selectedPackages.length,
-        (i) => {'info': selectedPackages[i], 'form': packageFormsData[i]},
-      ),
+      'packages': List.generate(selectedPackages.length, (i) {
+        final form = packageFormsData[i];
+        return {'info': selectedPackages[i], 'form': form};
+      }),
       'termsAccepted': acceptTerms.value,
     };
-    print('✅ Booking Data Submitted:\n$data');
+    print('Booking Data Submitted:\n$data');
   }
 }
