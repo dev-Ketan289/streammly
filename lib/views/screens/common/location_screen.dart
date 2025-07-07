@@ -9,10 +9,15 @@ class LocationScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final size = MediaQuery.of(context).size;
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+    final textTheme = theme.textTheme;
     final locationController = Get.put(LocationController());
 
+    // final bottomImageHeight = (size.height * 0.22) / MediaQuery.of(context).devicePixelRatio * 2;
+
     return Scaffold(
-      backgroundColor: const Color(0xFFF8F8FF),
+      backgroundColor: colorScheme.surface,
       body: SafeArea(
         child: SizedBox(
           width: size.width,
@@ -28,7 +33,7 @@ class LocationScreen extends StatelessWidget {
                     Expanded(
                       child: Text(
                         "Location",
-                        style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                        style: textTheme.titleLarge!.copyWith(fontWeight: FontWeight.bold),
                         textAlign: Navigator.canPop(context) ? TextAlign.start : TextAlign.center,
                       ),
                     ),
@@ -37,9 +42,9 @@ class LocationScreen extends StatelessWidget {
               ),
               const SizedBox(height: 40),
 
-              const Padding(
-                padding: EdgeInsets.symmetric(horizontal: 16.0),
-                child: Text("Let us know the spot.....\nwe'll bring the magic there.", textAlign: TextAlign.center, style: TextStyle(fontSize: 15, color: Colors.black54)),
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                child: Text("Let us know the spot.....\nwe'll bring the magic there.", textAlign: TextAlign.center, style: textTheme.bodyMedium!.copyWith(color: theme.hintColor)),
               ),
               const SizedBox(height: 20),
 
@@ -67,7 +72,11 @@ class LocationScreen extends StatelessWidget {
                         width: double.infinity,
                         height: 50,
                         child: ElevatedButton(
-                          style: ElevatedButton.styleFrom(backgroundColor: Colors.indigo, shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)), elevation: 2),
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: colorScheme.primary,
+                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                            elevation: 2,
+                          ),
                           onPressed:
                               locationController.isLoading.value
                                   ? null
@@ -88,11 +97,10 @@ class LocationScreen extends StatelessWidget {
                           child:
                               locationController.isLoading.value
                                   ? const SizedBox(height: 20, width: 20, child: CircularProgressIndicator(strokeWidth: 2, valueColor: AlwaysStoppedAnimation<Color>(Colors.white)))
-                                  : const Text("Use Current Location", style: TextStyle(color: Colors.white, fontSize: 16)),
+                                  : Text("Use Current Location", style: textTheme.bodyLarge!.copyWith(color: Colors.white, fontWeight: FontWeight.w600)),
                         ),
                       ),
                     ),
-
                     const SizedBox(height: 15),
 
                     // Enter Manually Button
@@ -100,29 +108,30 @@ class LocationScreen extends StatelessWidget {
                       width: double.infinity,
                       height: 50,
                       child: OutlinedButton(
-                        style: OutlinedButton.styleFrom(side: const BorderSide(color: Colors.blue), shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10))),
+                        style: OutlinedButton.styleFrom(side: BorderSide(color: colorScheme.primary), shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10))),
                         onPressed: () {
                           Get.to(() => EnterLocationManuallyScreen());
                         },
-                        child: const Text("Enter Location Manually", style: TextStyle(color: Colors.blue, fontSize: 16)),
+                        child: Text("Enter Location Manually", style: textTheme.bodyLarge!.copyWith(color: colorScheme.primary, fontWeight: FontWeight.w600)),
                       ),
                     ),
                   ],
                 ),
               ),
-
-              const Spacer(),
-
-              // Bottom image with error handling
-              Image.asset(
-                'assets/images/location_map_bottom.jpg',
-                fit: BoxFit.cover,
-                width: double.infinity,
-                height: 180,
-                errorBuilder: (context, error, stackTrace) {
-                  return Container(width: double.infinity, height: 180, color: Colors.grey[300], child: const Icon(Icons.map, size: 60, color: Colors.grey));
-                },
-              ),
+              // SizedBox(
+              //   width: double.infinity,
+              //   height: bottomImageHeight,
+              //   child: Image.asset(
+              //     'assets/images/location_map_bottom.jpg',
+              //     fit: BoxFit.cover,
+              //     errorBuilder: (context, error, stackTrace) {
+              //       return Container(
+              //         color: Colors.grey[300],
+              //         child: const Icon(Icons.map, size: 60, color: Colors.grey),
+              //       );
+              //     },
+              //   ),
+              // ),
             ],
           ),
         ),

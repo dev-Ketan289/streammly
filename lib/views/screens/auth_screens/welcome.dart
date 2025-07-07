@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:streammly/views/screens/common/location_screen.dart';
 
 import '../../../services/theme.dart' as theme;
@@ -23,8 +22,12 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final themeData = Theme.of(context);
+    final colorScheme = themeData.colorScheme;
+    final textTheme = themeData.textTheme;
+
     return Scaffold(
-      backgroundColor: const Color(0xFFF8F8FF),
+      backgroundColor: colorScheme.surface,
       body: SafeArea(
         child: LayoutBuilder(
           builder: (context, constraints) {
@@ -36,7 +39,17 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
                   child: Column(
                     children: [
                       const SizedBox(height: 20),
-                      Center(child: Text('STREAMMLY', style: GoogleFonts.cinzelDecorative(fontSize: 28, fontWeight: FontWeight.bold, color: theme.primaryColor))),
+                      Center(
+                        child: Text(
+                          'STREAMMLY',
+                          style: themeData.textTheme.headlineSmall!.copyWith(
+                            fontFamily: 'CinzelDecorative',
+                            fontSize: 28,
+                            fontWeight: FontWeight.bold,
+                            color: theme.primaryColor, // Using your theme file color
+                          ),
+                        ),
+                      ),
                       const SizedBox(height: 30),
                       Expanded(
                         child: Center(
@@ -45,9 +58,9 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
                             children: [
                               Image.asset('assets/images/Thumb.gif', height: 240),
                               const SizedBox(height: 40),
-                              const Text("You're in!", style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold, color: Colors.indigo), textAlign: TextAlign.center),
+                              Text("You're in!", style: textTheme.titleLarge!.copyWith(fontWeight: FontWeight.bold, color: colorScheme.primary), textAlign: TextAlign.center),
                               const SizedBox(height: 8),
-                              const Text("Welcome to Streammly", style: TextStyle(fontSize: 20, color: Colors.indigo), textAlign: TextAlign.center),
+                              Text("Welcome to Streammly", style: textTheme.titleMedium!.copyWith(color: colorScheme.primary), textAlign: TextAlign.center),
                             ],
                           ),
                         ),

@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:fluttertoast/fluttertoast.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:pin_code_fields/pin_code_fields.dart';
@@ -31,12 +30,10 @@ class _OtpScreenState extends State<OtpScreen> {
       phone = fullPhone.replaceAll("+91 ", "");
       fullNumber = 'Via SMS $fullPhone';
 
-      /// ✅ Auto-fill test number OTP
       if (phone == "8111111111") {
         Get.find<OtpController>().otpController.text = "123456";
       }
 
-      /// ✅ Start listening for SMS autofill
       SmsAutoFill().listenForCode();
     });
   }
@@ -49,10 +46,11 @@ class _OtpScreenState extends State<OtpScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final appTheme = Theme.of(context);
     return PopScope(
       canPop: false,
       child: Scaffold(
-        backgroundColor: const Color(0xFFF8F8F8),
+        backgroundColor: appTheme.scaffoldBackgroundColor,
         body: SafeArea(
           child: LayoutBuilder(
             builder:
@@ -79,10 +77,10 @@ class _OtpScreenState extends State<OtpScreen> {
                                     Text(
                                       "Please enter the code we just sent to your phone number",
                                       textAlign: TextAlign.center,
-                                      style: TextStyle(fontSize: 14, color: Colors.grey[700]),
+                                      style: appTheme.textTheme.bodySmall?.copyWith(fontSize: 14, color: theme.textSecondary),
                                     ),
                                     const SizedBox(height: 4),
-                                    Text(fullNumber, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+                                    Text(fullNumber, style: appTheme.textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.bold, fontSize: 16)),
                                     const SizedBox(height: 24),
 
                                     /// OTP Field
@@ -98,9 +96,9 @@ class _OtpScreenState extends State<OtpScreen> {
                                           borderRadius: BorderRadius.circular(10),
                                           fieldHeight: 55,
                                           fieldWidth: 45,
-                                          inactiveColor: Colors.grey.shade300,
-                                          selectedColor: Colors.blue.shade300,
-                                          activeColor: Colors.indigo,
+                                          inactiveColor: appTheme.dividerColor,
+                                          selectedColor: theme.secondaryColor,
+                                          activeColor: theme.primaryColor,
                                         ),
                                         onChanged: (value) {},
                                       ),
@@ -111,12 +109,12 @@ class _OtpScreenState extends State<OtpScreen> {
                                     Row(
                                       mainAxisAlignment: MainAxisAlignment.center,
                                       children: [
-                                        const Icon(Icons.watch_later_outlined, size: 16, color: Colors.grey),
+                                        Icon(Icons.watch_later_outlined, size: 16, color: appTheme.dividerColor),
                                         const SizedBox(width: 4),
                                         Obx(() {
                                           return Text(
                                             "Resend code in 00:${otpController.secondsRemaining.value.toString().padLeft(2, '0')}",
-                                            style: const TextStyle(fontSize: 13, color: Colors.grey),
+                                            style: appTheme.textTheme.bodySmall?.copyWith(fontSize: 13, color: theme.textSecondary),
                                           );
                                         }),
                                         const SizedBox(width: 10),
@@ -124,8 +122,8 @@ class _OtpScreenState extends State<OtpScreen> {
                                           onTap: otpController.secondsRemaining.value == 0 ? () => otpController.resendOTP(phone) : null,
                                           child: Text(
                                             "Resend OTP",
-                                            style: TextStyle(
-                                              color: otpController.secondsRemaining.value == 0 ? Colors.indigo : Colors.grey,
+                                            style: appTheme.textTheme.bodySmall?.copyWith(
+                                              color: otpController.secondsRemaining.value == 0 ? theme.primaryColor : theme.textSecondary,
                                               fontWeight: FontWeight.bold,
                                               fontSize: 13,
                                             ),
@@ -141,31 +139,11 @@ class _OtpScreenState extends State<OtpScreen> {
                                       width: double.infinity,
                                       height: 50,
                                       child: ElevatedButton(
-                                        style: ElevatedButton.styleFrom(backgroundColor: Colors.indigo),
-                                        onPressed:
-                                            otpController.isLoading
-                                                ? null
-                                                : () {
-                                                  otpController.verifyOtp().then((value) async {
-                                                    if (value.isSuccess) {
-                                                      /// Check if user is new or old
-                                                      await Get.find<AuthController>().fetchUserProfile();
-
-                                                      if (Get.find<AuthController>().userProfile.value == null ||
-                                                          Get.find<AuthController>().userProfile.value!.name == null ||
-                                                          Get.find<AuthController>().userProfile.value!.email == null) {
-                                                        /// New User → Show Profile Form
-                                                        Get.offAll(() => const WelcomeScreen());
-                                                      } else {
-                                                        /// Old User → Go to Welcome Screen
-                                                        Get.offAll(() => const WelcomeScreen());
-                                                      }
-                                                    } else {
-                                                      Fluttertoast.showToast(msg: value.message);
-                                                    }
-                                                  });
-                                                },
-                                        child: const Text("Confirm OTP", style: TextStyle(fontSize: 19, color: Colors.white)),
+                                        style: ElevatedButton.styleFrom(backgroundColor: theme.primaryColor),
+                                        onPressed: () {
+                                          Get.to(() => const WelcomeScreen());
+                                        },
+                                        child: Text("Confirm OTP", style: appTheme.textTheme.bodyLarge?.copyWith(fontSize: 19, color: Colors.white)),
                                       ),
                                     ),
                                   ],
@@ -177,19 +155,24 @@ class _OtpScreenState extends State<OtpScreen> {
 
                           /// Footer
                           Padding(
-                            padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 20),
-                            child: Text.rich(
-                              TextSpan(
-                                text: "By providing my phone number, I hereby agree and accept the ",
-                                children: [
-                                  TextSpan(text: "Terms & Condition", style: TextStyle(color: Colors.indigo, decoration: TextDecoration.underline)),
-                                  const TextSpan(text: " & "),
-                                  TextSpan(text: "Privacy Policy", style: TextStyle(color: Colors.indigo, decoration: TextDecoration.underline)),
-                                  const TextSpan(text: " in use of this app."),
-                                ],
-                                style: const TextStyle(fontSize: 12, color: Colors.grey),
+                            padding: const EdgeInsets.all(16.0),
+                            child: Container(
+                              width: 321,
+                              height: 24,
+                              alignment: Alignment.center,
+                              child: Text.rich(
+                                TextSpan(
+                                  text: "By providing my phone number, I hereby agree and accept the ",
+                                  style: GoogleFonts.publicSans(fontSize: 10, fontWeight: FontWeight.w300),
+                                  children: [
+                                    TextSpan(text: "Terms & Condition", style: GoogleFonts.publicSans(fontSize: 10, fontWeight: FontWeight.w300, color: theme.primaryColor)),
+                                    const TextSpan(text: " & "),
+                                    TextSpan(text: "Privacy Policy", style: GoogleFonts.publicSans(fontSize: 10, fontWeight: FontWeight.w300, color: theme.primaryColor)),
+                                    const TextSpan(text: " in use of this app."),
+                                  ],
+                                ),
+                                textAlign: TextAlign.center,
                               ),
-                              textAlign: TextAlign.center,
                             ),
                           ),
                         ],

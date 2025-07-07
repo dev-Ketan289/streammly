@@ -8,6 +8,10 @@ class VendorDescription extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final screenWidth = MediaQuery.of(context).size.width;
+    final horizontalPadding = screenWidth * 0.05;
+
     return Scaffold(
       body: GetBuilder<CompanyController>(
         builder: (controller) {
@@ -40,24 +44,27 @@ class VendorDescription extends StatelessWidget {
             children: [
               SizedBox(height: double.infinity, width: double.infinity, child: bannerWidget),
 
-              // Overlay
               Container(height: double.infinity, width: double.infinity, color: Colors.indigo.withValues(alpha: 0.4)),
 
-              // Content
               SafeArea(
                 child: Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 20),
+                  padding: EdgeInsets.symmetric(horizontal: horizontalPadding, vertical: screenWidth * 0.05),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      // Back Button
                       GestureDetector(
                         onTap: () => Navigator.pop(context),
                         child: Row(
                           children: [
                             const Icon(Icons.arrow_back, color: Colors.white),
                             const SizedBox(width: 10),
-                            Text(company.companyName, style: const TextStyle(color: Colors.white, fontSize: 20, fontWeight: FontWeight.bold)),
+                            Flexible(
+                              child: Text(
+                                company.companyName,
+                                style: theme.textTheme.titleLarge?.copyWith(color: Colors.white, fontWeight: FontWeight.bold),
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                            ),
                           ],
                         ),
                       ),
@@ -65,55 +72,51 @@ class VendorDescription extends StatelessWidget {
 
                       const Spacer(),
 
-                      // Category + Rating
                       Row(
                         children: [
-                          Text(company.categoryName ?? 'Service', style: const TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold)),
+                          Flexible(child: Text(company.categoryName ?? 'Service', style: theme.textTheme.titleMedium?.copyWith(color: Colors.white, fontWeight: FontWeight.bold))),
                           const SizedBox(width: 20),
                           if (company.rating != null)
                             Container(
                               padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-                              decoration: BoxDecoration(color: Colors.blue.shade600, borderRadius: BorderRadius.circular(6)),
-                              child: Text("${company.rating!.toStringAsFixed(1)} ★", style: const TextStyle(color: Colors.white, fontSize: 12)),
+                              decoration: BoxDecoration(color: theme.primaryColor, borderRadius: BorderRadius.circular(6)),
+                              child: Text("${company.rating!.toStringAsFixed(1)} ★", style: theme.textTheme.bodySmall?.copyWith(color: Colors.white)),
                             ),
                         ],
                       ),
+                      const SizedBox(height: 10),
 
-                      const SizedBox(height: 8),
-
-                      // Distance
-                      // Estimated Time + Distance
                       Row(
                         children: [
                           const Icon(Icons.location_on, size: 16, color: Colors.white),
                           const SizedBox(width: 4),
-                          Text("${company.estimatedTime ?? "31–36 mins"} • $distanceText", style: const TextStyle(color: Colors.white, fontSize: 14)),
+                          Flexible(
+                            child: Text(
+                              "${company.estimatedTime ?? "31–36 mins"} • $distanceText",
+                              style: theme.textTheme.bodyMedium?.copyWith(color: Colors.white),
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ),
                         ],
                       ),
-
                       const SizedBox(height: 10),
 
-                      // Description
                       Text(
                         (company.description?.trim().isNotEmpty ?? false)
                             ? company.description!.replaceAll(RegExp(r'<[^>]*>|&[^;]+;'), '')
                             : "FocusPoint Studio is a premium photography and videography studio...",
-                        style: const TextStyle(color: Colors.white70, fontSize: 13),
+                        style: theme.textTheme.bodySmall?.copyWith(color: Colors.white70, fontSize: 13),
                       ),
-
                       const SizedBox(height: 10),
 
-                      // View More Details Button
                       Center(
                         child: TextButton(
                           onPressed: () => _showMoreDetailsBottomSheet(context, company),
-                          child: const Text("View More Details ▼", style: TextStyle(color: Colors.white, fontWeight: FontWeight.w500, fontSize: 13)),
+                          child: Text("View More Details ▼", style: theme.textTheme.bodySmall?.copyWith(color: Colors.white, fontWeight: FontWeight.w500)),
                         ),
                       ),
-
                       const SizedBox(height: 20),
 
-                      // Continue Button
                       Center(
                         child: ElevatedButton(
                           style: ElevatedButton.styleFrom(
@@ -124,7 +127,7 @@ class VendorDescription extends StatelessWidget {
                           onPressed: () {
                             Navigator.push(context, MaterialPageRoute(builder: (_) => VendorDetailScreen(company: company)));
                           },
-                          child: const Text("Let’s Continue", style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+                          child: Text("Let’s Continue", style: theme.textTheme.bodyLarge?.copyWith(color: Colors.white, fontWeight: FontWeight.bold)),
                         ),
                       ),
                     ],
@@ -139,6 +142,8 @@ class VendorDescription extends StatelessWidget {
   }
 
   void _showMoreDetailsBottomSheet(BuildContext context, dynamic company) {
+    final theme = Theme.of(context);
+    final screenWidth = MediaQuery.of(context).size.width;
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
@@ -146,54 +151,46 @@ class VendorDescription extends StatelessWidget {
       backgroundColor: Colors.white,
       builder: (context) {
         return Padding(
-          padding: const EdgeInsets.fromLTRB(20, 20, 20, 30),
+          padding: EdgeInsets.fromLTRB(screenWidth * 0.05, 20, screenWidth * 0.05, 30),
           child: SingleChildScrollView(
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                // Distance & Time
                 Row(
                   children: [
                     Text(
                       "${company.estimatedTime ?? "31–36 mins"} • ${company.distanceKm != null ? "${company.distanceKm!.toStringAsFixed(1)} km" : "--"}",
-                      style: const TextStyle(fontSize: 13, color: Colors.green, fontWeight: FontWeight.w500),
+                      style: theme.textTheme.bodySmall?.copyWith(fontSize: 13, color: Colors.green, fontWeight: FontWeight.w500),
                     ),
                   ],
                 ),
                 const SizedBox(height: 8),
 
-                // Name & Rating
                 Row(
                   children: [
-                    Expanded(child: Text(company.companyName, style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold))),
+                    Expanded(child: Text(company.companyName, style: theme.textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold))),
                     if (company.rating != null)
                       Container(
                         padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-                        decoration: BoxDecoration(color: Colors.blue.shade600, borderRadius: BorderRadius.circular(6)),
-                        child: Text("${company.rating!.toStringAsFixed(1)} ★", style: const TextStyle(color: Colors.white, fontSize: 12)),
+                        decoration: BoxDecoration(color: theme.primaryColor, borderRadius: BorderRadius.circular(6)),
+                        child: Text("${company.rating!.toStringAsFixed(1)} ★", style: theme.textTheme.bodySmall?.copyWith(color: Colors.white)),
                       ),
                   ],
                 ),
-                Align(alignment: Alignment.centerLeft, child: Text(company.categoryName ?? 'Photographer', style: const TextStyle(color: Colors.black54))),
+                Align(alignment: Alignment.centerLeft, child: Text(company.categoryName ?? 'Photographer', style: theme.textTheme.bodySmall?.copyWith(color: Colors.black54))),
                 const SizedBox(height: 16),
 
-                const Align(alignment: Alignment.centerLeft, child: Text("About", style: TextStyle(fontWeight: FontWeight.bold))),
+                Align(alignment: Alignment.centerLeft, child: Text("About", style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold))),
                 const SizedBox(height: 8),
                 Text(
                   (company.description?.trim().isNotEmpty ?? false)
                       ? company.description!.replaceAll(RegExp(r'<[^>]*>|&[^;]+;'), '')
                       : "FocusPoint Studios is a premium photography and videography studio, offering state-of-the-art facilities...",
-                  style: const TextStyle(color: Colors.black87),
+                  style: theme.textTheme.bodyMedium,
                 ),
-                const SizedBox(height: 12),
+                const SizedBox(height: 16),
 
-                // Text("Why Choose Us:", style: TextStyle(fontWeight: FontWeight.bold)),
-                // const SizedBox(height: 6),
-                // const Text("• High-end studio environment"),
-                // const Text("• Latest photography and video equipment"),
-                // const Text("• Experienced creative team"),
-                // const SizedBox(height: 20),
-                Text("Opening Hours", style: TextStyle(fontWeight: FontWeight.bold)),
+                Text("Opening Hours", style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold)),
                 const SizedBox(height: 12),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -201,7 +198,7 @@ class VendorDescription extends StatelessWidget {
                     Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text("Monday – Friday", style: TextStyle(color: Colors.black87)),
+                        Text("Monday – Friday"),
                         SizedBox(height: 4),
                         Row(children: [Icon(Icons.circle, size: 6, color: Colors.teal), SizedBox(width: 6), Text("08:00am - 03:00pm")]),
                       ],
@@ -209,7 +206,7 @@ class VendorDescription extends StatelessWidget {
                     Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text("Saturday – Sunday", style: TextStyle(color: Colors.black87)),
+                        Text("Saturday – Sunday"),
                         SizedBox(height: 4),
                         Row(children: [Icon(Icons.circle, size: 6, color: Colors.teal), SizedBox(width: 6), Text("09:00am - 02:00pm")]),
                       ],
@@ -218,7 +215,7 @@ class VendorDescription extends StatelessWidget {
                 ),
                 const SizedBox(height: 20),
 
-                const Align(alignment: Alignment.centerLeft, child: Text("Reviews", style: TextStyle(fontWeight: FontWeight.bold))),
+                Align(alignment: Alignment.centerLeft, child: Text("Reviews", style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold))),
                 const SizedBox(height: 12),
                 Container(
                   padding: const EdgeInsets.all(12),
@@ -230,21 +227,18 @@ class VendorDescription extends StatelessWidget {
                       Expanded(
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
-                          children: const [
+                          children: [
                             Row(
                               mainAxisAlignment: MainAxisAlignment.spaceBetween,
                               children: [
-                                Text("Jennie Whang", style: TextStyle(fontWeight: FontWeight.bold)),
-                                Text("2 days ago", style: TextStyle(fontSize: 12, color: Colors.grey)),
+                                Text("Jennie Whang", style: theme.textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.bold)),
+                                Text("2 days ago", style: theme.textTheme.bodySmall?.copyWith(color: Colors.grey)),
                               ],
                             ),
-                            SizedBox(height: 4),
-                            Row(children: [Icon(Icons.star, color: Colors.amber, size: 16), Text(" 4.0", style: TextStyle(fontSize: 12))]),
-                            SizedBox(height: 6),
-                            Text(
-                              "The place was clean, great service, staff are friendly. I will certainly recommend to my...",
-                              style: TextStyle(fontSize: 13, color: Colors.black87),
-                            ),
+                            const SizedBox(height: 4),
+                            Row(children: const [Icon(Icons.star, color: Colors.amber, size: 16), Text(" 4.0", style: TextStyle(fontSize: 12))]),
+                            const SizedBox(height: 6),
+                            const Text("The place was clean, great service, staff are friendly. I will certainly recommend to my...", style: TextStyle(fontSize: 13)),
                           ],
                         ),
                       ),
@@ -257,7 +251,7 @@ class VendorDescription extends StatelessWidget {
                   width: double.infinity,
                   child: ElevatedButton(
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.blue,
+                      backgroundColor: theme.primaryColor,
                       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
                       padding: const EdgeInsets.symmetric(vertical: 16),
                     ),

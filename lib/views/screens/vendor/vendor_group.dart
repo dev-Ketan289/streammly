@@ -37,8 +37,11 @@ class _VendorGroupState extends State<VendorGroup> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final screenWidth = MediaQuery.of(context).size.width;
+
     return Scaffold(
-      backgroundColor: const Color(0xFFF7F9FD),
+      backgroundColor: theme.scaffoldBackgroundColor,
       bottomNavigationBar: NavigationHelper.buildBottomNav(),
       floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
       floatingActionButton: NavigationHelper.buildFloatingButton(),
@@ -47,7 +50,7 @@ class _VendorGroupState extends State<VendorGroup> {
           children: [
             /// Header Banner
             HeaderBanner(
-              height: 280,
+              height: screenWidth * 0.7,
               backgroundImage:
                   widget.company.bannerImage?.isNotEmpty == true
                       ? 'http://192.168.1.113:8000/${widget.company.bannerImage}'
@@ -92,7 +95,7 @@ class _VendorGroupState extends State<VendorGroup> {
                             Container(
                               width: 70,
                               height: 70,
-                              decoration: BoxDecoration(shape: BoxShape.rectangle, border: Border.all(color: isSelected ? Colors.indigo : Colors.grey.shade300, width: 2)),
+                              decoration: BoxDecoration(shape: BoxShape.rectangle, border: Border.all(color: isSelected ? theme.primaryColor : Colors.grey.shade300, width: 2)),
                               child: Stack(
                                 children: [
                                   ClipRRect(
@@ -120,7 +123,7 @@ class _VendorGroupState extends State<VendorGroup> {
                                 sub.title,
                                 maxLines: 2,
                                 textAlign: TextAlign.center,
-                                style: TextStyle(fontSize: 12, color: isSelected ? Colors.indigo : Colors.black, fontWeight: isSelected ? FontWeight.bold : FontWeight.normal),
+                                style: TextStyle(fontSize: 12, color: isSelected ? theme.primaryColor : Colors.black, fontWeight: isSelected ? FontWeight.bold : FontWeight.normal),
                               ),
                             ),
                           ],
@@ -178,7 +181,7 @@ class _VendorGroupState extends State<VendorGroup> {
                               ),
                             ),
                             const SizedBox(height: 8),
-                            Text(label, textAlign: TextAlign.center, style: const TextStyle(fontWeight: FontWeight.bold, color: Colors.indigo)),
+                            Text(label, textAlign: TextAlign.center, style: TextStyle(fontWeight: FontWeight.bold, color: theme.primaryColor)),
                           ],
                         ),
                       );
@@ -194,6 +197,7 @@ class _VendorGroupState extends State<VendorGroup> {
   }
 
   void _showShootOptionsBottomSheet(BuildContext context, String shootTitle, int subVerticalId, int companyId, int subCategoryId) {
+    final theme = Theme.of(context);
     showModalBottomSheet(
       context: context,
       shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(16))),
@@ -209,7 +213,7 @@ class _VendorGroupState extends State<VendorGroup> {
                 margin: const EdgeInsets.only(bottom: 12),
                 decoration: BoxDecoration(color: Colors.grey[400], borderRadius: BorderRadius.circular(2)),
               ),
-              Align(alignment: Alignment.centerLeft, child: Text(shootTitle, style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold))),
+              Align(alignment: Alignment.centerLeft, child: Text(shootTitle, style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold))),
               const SizedBox(height: 16),
               _buildOptionTile(
                 icon: Icons.request_quote,
@@ -234,7 +238,6 @@ class _VendorGroupState extends State<VendorGroup> {
                   );
                 },
               ),
-
               const SizedBox(height: 24),
               Row(
                 children: const [
@@ -290,9 +293,10 @@ class _FacilityIcon extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     return Column(
       children: [
-        CircleAvatar(backgroundColor: Colors.indigo.withValues(alpha: 0.1), radius: 22, child: Icon(icon, color: Colors.indigo, size: 20)),
+        CircleAvatar(backgroundColor: theme.primaryColor.withValues(alpha: 0.1), radius: 22, child: Icon(icon, color: theme.primaryColor, size: 20)),
         const SizedBox(height: 4),
         Text(label, style: const TextStyle(fontSize: 10), textAlign: TextAlign.center),
       ],

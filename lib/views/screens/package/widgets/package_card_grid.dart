@@ -9,6 +9,7 @@ class PackagesGridView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     return SingleChildScrollView(
       padding: const EdgeInsets.symmetric(vertical: 16),
       child: Column(
@@ -36,11 +37,11 @@ class PackagesGridView extends StatelessWidget {
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Text(pkg["title"], style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold, color: Colors.white)),
-                            Text(pkg["type"], style: const TextStyle(fontSize: 12, color: Colors.white70, fontWeight: FontWeight.w500)),
+                            Text(pkg["title"], style: theme.textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold, color: Colors.white)),
+                            Text(pkg["type"], style: theme.textTheme.bodySmall?.copyWith(color: Colors.white70, fontWeight: FontWeight.w500)),
                             const SizedBox(height: 20),
                             const Text("Just For", style: TextStyle(fontSize: 11, color: Colors.white70)),
-                            Text("₹${pkg["price"]}/-", style: const TextStyle(fontSize: 26, fontWeight: FontWeight.bold, color: Colors.white)),
+                            Text("₹${pkg["price"]}/-", style: theme.textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.bold, color: Colors.white)),
                             const SizedBox(height: 16),
                             Row(
                               children:
@@ -110,16 +111,16 @@ class PackagesGridView extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 8),
-          _buildCategorySection(controller, "HomeShoot"),
+          _buildCategorySection(controller, "HomeShoot", theme),
           const SizedBox(height: 20),
-          _buildCategorySection(controller, "StudioShoot"),
+          _buildCategorySection(controller, "StudioShoot", theme),
           const SizedBox(height: 16),
         ],
       ),
     );
   }
 
-  Widget _buildCategorySection(PackagesController controller, String category) {
+  Widget _buildCategorySection(PackagesController controller, String category, ThemeData theme) {
     final categoryPackages = controller.packages.where((pkg) => pkg["type"] == category).toList();
     if (categoryPackages.isEmpty) return const SizedBox.shrink();
 
@@ -128,18 +129,18 @@ class PackagesGridView extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(category, style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600, color: Colors.grey.shade600)),
+          Text(category, style: theme.textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.w600, color: Colors.grey.shade600)),
           const SizedBox(height: 12),
           ...categoryPackages.map((pkg) {
             final index = controller.packages.indexOf(pkg);
-            return _buildPackageCard(controller, pkg, index);
+            return _buildPackageCard(controller, pkg, index, theme);
           }),
         ],
       ),
     );
   }
 
-  Widget _buildPackageCard(PackagesController controller, Map<String, dynamic> pkg, int index) {
+  Widget _buildPackageCard(PackagesController controller, Map<String, dynamic> pkg, int index, ThemeData theme) {
     return Obx(() {
       final isSelected = controller.isPackageSelected(index);
 
@@ -149,7 +150,7 @@ class PackagesGridView extends StatelessWidget {
           margin: const EdgeInsets.only(bottom: 12),
           padding: const EdgeInsets.all(16),
           decoration: BoxDecoration(
-            color: Colors.white,
+            color: theme.colorScheme.surface,
             borderRadius: BorderRadius.circular(12),
             border: isSelected ? Border.all(color: const Color(0xFF4A6CF7), width: 2) : null,
             boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: 0.04), blurRadius: 8, offset: const Offset(0, 2))],
@@ -161,9 +162,9 @@ class PackagesGridView extends StatelessWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text("₹${pkg["price"]}/-", style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Color(0xFF4A6CF7))),
+                    Text("₹${pkg["price"]}/-", style: theme.textTheme.titleLarge?.copyWith(color: const Color(0xFF4A6CF7), fontWeight: FontWeight.bold)),
                     const SizedBox(height: 4),
-                    Text(pkg["type"], style: const TextStyle(fontSize: 10, color: Colors.grey, fontWeight: FontWeight.w500)),
+                    Text(pkg["type"], style: theme.textTheme.bodySmall?.copyWith(color: Colors.grey, fontWeight: FontWeight.w500)),
                   ],
                 ),
               ),
@@ -172,7 +173,7 @@ class PackagesGridView extends StatelessWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(pkg["title"], style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600, color: Color(0xFF4A6CF7))),
+                    Text(pkg["title"], style: theme.textTheme.bodyLarge?.copyWith(color: const Color(0xFF4A6CF7), fontWeight: FontWeight.w600)),
                     const SizedBox(height: 8),
                     Row(
                       children:

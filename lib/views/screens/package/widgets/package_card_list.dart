@@ -9,6 +9,8 @@ class PackagesListView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
     return ListView.builder(
       padding: const EdgeInsets.all(16),
       itemCount: controller.packages.length,
@@ -25,10 +27,10 @@ class PackagesListView extends StatelessWidget {
               onTap: () => controller.togglePackageSelection(index),
               child: Container(
                 decoration: BoxDecoration(
-                  color: Colors.white,
+                  color: theme.colorScheme.surface,
                   borderRadius: BorderRadius.circular(12),
                   border: isSelected ? Border.all(color: const Color(0xFF4A6CF7), width: 2) : null,
-                  boxShadow: [BoxShadow(color: Colors.black.withAlpha(13), blurRadius: 8, offset: const Offset(0, 2))],
+                  boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: 0.08), blurRadius: 8, offset: const Offset(0, 2))],
                 ),
                 child: IntrinsicHeight(
                   child: Row(
@@ -57,9 +59,9 @@ class PackagesListView extends StatelessWidget {
                                     child: Column(
                                       crossAxisAlignment: CrossAxisAlignment.start,
                                       children: [
-                                        Text(pkg["title"] ?? '', style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.black87)),
+                                        Text(pkg["title"] ?? '', style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold, color: Colors.black87)),
                                         const SizedBox(height: 4),
-                                        Text(pkg["type"] ?? '', style: const TextStyle(fontSize: 14, color: Colors.grey)),
+                                        Text(pkg["type"] ?? '', style: theme.textTheme.bodySmall?.copyWith(color: Colors.grey)),
                                       ],
                                     ),
                                   ),
@@ -91,7 +93,7 @@ class PackagesListView extends StatelessWidget {
                                     Text("Rs. ${pkg["oldPrice"]}", style: const TextStyle(fontSize: 14, color: Colors.grey, decoration: TextDecoration.lineThrough)),
                                     const SizedBox(width: 8),
                                   ],
-                                  Text("Rs. ${pkg["price"]}/-", style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Color(0xFF4A6CF7))),
+                                  Text("Rs. ${pkg["price"]}/-", style: theme.textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold, color: const Color(0xFF4A6CF7))),
                                 ],
                               ),
 
@@ -121,7 +123,7 @@ class PackagesListView extends StatelessWidget {
                               /// HIGHLIGHT
                               if ((pkg["highlight"] ?? '').isNotEmpty) ...[
                                 const SizedBox(height: 12),
-                                Text(pkg["fullDescription"], style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w600, color: Colors.black87)),
+                                Text(pkg["highlight"], style: theme.textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.w600, color: Colors.black87)),
                               ],
 
                               /// SHORT / FULL DESCRIPTION
@@ -129,7 +131,7 @@ class PackagesListView extends StatelessWidget {
                                 const SizedBox(height: 8),
                                 Text(
                                   isExpanded ? pkg["fullDescription"] ?? '' : pkg["shortDescription"] ?? '',
-                                  style: const TextStyle(fontSize: 12, color: Colors.grey, height: 1.4),
+                                  style: theme.textTheme.bodySmall?.copyWith(color: Colors.grey, height: 1.4),
                                 ),
                                 if ((pkg["fullDescription"] ?? '') != (pkg["shortDescription"] ?? ''))
                                   GestureDetector(

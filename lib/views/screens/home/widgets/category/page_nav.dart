@@ -10,28 +10,21 @@ class PageNav extends StatelessWidget {
   Widget build(BuildContext context) {
     final filters = ['Wishlist', 'Recommended', 'Bundles'];
     final selectedIndex = 1.obs; // Default to 'Recommended'
-
     final icons = [Icons.favorite, Icons.recommend, Icons.card_giftcard];
+    final theme = Theme.of(context);
 
     return Stack(
       children: [
         Row(
           children: [
-            // Expanded to prevent overflow
             Expanded(
               child: Obx(
                 () => Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     Container(
-                      decoration: BoxDecoration(
-                        color: Colors.grey.shade200,
-                        borderRadius: BorderRadius.circular(40),
-                      ),
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 1,
-                        vertical: 4,
-                      ),
+                      decoration: BoxDecoration(color: Colors.grey.shade200, borderRadius: BorderRadius.circular(40)),
+                      padding: const EdgeInsets.symmetric(horizontal: 1, vertical: 4),
                       child: Row(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: List.generate(filters.length, (index) {
@@ -43,46 +36,22 @@ class PageNav extends StatelessWidget {
 
                               if (filters[index] == 'Bundles') {
                                 await Get.to(() => const BundleInformation());
-                                selectedIndex.value =
-                                    1; // Return to 'Recommended'
+                                selectedIndex.value = 1;
                               } else if (filters[index] == 'Wishlist') {
                                 await Get.to(() => Wishlistpage());
                                 selectedIndex.value = 1;
                               }
                             },
                             child: Container(
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 8,
-                                vertical: 5,
-                              ),
-                              decoration: BoxDecoration(
-                                color:
-                                    isSelected
-                                        ? Colors.blue
-                                        : Colors.transparent,
-                                borderRadius: BorderRadius.circular(30),
-                              ),
+                              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 5),
+                              decoration: BoxDecoration(color: isSelected ? theme.colorScheme.primary : Colors.transparent, borderRadius: BorderRadius.circular(30)),
                               child: Row(
                                 children: [
-                                  Icon(
-                                    icons[index],
-                                    size: 16,
-                                    color:
-                                        isSelected
-                                            ? Colors.white
-                                            : Colors.black54,
-                                  ),
+                                  Icon(icons[index], size: 16, color: isSelected ? theme.colorScheme.onPrimary : theme.colorScheme.onSurfaceVariant),
                                   const SizedBox(width: 4),
                                   Text(
                                     filters[index],
-                                    style: TextStyle(
-                                      fontSize: 9,
-                                      color:
-                                          isSelected
-                                              ? Colors.white
-                                              : Colors.black87,
-                                      fontWeight: FontWeight.w500,
-                                    ),
+                                    style: TextStyle(fontSize: 9, color: isSelected ? theme.colorScheme.onPrimary : theme.colorScheme.onSurface, fontWeight: FontWeight.w500),
                                   ),
                                 ],
                               ),
@@ -95,26 +64,6 @@ class PageNav extends StatelessWidget {
                 ),
               ),
             ),
-            // const SizedBox(width: 8),
-            // InkWell(
-            //   onTap: () {
-            //     // TODO: Navigate to full list
-            //   },
-            //   child: Row(
-            //     children: const [
-            //       Text(
-            //         "See all",
-            //         style: TextStyle(
-            //           color: Colors.blue,
-            //           fontWeight: FontWeight.w500,
-            //           fontSize: 13,
-            //         ),
-            //       ),
-            //       SizedBox(width: 4),
-            //       Icon(Icons.arrow_forward_ios, size: 14, color: Colors.blue),
-            //     ],
-            //   ),
-            // ),
           ],
         ),
         Positioned(
@@ -126,17 +75,10 @@ class PageNav extends StatelessWidget {
               // TODO: Navigate to full list
             },
             child: Row(
-              children: const [
-                Text(
-                  "See all",
-                  style: TextStyle(
-                    color: Colors.blue,
-                    fontWeight: FontWeight.w500,
-                    fontSize: 13,
-                  ),
-                ),
-                SizedBox(width: 4),
-                Icon(Icons.arrow_forward_ios, size: 14, color: Colors.blue),
+              children: [
+                Text("See all", style: TextStyle(color: theme.colorScheme.primary, fontWeight: FontWeight.w500, fontSize: 13)),
+                const SizedBox(width: 4),
+                Icon(Icons.arrow_forward_ios, size: 14, color: theme.colorScheme.primary),
               ],
             ),
           ),

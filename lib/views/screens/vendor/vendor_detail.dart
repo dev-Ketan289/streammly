@@ -31,6 +31,10 @@ class _VendorDetailScreenState extends State<VendorDetailScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final screenWidth = MediaQuery.of(context).size.width;
+    final horizontalPadding = screenWidth * 0.04; // 4% padding for better scaling
+
     return Scaffold(
       bottomNavigationBar: NavigationHelper.buildBottomNav(),
       floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
@@ -53,7 +57,7 @@ class _VendorDetailScreenState extends State<VendorDetailScreen> {
                 specialities: widget.company.specialities,
               ),
 
-              const SizedBox(height: 6),
+              SizedBox(height: screenWidth * 0.02),
 
               /// ---- Category Scroller (Subcategories) ----
               GetBuilder<CompanyController>(
@@ -89,22 +93,22 @@ class _VendorDetailScreenState extends State<VendorDetailScreen> {
                 },
               ),
 
-              const SizedBox(height: 10),
+              SizedBox(height: screenWidth * 0.04),
 
               /// ---- Reviews ----
               Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+                padding: EdgeInsets.symmetric(horizontal: horizontalPadding, vertical: screenWidth * 0.03),
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    const Text("Reviews", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
+                    Text("Reviews", style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold)),
                     InkWell(
                       onTap: () {},
                       child: Row(
-                        children: const [
-                          Text("See All", style: TextStyle(color: Colors.blue, fontSize: 13, fontWeight: FontWeight.w500)),
-                          SizedBox(width: 4),
-                          Icon(Icons.arrow_forward_ios, size: 14, color: Colors.blue),
+                        children: [
+                          Text("See All", style: theme.textTheme.bodySmall?.copyWith(color: theme.primaryColor, fontWeight: FontWeight.w500)),
+                          const SizedBox(width: 4),
+                          Icon(Icons.arrow_forward_ios, size: 14, color: theme.primaryColor),
                         ],
                       ),
                     ),
@@ -116,7 +120,7 @@ class _VendorDetailScreenState extends State<VendorDetailScreen> {
                 height: 210,
                 child: ListView(
                   scrollDirection: Axis.horizontal,
-                  padding: const EdgeInsets.symmetric(horizontal: 16),
+                  padding: EdgeInsets.symmetric(horizontal: horizontalPadding),
                   children: const [
                     ReviewCard(
                       name: "Sarah M.",
@@ -142,7 +146,7 @@ class _VendorDetailScreenState extends State<VendorDetailScreen> {
                 ),
               ),
 
-              const SizedBox(height: 20),
+              SizedBox(height: screenWidth * 0.05),
 
               /// ---- Packages ----
               PackageSection(

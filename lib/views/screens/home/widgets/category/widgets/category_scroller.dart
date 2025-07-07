@@ -7,12 +7,7 @@ class CategoryScroller extends StatelessWidget {
   final VoidCallback? onSeeAll;
   final List<CategoryItem> categories;
 
-  const CategoryScroller({
-    super.key,
-    this.title,
-    this.onSeeAll,
-    required this.categories,
-  });
+  const CategoryScroller({super.key, this.title, this.onSeeAll, required this.categories});
 
   @override
   Widget build(BuildContext context) {
@@ -25,29 +20,15 @@ class CategoryScroller extends StatelessWidget {
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Text(
-                  title!,
-                  style: const TextStyle(
-                    fontWeight: FontWeight.w700,
-                    fontSize: 20,
-                    color: Colors.black,
-                  ),
-                ),
+                Text(title!, style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 20, color: Colors.black)),
                 if (onSeeAll != null)
                   InkWell(
                     onTap: onSeeAll,
                     child: Row(
                       children: const [
-                        Text(
-                          "See all",
-                          style: TextStyle(color: Colors.blue, fontSize: 13),
-                        ),
+                        Text("See all", style: TextStyle(color: Colors.blue, fontSize: 13)),
                         SizedBox(width: 4),
-                        Icon(
-                          Icons.arrow_forward_ios,
-                          size: 14,
-                          color: Colors.blue,
-                        ),
+                        Icon(Icons.arrow_forward_ios, size: 14, color: Colors.blue),
                       ],
                     ),
                   ),
@@ -74,29 +55,14 @@ class CategoryScroller extends StatelessWidget {
                         child: Ink(
                           width: 60,
                           height: 60,
-                          decoration: BoxDecoration(
-                            color: const Color(0xFFF0F6FF),
-                            borderRadius: BorderRadius.circular(16),
-                          ),
+                          decoration: BoxDecoration(color: const Color(0xFFF0F6FF), borderRadius: BorderRadius.circular(16)),
                           child:
                               item.imagePath != null
                                   ? ClipRRect(
                                     borderRadius: BorderRadius.circular(16),
-                                    child: Image.network(
-                                      item.imagePath!,
-                                      fit: BoxFit.cover,
-                                      errorBuilder:
-                                          (_, __, ___) => const Icon(
-                                            Icons.broken_image,
-                                            color: Colors.grey,
-                                          ),
-                                    ),
+                                    child: Image.network(item.imagePath!, fit: BoxFit.cover, errorBuilder: (_, __, ___) => const Icon(Icons.broken_image, color: Colors.grey)),
                                   )
-                                  : Icon(
-                                    item.icon,
-                                    size: 28,
-                                    color: Colors.blue,
-                                  ),
+                                  : Icon(item.icon, size: 28, color: Colors.blue),
                         ),
                       ),
                     ),
@@ -104,14 +70,7 @@ class CategoryScroller extends StatelessWidget {
                     Flexible(
                       child: Padding(
                         padding: const EdgeInsets.symmetric(horizontal: 4),
-                        child: Text(
-                          item.label,
-                          style: const TextStyle(
-                            fontSize: 9,
-                            fontWeight: FontWeight.bold,
-                          ),
-                          textAlign: TextAlign.center,
-                        ),
+                        child: Text(item.label, style: const TextStyle(fontSize: 9, fontWeight: FontWeight.bold), textAlign: TextAlign.center),
                       ),
                     ),
                   ],
