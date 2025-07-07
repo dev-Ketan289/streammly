@@ -39,12 +39,12 @@ class CategoryModel {
   }
   bool get isBookMarked {
     return Get.find<WishlistController>().bookmarks.any(
-      (e) => id == e.bookmarkableId,
+      (e) => id == e.bookmarkableId && (e.bookmarkableType?.contains("Category")??false),
     );
   }
 }
 
-class WishlistModel {
+class Bookmark {
   int? id;
   int? userId;
   String? bookmarkableType;
@@ -54,7 +54,7 @@ class WishlistModel {
   DateTime? updatedAt;
   String? status;
 
-  WishlistModel({
+  Bookmark({
     this.id,
     this.userId,
     this.bookmarkableType,
@@ -65,7 +65,7 @@ class WishlistModel {
     this.status,
   });
 
-  factory WishlistModel.fromJson(Map<String, dynamic> json) => WishlistModel(
+  factory Bookmark.fromJson(Map<String, dynamic> json) => Bookmark(
     id: json["id"],
     userId: json["user_id"],
     bookmarkableType: json["bookmarkable_type"],

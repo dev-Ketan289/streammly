@@ -9,7 +9,7 @@ class WishlistController extends GetxController implements GetxService {
   final CategoryRepo categoryRepo;
   WishlistController({required this.categoryRepo});
 
-  List<WishlistModel> bookmarks = [];
+  List<Bookmark> bookmarks = [];
   bool isLoading = true;
 
   Future<ResponseModel> loadBookmarks() async {
@@ -22,7 +22,7 @@ class WishlistController extends GetxController implements GetxService {
       if (response.statusCode == 200) {
         bookmarks =
             (response.body['data'] as List<dynamic>)
-                .map((item) => WishlistModel.fromJson(item))
+                .map((item) => Bookmark.fromJson(item))
                 .toList();
         responseModel = ResponseModel(true, "Got Bookmarks");
       } else {
@@ -39,14 +39,15 @@ class WishlistController extends GetxController implements GetxService {
     return responseModel;
   }
 
-  Future<ResponseModel> addBookmark(int? typeId) async {
+  Future<ResponseModel> addBookmark(int? typeId, String type) async {
     isLoading = true;
     update();
     ResponseModel responseModel;
     try {
-      Response response = await categoryRepo.postBookmark(typeId = typeId);
+      Response response = await categoryRepo.postBookmark(typeId, type);
       if (response.statusCode == 200) {
         responseModel = ResponseModel(true, "Bookmark added");
+        await loadBookmarks(); // Refresh bookmarks after adding/removing
       } else {
         responseModel = ResponseModel(false, "Failed to add bookmark");
       }

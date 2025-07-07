@@ -1,3 +1,6 @@
+import 'package:get/get.dart';
+import 'package:streammly/controllers/wishlist_controller.dart';
+
 class RecommendedVendors {
   int? id;
   dynamic uniqueId;
@@ -119,6 +122,13 @@ class RecommendedVendors {
               json["vendorcategory"]!.map((x) => Vendorcategory.fromJson(x)),
             ),
   );
+  bool get isChecked {
+    return Get.find<WishlistController>().bookmarks.any(
+      (e) =>
+          id == e.bookmarkableId &&
+          (e.bookmarkableType?.contains("VendorCompany") ?? false),
+    );
+  }
 
   Map<String, dynamic> toJson() => {
     "id": id,

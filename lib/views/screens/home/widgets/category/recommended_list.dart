@@ -1,15 +1,31 @@
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
+import 'package:streammly/controllers/wishlist_controller.dart';
 import 'package:streammly/models/vendors/recommanded_vendors.dart';
 
-class RecommendedList extends StatelessWidget {
+class RecommendedList extends StatefulWidget {
   final BuildContext context;
   final List<RecommendedVendors> recommendedVendors;
+  final WishlistController wishlistController = Get.find<WishlistController>();
 
-  const RecommendedList({
+  RecommendedList({
     super.key,
     required this.context,
     required this.recommendedVendors,
   });
+
+  @override
+  State<RecommendedList> createState() => _RecommendedListState();
+}
+
+class _RecommendedListState extends State<RecommendedList> {
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      widget.wishlistController.loadBookmarks();
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -28,10 +44,10 @@ class RecommendedList extends StatelessWidget {
           vertical: 8,
         ),
         scrollDirection: Axis.horizontal,
-        itemCount: recommendedVendors.length,
+        itemCount: widget.recommendedVendors.length,
         separatorBuilder: (_, __) => SizedBox(width: screenWidth * 0.03),
         itemBuilder: (_, index) {
-          final vendor = recommendedVendors[index];
+          final vendor = widget.recommendedVendors[index];
 
           final imageUrl =
               vendor.bannerImage != null
@@ -97,13 +113,34 @@ class RecommendedList extends StatelessWidget {
                       Positioned(
                         top: 8,
                         right: 8,
-                        child: GestureDetector(
-                          onTap: () {},
-                          child: Icon(
-                            Icons.favorite,
-                            size: itemWidth * 0.12,
-                            color: theme.colorScheme.onPrimary,
-                          ),
+                        child: GetBuilder<WishlistController>(
+                          builder: (wishlistController) {
+                            return GestureDetector(
+                              onTap: () {
+                                wishlistController
+                                    .addBookmark(vendor.id, "company")
+                                    .then((value) {
+                                      if (value.isSuccess) {
+                                        wishlistController.loadBookmarks();
+                                      }
+                                    });
+
+                                // if (isToggled) {
+                                //   isToggled = !isToggled;
+
+                                // }
+                              },
+
+                              child: Icon(
+                                Icons.favorite,
+                                size: 25,
+                                color:
+                                    vendor.isChecked == true
+                                        ? Colors.red
+                                        : Colors.white,
+                              ),
+                            );
+                          },
                         ),
                       ),
                     ],

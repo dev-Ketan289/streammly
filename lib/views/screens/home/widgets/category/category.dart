@@ -108,15 +108,15 @@ class _CategoryListScreenState extends State<CategoryListScreen> {
                             right: 10,
                             child: GetBuilder<WishlistController>(
                               builder: (wishlistController) {
-                                return InkWell(
+                                return GestureDetector(
                                   onTap: () {
-                                    wishlistController.addBookmark(cat.id).then(
-                                      (value) {
-                                        if (value.isSuccess) {
-                                          wishlistController.loadBookmarks();
-                                        }
-                                      },
-                                    );
+                                    wishlistController
+                                        .addBookmark(cat.id, "category")
+                                        .then((value) {
+                                          if (value.isSuccess) {
+                                            wishlistController.loadBookmarks();
+                                          }
+                                        });
 
                                     // if (isToggled) {
                                     //   isToggled = !isToggled;
