@@ -1,13 +1,14 @@
 import 'package:flutter/material.dart';
+import 'package:streammly/models/vendors/recommanded_vendors.dart';
 
 class RecommendedList extends StatelessWidget {
   final BuildContext context;
-  final List<Map<String, dynamic>> recommendedCompanies;
+  final List<RecommendedVendors> recommendedVendors;
 
   const RecommendedList({
     super.key,
     required this.context,
-    required this.recommendedCompanies,
+    required this.recommendedVendors,
   });
 
   @override
@@ -27,21 +28,22 @@ class RecommendedList extends StatelessWidget {
           vertical: 8,
         ),
         scrollDirection: Axis.horizontal,
-        itemCount: recommendedCompanies.length,
+        itemCount: recommendedVendors.length,
         separatorBuilder: (_, __) => SizedBox(width: screenWidth * 0.03),
         itemBuilder: (_, index) {
-          final vendor = recommendedCompanies[index];
+          final vendor = recommendedVendors[index];
 
           final imageUrl =
-              vendor["banner_image"] != null
-                  ? baseUrl + vendor["banner_image"]
+              vendor.bannerImage != null
+                  ? baseUrl + (vendor.bannerImage ?? '')
                   : "assets/images/placeholder.jpg";
 
-          final rating = vendor["rating"]?.toStringAsFixed(1) ?? "--";
-          final companyName = vendor["company_name"] ?? "Unknown";
-          final category = vendor["category_name"] ?? "Service";
+          final rating = vendor.rating?.toStringAsFixed(1) ?? "--";
+          final companyName = vendor.companyName ?? "Unknown";
+          final category =
+              vendor.vendorcategory?.first.getCategory?.title ?? "Service";
 
-          final distanceKm = vendor["distance_km"];
+          final distanceKm = vendor.id;
           final distanceText =
               distanceKm != null
                   ? (distanceKm < 1
