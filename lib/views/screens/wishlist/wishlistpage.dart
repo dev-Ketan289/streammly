@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:streammly/controllers/company_controller.dart';
+import 'package:streammly/controllers/wishlist_controller.dart';
 import 'package:streammly/views/screens/wishlist/components/custom_container.dart';
 
 import '../../../controllers/category_controller.dart';
@@ -15,6 +16,8 @@ class Wishlistpage extends StatefulWidget {
 }
 
 class _WishlistpageState extends State<Wishlistpage> {
+  final wishlistController = Get.find<WishlistController>();
+
   final CategoryController categoryController = Get.find<CategoryController>();
   final Map<String, List<CompanyLocation>> companiesByCategory = {};
 
@@ -23,6 +26,8 @@ class _WishlistpageState extends State<Wishlistpage> {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _fetchData();
+      wishlistController.loadBookmarks();
+      // wishlistController.loadBookmarks();
     });
   }
 
@@ -81,20 +86,22 @@ class _WishlistpageState extends State<Wishlistpage> {
                   child: Row(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      CustomContainer(text: 'All'),
-                      CustomContainer(text: 'Categories'),
-                      CustomContainer(text: 'Packages'),
-                      CustomContainer(text: 'Products'),
+                      CustomButton(text: 'All', onPressed: () {}),
+                      CustomButton(text: 'Categories', onPressed: () {}),
+                      CustomButton(text: 'Products', onPressed: () {}),
+                      CustomButton(text: 'Packages', onPressed: () {}),
                     ],
                   ),
                 ),
               ),
               SingleChildScrollView(
-                padding: const EdgeInsets.all(16),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 16,
+                ),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const SizedBox(height: 10),
                     GetBuilder<CompanyController>(
                       builder: (controller) {
                         if (controller.isLoading) {

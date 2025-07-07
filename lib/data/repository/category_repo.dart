@@ -15,7 +15,10 @@ class CategoryRepo {
     return await apiClient.getData(AppConstants.getBookMark);
   }
 
-  Future<Response> postBookmark(dynamic data) async {
-    return await apiClient.postData(AppConstants.postBookmark, data);
+  Future<Response> postBookmark(int? typeId) async {
+    return await apiClient.postData(AppConstants.postBookmark, {
+      "type_id": typeId,
+      "type": "category",
+    });
   }
 }
