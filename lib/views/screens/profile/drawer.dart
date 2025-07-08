@@ -14,8 +14,26 @@ import 'package:streammly/views/screens/profile/profile_screen.dart';
 
 import 'components/profile_item_widget.dart';
 
-class ProfilePage extends StatelessWidget {
+class ProfilePage extends StatefulWidget {
   const ProfilePage({super.key});
+
+  @override
+  State<ProfilePage> createState() => _ProfilePageState();
+}
+
+class _ProfilePageState extends State<ProfilePage> {
+  final authController = Get.find<AuthController>();
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      authController.fetchUserProfile().then((value) {
+        if (value?.isSuccess ?? false) {
+          setState(() {});
+        }
+      });
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -78,15 +96,18 @@ class ProfilePage extends StatelessWidget {
                   ),
                   SizedBox(width: screenWidth * 0.04),
                   Expanded(
-                    child: Text(
-                      authController.isLoggedIn()
-                          ? authController.userProfile?.name ?? ""
-                          : 'Login / Register',
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontSize: screenWidth * 0.045,
-                        fontWeight: FontWeight.bold,
-                      ),
+                    child: GetBuilder<AuthController>(
+                      builder:
+                          (controller) => Text(
+                            controller.isLoggedIn()
+                                ? controller.userProfile?.name ?? ""
+                                : 'Login / Register',
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontSize: screenWidth * 0.045,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
                     ),
                   ),
                   if (authController.isLoggedIn())
