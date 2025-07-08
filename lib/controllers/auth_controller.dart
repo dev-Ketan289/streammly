@@ -12,30 +12,86 @@ import 'package:streammly/models/response/response_model.dart';
 import 'package:uuid/uuid.dart';
 
 import '../models/profile/user_profile.dart';
+import '../views/screens/auth_screens/create_user.dart';
+import '../views/screens/auth_screens/welcome.dart';
 
 class AuthController extends GetxController implements GetxService {
   final AuthRepo authRepo;
   AuthController({required this.authRepo});
   final TextEditingController phoneController = TextEditingController();
+  final TextEditingController emailController = TextEditingController();
 
   bool isLoading = false;
 
   // --- User Profile ---
-  var userProfile = Rxn<UserProfile>();
+  UserProfile? userProfile;
 
-  Future<void> fetchUserProfile() async {
+  Future<ResponseModel?> fetchUserProfile() async {
+    isLoading = true;
+    update();
+    ResponseModel? responseModel;
     try {
       Response response = await authRepo.getUserProfile();
+      log(
+        response.bodyString ?? "",
+        name: "***** Response in fetchUserProfile () ******",
+      );
       if (response.statusCode == 200 && response.body['data'] != null) {
-        userProfile.value = UserProfile.fromJson(response.body['data']);
+        userProfile = UserProfile.fromJson(response.body['data']);
+        responseModel = ResponseModel(
+          true,
+          "User profile fetched successfully",
+        );
       } else {
-        userProfile.value = null;
-        Fluttertoast.showToast(msg: "Failed to fetch profile");
+        responseModel = ResponseModel(false, "Failed to fetch user profile");
       }
     } catch (e) {
-      userProfile.value = null;
-      Fluttertoast.showToast(msg: "Error fetching profile");
+      responseModel = ResponseModel(false, "Error in fetch user profile");
+      log(e.toString(), name: "***** Error in fetchUserProfile () ******");
     }
+    isLoading = false;
+    update();
+    return responseModel;
+  }
+
+  Future<ResponseModel?> updateUserProfile({
+    required String name,
+    required String email,
+    String? dob,
+    String? gender,
+    required String phone,
+  }) async {
+    isLoading = true;
+    update();
+    ResponseModel? responseModel;
+    try {
+      Response response = await authRepo.updateUserProfile(
+        name: name,
+        email: email,
+        dob: dob,
+        gender: gender,
+        phone: phone,
+      );
+      log(
+        "${response.bodyString}",
+        name: "***** Response in updateUserProfile () ******",
+      );
+      if (response.statusCode == 200) {
+        fetchUserProfile();
+        responseModel = ResponseModel(
+          true,
+          "User profile updated successfully",
+        );
+      } else {
+        responseModel = ResponseModel(false, "Failed to update user profile");
+      }
+    } catch (e) {
+      responseModel = ResponseModel(false, "Error in update user profile");
+      log(e.toString(), name: "***** Error in updateUserProfile () ******");
+    }
+    isLoading = false;
+    update();
+    return responseModel;
   }
 
   Future<ResponseModel> sendOtp() async {
@@ -70,10 +126,15 @@ class AuthController extends GetxController implements GetxService {
         return null;
       }
 
-      final GoogleSignInAuthentication googleAuth = await googleUser.authentication;
-      final credential = GoogleAuthProvider.credential(accessToken: googleAuth.accessToken, idToken: googleAuth.idToken);
+      final GoogleSignInAuthentication googleAuth =
+          await googleUser.authentication;
+      final credential = GoogleAuthProvider.credential(
+        accessToken: googleAuth.accessToken,
+        idToken: googleAuth.idToken,
+      );
 
-      final UserCredential userCredential = await FirebaseAuth.instance.signInWithCredential(credential);
+      final UserCredential userCredential = await FirebaseAuth.instance
+          .signInWithCredential(credential);
       final User? firebaseUser = userCredential.user;
       final firebaseIdToken = await userCredential.user?.getIdToken();
 
@@ -90,12 +151,24 @@ class AuthController extends GetxController implements GetxService {
         return null;
       }
 
-      Response response = await authRepo.signInWithGoogle(token: firebaseIdToken ?? "", firebaseUid: firebaseUid, deviceId: deviceId);
+      Response response = await authRepo.signInWithGoogle(
+        token: firebaseIdToken ?? "",
+        firebaseUid: firebaseUid,
+        deviceId: deviceId,
+      );
 
       if (response.statusCode == 200 && response.body["token"] != null) {
         setUserToken(response.body['token']);
         await fetchUserProfile();
+        if (userProfile == null ||
+            userProfile!.name == null ||
+            userProfile!.email == null) {
+          Get.offAll(() => ProfileFormScreen());
+        } else {
+          Get.offAll(() => const WelcomeScreen());
+        }
         responseModel = ResponseModel(true, "Google Sign-In Successful");
+        emailController.text = googleUser.email;
       } else {
         responseModel = ResponseModel(false, "Failed to Google Sign-In");
       }

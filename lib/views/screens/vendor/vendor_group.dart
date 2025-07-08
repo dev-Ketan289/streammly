@@ -100,7 +100,7 @@ class _VendorGroupState extends State<VendorGroup> {
                                 children: [
                                   ClipRRect(
                                     child: Image.network(
-                                      'http://192.168.1.113:8000/${sub.image ?? ""}',
+                                      'http://192.168.1.113:8000/${sub.image}',
                                       width: 70,
                                       height: 70,
                                       fit: BoxFit.cover,

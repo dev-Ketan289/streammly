@@ -85,7 +85,7 @@ class _VendorDetailScreenState extends State<VendorDetailScreen> {
                         subs.map((sub) {
                           return CategoryItem(
                             label: sub.title,
-                            imagePath: 'http://192.168.1.113:8000/${sub.image ?? ""}',
+                            imagePath: 'http://192.168.1.113:8000/${sub.image}',
                             onTap: () => Get.to(() => VendorGroup(company: widget.company, subCategoryId: sub.id)),
                           );
                         }).toList(),

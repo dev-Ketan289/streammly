@@ -33,16 +33,21 @@ class AppConstants {
 
   static const String agoraAppId = 'c87b710048c049f59570bd1895b7e561';
 
-  // Auth
+  // User
   static const String getUserProfile = 'api/v1/user/getuserprofile/';
+  static const String updateUserProfile = 'api/v1/user/updateuserprofile/';
 
+  // OTP
   static const String sendOtp = 'api/v1/user/auth/generateOtp';
   static const String verifyOtp = 'api/v1/user/auth/login';
 
+  // Google
   static const String signInWithGoogle = 'api/v1/user/auth/googleLogin';
 
+  // Extra
   static const String extras = 'api/v1/extra';
 
+  // Category
   // Category
   static const String categoriesUrl = 'api/v1/basic/categories';
 
