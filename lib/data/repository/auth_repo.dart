@@ -27,8 +27,14 @@ class AuthRepo {
     return await apiClient.getData(AppConstants.getUserProfile);
   }
 
-  Future<Response> saveUserProfile({required String name, required String email, String? dob, String? gender}) async {
-    return await apiClient.postData("/api/v1/user", {"name": name, "email": email, "dob": dob, "gender": gender});
+  Future<Response> updateUserProfile({required String name, required String email, required String phone, String? dob, String? gender}) async {
+    return await apiClient.postData("/api/v1/user/updateuserprofile/", {
+      "name": name,
+      "email": email,
+      "phone": phone,
+      if (dob != null) "dob": dob,
+      if (gender != null) "gender": gender,
+    });
   }
 
   Future<bool> saveUserToken(String token) async {

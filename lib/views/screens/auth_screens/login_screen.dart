@@ -2,8 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:streammly/views/screens/auth_screens/otp_verification_screen.dart';
+import 'package:streammly/views/screens/auth_screens/welcome.dart';
 
 import '../../../controllers/auth_controller.dart';
+import 'cretae_user.dart';
 
 class LoginScreen extends StatelessWidget {
   const LoginScreen({super.key});
@@ -43,7 +45,6 @@ class LoginScreen extends StatelessWidget {
                                   controller: authController.phoneController,
                                   keyboardType: TextInputType.phone,
                                   style: theme.textTheme.bodyMedium,
-                                  maxLength: 10,
                                   decoration: InputDecoration(
                                     prefixIcon: Padding(
                                       padding: const EdgeInsets.symmetric(horizontal: 10),
@@ -55,17 +56,11 @@ class LoginScreen extends StatelessWidget {
                                     hintText: "Enter phone number",
                                     hintStyle: theme.textTheme.bodySmall,
                                     border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
-                                    counterText: '',
                                   ),
-                                  onChanged: (value) {
-                                    if (value.length == 10) {
-                                      FocusScope.of(context).unfocus();
-                                    }
-                                  },
                                 ),
                                 const SizedBox(height: 8),
-                                Center(child: Text("OTP will be sent to the entered phone number", style: theme.textTheme.bodySmall)),
-                                const SizedBox(height: 24),
+                                Text("OTP will be sent to the entered phone number", style: theme.textTheme.bodySmall),
+                                const SizedBox(height: 12),
                                 SizedBox(
                                   width: double.infinity,
                                   height: 50,
@@ -85,14 +80,14 @@ class LoginScreen extends StatelessWidget {
                                       side: BorderSide(color: theme.primaryColor),
                                       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
                                     ),
-                                    child: Text("Generate OTP", style: theme.textTheme.titleMedium?.copyWith(color: Colors.white)),
+                                    child: Text("Generate OTP", style: theme.textTheme.bodyLarge?.copyWith(color: Colors.white)),
                                   ),
                                 ),
                                 const SizedBox(height: 16),
                                 Row(
                                   children: [
                                     const Expanded(child: Divider()),
-                                    Padding(padding: const EdgeInsets.symmetric(horizontal: 8), child: Text("Or", style: theme.textTheme.bodyMedium)),
+                                    Padding(padding: const EdgeInsets.symmetric(horizontal: 8), child: Text("Or", style: theme.textTheme.bodySmall)),
                                     const Expanded(child: Divider()),
                                   ],
                                 ),
@@ -101,19 +96,25 @@ class LoginScreen extends StatelessWidget {
                                   width: double.infinity,
                                   height: 50,
                                   child: OutlinedButton.icon(
-                                    onPressed: () {
-                                      Get.to(OtpScreen());
-                                    },
-                                    // authController.isLoading
-                                    //     ? null
-                                    //     : () async {
-                                    //   final result = await authController.signInWithGoogle();
-                                    //   if (result?.isSuccess ?? false) {
-                                    //     Get.to(() => WelcomeScreen());
-                                    //   }
-                                    // },
+                                    onPressed:
+                                        authController.isLoading
+                                            ? null
+                                            : () async {
+                                              final result = await authController.signInWithGoogle();
+                                              if (result?.isSuccess ?? false) {
+                                                // Fetch profile to check user existence
+                                                await authController.fetchUserProfile();
+                                                if (authController.userProfile.value == null) {
+                                                  // User does not exist, open profile form
+                                                  Get.offAll(() => const ProfileFormScreen());
+                                                } else {
+                                                  // Existing user, go to welcome screen
+                                                  Get.offAll(() => const WelcomeScreen());
+                                                }
+                                              }
+                                            },
                                     icon: Image.asset('assets/images/img.png', height: 24),
-                                    label: Text("Continue with Google", style: Theme.of(context).textTheme.bodyMedium?.copyWith(color: Theme.of(context).primaryColor)),
+                                    label: Text("Continue with Google", style: theme.textTheme.bodySmall),
                                     style: OutlinedButton.styleFrom(
                                       side: BorderSide(color: theme.primaryColor),
                                       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
@@ -125,24 +126,19 @@ class LoginScreen extends StatelessWidget {
                           ),
                           const Spacer(),
                           Padding(
-                            padding: const EdgeInsets.all(16.0),
-                            child: Container(
-                              width: 321,
-                              height: 24,
-                              alignment: Alignment.center,
-                              child: Text.rich(
-                                TextSpan(
-                                  text: "By providing my phone number, I hereby agree and accept the ",
-                                  style: GoogleFonts.publicSans(fontSize: 10, fontWeight: FontWeight.w300),
-                                  children: [
-                                    TextSpan(text: "Terms & Condition", style: GoogleFonts.publicSans(fontSize: 10, fontWeight: FontWeight.w300, color: theme.primaryColor)),
-                                    const TextSpan(text: " & "),
-                                    TextSpan(text: "Privacy Policy", style: GoogleFonts.publicSans(fontSize: 10, fontWeight: FontWeight.w300, color: theme.primaryColor)),
-                                    const TextSpan(text: " in use of this app."),
-                                  ],
-                                ),
-                                textAlign: TextAlign.center,
+                            padding: const EdgeInsets.only(left: 24, right: 24, bottom: 20),
+                            child: Text.rich(
+                              TextSpan(
+                                text: "By providing my phone number, I hereby agree and accept the ",
+                                style: theme.textTheme.bodySmall?.copyWith(fontSize: 12),
+                                children: [
+                                  TextSpan(text: "Terms & Condition", style: theme.textTheme.bodySmall?.copyWith(color: theme.primaryColor, fontWeight: FontWeight.w500)),
+                                  const TextSpan(text: " & "),
+                                  TextSpan(text: "Privacy Policy", style: theme.textTheme.bodySmall?.copyWith(color: theme.primaryColor, fontWeight: FontWeight.w500)),
+                                  const TextSpan(text: " in use of this app."),
+                                ],
                               ),
+                              textAlign: TextAlign.center,
                             ),
                           ),
                         ],

@@ -36,7 +36,13 @@ class _ProfileFormScreenState extends State<ProfileFormScreen> {
     });
 
     try {
-      final response = await Get.find<AuthRepo>().saveUserProfile(name: name, email: email, dob: dob.isEmpty ? null : dob, gender: selectedGender);
+      final response = await Get.find<AuthRepo>().updateUserProfile(
+        name: name,
+        email: email,
+        phone: Get.find<AuthController>().phoneController.text, // Passing phone from controller
+        dob: dob.isEmpty ? null : dob,
+        gender: selectedGender,
+      );
 
       if (response.statusCode == 200) {
         await Get.find<AuthController>().fetchUserProfile();

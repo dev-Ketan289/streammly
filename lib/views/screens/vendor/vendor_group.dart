@@ -52,9 +52,7 @@ class _VendorGroupState extends State<VendorGroup> {
             HeaderBanner(
               height: screenWidth * 0.7,
               backgroundImage:
-                  widget.company.bannerImage?.isNotEmpty == true
-                      ? 'http://192.168.1.113:8000/${widget.company.bannerImage}'
-                      : 'assets/images/recommended_banner/FocusPointVendor.png',
+                  widget.company.bannerImage?.isNotEmpty == true ? getFullImageUrl(widget.company.bannerImage) : 'assets/images/recommended_banner/FocusPointVendor.png',
               overlayColor: Colors.indigo.withValues(alpha: 0.6),
               overrideTitle: widget.company.companyName,
               overrideSubtitle: widget.company.categoryName,
@@ -100,7 +98,7 @@ class _VendorGroupState extends State<VendorGroup> {
                                 children: [
                                   ClipRRect(
                                     child: Image.network(
-                                      'http://192.168.1.113:8000/${sub.image ?? ""}',
+                                      getFullImageUrl(sub.image),
                                       width: 70,
                                       height: 70,
                                       fit: BoxFit.cover,
@@ -171,7 +169,7 @@ class _VendorGroupState extends State<VendorGroup> {
                                 child:
                                     imageUrl.isNotEmpty
                                         ? Image.network(
-                                          imageUrl,
+                                          getFullImageUrl(imageUrl),
                                           fit: BoxFit.cover,
                                           errorBuilder: (_, __, ___) {
                                             return Image.asset("assets/images/category/vendor_category/img.png", fit: BoxFit.cover);
@@ -285,6 +283,7 @@ class _VendorGroupState extends State<VendorGroup> {
   }
 }
 
+/// Facility icon widget for vendor features
 class _FacilityIcon extends StatelessWidget {
   final String label;
   final IconData icon;
@@ -301,5 +300,17 @@ class _FacilityIcon extends StatelessWidget {
         Text(label, style: const TextStyle(fontSize: 10), textAlign: TextAlign.center),
       ],
     );
+  }
+}
+
+/// Helper method for consistent image URLs (handles both full & relative URLs)
+String getFullImageUrl(String? path) {
+  if (path == null || path.isEmpty) return '';
+  final uri = Uri.tryParse(path);
+  if (uri != null && uri.hasAbsolutePath) {
+    return path;
+  } else {
+    final cleanedPath = path.replaceFirst(RegExp(r'^/+'), '');
+    return "http://192.168.1.113:8000/$cleanedPath";
   }
 }

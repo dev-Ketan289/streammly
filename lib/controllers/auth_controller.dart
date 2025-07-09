@@ -38,6 +38,26 @@ class AuthController extends GetxController implements GetxService {
     }
   }
 
+  Future<ResponseModel> updateUserProfile({required String name, required String email, required String phone, String? dob, String? gender}) async {
+    isLoading = true;
+    update();
+    ResponseModel responseModel;
+    try {
+      Response response = await authRepo.updateUserProfile(name: name, email: email, phone: phone, dob: dob, gender: gender);
+      if (response.statusCode == 200) {
+        responseModel = ResponseModel(true, "Profile updated successfully");
+        await fetchUserProfile();
+      } else {
+        responseModel = ResponseModel(false, "Failed to update profile");
+      }
+    } catch (e) {
+      responseModel = ResponseModel(false, "Error updating profile");
+    }
+    isLoading = false;
+    update();
+    return responseModel;
+  }
+
   Future<ResponseModel> sendOtp() async {
     isLoading = true;
     update();
@@ -108,81 +128,6 @@ class AuthController extends GetxController implements GetxService {
     update();
     return responseModel;
   }
-
-  // /// Google Login Setup
-  // void signInWithGoogle() async {
-  //   try {
-  //     final GoogleSignInAccount? googleUser = await GoogleSignIn().signIn();
-  //     if (googleUser == null) {
-  //       Fluttertoast.showToast(msg: "Google sign-in cancelled");
-  //       return;
-  //     }
-
-  //     final GoogleSignInAuthentication googleAuth =
-  //         await googleUser.authentication;
-
-  //     final credential = GoogleAuthProvider.credential(
-  //       accessToken: googleAuth.accessToken,
-  //       idToken: googleAuth.idToken,
-  //     );
-
-  //     final UserCredential userCredential = await FirebaseAuth.instance
-  //         .signInWithCredential(credential);
-  //     final User? firebaseUser = userCredential.user;
-
-  //     if (firebaseUser == null) {
-  //       Fluttertoast.showToast(msg: "Firebase authentication failed");
-  //       return;
-  //     }
-
-  //     final String firebaseUid = firebaseUser.uid;
-  //     final String firebaseProjectId = Firebase.app().options.projectId;
-  //     String deviceId = await getOrCreateDeviceId();
-
-  //     if (deviceId.isEmpty) {
-  //       Fluttertoast.showToast(msg: "Device ID not found");
-  //       return;
-  //     }
-
-  //     final url = Uri.parse(
-  //       "http://192.168.1.10:8000/api/v1/user/auth/googleLogin",
-  //     );
-
-  //     final body = jsonEncode({
-  //       "token": firebaseProjectId,
-  //       "device_id": deviceId,
-  //       "firebase_uid": firebaseUid,
-  //     });
-
-  //     final response = await http.post(
-  //       url,
-  //       headers: {
-  //         'Content-Type': 'application/json',
-  //         'Accept': 'application/json',
-  //       },
-  //       body: body,
-  //     );
-
-  //     final jsonResponse = jsonDecode(response.body);
-
-  //     if (response.statusCode == 200 && jsonResponse['success'] == true) {
-  //       Fluttertoast.showToast(msg: "Login Successful");
-  //       Get.offAll(() => WelcomeScreen());
-  //     } else {
-  //       String errorMessage =
-  //           jsonResponse['message']?.toString() ?? "Login failed";
-  //       if (errorMessage.length > 100) {
-  //         errorMessage = "${errorMessage.substring(0, 100)}...";
-  //       }
-  //       Fluttertoast.showToast(msg: errorMessage);
-  //     }
-  //   } catch (e) {
-  //     await FirebaseAuth.instance.signOut();
-  //     await GoogleSignIn().signOut();
-
-  //     Fluttertoast.showToast(msg: "Error: $e");
-  //   }
-  // }
 
   Future<String> getOrCreateDeviceId() async {
     try {

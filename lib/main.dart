@@ -1,6 +1,7 @@
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:streammly/controllers/home_screen_controller.dart';
 import 'package:streammly/data/init.dart';
 import 'package:streammly/services/theme.dart';
 import 'package:streammly/views/screens/auth_screens/login_screen.dart';
@@ -13,6 +14,7 @@ import 'views/screens/splash_screen/splash_screen.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  Get.put(HomeController);
   await Firebase.initializeApp();
   await Init().initialize();
   runApp(const StreammlyApp());
