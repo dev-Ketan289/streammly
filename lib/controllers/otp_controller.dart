@@ -17,7 +17,7 @@ class OtpController extends GetxController implements GetxService {
   final AuthRepo authRepo;
   OtpController({required this.authRepo});
 
-  final TextEditingController otpController = TextEditingController();
+
 
   RxInt secondsRemaining = 30.obs;
   RxString receivedOTP = ''.obs;
@@ -26,7 +26,7 @@ class OtpController extends GetxController implements GetxService {
 
   Timer? _timer;
 
-  Future<ResponseModel> verifyOtp({required String phone}) async {
+  Future<ResponseModel> verifyOtp({required String phone,required String otp}) async {
     isLoading = true;
     update();
     ResponseModel responseModel;
@@ -47,7 +47,7 @@ class OtpController extends GetxController implements GetxService {
       String deviceId = await Get.find<AuthController>().getOrCreateDeviceId();
 
       /// Verify OTP with device ID
-      Response response = await authRepo.verifyOtp(phone: phone, otp: otpController.text, deviceId: deviceId);
+      Response response = await authRepo.verifyOtp(phone: phone, otp: otp, deviceId: deviceId);
 
       if (response.statusCode == 200 && response.body['data']['token'] != null) {
         Get.find<AuthController>().setUserToken(response.body['data']['token']);
@@ -96,8 +96,8 @@ class OtpController extends GetxController implements GetxService {
     });
   }
 
-  void confirmOTP(String phone, {VoidCallback? onVerified}) {
-    final enteredOTP = otpController.text.trim();
+  void confirmOTP(String phone,String otp, {VoidCallback? onVerified}) {
+    final enteredOTP = otp.trim();
 
     ///  Bypass check for test number
     if (phone == "8111111111") {

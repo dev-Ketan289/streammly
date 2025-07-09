@@ -6,9 +6,20 @@ import 'package:streammly/views/screens/auth_screens/welcome.dart';
 
 import '../../../controllers/auth_controller.dart';
 
-class LoginScreen extends StatelessWidget {
+class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
 
+  @override
+  State<LoginScreen> createState() => _LoginScreenState();
+}
+
+class _LoginScreenState extends State<LoginScreen> {
+
+  @override
+  void dispose() {
+    super.dispose();
+    Get.find<AuthController>().phoneController.clear();
+  }
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);

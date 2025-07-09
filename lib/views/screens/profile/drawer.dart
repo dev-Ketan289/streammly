@@ -2,10 +2,11 @@ import 'dart:developer';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:get/get.dart';
 import 'package:streammly/controllers/auth_controller.dart'; // Added
+import 'package:streammly/controllers/home_screen_controller.dart';
 import 'package:streammly/generated/assets.dart';
-import 'package:streammly/main.dart';
 import 'package:streammly/navigation_menu.dart';
 import 'package:streammly/views/screens/profile/components/profile_section_widget.dart';
 import 'package:streammly/views/screens/profile/language_preferences.dart';
@@ -13,7 +14,6 @@ import 'package:streammly/views/screens/profile/linked_pages.dart';
 import 'package:streammly/views/screens/profile/notifications_page.dart';
 import 'package:streammly/views/screens/profile/offers_page.dart';
 import 'package:streammly/views/screens/profile/profile_screen.dart';
-import 'package:streammly/views/screens/splash_screen/splash_screen.dart';
 
 import 'components/profile_item_widget.dart';
 
@@ -299,11 +299,8 @@ class _ProfilePageState extends State<ProfilePage> {
             title: "Logout",
             onTap: () {
               authController.clearSharedData();
-              Navigator.pushAndRemoveUntil(
-                navigatorKey.currentContext!,
-                MaterialPageRoute(builder: (context) => const NavigationMenu()),
-                (route) => false,
-              );
+              Navigator.pop(context);
+              Fluttertoast.showToast(msg: "Logged out successfully");
             },
           ),
           SizedBox(height: screenHeight * 0.03),
