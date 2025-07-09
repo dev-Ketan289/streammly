@@ -127,6 +127,7 @@ class PackagesListView extends StatelessWidget {
                               ],
 
                               /// SHORT / FULL DESCRIPTION
+                              /// SHORT / FULL DESCRIPTION
                               if ((pkg["shortDescription"] ?? '').isNotEmpty || (pkg["fullDescription"] ?? '').isNotEmpty) ...[
                                 const SizedBox(height: 8),
                                 Text(

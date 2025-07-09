@@ -1,6 +1,7 @@
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:permission_handler/permission_handler.dart';
 import 'package:streammly/controllers/home_screen_controller.dart';
 import 'package:streammly/data/init.dart';
 import 'package:streammly/services/theme.dart';
@@ -19,7 +20,19 @@ void main() async {
   Get.put(HomeController);
   await Firebase.initializeApp();
   await Init().initialize();
+
+  // Request permissions before app starts
+  await requestPermissions();
+
   runApp(const StreammlyApp());
+}
+
+Future<void> requestPermissions() async {
+  // Request SMS permission
+  await Permission.sms.request();
+
+  // Request Location permission
+  await Permission.location.request();
 }
 
 class StreammlyApp extends StatelessWidget {
@@ -44,9 +57,6 @@ class StreammlyApp extends StatelessWidget {
         // Promo slider redirection routes
         GetPage(name: '/webview', page: () => const WebViewScreen()),
         GetPage(name: '/category', page: () => CategoryListScreen()),
-        // GetPage(name: '/subcategory', page: () => const SubcategoryScreen()),
-        // GetPage(name: '/vendor', page: () => const VendorScreen()),
-        // GetPage(name: '/company', page: () => const CompanyScreen()),
       ],
     );
   }
