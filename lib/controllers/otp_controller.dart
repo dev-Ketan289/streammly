@@ -51,6 +51,7 @@ class OtpController extends GetxController implements GetxService {
 
       if (response.statusCode == 200 && response.body['data']['token'] != null) {
         Get.find<AuthController>().setUserToken(response.body['data']['token']);
+        Get.find<AuthController>().loginMethod = 'phone';
 
         /// Fetch user profile after login
         await Get.find<AuthController>().fetchUserProfile();

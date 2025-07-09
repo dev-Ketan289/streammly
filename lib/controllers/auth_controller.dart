@@ -23,6 +23,8 @@ class AuthController extends GetxController implements GetxService {
 
   bool isLoading = false;
 
+  String? loginMethod;
+
   // --- User Profile ---
   UserProfile? userProfile;
 
@@ -77,6 +79,7 @@ class AuthController extends GetxController implements GetxService {
     try {
       Response response = await authRepo.sendOtp(phone: phoneController.text);
       if (response.statusCode == 200) {
+        loginMethod = 'phone';
         responseModel = ResponseModel(true, "Otp sent successfully");
       } else {
         responseModel = ResponseModel(false, "Failed to send OTP");
@@ -126,6 +129,7 @@ class AuthController extends GetxController implements GetxService {
 
       if (response.statusCode == 200 && response.body["token"] != null) {
         setUserToken(response.body['token']);
+        loginMethod = 'google';
         await fetchUserProfile();
         if (userProfile == null || userProfile!.name == null || userProfile!.email == null) {
           Get.offAll(() => ProfileFormScreen());
@@ -256,5 +260,13 @@ class AuthController extends GetxController implements GetxService {
 
   void setUserToken(String id) {
     authRepo.saveUserToken(id);
+  }
+
+  bool isPhoneLogin() {
+    return loginMethod == 'phone';
+  }
+
+  bool isGoogleLogin() {
+    return loginMethod == 'google';
   }
 }

@@ -28,6 +28,16 @@ class _ProfileFormScreenState extends State<ProfileFormScreen> {
     super.initState();
     phoneController.text = Get.find<AuthController>().phoneController.text;
     emailController.text = Get.find<AuthController>().emailController.text;
+    
+    // Set readonly based on login method
+    final authController = Get.find<AuthController>();
+    if (authController.isPhoneLogin()) {
+      // Phone login: make phone field readonly
+      phoneController.text = authController.phoneController.text;
+    } else if (authController.isGoogleLogin()) {
+      // Google login: make email field readonly
+      emailController.text = authController.emailController.text;
+    }
   }
 
   Future<void> _pickDate() async {
@@ -121,11 +131,12 @@ class _ProfileFormScreenState extends State<ProfileFormScreen> {
                     TextField(
                       controller: emailController,
                       keyboardType: TextInputType.emailAddress,
+                      readOnly: Get.find<AuthController>().loginMethod == 'google',
                       decoration: InputDecoration(
                         labelText: "Email *",
                         prefixIcon: const Icon(Icons.email_outlined),
                         filled: true,
-                        fillColor: Colors.white,
+                        fillColor: Get.find<AuthController>().loginMethod == 'google' ? Colors.grey[100] : Colors.white,
                         border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
                       ),
                     ),
@@ -133,11 +144,12 @@ class _ProfileFormScreenState extends State<ProfileFormScreen> {
                     TextField(
                       controller: phoneController,
                       keyboardType: TextInputType.phone,
+                      readOnly: Get.find<AuthController>().isPhoneLogin(),
                       decoration: InputDecoration(
                         labelText: "Phone *",
                         prefixIcon: const Icon(Icons.phone_outlined),
                         filled: true,
-                        fillColor: Colors.white,
+                        fillColor: Get.find<AuthController>().isPhoneLogin() ? Colors.grey[100] : Colors.white,
                         border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
                       ),
                     ),
