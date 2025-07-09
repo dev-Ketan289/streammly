@@ -89,10 +89,10 @@ class _HomeScreenState extends State<HomeScreen> {
                     builder: (headerCtrl) {
                       if (headerCtrl.isRecommendedLoading) {
                         return const Center(child: CircularProgressIndicator());
-                      } else if (headerCtrl.recommendedCompanies.isEmpty) {
+                      } else if (headerCtrl.recommendedVendors.isEmpty) {
                         return const Center(child: Text("No recommended vendors found."));
                       } else {
-                        return RecommendedList(context: context, recommendedCompanies: headerCtrl.recommendedCompanies);
+                        return RecommendedList(context: context, recommendedVendors: headerCtrl.recommendedVendors);
                       }
                     },
                   ),

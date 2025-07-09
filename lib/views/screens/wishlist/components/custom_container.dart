@@ -1,25 +1,55 @@
 import 'package:flutter/material.dart';
 
-class CustomContainer extends StatelessWidget {
-  final String text;
+class CustomButton extends StatefulWidget {
+  const CustomButton({super.key, required this.text, required this.onPressed});
 
-  const CustomContainer({super.key, required this.text});
+  final String text;
+  final VoidCallback? onPressed;
 
   @override
+  State<CustomButton> createState() => _CustomButtonState();
+}
+
+class _CustomButtonState extends State<CustomButton> {
+  @override
   Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: (){},
-      child: Container(
-        margin: EdgeInsets.only(right: 5, left: 5),
-        height: 23,
-        width: 91,
-        decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(6),
-          border: Border.all(color: Color(0xFFF5EEEE)),
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 4),
+      child: ElevatedButton(
+        onPressed: widget.onPressed,
+        style: ButtonStyle(
+          foregroundColor: WidgetStateProperty.all(
+            Colors.black,
+          ), // Text/icon color
+          backgroundColor: WidgetStateProperty.resolveWith<Color>((
+            Set<WidgetState> states,
+          ) {
+            if (states.contains(WidgetState.pressed)) {
+              return Colors.blue; // Blue background when pressed
+            }
+            return Colors.white; // Default white background
+          }),
+          side: WidgetStateProperty.all(
+            const BorderSide(color: Color(0xFFF5EEEE), width: 2),
+          ),
+          fixedSize: WidgetStateProperty.all(const Size(92, 23)),
+          shape: WidgetStateProperty.all(
+            RoundedRectangleBorder(borderRadius: BorderRadius.circular(6)),
+          ),
+          padding: WidgetStateProperty.all(
+            EdgeInsets.zero,
+          ), // Remove default padding
         ),
-        child: Center(
-          child: Text(text, style: Theme.of(context).textTheme.bodySmall),
+        child: FittedBox(
+          fit: BoxFit.scaleDown,
+          child: Text(
+            widget.text,
+            style: Theme.of(context).textTheme.bodySmall?.copyWith(
+              color: Colors.black, // Consistent text color
+            ),
+            overflow: TextOverflow.ellipsis, // Prevent text overflow
+            maxLines: 1,
+          ),
         ),
       ),
     );

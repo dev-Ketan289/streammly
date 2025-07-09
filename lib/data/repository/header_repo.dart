@@ -27,13 +27,16 @@ class HomeRepo {
     return result;
   }
 
-  Future<List<Map<String, dynamic>>> fetchRecommendedCompanies() async {
-    final res = await apiClient.getData(AppConstants.recommendedCompaniesUrl);
-    final List data = res.body['data'] ?? [];
+  Future<Response> fetchRecommendedCompanies() async =>
+      await apiClient.getData(AppConstants.recommendedCompaniesUrl);
 
-    return data
-        .where((c) => (c["rating"] ?? 0) >= 4)
-        .cast<Map<String, dynamic>>()
-        .toList();
-  }
+  // Future<List<Map<String, dynamic>>> fetchRecommendedCompanies() async {
+  //   final res = await apiClient.getData(AppConstants.recommendedCompaniesUrl);
+  //   final List data = res.body['data'] ?? [];
+
+  //   return data
+  //       .where((c) => (c["rating"] ?? 0) >= 4)
+  //       .cast<Map<String, dynamic>>()
+  //       .toList();
+  // }
 }

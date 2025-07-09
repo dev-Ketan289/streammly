@@ -7,8 +7,19 @@ class UserProfile {
   final String? profileImage;
   final int userType;
   final String? dob;
+  final String? gender;
 
-  UserProfile({required this.id, this.phone, this.name, this.email, required this.status, this.profileImage, required this.userType, this.dob});
+  UserProfile({
+    required this.id,
+    this.phone,
+    this.name,
+    this.email,
+    required this.status,
+    this.profileImage,
+    required this.userType,
+    this.dob,
+    this.gender,
+  });
 
   factory UserProfile.fromJson(Map<String, dynamic> json) {
     return UserProfile(
@@ -20,6 +31,7 @@ class UserProfile {
       profileImage: json['profile_image'],
       userType: json['user_type'],
       dob: json['dob'],
+      gender: json['gender'],
     );
   }
 }

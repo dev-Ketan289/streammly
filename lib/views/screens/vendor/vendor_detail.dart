@@ -33,7 +33,7 @@ class _VendorDetailScreenState extends State<VendorDetailScreen> {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final screenWidth = MediaQuery.of(context).size.width;
-    final horizontalPadding = screenWidth * 0.04;
+    final horizontalPadding = screenWidth * 0.04; // 4% padding for better scaling
 
     return Scaffold(
       bottomNavigationBar: NavigationHelper.buildBottomNav(),
@@ -49,7 +49,7 @@ class _VendorDetailScreenState extends State<VendorDetailScreen> {
                 height: 280,
                 backgroundImage:
                     widget.company.bannerImage != null && widget.company.bannerImage!.isNotEmpty
-                        ? getFullImageUrl(widget.company.bannerImage)
+                        ? 'http://192.168.1.113:8000/${widget.company.bannerImage}'
                         : 'assets/images/recommended_banner/FocusPointVendor.png',
                 overlayColor: Colors.indigo.withValues(alpha: 0.6),
                 overrideTitle: widget.company.companyName,
@@ -85,7 +85,7 @@ class _VendorDetailScreenState extends State<VendorDetailScreen> {
                         subs.map((sub) {
                           return CategoryItem(
                             label: sub.title,
-                            imagePath: getFullImageUrl(sub.image),
+                            imagePath: 'http://192.168.1.113:8000/${sub.image}',
                             onTap: () => Get.to(() => VendorGroup(company: widget.company, subCategoryId: sub.id)),
                           );
                         }).toList(),
@@ -173,17 +173,5 @@ class _VendorDetailScreenState extends State<VendorDetailScreen> {
         ),
       ),
     );
-  }
-}
-
-/// Helper method for consistent image URLs
-String getFullImageUrl(String? path) {
-  if (path == null || path.isEmpty) return '';
-  final uri = Uri.tryParse(path);
-  if (uri != null && uri.hasAbsolutePath) {
-    return path;
-  } else {
-    final cleanedPath = path.replaceFirst(RegExp(r'^/+'), '');
-    return "http://192.168.1.113:8000/$cleanedPath";
   }
 }
