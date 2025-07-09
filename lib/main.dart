@@ -11,6 +11,8 @@ import 'package:streammly/views/screens/home/widgets/category/category.dart';
 import 'navigation_menu.dart';
 import 'views/screens/splash_screen/splash_screen.dart';
 
+final navigatorKey = GlobalKey<NavigatorState>();
+
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp();
@@ -24,6 +26,7 @@ class StreammlyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return GetMaterialApp(
+      navigatorKey: navigatorKey,
       debugShowCheckedModeBanner: false,
       title: 'Streammly',
       theme: CustomTheme.light,

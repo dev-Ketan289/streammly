@@ -118,6 +118,10 @@ class Assets {
   /// assets/images/vendor_demo.png
   static const String imagesVendorDemo = "assets/images/vendor_demo.png";
 
+  /// Assets for svgAbout
+  /// assets/svg/about.svg
+  static const String svgAbout = "assets/svg/about.svg";
+
   /// Assets for svgBell
   /// assets/svg/bell.svg
   static const String svgBell = "assets/svg/bell.svg";
@@ -182,6 +186,10 @@ class Assets {
   /// assets/svg/linked.svg
   static const String svgLinked = "assets/svg/linked.svg";
 
+  /// Assets for svgLogout
+  /// assets/svg/logout.svg
+  static const String svgLogout = "assets/svg/logout.svg";
+
   /// Assets for svgMore
   /// assets/svg/more.svg
   static const String svgMore = "assets/svg/more.svg";
@@ -214,9 +222,17 @@ class Assets {
   /// assets/svg/saved.svg
   static const String svgSaved = "assets/svg/saved.svg";
 
+  /// Assets for svgSettings
+  /// assets/svg/settings.svg
+  static const String svgSettings = "assets/svg/settings.svg";
+
   /// Assets for svgShop
   /// assets/svg/shop.svg
   static const String svgShop = "assets/svg/shop.svg";
+
+  /// Assets for svgSupport
+  /// assets/svg/support.svg
+  static const String svgSupport = "assets/svg/support.svg";
 
   /// Assets for svgTransaction
   /// assets/svg/transaction.svg

@@ -166,11 +166,4 @@ class OtpController extends GetxController implements GetxService {
       Fluttertoast.showToast(msg: "Could not connect to server");
     }
   }
-
-  @override
-  void onClose() {
-    otpController.dispose();
-    _timer?.cancel();
-    super.onClose();
-  }
 }
