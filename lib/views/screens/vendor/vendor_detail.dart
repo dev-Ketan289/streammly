@@ -29,6 +29,12 @@ class _VendorDetailScreenState extends State<VendorDetailScreen> {
     companyController.fetchCompanySubCategories(widget.company.id ?? 0);
   }
 
+  /// Helper function to handle full URL or relative path for images
+  String resolveImageUrl(String? url) {
+    if (url == null || url.isEmpty) return '';
+    return url.startsWith('http') ? url : 'http://192.168.1.113:8000/${url.replaceFirst(RegExp(r'^/'), '')}';
+  }
+
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
@@ -48,8 +54,8 @@ class _VendorDetailScreenState extends State<VendorDetailScreen> {
               HeaderBanner(
                 height: 280,
                 backgroundImage:
-                    widget.company.bannerImage != null && widget.company.bannerImage!.isNotEmpty
-                        ? 'http://192.168.1.113:8000/${widget.company.bannerImage}'
+                    (widget.company.bannerImage != null && widget.company.bannerImage!.isNotEmpty)
+                        ? resolveImageUrl(widget.company.bannerImage)
                         : 'assets/images/recommended_banner/FocusPointVendor.png',
                 overlayColor: Colors.indigo.withValues(alpha: 0.6),
                 overrideTitle: widget.company.companyName,
@@ -85,7 +91,7 @@ class _VendorDetailScreenState extends State<VendorDetailScreen> {
                         subs.map((sub) {
                           return CategoryItem(
                             label: sub.title,
-                            imagePath: 'http://192.168.1.113:8000/${sub.image}',
+                            imagePath: resolveImageUrl(sub.image),
                             onTap: () => Get.to(() => VendorGroup(company: widget.company, subCategoryId: sub.id)),
                           );
                         }).toList(),

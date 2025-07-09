@@ -47,23 +47,16 @@ class OtpController extends GetxController implements GetxService {
       String deviceId = await Get.find<AuthController>().getOrCreateDeviceId();
 
       /// Verify OTP with device ID
-      Response response = await authRepo.verifyOtp(
-        phone: phone,
-        otp: otpController.text,
-        deviceId: deviceId,
-      );
+      Response response = await authRepo.verifyOtp(phone: phone, otp: otpController.text, deviceId: deviceId);
 
-      if (response.statusCode == 200 &&
-          response.body['data']['token'] != null) {
+      if (response.statusCode == 200 && response.body['data']['token'] != null) {
         Get.find<AuthController>().setUserToken(response.body['data']['token']);
 
         /// Fetch user profile after login
         await Get.find<AuthController>().fetchUserProfile();
 
         /// Check if user is new or existing
-        if (Get.find<AuthController>().userProfile == null ||
-            Get.find<AuthController>().userProfile!.name == null ||
-            Get.find<AuthController>().userProfile!.email == null) {
+        if (Get.find<AuthController>().userProfile == null || Get.find<AuthController>().userProfile!.name == null || Get.find<AuthController>().userProfile!.email == null) {
           /// New User → Show Profile Form
           Get.offAll(() => ProfileFormScreen());
         } else {
@@ -135,14 +128,8 @@ class OtpController extends GetxController implements GetxService {
     }
 
     try {
-      final url = Uri.parse(
-        "http://192.168.1.113:8000/api/v1/user/auth/generateOtp",
-      );
-      final response = await http.post(
-        url,
-        headers: {'Content-Type': 'application/json'},
-        body: jsonEncode({"phone": phone}),
-      );
+      final url = Uri.parse("http://192.168.1.113:8000/api/v1/user/auth/generateOtp");
+      final response = await http.post(url, headers: {'Content-Type': 'application/json'}, body: jsonEncode({"phone": phone}));
 
       final responseBody = jsonDecode(response.body);
 
@@ -158,9 +145,7 @@ class OtpController extends GetxController implements GetxService {
           Fluttertoast.showToast(msg: "OTP format error");
         }
       } else {
-        Fluttertoast.showToast(
-          msg: responseBody['message'] ?? "Could not resend OTP",
-        );
+        Fluttertoast.showToast(msg: responseBody['message'] ?? "Could not resend OTP");
       }
     } catch (e) {
       Fluttertoast.showToast(msg: "Could not connect to server");

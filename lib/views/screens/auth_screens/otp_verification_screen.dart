@@ -58,31 +58,14 @@ class _OtpScreenState extends State<OtpScreen> {
                 (context, constraints) => SingleChildScrollView(
                   physics: const ClampingScrollPhysics(),
                   child: ConstrainedBox(
-                    constraints: BoxConstraints(
-                      minHeight: constraints.maxHeight,
-                    ),
+                    constraints: BoxConstraints(minHeight: constraints.maxHeight),
                     child: IntrinsicHeight(
                       child: Column(
                         children: [
                           const SizedBox(height: 20),
-                          Text(
-                            "STREAMMLY",
-                            style: GoogleFonts.cinzelDecorative(
-                              fontSize: 28,
-                              fontWeight: FontWeight.bold,
-                              color: theme.primaryColor,
-                            ),
-                          ),
+                          Text("STREAMMLY", style: GoogleFonts.cinzelDecorative(fontSize: 28, fontWeight: FontWeight.bold, color: theme.primaryColor)),
                           const SizedBox(height: 20),
-                          Padding(
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 40.0,
-                            ),
-                            child: Image.asset(
-                              "assets/images/loginpage.gif",
-                              height: 300,
-                            ),
-                          ),
+                          Padding(padding: const EdgeInsets.symmetric(horizontal: 40.0), child: Image.asset("assets/images/loginpage.gif", height: 300)),
                           const SizedBox(height: 20),
 
                           /// OTP Section
@@ -95,21 +78,10 @@ class _OtpScreenState extends State<OtpScreen> {
                                     Text(
                                       "Please enter the code we just sent to your phone number",
                                       textAlign: TextAlign.center,
-                                      style: appTheme.textTheme.bodySmall
-                                          ?.copyWith(
-                                            fontSize: 14,
-                                            color: theme.textSecondary,
-                                          ),
+                                      style: appTheme.textTheme.bodySmall?.copyWith(fontSize: 14, color: theme.textSecondary),
                                     ),
                                     const SizedBox(height: 4),
-                                    Text(
-                                      fullNumber,
-                                      style: appTheme.textTheme.bodyMedium
-                                          ?.copyWith(
-                                            fontWeight: FontWeight.bold,
-                                            fontSize: 16,
-                                          ),
-                                    ),
+                                    Text(fullNumber, style: appTheme.textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.bold, fontSize: 16)),
                                     const SizedBox(height: 24),
 
                                     /// OTP Field
@@ -122,9 +94,7 @@ class _OtpScreenState extends State<OtpScreen> {
                                         keyboardType: TextInputType.number,
                                         pinTheme: PinTheme(
                                           shape: PinCodeFieldShape.box,
-                                          borderRadius: BorderRadius.circular(
-                                            10,
-                                          ),
+                                          borderRadius: BorderRadius.circular(10),
                                           fieldHeight: 55,
                                           fieldWidth: 45,
                                           inactiveColor: appTheme.dividerColor,
@@ -138,49 +108,26 @@ class _OtpScreenState extends State<OtpScreen> {
 
                                     /// Timer & Resend
                                     Row(
-                                      mainAxisAlignment:
-                                          MainAxisAlignment.center,
+                                      mainAxisAlignment: MainAxisAlignment.center,
                                       children: [
-                                        Icon(
-                                          Icons.watch_later_outlined,
-                                          size: 16,
-                                          color: appTheme.dividerColor,
-                                        ),
+                                        Icon(Icons.watch_later_outlined, size: 16, color: appTheme.dividerColor),
                                         const SizedBox(width: 4),
                                         Obx(() {
                                           return Text(
                                             "Resend code in 00:${otpController.secondsRemaining.value.toString().padLeft(2, '0')}",
-                                            style: appTheme.textTheme.bodySmall
-                                                ?.copyWith(
-                                                  fontSize: 13,
-                                                  color: theme.textSecondary,
-                                                ),
+                                            style: appTheme.textTheme.bodySmall?.copyWith(fontSize: 13, color: theme.textSecondary),
                                           );
                                         }),
                                         const SizedBox(width: 10),
                                         GestureDetector(
-                                          onTap:
-                                              otpController
-                                                          .secondsRemaining
-                                                          .value ==
-                                                      0
-                                                  ? () => otpController
-                                                      .resendOTP(phone)
-                                                  : null,
+                                          onTap: otpController.secondsRemaining.value == 0 ? () => otpController.resendOTP(phone) : null,
                                           child: Text(
                                             "Resend OTP",
-                                            style: appTheme.textTheme.bodySmall
-                                                ?.copyWith(
-                                                  color:
-                                                      otpController
-                                                                  .secondsRemaining
-                                                                  .value ==
-                                                              0
-                                                          ? theme.primaryColor
-                                                          : theme.textSecondary,
-                                                  fontWeight: FontWeight.bold,
-                                                  fontSize: 13,
-                                                ),
+                                            style: appTheme.textTheme.bodySmall?.copyWith(
+                                              color: otpController.secondsRemaining.value == 0 ? theme.primaryColor : theme.textSecondary,
+                                              fontWeight: FontWeight.bold,
+                                              fontSize: 13,
+                                            ),
                                           ),
                                         ),
                                       ],
@@ -193,28 +140,15 @@ class _OtpScreenState extends State<OtpScreen> {
                                       width: double.infinity,
                                       height: 50,
                                       child: ElevatedButton(
-                                        style: ElevatedButton.styleFrom(
-                                          backgroundColor: theme.primaryColor,
-                                        ),
+                                        style: ElevatedButton.styleFrom(backgroundColor: theme.primaryColor),
                                         onPressed: () {
-                                          Get.find<OtpController>()
-                                              .verifyOtp(phone: phone)
-                                              .then((value) {
-                                                if (value.isSuccess) {
-                                                  Get.to(
-                                                    () => const WelcomeScreen(),
-                                                  );
-                                                }
-                                              });
+                                          Get.find<OtpController>().verifyOtp(phone: phone).then((value) {
+                                            if (value.isSuccess) {
+                                              Get.to(() => const WelcomeScreen());
+                                            }
+                                          });
                                         },
-                                        child: Text(
-                                          "Confirm OTP",
-                                          style: appTheme.textTheme.bodyLarge
-                                              ?.copyWith(
-                                                fontSize: 19,
-                                                color: Colors.white,
-                                              ),
-                                        ),
+                                        child: Text("Confirm OTP", style: appTheme.textTheme.bodyLarge?.copyWith(fontSize: 19, color: Colors.white)),
                                       ),
                                     ),
                                   ],
@@ -233,33 +167,13 @@ class _OtpScreenState extends State<OtpScreen> {
                               alignment: Alignment.center,
                               child: Text.rich(
                                 TextSpan(
-                                  text:
-                                      "By providing my phone number, I hereby agree and accept the ",
-                                  style: GoogleFonts.publicSans(
-                                    fontSize: 10,
-                                    fontWeight: FontWeight.w300,
-                                  ),
+                                  text: "By providing my phone number, I hereby agree and accept the ",
+                                  style: GoogleFonts.publicSans(fontSize: 10, fontWeight: FontWeight.w300),
                                   children: [
-                                    TextSpan(
-                                      text: "Terms & Condition",
-                                      style: GoogleFonts.publicSans(
-                                        fontSize: 10,
-                                        fontWeight: FontWeight.w300,
-                                        color: theme.primaryColor,
-                                      ),
-                                    ),
+                                    TextSpan(text: "Terms & Condition", style: GoogleFonts.publicSans(fontSize: 10, fontWeight: FontWeight.w300, color: theme.primaryColor)),
                                     const TextSpan(text: " & "),
-                                    TextSpan(
-                                      text: "Privacy Policy",
-                                      style: GoogleFonts.publicSans(
-                                        fontSize: 10,
-                                        fontWeight: FontWeight.w300,
-                                        color: theme.primaryColor,
-                                      ),
-                                    ),
-                                    const TextSpan(
-                                      text: " in use of this app.",
-                                    ),
+                                    TextSpan(text: "Privacy Policy", style: GoogleFonts.publicSans(fontSize: 10, fontWeight: FontWeight.w300, color: theme.primaryColor)),
+                                    const TextSpan(text: " in use of this app."),
                                   ],
                                 ),
                                 textAlign: TextAlign.center,

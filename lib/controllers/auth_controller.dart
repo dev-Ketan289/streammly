@@ -32,16 +32,10 @@ class AuthController extends GetxController implements GetxService {
     ResponseModel? responseModel;
     try {
       Response response = await authRepo.getUserProfile();
-      log(
-        response.bodyString ?? "",
-        name: "***** Response in fetchUserProfile () ******",
-      );
+      log(response.bodyString ?? "", name: "***** Response in fetchUserProfile () ******");
       if (response.statusCode == 200 && response.body['data'] != null) {
         userProfile = UserProfile.fromJson(response.body['data']);
-        responseModel = ResponseModel(
-          true,
-          "User profile fetched successfully",
-        );
+        responseModel = ResponseModel(true, "User profile fetched successfully");
       } else {
         responseModel = ResponseModel(false, "Failed to fetch user profile");
       }
@@ -54,60 +48,22 @@ class AuthController extends GetxController implements GetxService {
     return responseModel;
   }
 
-  Future<ResponseModel?> updateUserProfile({
-    required String name,
-    required String email,
-    String? dob,
-    String? gender,
-    required String phone,
-  }) async {
+  Future<ResponseModel?> updateUserProfile({required String name, required String email, String? dob, String? gender, required String phone}) async {
     isLoading = true;
     update();
     ResponseModel? responseModel;
     try {
-      Response response = await authRepo.updateUserProfile(
-        name: name,
-        email: email,
-        dob: dob,
-        gender: gender,
-        phone: phone,
-      );
-      log(
-        "${response.bodyString}",
-        name: "***** Response in updateUserProfile () ******",
-      );
+      Response response = await authRepo.updateUserProfile(name: name, email: email, dob: dob, gender: gender, phone: phone);
+      log("${response.bodyString}", name: "***** Response in updateUserProfile () ******");
       if (response.statusCode == 200) {
         fetchUserProfile();
-        responseModel = ResponseModel(
-          true,
-          "User profile updated successfully",
-        );
+        responseModel = ResponseModel(true, "User profile updated successfully");
       } else {
         responseModel = ResponseModel(false, "Failed to update user profile");
       }
     } catch (e) {
       responseModel = ResponseModel(false, "Error in update user profile");
       log(e.toString(), name: "***** Error in updateUserProfile () ******");
-    }
-    isLoading = false;
-    update();
-    return responseModel;
-  }
-
-  Future<ResponseModel> updateUserProfile({required String name, required String email, required String phone, String? dob, String? gender}) async {
-    isLoading = true;
-    update();
-    ResponseModel responseModel;
-    try {
-      Response response = await authRepo.updateUserProfile(name: name, email: email, phone: phone, dob: dob, gender: gender);
-      if (response.statusCode == 200) {
-        responseModel = ResponseModel(true, "Profile updated successfully");
-        await fetchUserProfile();
-      } else {
-        responseModel = ResponseModel(false, "Failed to update profile");
-      }
-    } catch (e) {
-      responseModel = ResponseModel(false, "Error updating profile");
     }
     isLoading = false;
     update();
@@ -146,15 +102,10 @@ class AuthController extends GetxController implements GetxService {
         return null;
       }
 
-      final GoogleSignInAuthentication googleAuth =
-          await googleUser.authentication;
-      final credential = GoogleAuthProvider.credential(
-        accessToken: googleAuth.accessToken,
-        idToken: googleAuth.idToken,
-      );
+      final GoogleSignInAuthentication googleAuth = await googleUser.authentication;
+      final credential = GoogleAuthProvider.credential(accessToken: googleAuth.accessToken, idToken: googleAuth.idToken);
 
-      final UserCredential userCredential = await FirebaseAuth.instance
-          .signInWithCredential(credential);
+      final UserCredential userCredential = await FirebaseAuth.instance.signInWithCredential(credential);
       final User? firebaseUser = userCredential.user;
       final firebaseIdToken = await userCredential.user?.getIdToken();
 
@@ -171,18 +122,12 @@ class AuthController extends GetxController implements GetxService {
         return null;
       }
 
-      Response response = await authRepo.signInWithGoogle(
-        token: firebaseIdToken ?? "",
-        firebaseUid: firebaseUid,
-        deviceId: deviceId,
-      );
+      Response response = await authRepo.signInWithGoogle(token: firebaseIdToken ?? "", firebaseUid: firebaseUid, deviceId: deviceId);
 
       if (response.statusCode == 200 && response.body["token"] != null) {
         setUserToken(response.body['token']);
         await fetchUserProfile();
-        if (userProfile == null ||
-            userProfile!.name == null ||
-            userProfile!.email == null) {
+        if (userProfile == null || userProfile!.name == null || userProfile!.email == null) {
           Get.offAll(() => ProfileFormScreen());
         } else {
           Get.offAll(() => const WelcomeScreen());
@@ -201,6 +146,81 @@ class AuthController extends GetxController implements GetxService {
     update();
     return responseModel;
   }
+
+  // /// Google Login Setup
+  // void signInWithGoogle() async {
+  //   try {
+  //     final GoogleSignInAccount? googleUser = await GoogleSignIn().signIn();
+  //     if (googleUser == null) {
+  //       Fluttertoast.showToast(msg: "Google sign-in cancelled");
+  //       return;
+  //     }
+
+  //     final GoogleSignInAuthentication googleAuth =
+  //         await googleUser.authentication;
+
+  //     final credential = GoogleAuthProvider.credential(
+  //       accessToken: googleAuth.accessToken,
+  //       idToken: googleAuth.idToken,
+  //     );
+
+  //     final UserCredential userCredential = await FirebaseAuth.instance
+  //         .signInWithCredential(credential);
+  //     final User? firebaseUser = userCredential.user;
+
+  //     if (firebaseUser == null) {
+  //       Fluttertoast.showToast(msg: "Firebase authentication failed");
+  //       return;
+  //     }
+
+  //     final String firebaseUid = firebaseUser.uid;
+  //     final String firebaseProjectId = Firebase.app().options.projectId;
+  //     String deviceId = await getOrCreateDeviceId();
+
+  //     if (deviceId.isEmpty) {
+  //       Fluttertoast.showToast(msg: "Device ID not found");
+  //       return;
+  //     }
+
+  //     final url = Uri.parse(
+  //       "http://192.168.1.10:8000/api/v1/user/auth/googleLogin",
+  //     );
+
+  //     final body = jsonEncode({
+  //       "token": firebaseProjectId,
+  //       "device_id": deviceId,
+  //       "firebase_uid": firebaseUid,
+  //     });
+
+  //     final response = await http.post(
+  //       url,
+  //       headers: {
+  //         'Content-Type': 'application/json',
+  //         'Accept': 'application/json',
+  //       },
+  //       body: body,
+  //     );
+
+  //     final jsonResponse = jsonDecode(response.body);
+
+  //     if (response.statusCode == 200 && jsonResponse['success'] == true) {
+  //       Fluttertoast.showToast(msg: "Login Successful");
+  //       Get.offAll(() => WelcomeScreen());
+  //     } else {
+  //       String errorMessage =
+  //           jsonResponse['message']?.toString() ?? "Login failed";
+  //       if (errorMessage.length > 100) {
+  //         errorMessage = "${errorMessage.substring(0, 100)}...";
+  //       }
+  //       Fluttertoast.showToast(msg: errorMessage);
+  //     }
+  //   } catch (e) {
+  //     await FirebaseAuth.instance.signOut();
+  //     await GoogleSignIn().signOut();
+
+  //     Fluttertoast.showToast(msg: "Error: $e");
+  //   }
+  // }
 
   Future<String> getOrCreateDeviceId() async {
     try {

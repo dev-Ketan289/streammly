@@ -2,14 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:get/get.dart';
 import 'package:iconsax/iconsax.dart';
-import 'package:streammly/data/api/api_client.dart';
-import 'package:streammly/data/repository/header_repo.dart';
 import 'package:streammly/generated/assets.dart';
 import 'package:streammly/services/theme.dart' as theme;
 import 'package:streammly/views/screens/home/home_screen.dart';
 import 'package:streammly/views/screens/package/booking/booking_page.dart';
-
-import 'controllers/home_screen_controller.dart';
 
 class NavigationMenu extends StatefulWidget {
   const NavigationMenu({super.key});
@@ -20,7 +16,6 @@ class NavigationMenu extends StatefulWidget {
 
 class _NavigationMenuState extends State<NavigationMenu> {
   final controller = Get.put(NavigationController());
-  final homeController = Get.put(HomeController(homeRepo: HomeRepo(apiClient: ApiClient(appBaseUrl: "192.168.1.113/", sharedPreferences: Get.find()))));
 
   @override
   Widget build(BuildContext context) {
@@ -77,7 +72,12 @@ class _NavigationMenuState extends State<NavigationMenu> {
       onTap: () => controller.selectedIndex.value = index,
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
-        children: [SvgPicture.asset(icon), const SizedBox(height: 4), Text(label, style: TextStyle(fontSize: 12, color: isSelected ? Colors.indigo : Colors.black54))],
+        children: [
+          // Icon(icon, color: isSelected ? Colors.indigo : Colors.black54),
+          SvgPicture.asset(icon),
+          const SizedBox(height: 4),
+          Text(label, style: TextStyle(fontSize: 12, color: isSelected ? Colors.indigo : Colors.black54)),
+        ],
       ),
     );
   }
