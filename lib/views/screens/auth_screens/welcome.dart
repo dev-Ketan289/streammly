@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:streammly/views/screens/auth_screens/create_user.dart';
 import 'package:streammly/views/screens/common/location_screen.dart';
-import '../../../controllers/auth_controller.dart';
 
+import '../../../controllers/auth_controller.dart';
 import '../../../services/theme.dart' as theme;
 
 class WelcomeScreen extends StatefulWidget {
@@ -23,11 +23,9 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
       if (authController.userProfile == null) {
         await authController.fetchUserProfile();
       }
-      if (authController.userProfile == null ||
-          authController.userProfile!.name == null ||
-          authController.userProfile!.email == null) {
+      if (authController.userProfile == null || authController.userProfile!.name == null || authController.userProfile!.email == null) {
         // New user: show profile form
-        Get.off(() =>  ProfileFormScreen());
+        Get.off(() => ProfileFormScreen());
       } else {
         // Existing user: go to location screen
         Get.off(() => const LocationScreen());
@@ -61,9 +59,7 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
                             fontFamily: 'CinzelDecorative',
                             fontSize: 28,
                             fontWeight: FontWeight.bold,
-                            color:
-                                theme
-                                    .primaryColor, // Using your theme file color
+                            color: theme.primaryColor, // Using your theme file color
                           ),
                         ),
                       ),
@@ -73,27 +69,11 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
                           child: Column(
                             mainAxisSize: MainAxisSize.min,
                             children: [
-                              Image.asset(
-                                'assets/images/Thumb.gif',
-                                height: 240,
-                              ),
+                              Image.asset('assets/images/Thumb.gif', height: 240),
                               const SizedBox(height: 40),
-                              Text(
-                                "You're in!",
-                                style: textTheme.titleLarge!.copyWith(
-                                  fontWeight: FontWeight.bold,
-                                  color: colorScheme.primary,
-                                ),
-                                textAlign: TextAlign.center,
-                              ),
+                              Text("You're in!", style: textTheme.titleLarge!.copyWith(fontWeight: FontWeight.bold, color: colorScheme.primary), textAlign: TextAlign.center),
                               const SizedBox(height: 8),
-                              Text(
-                                "Welcome to Streammly",
-                                style: textTheme.titleMedium!.copyWith(
-                                  color: colorScheme.primary,
-                                ),
-                                textAlign: TextAlign.center,
-                              ),
+                              Text("Welcome to Streammly", style: textTheme.titleMedium!.copyWith(color: colorScheme.primary), textAlign: TextAlign.center),
                             ],
                           ),
                         ),

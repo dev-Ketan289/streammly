@@ -35,6 +35,12 @@ class _VendorGroupState extends State<VendorGroup> {
     });
   }
 
+  /// Helper function to resolve image URL
+  String resolveImageUrl(String? url) {
+    if (url == null || url.isEmpty) return '';
+    return url.startsWith('http') ? url : 'http://192.168.1.113:8000/${url.replaceFirst(RegExp(r'^/'), '')}';
+  }
+
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
@@ -52,9 +58,7 @@ class _VendorGroupState extends State<VendorGroup> {
             HeaderBanner(
               height: screenWidth * 0.7,
               backgroundImage:
-                  widget.company.bannerImage?.isNotEmpty == true
-                      ? 'http://192.168.1.113:8000/${widget.company.bannerImage}'
-                      : 'assets/images/recommended_banner/FocusPointVendor.png',
+                  (widget.company.bannerImage?.isNotEmpty == true) ? resolveImageUrl(widget.company.bannerImage) : 'assets/images/recommended_banner/FocusPointVendor.png',
               overlayColor: Colors.indigo.withValues(alpha: 0.6),
               overrideTitle: widget.company.companyName,
               overrideSubtitle: widget.company.categoryName,
@@ -100,7 +104,7 @@ class _VendorGroupState extends State<VendorGroup> {
                                 children: [
                                   ClipRRect(
                                     child: Image.network(
-                                      'http://192.168.1.113:8000/${sub.image}',
+                                      resolveImageUrl(sub.image),
                                       width: 70,
                                       height: 70,
                                       fit: BoxFit.cover,
@@ -171,7 +175,7 @@ class _VendorGroupState extends State<VendorGroup> {
                                 child:
                                     imageUrl.isNotEmpty
                                         ? Image.network(
-                                          imageUrl,
+                                          resolveImageUrl(imageUrl),
                                           fit: BoxFit.cover,
                                           errorBuilder: (_, __, ___) {
                                             return Image.asset("assets/images/category/vendor_category/img.png", fit: BoxFit.cover);

@@ -32,16 +32,10 @@ class AuthController extends GetxController implements GetxService {
     ResponseModel? responseModel;
     try {
       Response response = await authRepo.getUserProfile();
-      log(
-        response.bodyString ?? "",
-        name: "***** Response in fetchUserProfile () ******",
-      );
+      log(response.bodyString ?? "", name: "***** Response in fetchUserProfile () ******");
       if (response.statusCode == 200 && response.body['data'] != null) {
         userProfile = UserProfile.fromJson(response.body['data']);
-        responseModel = ResponseModel(
-          true,
-          "User profile fetched successfully",
-        );
+        responseModel = ResponseModel(true, "User profile fetched successfully");
       } else {
         responseModel = ResponseModel(false, "Failed to fetch user profile");
       }
@@ -54,34 +48,16 @@ class AuthController extends GetxController implements GetxService {
     return responseModel;
   }
 
-  Future<ResponseModel?> updateUserProfile({
-    required String name,
-    required String email,
-    String? dob,
-    String? gender,
-    required String phone,
-  }) async {
+  Future<ResponseModel?> updateUserProfile({required String name, required String email, String? dob, String? gender, required String phone}) async {
     isLoading = true;
     update();
     ResponseModel? responseModel;
     try {
-      Response response = await authRepo.updateUserProfile(
-        name: name,
-        email: email,
-        dob: dob,
-        gender: gender,
-        phone: phone,
-      );
-      log(
-        "${response.bodyString}",
-        name: "***** Response in updateUserProfile () ******",
-      );
+      Response response = await authRepo.updateUserProfile(name: name, email: email, dob: dob, gender: gender, phone: phone);
+      log("${response.bodyString}", name: "***** Response in updateUserProfile () ******");
       if (response.statusCode == 200) {
         fetchUserProfile();
-        responseModel = ResponseModel(
-          true,
-          "User profile updated successfully",
-        );
+        responseModel = ResponseModel(true, "User profile updated successfully");
       } else {
         responseModel = ResponseModel(false, "Failed to update user profile");
       }
@@ -126,15 +102,10 @@ class AuthController extends GetxController implements GetxService {
         return null;
       }
 
-      final GoogleSignInAuthentication googleAuth =
-          await googleUser.authentication;
-      final credential = GoogleAuthProvider.credential(
-        accessToken: googleAuth.accessToken,
-        idToken: googleAuth.idToken,
-      );
+      final GoogleSignInAuthentication googleAuth = await googleUser.authentication;
+      final credential = GoogleAuthProvider.credential(accessToken: googleAuth.accessToken, idToken: googleAuth.idToken);
 
-      final UserCredential userCredential = await FirebaseAuth.instance
-          .signInWithCredential(credential);
+      final UserCredential userCredential = await FirebaseAuth.instance.signInWithCredential(credential);
       final User? firebaseUser = userCredential.user;
       final firebaseIdToken = await userCredential.user?.getIdToken();
 
@@ -151,18 +122,12 @@ class AuthController extends GetxController implements GetxService {
         return null;
       }
 
-      Response response = await authRepo.signInWithGoogle(
-        token: firebaseIdToken ?? "",
-        firebaseUid: firebaseUid,
-        deviceId: deviceId,
-      );
+      Response response = await authRepo.signInWithGoogle(token: firebaseIdToken ?? "", firebaseUid: firebaseUid, deviceId: deviceId);
 
       if (response.statusCode == 200 && response.body["token"] != null) {
         setUserToken(response.body['token']);
         await fetchUserProfile();
-        if (userProfile == null ||
-            userProfile!.name == null ||
-            userProfile!.email == null) {
+        if (userProfile == null || userProfile!.name == null || userProfile!.email == null) {
           Get.offAll(() => ProfileFormScreen());
         } else {
           Get.offAll(() => const WelcomeScreen());
