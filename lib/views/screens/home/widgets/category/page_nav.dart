@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:streammly/services/route_helper.dart';
 import 'package:streammly/views/screens/bundle/bundle_information.dart';
 import 'package:streammly/views/screens/wishlist/wishlistpage.dart';
 
@@ -35,10 +36,10 @@ class PageNav extends StatelessWidget {
                               selectedIndex.value = index;
 
                               if (filters[index] == 'Bundles') {
-                                await Get.to(() => const BundleInformation());
+                                await Navigator.push(context, getCustomRoute(child: const BundleInformation()));
                                 selectedIndex.value = 1;
                               } else if (filters[index] == 'Wishlist') {
-                                await Get.to(() => Wishlistpage());
+                                await Navigator.push(context, getCustomRoute(child: Wishlistpage()));
                                 selectedIndex.value = 1;
                               }
                             },

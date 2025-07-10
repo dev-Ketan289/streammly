@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:streammly/controllers/company_controller.dart';
+import 'package:streammly/services/route_helper.dart';
 
 import '../../../controllers/package_page_controller.dart';
 import '../../../models/company/company_location.dart';
@@ -224,7 +225,7 @@ class _VendorGroupState extends State<VendorGroup> {
                 label: "Get Quote",
                 onTap: () {
                   Navigator.pop(context);
-                  Get.to(() => const GetQuoteScreen());
+                  Navigator.push(context, getCustomRoute(child: const GetQuoteScreen()));
                 },
               ),
               const SizedBox(height: 12),

@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:developer';
 
 import 'package:flutter/material.dart';
@@ -25,12 +26,15 @@ class _ProfileFormScreenState extends State<ProfileFormScreen> {
 
   @override
   void initState() {
-    super.initState();
-    phoneController.text = Get.find<AuthController>().phoneController.text;
-    emailController.text = Get.find<AuthController>().emailController.text;
+    super.initState(); 
+    Timer.run((){
+          final authController = Get.find<AuthController>();
+    log("Phone in AuthController: ${authController.phoneController.text}", name: "Phone in AuthController");
+    phoneController.text = authController.phoneController.text;
+    emailController.text = authController.emailController.text;
     
     // Set readonly based on login method
-    final authController = Get.find<AuthController>();
+    // final authController = Get.find<AuthController>();
     if (authController.isPhoneLogin()) {
       // Phone login: make phone field readonly
       phoneController.text = authController.phoneController.text;
@@ -38,6 +42,9 @@ class _ProfileFormScreenState extends State<ProfileFormScreen> {
       // Google login: make email field readonly
       emailController.text = authController.emailController.text;
     }
+
+    });
+
   }
 
   Future<void> _pickDate() async {

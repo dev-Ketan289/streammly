@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:streammly/controllers/wishlist_controller.dart';
 import 'package:streammly/services/constants.dart';
+import 'package:streammly/services/route_helper.dart';
 
 import '../../../../../controllers/category_controller.dart';
 import '../../../../../navigation_menu.dart';
@@ -70,7 +71,7 @@ class _CategoryListScreenState extends State<CategoryListScreen> {
 
               return GestureDetector(
                 onTap: () {
-                  Get.to(() => CompanyLocatorMapScreen(categoryId: cat.id));
+                  Navigator.push(context, getCustomRoute(child: CompanyLocatorMapScreen(categoryId: cat.id)));
                 },
                 child: Container(
                   margin: const EdgeInsets.only(bottom: 16),

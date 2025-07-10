@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:streammly/services/route_helper.dart';
 import 'package:streammly/views/screens/package/booking/booking_summary.dart';
 import 'package:streammly/views/screens/package/booking/widgets/booking_form_page.dart';
 import 'package:streammly/views/screens/package/booking/widgets/booking_personal_info.dart';
@@ -87,7 +88,7 @@ class BookingPage extends StatelessWidget {
                 width: double.infinity,
                 child: ElevatedButton(
                   onPressed: () {
-                    Get.to(() => BookingSummaryPage());
+                    Navigator.push(context, getCustomRoute(child: BookingSummaryPage()));
                   },
                   style: ElevatedButton.styleFrom(
                     backgroundColor: const Color(0xFF4A6CF7),

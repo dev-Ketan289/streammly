@@ -3,6 +3,7 @@ import 'package:get/get.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:streammly/controllers/location_controller.dart';
 import 'package:streammly/navigation_menu.dart';
+import 'package:streammly/services/route_helper.dart';
 import 'package:streammly/views/screens/common/widgets/add_new_address.dart';
 
 class EnterLocationManuallyScreen extends StatelessWidget {
@@ -170,7 +171,7 @@ class EnterLocationManuallyScreen extends StatelessWidget {
                         const SizedBox(height: 8),
 
                         TextButton.icon(
-                          onPressed: () => Get.to(() => const AddNewAddressScreen()),
+                          onPressed: () => Navigator.push(context, getCustomRoute(child: AddNewAddressScreen())),
                           icon: Icon(Icons.add, color: colorScheme.primary),
                           label: Text("Add New Address", style: theme.textTheme.bodyMedium!.copyWith(color: colorScheme.primary)),
                         ),
@@ -183,7 +184,7 @@ class EnterLocationManuallyScreen extends StatelessWidget {
                           child: ElevatedButton(
                             onPressed: () {
                               controller.saveSelectedLocation();
-                              Get.to(() => NavigationMenu());
+                              Navigator.push(context, getCustomRoute(child: NavigationMenu()));
                             },
                             style: ElevatedButton.styleFrom(
                               backgroundColor: colorScheme.primary,

@@ -28,7 +28,7 @@ class PackagesPage extends StatelessWidget {
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         elevation: 0,
-        leading: IconButton(icon: const Icon(Icons.arrow_back_ios, color: Colors.black54), onPressed: () => Get.back()),
+        leading: IconButton(icon: const Icon(Icons.arrow_back_ios, color: Colors.black54), onPressed: () => Navigator.pop(context)),
         title: Center(child: Text("Packages", style: Theme.of(context).textTheme.titleMedium?.copyWith(color: Colors.black87, fontWeight: FontWeight.w600))),
         actions: [IconButton(icon: const Icon(Icons.filter_alt, color: Colors.indigo), onPressed: () => Get.bottomSheet(const FilterPage(), isScrollControlled: true))],
       ),

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:streammly/controllers/category_controller.dart';
+import 'package:streammly/services/route_helper.dart';
 import 'package:streammly/views/screens/bundle/bundle_categories_page.dart';
 import '../package/booking/widgets/time_picker.dart'; // Adjust if needed
 
@@ -320,9 +321,7 @@ class _BundleInformationState extends State<BundleInformation> {
                 height: 48,
                 child: ElevatedButton(
                   onPressed: () {
-                    Get.to(
-                      () => Categories(selectedCategories: selectedCategories),
-                    );
+                    Navigator.push(context, getCustomRoute(child: Categories(selectedCategories: selectedCategories)));
                     debugPrint("Selected Event: $selectedEventType");
                     debugPrint("Selected Categories: $selectedCategories");
                   },

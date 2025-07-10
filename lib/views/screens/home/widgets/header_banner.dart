@@ -3,6 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:page_transition/page_transition.dart';
+import 'package:streammly/services/route_helper.dart';
 import 'package:streammly/views/screens/profile/drawer.dart';
 import '../../../../controllers/location_controller.dart';
 import '../../../../models/banner/banner_item.dart';
@@ -191,7 +193,14 @@ class _HeaderBannerState extends State<HeaderBanner> {
                       IconButton(
                         icon: Icon(Icons.menu, color: theme.colorScheme.onPrimary),
                         onPressed: () {
-                          Get.to(() => const ProfilePage(), transition: Transition.leftToRight, duration: const Duration(milliseconds: 800));
+                          Navigator.push(
+                            context,
+                            getCustomRoute(
+                              child: ProfilePage(),
+                              duration: Duration(milliseconds: 400),
+                              type: PageTransitionType.leftToRight,
+                            ),
+                          );
                         },
                       ),
                       const SizedBox(width: 8),
@@ -227,24 +236,24 @@ class _HeaderBannerState extends State<HeaderBanner> {
                     Text(
                       title,
                       style: GoogleFonts.openSans(
-                        fontSize: 29,
-                        fontWeight: FontWeight.w700,
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
                         color: theme.colorScheme.onPrimary,
                       ),
                     ),
-                  if (subtitle.isNotEmpty) const SizedBox(height: 6),
+                  if (subtitle.isNotEmpty) const SizedBox(height: 2),
                   if (subtitle.isNotEmpty)
                     Text(
                       subtitle,
                       style: GoogleFonts.openSans(
                         color: theme.colorScheme.onPrimary,
-                        fontSize: 16,
+                        fontSize: 15,
                       ),
                       maxLines: 4,
                       overflow: TextOverflow.clip,
                     ),
 
-                  const SizedBox(height: 12),
+                  const SizedBox(height: 10),
 
                   // Specialized In + Specialities Section
                   if (widget.specialities != null && widget.specialities!.isNotEmpty) ...[

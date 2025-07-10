@@ -47,7 +47,7 @@ class _LanguagePreferencesScreenState extends State<LanguagePreferencesScreen> {
         leading: IconButton(
           icon: const Icon(Icons.arrow_back_ios),
           onPressed: () {
-            Get.back();
+            Navigator.pop(context);
           },
         ),
         title: const Text(

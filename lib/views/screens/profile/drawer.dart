@@ -8,12 +8,15 @@ import 'package:streammly/controllers/auth_controller.dart'; // Added
 import 'package:streammly/controllers/home_screen_controller.dart';
 import 'package:streammly/generated/assets.dart';
 import 'package:streammly/navigation_menu.dart';
+import 'package:streammly/services/route_helper.dart';
+import 'package:streammly/views/screens/auth_screens/login_screen.dart';
 import 'package:streammly/views/screens/profile/components/profile_section_widget.dart';
 import 'package:streammly/views/screens/profile/language_preferences.dart';
 import 'package:streammly/views/screens/profile/linked_pages.dart';
 import 'package:streammly/views/screens/profile/notifications_page.dart';
 import 'package:streammly/views/screens/profile/offers_page.dart';
 import 'package:streammly/views/screens/profile/profile_screen.dart';
+import 'package:streammly/views/screens/splash_screen/splash_screen.dart';
 
 import 'components/profile_item_widget.dart';
 
@@ -51,7 +54,7 @@ class _ProfilePageState extends State<ProfilePage> {
         leading: IconButton(
           icon: const Icon(Icons.arrow_back_ios_new, color: Colors.black),
           onPressed: () {
-            Get.back();
+            Navigator.pop(context);
           },
         ),
         title: const Text(
@@ -72,10 +75,10 @@ class _ProfilePageState extends State<ProfilePage> {
             onTap: () {
               if (authController.isLoggedIn()) {
                 log("navigating to profile");
-                Get.to(() => ProfileScreen());
+                Navigator.push(context, getCustomRoute(child: ProfileScreen()));
               } else {
                 log("navigating to login");
-                Get.toNamed('/login');
+                Navigator.push(context, getCustomRoute(child: LoginScreen()));
               }
             },
             child: Container(
@@ -155,14 +158,14 @@ class _ProfilePageState extends State<ProfilePage> {
             icon: SvgPicture.asset(Assets.svgLanguage, height: 26, width: 26),
             title: "Language Preferences",
             onTap: () {
-              Get.to(() => LanguagePreferencesScreen());
+              Navigator.push(context, getCustomRoute(child: LanguagePreferencesScreen()));
             },
           ),
           ProfileItemWidget(
             icon: SvgPicture.asset(Assets.svgBell, height: 26, width: 26),
             title: "Notification",
             onTap: () {
-              Get.to(() => NotificationsPage());
+              Navigator.push(context, getCustomRoute(child: NotificationsPage()));
             },
           ),
           ProfileItemWidget(
@@ -174,7 +177,7 @@ class _ProfilePageState extends State<ProfilePage> {
             icon: SvgPicture.asset(Assets.svgLinked, height: 26, width: 26),
             title: "Linked Accounts",
             onTap: () {
-              Get.to(() => LinkedPages());
+              Navigator.push(context, getCustomRoute(child: LinkedPages()));
             },
           ),
 
@@ -201,7 +204,7 @@ class _ProfilePageState extends State<ProfilePage> {
             icon: SvgPicture.asset(Assets.svgSaved, height: 26, width: 26),
             title: "Saved Offers",
             onTap: () {
-              Get.to(() => OffersPage());
+              Navigator.push(context, getCustomRoute(child: OffersPage()));
             },
           ),
           ProfileItemWidget(
@@ -298,9 +301,11 @@ class _ProfilePageState extends State<ProfilePage> {
             icon: SvgPicture.asset(Assets.svgLogout, height: 26, width: 26),
             title: "Logout",
             onTap: () {
-              authController.clearSharedData();
-              Navigator.pop(context);
+              authController.clearSharedData(); 
               Fluttertoast.showToast(msg: "Logged out successfully");
+              Navigator.of(context).pushAndRemoveUntil(getCustomRoute(child: NavigationMenu()), (route) => false,); 
+              // Navigator.of(context).pushNamedAndRemoveUntil('/home',(route) => false,  );
+              // Navigator.pop(context);
             },
           ),
           SizedBox(height: screenHeight * 0.03),

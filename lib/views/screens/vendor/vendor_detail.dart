@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:streammly/controllers/company_controller.dart';
+import 'package:streammly/services/route_helper.dart';
 
 import '../../../models/category/category_item.dart';
 import '../../../models/company/company_location.dart';
@@ -76,7 +77,7 @@ class _VendorDetailScreenState extends State<VendorDetailScreen> {
                         CategoryItem(
                           label: 'Baby Shoot',
                           imagePath: 'assets/images/category/vendor_category/img.png',
-                          onTap: () => Get.to(() => VendorGroup(company: widget.company, subCategoryId: 2)),
+                          onTap: () => Navigator.push(context, getCustomRoute(child: VendorGroup(company: widget.company, subCategoryId: 2))),
                         ),
                         CategoryItem(label: 'Wedding Shoot', imagePath: 'assets/images/category/vendor_category/img.png', onTap: () {}),
                         CategoryItem(label: 'Portfolio Shoot', imagePath: 'assets/images/category/vendor_category/img.png', onTap: () {}),
@@ -92,7 +93,7 @@ class _VendorDetailScreenState extends State<VendorDetailScreen> {
                           return CategoryItem(
                             label: sub.title,
                             imagePath: resolveImageUrl(sub.image),
-                            onTap: () => Get.to(() => VendorGroup(company: widget.company, subCategoryId: sub.id)),
+                            onTap: () => Navigator.push(context, getCustomRoute(child: VendorGroup(company: widget.company, subCategoryId: sub.id))),
                           );
                         }).toList(),
                   );

@@ -8,6 +8,7 @@ import 'package:flutter/rendering.dart';
 import 'package:get/get.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:permission_handler/permission_handler.dart';
+import 'package:streammly/services/route_helper.dart';
 
 import '../../../controllers/category_controller.dart';
 import '../../../controllers/company_controller.dart';
@@ -429,7 +430,7 @@ class _CompanyLocatorMapScreenState extends State<CompanyLocatorMapScreen> {
                                     child: GestureDetector(
                                       onTap: () async {
                                         await controller.fetchCompanyById(company.id!);
-                                        Get.to(() => const VendorDescription());
+                                        Navigator.push(context, getCustomRoute(child: VendorDescription()));
                                       },
                                       child: VendorInfoCard(
                                         logoImage: company.logo ?? '',

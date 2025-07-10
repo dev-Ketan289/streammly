@@ -5,6 +5,8 @@ import 'package:pin_code_fields/pin_code_fields.dart';
 import 'package:sms_autofill/sms_autofill.dart';
 import 'package:streammly/controllers/auth_controller.dart';
 import 'package:streammly/controllers/otp_controller.dart';
+import 'package:streammly/navigation_menu.dart';
+import 'package:streammly/services/route_helper.dart';
 import 'package:streammly/views/screens/auth_screens/welcome.dart';
 
 import '../../../generated/animation/shake_widget.dart';
@@ -147,7 +149,7 @@ class _OtpScreenState extends State<OtpScreen> {
                                         onPressed: () {
                                           Get.find<OtpController>().verifyOtp(phone: phone, otp: otpTextController.text).then((value) {
                                             if (value.isSuccess) {
-                                              Get.to(() => const WelcomeScreen());
+                                              Navigator.pushAndRemoveUntil(context, getCustomRoute(child: NavigationMenu()), (route) => false,);
                                             }
                                           });
                                         },

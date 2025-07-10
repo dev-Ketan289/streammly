@@ -105,7 +105,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
       backgroundColor: Colors.grey[100],
       appBar: AppBar(
         backgroundColor: Colors.transparent,
-        leading: IconButton(icon: const Icon(Icons.arrow_back_ios_new, color: Colors.white), onPressed: () => Get.back()),
+        leading: IconButton(icon: const Icon(Icons.arrow_back_ios_new, color: Colors.white), onPressed: () => Navigator.pop(context)),
         title: const Text('Your Profile', style: TextStyle(color: Colors.white, fontSize: 20, fontWeight: FontWeight.bold)),
         centerTitle: true,
       ),
@@ -328,7 +328,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                   )
                                   .then((value) {
                                     if (value?.isSuccess ?? false) {
-                                      Get.back();
+                                      Navigator.pop(context);
                                       Get.snackbar("Success", "Profile updated successfully");
                                     }
                                   });

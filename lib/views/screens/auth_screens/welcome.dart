@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:streammly/services/route_helper.dart';
 import 'package:streammly/views/screens/auth_screens/create_user.dart';
 import 'package:streammly/views/screens/common/location_screen.dart';
 
@@ -25,10 +26,10 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
       }
       if (authController.userProfile == null || authController.userProfile!.name == null || authController.userProfile!.email == null) {
         // New user: show profile form
-        Get.off(() => ProfileFormScreen());
+        Navigator.pushReplacement(context, getCustomRoute(child: ProfileFormScreen()));
       } else {
         // Existing user: go to location screen
-        Get.off(() => const LocationScreen());
+        Navigator.pushReplacement(context, getCustomRoute(child: LocationScreen()));
       }
     });
   }

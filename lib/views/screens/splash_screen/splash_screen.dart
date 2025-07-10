@@ -6,6 +6,9 @@ import 'package:streammly/controllers/auth_controller.dart';
 import 'package:streammly/generated/assets.dart';
 import 'package:streammly/navigation_menu.dart';
 import 'package:streammly/services/route_helper.dart';
+import 'package:streammly/views/screens/auth_screens/login_screen.dart';
+import 'package:streammly/views/screens/auth_screens/welcome.dart';
+import 'package:streammly/views/screens/home/home_screen.dart';
 // Add your custom image widget if needed
 
 class SplashScreen extends StatefulWidget {
@@ -20,22 +23,43 @@ class _SplashScreenState extends State<SplashScreen> {
   void initState() {
     super.initState();
 
-    Timer(const Duration(seconds: 3), () {
+    Timer(const Duration(seconds: 2), () { 
       // Navigate to next screen after splash
       if (Get.find<AuthController>().isLoggedIn()) {
         Navigator.push(context, getCustomRoute(child: NavigationMenu()));
 
-        // Navigator.pushReplacementNamed(context, '/home'); //
+     
       } else {
         Navigator.push(context, getCustomRoute(child: NavigationMenu()));
-        // Navigator.pushReplacementNamed(
-        //   context,
-        //   '/login',
-        // ); // change route as needed
-        // Navigator.push(context, getCustomRoute(child: LocationScreen()));
+        
       }
     });
+  }  
+  void initMethos(){ 
+    final authCtrl=Get.find<AuthController>(); 
+    if(authCtrl.isLoggedIn()){
+      // Navigator.of(context).push(getCustomRoute(child: ));
+      Navigator.of(context).pushAndRemoveUntil(getCustomRoute(child: NavigationMenu()), (route) => false,); 
+      
+    }else{
+      Navigator.of(context).pushAndRemoveUntil(getCustomRoute(child: WelcomeScreen()), (route) => false,);
+      
+    }
+
   }
+
+
+
+
+
+
+
+
+
+
+
+
+
 
   @override
   Widget build(BuildContext context) {

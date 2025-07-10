@@ -62,7 +62,7 @@ class _WishlistpageState extends State<Wishlistpage> {
         leading: IconButton(
           icon: const Icon(Icons.arrow_back_ios_new, color: Colors.black),
           onPressed: () {
-            Get.back();
+            Navigator.pop(context);
           },
         ),
         title: const Text(
@@ -241,7 +241,7 @@ class WishlistBottomSheet extends StatelessWidget {
                   ),
                 ),
                 onPressed: () {
-                  Get.back();
+                  Navigator.pop(context);
                 },
                 child: Text(
                   'Yes, Remove',
@@ -264,7 +264,7 @@ class WishlistBottomSheet extends StatelessWidget {
                   ),
                 ),
                 onPressed: () {
-                  Get.back();
+                  Navigator.pop(context);
                 },
                 child: Text(
                   'Keep Wishlist',

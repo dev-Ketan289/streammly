@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:streammly/controllers/location_controller.dart';
+import 'package:streammly/services/route_helper.dart';
 import 'package:streammly/views/screens/common/enter_location_manually.dart';
 
 class LocationScreen extends StatelessWidget {
@@ -83,7 +84,7 @@ class LocationScreen extends StatelessWidget {
                                   : () async {
                                     try {
                                       await locationController.getCurrentLocation();
-                                      Get.to(() => EnterLocationManuallyScreen());
+                                      Navigator.push(context, getCustomRoute(child: EnterLocationManuallyScreen()));
                                     } catch (e) {
                                       Get.snackbar(
                                         'Error',
@@ -110,7 +111,7 @@ class LocationScreen extends StatelessWidget {
                       child: OutlinedButton(
                         style: OutlinedButton.styleFrom(side: BorderSide(color: colorScheme.primary), shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10))),
                         onPressed: () {
-                          Get.to(() => EnterLocationManuallyScreen());
+                          Navigator.push(context, getCustomRoute(child: EnterLocationManuallyScreen()));
                         },
                         child: Text("Enter Location Manually", style: textTheme.bodyLarge!.copyWith(color: colorScheme.primary, fontWeight: FontWeight.w600)),
                       ),

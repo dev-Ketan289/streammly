@@ -5,13 +5,8 @@ import 'package:permission_handler/permission_handler.dart';
 import 'package:streammly/controllers/home_screen_controller.dart';
 import 'package:streammly/data/init.dart';
 import 'package:streammly/services/theme.dart';
-import 'package:streammly/views/screens/auth_screens/login_screen.dart';
-import 'package:streammly/views/screens/common/location_screen.dart';
-import 'package:streammly/views/screens/common/webview_screen.dart';
-import 'package:streammly/views/screens/home/widgets/category/category.dart';
+import 'package:streammly/views/screens/splash_screen/splash_screen.dart';
 
-import 'navigation_menu.dart';
-import 'views/screens/splash_screen/splash_screen.dart';
 
 final navigatorKey = GlobalKey<NavigatorState>();
 
@@ -40,24 +35,25 @@ class StreammlyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return GetMaterialApp(
+    return MaterialApp(
       navigatorKey: navigatorKey,
       debugShowCheckedModeBanner: false,
       title: 'Streammly',
       theme: CustomTheme.light,
       darkTheme: CustomTheme.dark,
-      themeMode: ThemeMode.system,
-      initialRoute: '/splash',
-      getPages: [
-        GetPage(name: '/splash', page: () => const SplashScreen()),
-        GetPage(name: '/Location', page: () => const LocationScreen()),
-        GetPage(name: '/home', page: () => NavigationMenu()),
-        GetPage(name: '/login', page: () => LoginScreen()),
+      themeMode: ThemeMode.system, 
+      home: SplashScreen(),
+      // initialRoute: '/splash',
+      // getPages: [
+      //   GetPage(name: '/splash', page: () => const SplashScreen()),
+      //   GetPage(name: '/Location', page: () => const LocationScreen()),
+      //   GetPage(name: '/home', page: () => NavigationMenu()),
+      //   GetPage(name: '/login', page: () => LoginScreen()),
 
-        // Promo slider redirection routes
-        GetPage(name: '/webview', page: () => const WebViewScreen()),
-        GetPage(name: '/category', page: () => CategoryListScreen()),
-      ],
+      //   // Promo slider redirection routes
+      //   GetPage(name: '/webview', page: () => const WebViewScreen()),
+      //   GetPage(name: '/category', page: () => CategoryListScreen()),
+      // ],
     );
   }
 }

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:streammly/controllers/booking_form_controller.dart';
+import 'package:streammly/services/route_helper.dart';
 import 'package:streammly/views/screens/package/booking/thanks_for_booking.dart';
 
 import '../../../../controllers/package_page_controller.dart';
@@ -257,11 +258,19 @@ class BookingSummaryPage extends StatelessWidget {
       width: double.infinity,
       height: 48,
       margin: const EdgeInsets.only(top: 16),
-      child: ElevatedButton(
-        onPressed: () => Get.to(() => ThanksForBookingPage()),
-        style: ElevatedButton.styleFrom(backgroundColor: const Color(0xFF4A90E2), shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)), elevation: 0),
-        child: const Text('Let\'s Continue', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600, color: Colors.white)),
-      ),
-    );
+      child: Builder(
+        builder: (context) => ElevatedButton(
+          onPressed: () => Navigator.push(context, getCustomRoute(child: ThanksForBookingPage())),
+          style: ElevatedButton.styleFrom(
+            backgroundColor: const Color(0xFF4A90E2),
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+            elevation: 0,
+          ),
+          child: const Text(
+            'Let\'s Continue',
+            style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600, color: Colors.white),
+          ),
+        ),
+      ));
   }
 }

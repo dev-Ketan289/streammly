@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:streammly/services/route_helper.dart';
 import 'package:streammly/views/screens/home/vendor_locator.dart';
 import 'package:streammly/views/screens/home/widgets/category/page_nav.dart';
 
@@ -49,7 +50,7 @@ class _HomeScreenState extends State<HomeScreen> {
         label: model.title,
         imagePath: fullImageUrl,
         onTap: () {
-          Get.to(() => CompanyLocatorMapScreen(categoryId: model.id));
+          Navigator.push(context, getCustomRoute(child: CompanyLocatorMapScreen(categoryId: model.id)));
         },
       );
     }).toList();
@@ -79,7 +80,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   const SizedBox(height: 24),
                   isCategoryLoading
                       ? const CircularProgressIndicator()
-                      : CategoryScroller(title: "Categories", onSeeAll: () => Get.to(() => CategoryListScreen()), categories: convertToCategoryItems(categoryModels)),
+                      : CategoryScroller(title: "Categories", onSeeAll: () => Navigator.push(context, getCustomRoute(child: CategoryListScreen())), categories: convertToCategoryItems(categoryModels)),
                   const SizedBox(height: 24),
                   PageNav(),
                   const SizedBox(height: 24),
