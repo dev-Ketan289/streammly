@@ -203,7 +203,7 @@ class _HeaderBannerState extends State<HeaderBanner> {
                           ),
                           child: TextField(
                             decoration: InputDecoration(
-                              hintText: "What are you looking for?",
+                              hintText: "Searching...",
                               prefixIcon: Icon(Icons.search, color: theme.iconTheme.color),
                               border: InputBorder.none,
                               contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),

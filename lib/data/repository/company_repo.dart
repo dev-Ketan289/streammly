@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import '../../models/company/company_location.dart';
 import '../api/api_client.dart';
 
@@ -7,8 +9,9 @@ class CompanyRepo {
 
   Future<List<CompanyLocation>> fetchCompaniesByCategory(int categoryId) async {
     final response = await apiClient.getData("api/v1/company/getcompanyslocations/$categoryId");
-
     final List<dynamic> data = response.body['data'] ?? [];
+    log(data.toString(), name: 'data');
+    log(response.bodyString.toString() ,name: 'data');
     return data.map((e) => CompanyLocation.fromJson(e)).toList();
   }
 

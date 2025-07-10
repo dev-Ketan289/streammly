@@ -94,6 +94,7 @@ class CompanyController extends GetxController {
           userPosition!.longitude,
           company.latitude!,
           company.longitude!,
+          
         );
         company?.estimatedTime = _estimateTimeFromDistance(company.distanceKm!);
       }
@@ -184,5 +185,6 @@ class CompanyController extends GetxController {
   void onInit() {
     super.onInit();
     fetchCompaniesByCategory(selectedCategoryId);
+
   }
 }
