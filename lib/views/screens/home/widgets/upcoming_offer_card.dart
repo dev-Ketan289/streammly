@@ -26,23 +26,9 @@ class UpcomingOfferCard extends StatelessWidget {
                     children: [
                       Text(
                         "Upcoming",
-                        style: GoogleFonts.poppins(
-                          textStyle: theme.textTheme.bodyMedium?.copyWith(
-                            fontWeight: FontWeight.bold,
-                            fontSize: 14,
-                            color: theme.colorScheme.onSurface,
-                          ),
-                        ),
+                        style: GoogleFonts.poppins(textStyle: theme.textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.bold, fontSize: 14, color: theme.colorScheme.onSurface)),
                       ),
-                      Text(
-                        "View All",
-                        style: GoogleFonts.poppins(
-                          textStyle: theme.textTheme.bodySmall?.copyWith(
-                            fontSize: 12,
-                            color: theme.colorScheme.onSurfaceVariant,
-                          ),
-                        ),
-                      ),
+                      Text("View All", style: GoogleFonts.poppins(textStyle: theme.textTheme.bodySmall?.copyWith(fontSize: 12, color: theme.colorScheme.onSurfaceVariant))),
                     ],
                   ),
                   const SizedBox(height: 10),
@@ -51,11 +37,7 @@ class UpcomingOfferCard extends StatelessWidget {
                   Text(
                     "Wedding Photography Special",
                     style: GoogleFonts.playfairDisplay(
-                      textStyle: theme.textTheme.titleLarge?.copyWith(
-                        fontSize: 20,
-                        fontWeight: FontWeight.w700,
-                        color: theme.colorScheme.onSurface,
-                      ),
+                      textStyle: theme.textTheme.titleLarge?.copyWith(fontSize: 20, fontWeight: FontWeight.w700, color: theme.colorScheme.onSurface),
                     ),
                   ),
 
@@ -66,24 +48,11 @@ class UpcomingOfferCard extends StatelessWidget {
                     children: [
                       Icon(Icons.calendar_today, size: 16, color: theme.iconTheme.color),
                       const SizedBox(width: 6),
-                      Text(
-                        "15 June, Saturday",
-                        style: theme.textTheme.bodySmall?.copyWith(
-                          fontSize: 12,
-                          color: theme.colorScheme.onSurface,
-                        ),
-                        overflow: TextOverflow.ellipsis,
-                      ),
+                      Text("15 June, Saturday", style: theme.textTheme.bodySmall?.copyWith(fontSize: 12, color: theme.colorScheme.onSurface), overflow: TextOverflow.ellipsis),
                       const SizedBox(width: 16),
                       Icon(Icons.access_time, size: 16, color: theme.iconTheme.color),
                       const SizedBox(width: 6),
-                      Text(
-                        "12:30 pm",
-                        style: theme.textTheme.bodySmall?.copyWith(
-                          fontSize: 12,
-                          color: theme.colorScheme.onSurface,
-                        ),
-                      ),
+                      Text("12:30 pm", style: theme.textTheme.bodySmall?.copyWith(fontSize: 12, color: theme.colorScheme.onSurface)),
                     ],
                   ),
                   const SizedBox(height: 30),
@@ -91,10 +60,7 @@ class UpcomingOfferCard extends StatelessWidget {
                   // Photographer Text (you didn't want theme here originally)
                   Text(
                     "3 Photographers",
-                    style: theme.textTheme.bodySmall?.copyWith(
-                      fontSize: 12,
-                      color: theme.colorScheme.onSurface,
-                    ),
+                    style: theme.textTheme.bodySmall?.copyWith(fontSize: 12, color: theme.colorScheme.onSurface),
                     maxLines: 2,
                     overflow: TextOverflow.ellipsis,
                   ),
@@ -109,10 +75,7 @@ class UpcomingOfferCard extends StatelessWidget {
               child: Container(
                 height: 60,
                 width: 140,
-                decoration: BoxDecoration(
-                  color: theme.colorScheme.primary,
-                  borderRadius: const BorderRadius.only(topLeft: Radius.circular(40)),
-                ),
+                decoration: BoxDecoration(color: theme.colorScheme.primary, borderRadius: const BorderRadius.only(topLeft: Radius.circular(40))),
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [

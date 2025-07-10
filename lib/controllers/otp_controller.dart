@@ -10,14 +10,14 @@ import 'package:streammly/data/repository/auth_repo.dart';
 import 'package:streammly/models/response/response_model.dart';
 import 'package:streammly/views/screens/auth_screens/welcome.dart';
 
-import '../views/screens/auth_screens/cretae_user.dart';
+import '../views/screens/auth_screens/create_user.dart';
 import 'auth_controller.dart';
 
 class OtpController extends GetxController implements GetxService {
   final AuthRepo authRepo;
   OtpController({required this.authRepo});
 
-  final TextEditingController otpController = TextEditingController();
+
 
   RxInt secondsRemaining = 30.obs;
   RxString receivedOTP = ''.obs;
@@ -26,7 +26,7 @@ class OtpController extends GetxController implements GetxService {
 
   Timer? _timer;
 
-  Future<ResponseModel> verifyOtp() async {
+  Future<ResponseModel> verifyOtp({required String phone,required String otp}) async {
     isLoading = true;
     update();
     ResponseModel responseModel;
@@ -47,20 +47,19 @@ class OtpController extends GetxController implements GetxService {
       String deviceId = await Get.find<AuthController>().getOrCreateDeviceId();
 
       /// Verify OTP with device ID
-      Response response = await authRepo.verifyOtp(phone: phone, otp: otpController.text, deviceId: deviceId);
+      Response response = await authRepo.verifyOtp(phone: phone, otp: otp, deviceId: deviceId);
 
       if (response.statusCode == 200 && response.body['data']['token'] != null) {
         Get.find<AuthController>().setUserToken(response.body['data']['token']);
+        Get.find<AuthController>().loginMethod = 'phone';
 
         /// Fetch user profile after login
         await Get.find<AuthController>().fetchUserProfile();
 
         /// Check if user is new or existing
-        if (Get.find<AuthController>().userProfile.value == null ||
-            Get.find<AuthController>().userProfile.value!.name == null ||
-            Get.find<AuthController>().userProfile.value!.email == null) {
+        if (Get.find<AuthController>().userProfile == null || Get.find<AuthController>().userProfile!.name == null || Get.find<AuthController>().userProfile!.email == null) {
           /// New User → Show Profile Form
-          Get.offAll(() => const ProfileFormScreen());
+          Get.offAll(() => ProfileFormScreen());
         } else {
           /// Existing User → Go to Welcome Screen
           Get.offAll(() => const WelcomeScreen());
@@ -97,8 +96,8 @@ class OtpController extends GetxController implements GetxService {
     });
   }
 
-  void confirmOTP(String phone, {VoidCallback? onVerified}) {
-    final enteredOTP = otpController.text.trim();
+  void confirmOTP(String phone,String otp, {VoidCallback? onVerified}) {
+    final enteredOTP = otp.trim();
 
     ///  Bypass check for test number
     if (phone == "8111111111") {
@@ -152,12 +151,5 @@ class OtpController extends GetxController implements GetxService {
     } catch (e) {
       Fluttertoast.showToast(msg: "Could not connect to server");
     }
-  }
-
-  @override
-  void onClose() {
-    otpController.dispose();
-    _timer?.cancel();
-    super.onClose();
   }
 }

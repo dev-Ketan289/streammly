@@ -1,6 +1,8 @@
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:permission_handler/permission_handler.dart';
+import 'package:streammly/controllers/home_screen_controller.dart';
 import 'package:streammly/data/init.dart';
 import 'package:streammly/services/theme.dart';
 import 'package:streammly/views/screens/auth_screens/login_screen.dart';
@@ -11,11 +13,26 @@ import 'package:streammly/views/screens/home/widgets/category/category.dart';
 import 'navigation_menu.dart';
 import 'views/screens/splash_screen/splash_screen.dart';
 
+final navigatorKey = GlobalKey<NavigatorState>();
+
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  Get.put(HomeController);
   await Firebase.initializeApp();
   await Init().initialize();
+
+  // Request permissions before app starts
+  await requestPermissions();
+
   runApp(const StreammlyApp());
+}
+
+Future<void> requestPermissions() async {
+  // Request SMS permission
+  await Permission.sms.request();
+
+  // Request Location permission
+  await Permission.location.request();
 }
 
 class StreammlyApp extends StatelessWidget {
@@ -24,6 +41,7 @@ class StreammlyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return GetMaterialApp(
+      navigatorKey: navigatorKey,
       debugShowCheckedModeBanner: false,
       title: 'Streammly',
       theme: CustomTheme.light,
@@ -39,9 +57,6 @@ class StreammlyApp extends StatelessWidget {
         // Promo slider redirection routes
         GetPage(name: '/webview', page: () => const WebViewScreen()),
         GetPage(name: '/category', page: () => CategoryListScreen()),
-        // GetPage(name: '/subcategory', page: () => const SubcategoryScreen()),
-        // GetPage(name: '/vendor', page: () => const VendorScreen()),
-        // GetPage(name: '/company', page: () => const CompanyScreen()),
       ],
     );
   }

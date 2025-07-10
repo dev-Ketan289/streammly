@@ -19,14 +19,11 @@ class PageNav extends StatelessWidget {
           children: [
             Expanded(
               child: Obx(
-                    () => Row(
+                () => Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     Container(
-                      decoration: BoxDecoration(
-                        color: Colors.grey.shade200,
-                        borderRadius: BorderRadius.circular(40),
-                      ),
+                      decoration: BoxDecoration(color: Colors.grey.shade200, borderRadius: BorderRadius.circular(40)),
                       padding: const EdgeInsets.symmetric(horizontal: 1, vertical: 4),
                       child: Row(
                         mainAxisAlignment: MainAxisAlignment.center,
@@ -47,29 +44,14 @@ class PageNav extends StatelessWidget {
                             },
                             child: Container(
                               padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 5),
-                              decoration: BoxDecoration(
-                                color: isSelected ? theme.colorScheme.primary : Colors.transparent,
-                                borderRadius: BorderRadius.circular(30),
-                              ),
+                              decoration: BoxDecoration(color: isSelected ? theme.colorScheme.primary : Colors.transparent, borderRadius: BorderRadius.circular(30)),
                               child: Row(
                                 children: [
-                                  Icon(
-                                    icons[index],
-                                    size: 16,
-                                    color: isSelected
-                                        ? theme.colorScheme.onPrimary
-                                        : theme.colorScheme.onSurfaceVariant,
-                                  ),
+                                  Icon(icons[index], size: 16, color: isSelected ? theme.colorScheme.onPrimary : theme.colorScheme.onSurfaceVariant),
                                   const SizedBox(width: 4),
                                   Text(
                                     filters[index],
-                                    style: TextStyle(
-                                      fontSize: 9,
-                                      color: isSelected
-                                          ? theme.colorScheme.onPrimary
-                                          : theme.colorScheme.onSurface,
-                                      fontWeight: FontWeight.w500,
-                                    ),
+                                    style: TextStyle(fontSize: 9, color: isSelected ? theme.colorScheme.onPrimary : theme.colorScheme.onSurface, fontWeight: FontWeight.w500),
                                   ),
                                 ],
                               ),
@@ -94,14 +76,7 @@ class PageNav extends StatelessWidget {
             },
             child: Row(
               children: [
-                Text(
-                  "See all",
-                  style: TextStyle(
-                    color: theme.colorScheme.primary,
-                    fontWeight: FontWeight.w500,
-                    fontSize: 13,
-                  ),
-                ),
+                Text("See all", style: TextStyle(color: theme.colorScheme.primary, fontWeight: FontWeight.w500, fontSize: 13)),
                 const SizedBox(width: 4),
                 Icon(Icons.arrow_forward_ios, size: 14, color: theme.colorScheme.primary),
               ],

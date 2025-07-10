@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:get/get.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:streammly/controllers/auth_controller.dart';
 import 'package:streammly/generated/assets.dart';
 import 'package:streammly/views/screens/profile/components/custom_textfield.dart';
 
@@ -16,17 +17,36 @@ class ProfileScreen extends StatefulWidget {
 
 class _ProfileScreenState extends State<ProfileScreen> {
   final _formKey = GlobalKey<FormState>();
-  final TextEditingController _usernameController = TextEditingController(text: "UMA RAJPUT");
+  final TextEditingController _usernameController = TextEditingController();
   final TextEditingController _mobileController = TextEditingController();
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _dobController = TextEditingController();
   String? _selectedGender;
+  final AuthController authController = Get.find<AuthController>();
 
   // Variables to hold selected images
   File? _profileImage; // For profile picture
   File? _coverImage; // For banner image
 
   final ImagePicker _picker = ImagePicker();
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      final value = await authController.fetchUserProfile();
+      if (value?.isSuccess ?? false) {
+        final profile = authController.userProfile;
+        setState(() {
+          _usernameController.text = profile?.name ?? "";
+          _mobileController.text = profile?.phone ?? "";
+          _emailController.text = profile?.email ?? "";
+          _dobController.text = profile?.dob ?? "";
+          _selectedGender = profile?.gender ?? "";
+        });
+      }
+    });
+  }
 
   @override
   void dispose() {
@@ -274,7 +294,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                           hintText: 'Enter Gender',
                           border: OutlineInputBorder(borderSide: BorderSide(color: Color(0xFFABB0B5)), borderRadius: BorderRadius.circular(10)),
                         ),
-                        items: ['Male', 'Female', 'Other'].map((gender) => DropdownMenuItem(value: gender, child: Text(gender))).toList(),
+                        items: ['male', 'female', 'other'].map((gender) => DropdownMenuItem(value: gender, child: Text(gender))).toList(),
                         onChanged: (value) {
                           setState(() {
                             _selectedGender = value;
@@ -298,7 +318,20 @@ class _ProfileScreenState extends State<ProfileScreen> {
                           onPressed: () {
                             if (_formKey.currentState!.validate()) {
                               // All fields are valid — perform submission
-                              Get.snackbar("Success", "Profile updated successfully", backgroundColor: Colors.green.shade100, colorText: Colors.black);
+                              authController
+                                  .updateUserProfile(
+                                    name: _usernameController.text,
+                                    email: _emailController.text,
+                                    phone: _mobileController.text,
+                                    dob: _dobController.text,
+                                    gender: _selectedGender,
+                                  )
+                                  .then((value) {
+                                    if (value?.isSuccess ?? false) {
+                                      Get.back();
+                                      Get.snackbar("Success", "Profile updated successfully");
+                                    }
+                                  });
                             }
                           },
                           child: const Text('Update Profile', style: TextStyle(color: Colors.white)),

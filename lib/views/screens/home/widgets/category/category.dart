@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:streammly/controllers/wishlist_controller.dart';
 import 'package:streammly/services/constants.dart';
 
 import '../../../../../controllers/category_controller.dart';
@@ -7,10 +8,25 @@ import '../../../../../navigation_menu.dart';
 import '../../../common/images/rounded_image.dart';
 import '../../vendor_locator.dart';
 
-class CategoryListScreen extends StatelessWidget {
-  final CategoryController controller = Get.find<CategoryController>();
+class CategoryListScreen extends StatefulWidget {
+  const CategoryListScreen({super.key});
 
-  CategoryListScreen({super.key});
+  @override
+  State<CategoryListScreen> createState() => _CategoryListScreenState();
+}
+
+class _CategoryListScreenState extends State<CategoryListScreen> {
+  final CategoryController controller = Get.find<CategoryController>();
+  final wishlistcontroller = Get.find<WishlistController>();
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      wishlistcontroller.loadBookmarks();
+      // wishlistController.loadBookmarks();
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -90,19 +106,43 @@ class CategoryListScreen extends StatelessWidget {
                           Positioned(
                             top: 10,
                             right: 10,
-                            child: GestureDetector(
-                              onTap: () {},
-                              child: const Icon(
-                                Icons.bookmark,
-                                size: 25,
-                                color: Colors.red,
-                              ),
+                            child: GetBuilder<WishlistController>(
+                              builder: (wishlistController) {
+                                return GestureDetector(
+                                  onTap: () {
+                                    wishlistController
+                                        .addBookmark(cat.id, "category")
+                                        .then((value) {
+                                          if (value.isSuccess) {
+                                            wishlistController.loadBookmarks();
+                                          }
+                                        });
+
+                                    // if (isToggled) {
+                                    //   isToggled = !isToggled;
+
+                                    // }
+                                  },
+
+                                  child: Icon(
+                                    Icons.bookmark,
+                                    size: 25,
+                                    color:
+                                        cat.isBookMarked
+                                            ? Colors.red
+                                            : Colors.white,
+                                  ),
+                                );
+                              },
                             ),
                           ),
                         ],
                       ),
                       Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 16,
+                          vertical: 12,
+                        ),
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
@@ -114,7 +154,8 @@ class CategoryListScreen extends StatelessWidget {
                             ),
                             const SizedBox(height: 4),
                             Text(
-                              cat.shortDescription ?? "No description available",
+                              cat.shortDescription ??
+                                  "No description available",
                               style: theme.textTheme.bodySmall?.copyWith(
                                 color: Colors.grey,
                               ),

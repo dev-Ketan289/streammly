@@ -1,14 +1,31 @@
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
+import 'package:streammly/controllers/wishlist_controller.dart';
+import 'package:streammly/models/vendors/recommanded_vendors.dart';
 
-class RecommendedList extends StatelessWidget {
+class RecommendedList extends StatefulWidget {
   final BuildContext context;
-  final List<Map<String, dynamic>> recommendedCompanies;
+  final List<RecommendedVendors> recommendedVendors;
+  final WishlistController wishlistController = Get.find<WishlistController>();
 
-  const RecommendedList({
+  RecommendedList({
     super.key,
     required this.context,
-    required this.recommendedCompanies,
+    required this.recommendedVendors,
   });
+
+  @override
+  State<RecommendedList> createState() => _RecommendedListState();
+}
+
+class _RecommendedListState extends State<RecommendedList> {
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      widget.wishlistController.loadBookmarks();
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -27,27 +44,30 @@ class RecommendedList extends StatelessWidget {
           vertical: 8,
         ),
         scrollDirection: Axis.horizontal,
-        itemCount: recommendedCompanies.length,
+        itemCount: widget.recommendedVendors.length,
         separatorBuilder: (_, __) => SizedBox(width: screenWidth * 0.03),
         itemBuilder: (_, index) {
-          final vendor = recommendedCompanies[index];
+          final vendor = widget.recommendedVendors[index];
 
-          final imageUrl = vendor["banner_image"] != null
-              ? baseUrl + vendor["banner_image"]
-              : "assets/images/placeholder.jpg";
+          final imageUrl =
+              vendor.bannerImage != null
+                  ? baseUrl + (vendor.bannerImage ?? '')
+                  : "assets/images/placeholder.jpg";
 
-          final rating = vendor["rating"]?.toStringAsFixed(1) ?? "--";
-          final companyName = vendor["company_name"] ?? "Unknown";
-          final category = vendor["category_name"] ?? "Service";
+          final rating = vendor.rating?.toStringAsFixed(1) ?? "--";
+          final companyName = vendor.companyName ?? "Unknown";
+          final category =
+              vendor.vendorcategory?.first.getCategory?.title ?? "Service";
 
-          final distanceKm = vendor["distance_km"];
-          final distanceText = distanceKm != null
-              ? (distanceKm < 1
-              ? "${(distanceKm * 1000).toStringAsFixed(0)} m"
-              : "${distanceKm.toStringAsFixed(1)} km")
-              : "--";
+          final distanceKm = vendor.id;
+          final distanceText =
+              distanceKm != null
+                  ? (distanceKm < 1
+                      ? "${(distanceKm * 1000).toStringAsFixed(0)} m"
+                      : "${distanceKm.toStringAsFixed(1)} km")
+                  : "--";
           final time =
-          distanceKm != null ? "${(distanceKm * 7).round()} mins" : "--";
+              distanceKm != null ? "${(distanceKm * 7).round()} mins" : "--";
 
           return InkWell(
             onTap: () {
@@ -93,13 +113,34 @@ class RecommendedList extends StatelessWidget {
                       Positioned(
                         top: 8,
                         right: 8,
-                        child: GestureDetector(
-                          onTap: () {},
-                          child: Icon(
-                            Icons.favorite,
-                            size: itemWidth * 0.12,
-                            color: theme.colorScheme.onPrimary,
-                          ),
+                        child: GetBuilder<WishlistController>(
+                          builder: (wishlistController) {
+                            return GestureDetector(
+                              onTap: () {
+                                wishlistController
+                                    .addBookmark(vendor.id, "company")
+                                    .then((value) {
+                                      if (value.isSuccess) {
+                                        wishlistController.loadBookmarks();
+                                      }
+                                    });
+
+                                // if (isToggled) {
+                                //   isToggled = !isToggled;
+
+                                // }
+                              },
+
+                              child: Icon(
+                                Icons.favorite,
+                                size: 25,
+                                color:
+                                    vendor.isChecked == true
+                                        ? Colors.red
+                                        : Colors.white,
+                              ),
+                            );
+                          },
                         ),
                       ),
                     ],

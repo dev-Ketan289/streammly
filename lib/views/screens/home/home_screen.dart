@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:streammly/views/screens/home/vendor_locator.dart';
-import 'package:streammly/views/screens/home/widgets/page_nav.dart';
+import 'package:streammly/views/screens/home/widgets/category/page_nav.dart';
 
 import '../../../controllers/category_controller.dart';
 import '../../../controllers/home_screen_controller.dart';
@@ -89,10 +89,10 @@ class _HomeScreenState extends State<HomeScreen> {
                     builder: (headerCtrl) {
                       if (headerCtrl.isRecommendedLoading) {
                         return const Center(child: CircularProgressIndicator());
-                      } else if (headerCtrl.recommendedCompanies.isEmpty) {
+                      } else if (headerCtrl.recommendedVendors.isEmpty) {
                         return const Center(child: Text("No recommended vendors found."));
                       } else {
-                        return RecommendedList(context: context, recommendedCompanies: headerCtrl.recommendedCompanies);
+                        return RecommendedList(context: context, recommendedVendors: headerCtrl.recommendedVendors);
                       }
                     },
                   ),
