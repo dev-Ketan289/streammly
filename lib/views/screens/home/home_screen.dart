@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:streammly/views/screens/home/vendor_locator.dart';
-import 'package:streammly/views/screens/home/widgets/category/page_nav.dart';
+import 'package:streammly/views/screens/home/widgets/page_nav.dart';
 
 import '../../../controllers/category_controller.dart';
 import '../../../controllers/home_screen_controller.dart';
@@ -37,7 +37,7 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   List<CategoryItem> convertToCategoryItems(List<CategoryModel> models) {
-    final String baseUrl = 'http://192.168.1.113:8000';
+    final String baseUrl = 'https://admin.streammly.com/';
     return models.map((model) {
       String? fullImageUrl;
       if (model.image != null && model.image!.isNotEmpty) {

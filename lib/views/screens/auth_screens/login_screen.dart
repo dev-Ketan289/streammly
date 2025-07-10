@@ -113,16 +113,18 @@ class _LoginScreenState extends State<LoginScreen> {
                                   width: double.infinity,
                                   height: 50,
                                   child: OutlinedButton.icon(
-                                    onPressed:
-                                        authController.isLoading
-                                            ? null
-                                            : () async {
-                                              final result = await authController.signInWithGoogle();
-
-                                              if (result?.isSuccess ?? false) {
-                                                Navigator.push(context, MaterialPageRoute(builder: (context) => WelcomeScreen()));
-                                              }
-                                            },
+                                    onPressed:(){
+                                      Get.to(() => WelcomeScreen());
+                                    },
+                                        // authController.isLoading
+                                        //     ? null
+                                        //     : () async {
+                                        //       final result = await authController.signInWithGoogle();
+                                        //
+                                        //       if (result?.isSuccess ?? false) {
+                                        //         Navigator.push(context, MaterialPageRoute(builder: (context) => WelcomeScreen()));
+                                        //       }
+                                        //     },
                                     icon: Image.asset('assets/images/img.png', height: 24),
                                     label: Text("Continue with Google", style: Theme.of(context).textTheme.bodyMedium?.copyWith(color: Theme.of(context).primaryColor)),
                                     style: OutlinedButton.styleFrom(

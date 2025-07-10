@@ -58,7 +58,7 @@ class AuthController extends GetxController implements GetxService {
       Response response = await authRepo.updateUserProfile(name: name, email: email, dob: dob, gender: gender, phone: phone);
       log("${response.bodyString}", name: "***** Response in updateUserProfile () ******");
       if (response.statusCode == 200) {
-        fetchUserProfile();
+        await fetchUserProfile();
         responseModel = ResponseModel(true, "User profile updated successfully");
       } else {
         responseModel = ResponseModel(false, "Failed to update user profile");

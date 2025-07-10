@@ -32,7 +32,7 @@ class PackagesController extends GetxController {
     packages.clear();
     try {
       final response = await http.post(
-        Uri.parse("http://192.168.1.113:8000/api/v1/package/getpackages"),
+        Uri.parse("https://admin.streammly.com/api/v1/package/getpackages"),
         headers: {"Content-Type": "application/json"},
         body: jsonEncode({"company_id": companyId, "sub_category_id": subCategoryId, "sub_vertical_id": subVerticalId}),
       );
@@ -206,7 +206,7 @@ class PackagesController extends GetxController {
 
   Future<void> fetchPopularPackages() async {
     try {
-      final response = await http.get(Uri.parse("http://192.168.1.113:8000/api/v1/package/getpopularpackages"), headers: {"Content-Type": "application/json"});
+      final response = await http.get(Uri.parse("https://admin.streammly.com/api/v1/package/getpopularpackages"), headers: {"Content-Type": "application/json"});
 
       if (response.statusCode == 200) {
         final jsonBody = json.decode(response.body);
@@ -226,7 +226,7 @@ class PackagesController extends GetxController {
               "packageIndex": data.indexOf(pkg),
               "image":
                   pkg["image_upload"] != null && pkg["image_upload"].isNotEmpty
-                      ? 'http://192.168.1.113:8000/${pkg["image_upload"]}'
+                      ? 'https://admin.streammly.com/${pkg["image_upload"]}'
                       : 'assets/images/category/vendor_category/Baby.jpg',
             };
           }).toList(),

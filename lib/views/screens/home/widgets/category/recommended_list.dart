@@ -34,7 +34,7 @@ class _RecommendedListState extends State<RecommendedList> {
     final itemWidth = (screenWidth * 0.45).clamp(140.0, 180.0);
     final itemHeight = itemWidth * 1.7;
 
-    const baseUrl = "http://192.168.1.113:8000/";
+    const baseUrl = "https://admin.streammly.com/";
 
     return SizedBox(
       height: itemHeight + 16,
