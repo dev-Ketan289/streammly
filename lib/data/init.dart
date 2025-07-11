@@ -3,7 +3,9 @@ import 'dart:developer';
 import 'package:get/get.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:streammly/controllers/auth_controller.dart';
+import 'package:streammly/controllers/booking_form_controller.dart';
 import 'package:streammly/controllers/otp_controller.dart';
+import 'package:streammly/controllers/package_page_controller.dart';
 import 'package:streammly/controllers/wishlist_controller.dart';
 import 'package:streammly/data/repository/auth_repo.dart';
 import 'package:streammly/data/repository/category_repo.dart';
@@ -57,6 +59,8 @@ class Init {
 
       //Wishlist
       Get.lazyPut(() => WishlistController(categoryRepo: Get.find()));
+      Get.lazyPut(() => BookingController());
+      Get.lazyPut(() => PackagesController());
       // Package
       // Get.lazyPut(() => PackageRepo(apiClient: Get.find()));
       // Get.lazyPut(() => PackagesController(packageRepo: Get.find()));

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:streammly/services/route_helper.dart';
 
 import '../../../../controllers/package_page_controller.dart';
 import '../booking/booking_page.dart';
@@ -65,8 +66,9 @@ class PackagesBottomBar extends StatelessWidget {
               onPressed:
                   selectedPackages.isEmpty
                       ? null
-                      : () {
-                        Get.to(() => BookingPage(), arguments: selectedPackages);
+                      : () { 
+                        Navigator.of(context).push(getCustomRoute(child: BookingPage(selectedPackages:selectedPackages ,)));
+                        // Get.to(() => BookingPage(), arguments: selectedPackages);
                       },
               child: Text(
                 selectedPackages.isEmpty ? "Select packages to continue" : "Let's Continue (${selectedPackages.length} packages)",

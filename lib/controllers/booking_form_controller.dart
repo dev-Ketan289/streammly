@@ -1,17 +1,19 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
-import 'package:streammly/views/screens/package/booking/booking_page.dart';
 
 class BookingController extends GetxController {
   var currentPage = 0.obs;
-  var selectedPackages = <Map<String, dynamic>>[].obs;
+  // var selectedPackages = <Map<String, dynamic>>[].obs;
   final personalInfo = {'name': ''.obs, 'mobile': ''.obs, 'email': ''.obs};
   final alternateMobiles = <RxString>[].obs;
   final alternateEmails = <RxString>[].obs;
   final packageFormsData = <int, Map<String, dynamic>>{}.obs;
-  var acceptTerms = false.obs;
+  var acceptTerms = false.obs; 
 
+  // List<UserProfile> userProfile=[];
+ 
+ List< Map<String,dynamic>> selectedPackages=[];
   /// Summary-specific data
   late RxList<int> packagePrices;
   late RxList<bool> showPackageDetails;
@@ -58,8 +60,8 @@ class BookingController extends GetxController {
   int get totalPayment => packagePrices.fold(0, (sum, price) => sum + price);
 
   void editPackage(int index) {
-    currentPage.value = index;
-    Get.to(() => BookingPage());
+    // currentPage.value = index;
+    // Get.to(() => BookingPage());
   }
 
   void toggleDetails(int index) {

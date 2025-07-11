@@ -234,13 +234,14 @@ class _VendorGroupState extends State<VendorGroup> {
                 label: "Packages",
                 iconColor: Colors.amber,
                 onTap: () {
-                  Navigator.pop(context);
-                  Get.to(
-                    () => PackagesPage(companyId: companyId, subCategoryId: subCategoryId, subVerticalId: subVerticalId),
-                    binding: BindingsBuilder(() {
-                      Get.put(PackagesController());
-                    }),
-                  );
+                  Navigator.pop(context); 
+                  Navigator.of(context).push(getCustomRoute(child: PackagesPage(companyId: companyId, subCategoryId: subCategoryId, subVerticalId: subVerticalId)));
+                  // Get.to(
+                  //   () => PackagesPage(companyId: companyId, subCategoryId: subCategoryId, subVerticalId: subVerticalId),
+                  //   binding: BindingsBuilder(() {
+                  //     Get.put(PackagesController());
+                  //   }),
+                  // );
                 },
               ),
               const SizedBox(height: 24),
