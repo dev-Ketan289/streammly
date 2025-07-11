@@ -6,6 +6,8 @@ class WalletScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final screenWidth = MediaQuery.of(context).size.width;
+
     return Scaffold(
       backgroundColor: const Color(0xffF9F9FB),
       appBar: AppBar(
@@ -35,8 +37,9 @@ class WalletScreen extends StatelessWidget {
             const SizedBox(height: 20),
             Image.asset(
               'assets/images/wallet.png',
-              width: 150,
-              height: 150,
+              width: screenWidth * 0.5,  // Max 50% of screen width
+              height: screenWidth * 0.5,
+              fit: BoxFit.contain,
             ),
             const SizedBox(height: 24),
             const Text(
@@ -115,17 +118,22 @@ class WalletScreen extends StatelessWidget {
               ),
             ),
             const SizedBox(height: 16),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                _buildTransactionTab('All Transactions', isActive: true),
-                _buildTransactionTab('Additions'),
-                _buildTransactionTab('Deductions'),
-                _buildTransactionTab('Refunds'),
-              ],
+            SingleChildScrollView(
+              scrollDirection: Axis.horizontal,
+              child: Row(
+                children: [
+                  _buildTransactionTab('All Transactions', isActive: true),
+                  const SizedBox(width: 8),
+                  _buildTransactionTab('Additions'),
+                  const SizedBox(width: 8),
+                  _buildTransactionTab('Deductions'),
+                  const SizedBox(width: 8),
+                  _buildTransactionTab('Refunds'),
+                ],
+              ),
             ),
             const SizedBox(height: 24),
-            // Transaction list can be placed here
+            // You can add transaction list here later.
           ],
         ),
       ),
@@ -133,26 +141,23 @@ class WalletScreen extends StatelessWidget {
   }
 
   Widget _buildTransactionTab(String text, {bool isActive = false}) {
-    return Expanded(
-      child: Container(
-        padding: const EdgeInsets.symmetric(vertical: 10),
-        decoration: BoxDecoration(
-          color: isActive ? Colors.white : Colors.grey[200],
-          borderRadius: BorderRadius.circular(8),
-          border: Border.all(
-            color: isActive ? const Color(0xFF2864A6) : Colors.transparent,
-            width: 1.5,
-          ),
+    return Container(
+      padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 12),
+      decoration: BoxDecoration(
+        color: isActive ? Colors.white : Colors.grey[200],
+        borderRadius: BorderRadius.circular(8),
+        border: Border.all(
+          color: isActive ? const Color(0xFF2864A6) : Colors.transparent,
+          width: 1.5,
         ),
-        alignment: Alignment.center,
-        child: Text(
-          text,
-          textAlign: TextAlign.center,
-          style: TextStyle(
-            fontWeight: FontWeight.w600,
-            fontSize: 13,
-            color: isActive ? const Color(0xFF2864A6) : Colors.black54,
-          ),
+      ),
+      child: Text(
+        text,
+        textAlign: TextAlign.center,
+        style: TextStyle(
+          fontWeight: FontWeight.w600,
+          fontSize: 13,
+          color: isActive ? const Color(0xFF2864A6) : Colors.black54,
         ),
       ),
     );

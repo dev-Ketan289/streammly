@@ -15,6 +15,7 @@ import 'package:streammly/views/screens/profile/offers_page.dart';
 import 'package:streammly/views/screens/profile/profile_screen.dart';
 import 'package:streammly/views/screens/profile/rate_your_experience.dart';
 import 'package:streammly/views/screens/profile/refer_and_earn.dart';
+import 'package:streammly/views/screens/profile/support_screen.dart';
 
 import 'components/profile_item_widget.dart';
 import 'components/transcation_histroy_screen.dart';
@@ -300,7 +301,7 @@ class _ProfilePageState extends State<ProfilePage> {
           ProfileItemWidget(
             icon: SvgPicture.asset(Assets.svgSupport, height: 26, width: 26),
             title: "Support",
-            onTap: () {},
+            onTap: () { Get.to(() => SupportTicketPage());},
           ),
           ProfileItemWidget(
             icon: SvgPicture.asset(Assets.svgLogout, height: 26, width: 26),

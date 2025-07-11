@@ -98,7 +98,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   ),
 
                   const SizedBox(height: 24),
-                  ExploreUs(vendorId: 1),
+                  ExploreUs(vendorId: 2),
                   const SizedBox(height: 26),
                   PromoSlider(),
                   const SizedBox(height: 24),

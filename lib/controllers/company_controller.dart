@@ -55,22 +55,22 @@ class CompanyController extends GetxController {
       final data = await companyRepo.fetchCompaniesByCategory(categoryId);
 
       final enrichedCompanies =
-          data.map((company) {
-            if (company.latitude != null &&
-                company.longitude != null &&
-                userPosition != null) {
-              company.distanceKm = calculateDistance(
-                userPosition!.latitude,
-                userPosition!.longitude,
-                company.latitude!,
-                company.longitude!,
-              );
-              company.estimatedTime = _estimateTimeFromDistance(
-                company.distanceKm!,
-              );
-            }
-            return company;
-          }).toList();
+      data.map((company) {
+        if (company.latitude != null &&
+            company.longitude != null &&
+            userPosition != null) {
+          company.distanceKm = calculateDistance(
+            userPosition!.latitude,
+            userPosition!.longitude,
+            company.latitude!,
+            company.longitude!,
+          );
+          company.estimatedTime = _estimateTimeFromDistance(
+            company.distanceKm!,
+          );
+        }
+        return company;
+      }).toList();
 
       companies.assignAll(enrichedCompanies);
     } catch (e) {
@@ -94,6 +94,7 @@ class CompanyController extends GetxController {
           userPosition!.longitude,
           company.latitude!,
           company.longitude!,
+
         );
         company?.estimatedTime = _estimateTimeFromDistance(company.distanceKm!);
       }
@@ -151,9 +152,9 @@ class CompanyController extends GetxController {
           final rawPath = item["image"]?.toString() ?? "";
           final cleanedPath = rawPath.replaceFirst(RegExp(r'^/+'), '');
           final imageUrl =
-              cleanedPath.isNotEmpty
-                  ? "https://admin.streammly.com/$cleanedPath"
-                  : "";
+          cleanedPath.isNotEmpty
+              ? "https://admin.streammly.com/$cleanedPath"
+              : "";
 
           return {
             "id": item["id"].toString(),
@@ -184,5 +185,6 @@ class CompanyController extends GetxController {
   void onInit() {
     super.onInit();
     fetchCompaniesByCategory(selectedCategoryId);
+
   }
 }
