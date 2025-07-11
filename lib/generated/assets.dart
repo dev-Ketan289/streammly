@@ -198,6 +198,10 @@ class Assets {
   /// assets/svg/mybookings.svg
   static const String svgMybookings = "assets/svg/mybookings.svg";
 
+  /// Assets for svgNotiCal
+  /// assets/svg/noti_cal.svg
+  static const String svgNotiCal = "assets/svg/noti_cal.svg";
+
   /// Assets for svgPen
   /// assets/svg/pen.svg
   static const String svgPen = "assets/svg/pen.svg";

@@ -8,12 +8,17 @@ import 'package:streammly/controllers/auth_controller.dart'; // Added
 import 'package:streammly/controllers/home_screen_controller.dart';
 import 'package:streammly/generated/assets.dart';
 import 'package:streammly/navigation_menu.dart';
+import 'package:streammly/services/route_helper.dart';
+import 'package:streammly/views/screens/profile/about_page.dart';
 import 'package:streammly/views/screens/profile/components/profile_section_widget.dart';
+import 'package:streammly/views/screens/profile/faq_page.dart';
 import 'package:streammly/views/screens/profile/language_preferences.dart';
 import 'package:streammly/views/screens/profile/linked_pages.dart';
+import 'package:streammly/views/screens/profile/notification_preferences.dart';
 import 'package:streammly/views/screens/profile/notifications_page.dart';
 import 'package:streammly/views/screens/profile/offers_page.dart';
 import 'package:streammly/views/screens/profile/profile_screen.dart';
+import 'package:streammly/views/screens/profile/settings.dart';
 
 import 'components/profile_item_widget.dart';
 
@@ -162,7 +167,8 @@ class _ProfilePageState extends State<ProfilePage> {
             icon: SvgPicture.asset(Assets.svgBell, height: 26, width: 26),
             title: "Notification",
             onTap: () {
-              Get.to(() => NotificationsPage());
+              Navigator.push(context, getCustomRoute(child: NotificationPreferencesPage()));
+              // Get.to(() => NotificationsPage());
             },
           ),
           ProfileItemWidget(
@@ -264,7 +270,9 @@ class _ProfilePageState extends State<ProfilePage> {
           ProfileItemWidget(
             icon: SvgPicture.asset(Assets.svgFaq, height: 26, width: 26),
             title: "FAQ's",
-            onTap: () {},
+            onTap: () {
+              Navigator.push(context, getCustomRoute(child: FaqScreen()));
+            },
           ),
           ProfileItemWidget(
             icon: SvgPicture.asset(Assets.svgReport, height: 26, width: 26),
@@ -282,12 +290,16 @@ class _ProfilePageState extends State<ProfilePage> {
           ProfileItemWidget(
             icon: SvgPicture.asset(Assets.svgAbout, height: 26, width: 26),
             title: "About",
-            onTap: () {},
+            onTap: () {
+              Navigator.push(context, getCustomRoute(child: AboutScreen()));
+            },
           ),
           ProfileItemWidget(
             icon: SvgPicture.asset(Assets.svgSettings, height: 26, width: 26),
             title: "Settings",
-            onTap: () {},
+            onTap: () {
+              Navigator.push(context, getCustomRoute(child: Settings()));
+            },
           ),
           ProfileItemWidget(
             icon: SvgPicture.asset(Assets.svgSupport, height: 26, width: 26),

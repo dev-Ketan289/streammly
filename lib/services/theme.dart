@@ -146,6 +146,7 @@ class CustomTheme {
       bodyLarge: GoogleFonts.openSans(),
       bodyMedium: GoogleFonts.openSans(),
       bodySmall: GoogleFonts.openSans(),
+      ///
     ),
   );
 }
