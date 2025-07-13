@@ -15,6 +15,12 @@ class PackagesController extends GetxController {
 
   RxList<Map<String, dynamic>> popularPackagesList = <Map<String, dynamic>>[].obs;
 
+  RxList<Map<String, dynamic>> productsInPackageList = <Map<String, dynamic>>[].obs;
+
+  // New: Free Item & Extra Add-On Selections
+  RxMap<String, dynamic> selectedFreeItem = <String, dynamic>{}.obs;
+  RxList<Map<String, dynamic>> selectedExtraAddons = <Map<String, dynamic>>[].obs;
+
   late int companyId;
   late int subCategoryId;
   late int subVerticalId;
@@ -58,7 +64,8 @@ class PackagesController extends GetxController {
 
         final filteredData = data
             .where((pkg) =>
-        pkg['sub_vertical_id'] == subVerticalId || subVerticalId == 0)
+        pkg['sub_vertical_id'] == subVerticalId ||
+            subVerticalId == 0)
             .toList();
 
         packages.assignAll(
@@ -82,17 +89,20 @@ class PackagesController extends GetxController {
             return {
               "title": pkg["title"] ?? "",
               "type": pkg["type"] ?? "N/A",
-              "price": priceMap[getDurationLabel(firstVariation ?? {})] ?? 0,
+              "price":
+              priceMap[getDurationLabel(firstVariation ?? {})] ?? 0,
               "priceMap": priceMap,
               "hours": hours,
               "highlight": pkg["short_description"] ?? "",
-              "shortDescription": pkg["short_description"] ?? "",
+              "shortDescription": pkg["long_description"] ?? "",
               "fullDescription": pkg["long_description"] ?? "",
               "termsAndCondition": pkg["terms_and_condition"] ?? "",
               "specialOffer":
               (pkg["status"] ?? "").toString().toLowerCase() == "active",
               "packageIndex": data.indexOf(pkg),
               "extraQuestions": pkg["packageextra_questions"] ?? [],
+              "packageId": pkg["id"] ?? 0,
+              "companyId": companyId,
             };
           }).toList(),
         );
@@ -108,6 +118,75 @@ class PackagesController extends GetxController {
       Get.snackbar("Exception", e.toString());
     }
     isLoading.value = false;
+  }
+
+  Future<void> fetchProductsInPackage(int packageId, int companyId) async {
+    productsInPackageList.clear();
+    try {
+      final response = await http.get(
+        Uri.parse(
+            'https://admin.streammly.com/api/v1/package/getproductinpackage?company_id=$companyId&package_id=$packageId'),
+        headers: {'Content-Type': 'application/json'},
+      );
+
+      if (response.statusCode == 200) {
+        final jsonBody = json.decode(response.body);
+        final List data = jsonBody["data"] ?? [];
+
+        productsInPackageList.assignAll(
+          data.map<Map<String, dynamic>>((category) {
+            final categoryTitle =
+                category["product_and_service_category"]["title"] ??
+                    "Category";
+            final products =
+                category["product_in_packages"]?.map<Map<String, dynamic>>(
+                      (product) {
+                    final prod = product["products"];
+                    return {
+                      "id": product["id"],
+                      "title": prod["title"] ?? "",
+                      "description": prod["decription"] ?? "",
+                      "image":
+                      'https://admin.streammly.com/${prod["cover_image"]}',
+                      "quantity": product["quantity"] ?? 1,
+                      "dataRequestStage":
+                      product["data_request_stage"] ?? "",
+                    };
+                  },
+                ).toList().cast<Map<String, dynamic>>() ??
+                    [];
+            return {
+              "categoryTitle": categoryTitle,
+              "products": products,
+            };
+          }).toList(),
+        );
+      } else {
+        Get.snackbar("Error", "Failed to fetch products in package");
+      }
+    } catch (e) {
+      Get.snackbar("Exception", e.toString());
+    }
+  }
+
+  // Free Item Selection Logic
+  void selectFreeItem(Map<String, dynamic> item) {
+    selectedFreeItem.value = item;
+  }
+
+  void clearFreeItem() {
+    selectedFreeItem.clear();
+  }
+
+  // Extra Add-Ons Selection Logic
+  void addExtraAddon(Map<String, dynamic> item) {
+    if (!selectedExtraAddons.any((e) => e['id'] == item['id'])) {
+      selectedExtraAddons.add(item);
+    }
+  }
+
+  void removeExtraAddon(Map<String, dynamic> item) {
+    selectedExtraAddons.removeWhere((e) => e['id'] == item['id']);
   }
 
   void toggleView() {
@@ -145,14 +224,8 @@ class PackagesController extends GetxController {
   }
 
   void toggleHour(int packageIndex, String hour) {
-    final currentSelected = selectedHours[packageIndex] ?? {};
-
-    // Prevent toggling off if same hour is tapped again
-    if (currentSelected.contains(hour)) return;
-
     selectedHours[packageIndex] = {hour};
     selectedHours.refresh();
-
     if (selectedPackageIndices.contains(packageIndex)) {
       selectedPackagesForBilling
           .removeWhere((pkg) => pkg['packageIndex'] == packageIndex);
@@ -258,11 +331,11 @@ class PackagesController extends GetxController {
             return {
               "title": pkg["title"] ?? "",
               "type": pkg["type"] ?? "N/A",
-              "price":
-              int.tryParse(firstVariation?["amount"]?.toString() ?? "0") ??
+              "price": int.tryParse(
+                  firstVariation?["amount"]?.toString() ?? "0") ??
                   0,
               "shortDescription": pkg["short_description"] ?? "",
-              "highlight": pkg["long_description"] ?? "",
+              "highlight": pkg["fullDescription"] ?? "",
               "packageIndex": data.indexOf(pkg),
               "image": (pkg["image_upload"] != null &&
                   pkg["image_upload"].isNotEmpty)

@@ -50,6 +50,7 @@ class CompanyController extends GetxController {
   Future<void> fetchCompaniesByCategory(int categoryId) async {
     try {
       isLoading = true;
+      update();
       userPosition = await _getCurrentLocation();
 
       final data = await companyRepo.fetchCompaniesByCategory(categoryId);
@@ -78,6 +79,7 @@ class CompanyController extends GetxController {
       Get.snackbar("Error", "Something went wrong: $e");
     } finally {
       isLoading = false;
+      update();
     }
   }
 
@@ -170,6 +172,35 @@ class CompanyController extends GetxController {
       update();
     }
   }
+  Future<CompanyLocation?> fetchAndCacheCompanyById(int companyId) async {
+    try {
+      userPosition ??= await _getCurrentLocation();
+      final company = await companyRepo.fetchCompanyById(companyId);
+
+      if (company?.latitude != null &&
+          company?.longitude != null &&
+          userPosition != null) {
+        company?.distanceKm = calculateDistance(
+          userPosition!.latitude,
+          userPosition!.longitude,
+          company.latitude!,
+          company.longitude!,
+        );
+        company?.estimatedTime = _estimateTimeFromDistance(company.distanceKm!);
+      }
+
+      if (company != null && !companies.any((c) => c.id == company.id)) {
+        companies.add(company);
+      }
+
+      update();
+      return company;
+    } catch (e) {
+      Get.snackbar("Error", "Could not load vendor $companyId: $e");
+      return null;
+    }
+  }
+
 
   void clearSelectedCompany() {
     selectedCompany = null;

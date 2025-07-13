@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-
 import '../../../../controllers/package_page_controller.dart';
 
 class PackagesGridView extends StatelessWidget {
@@ -13,6 +12,7 @@ class PackagesGridView extends StatelessWidget {
     return SingleChildScrollView(
       padding: const EdgeInsets.symmetric(vertical: 16),
       child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           SizedBox(
             width: 340,
@@ -122,31 +122,39 @@ class PackagesGridView extends StatelessWidget {
               },
             ),
           ),
+
           const SizedBox(height: 8),
-          _buildCategorySection(controller, "HomeShoot", theme),
-          const SizedBox(height: 20),
-          _buildCategorySection(controller, "StudioShoot", theme),
-          const SizedBox(height: 16),
-        ],
-      ),
-    );
-  }
 
-  Widget _buildCategorySection(PackagesController controller, String category, ThemeData theme) {
-    final categoryPackages = controller.packages.where((pkg) => pkg["type"] == category).toList();
-    if (categoryPackages.isEmpty) return const SizedBox.shrink();
-
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(category, style: theme.textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.w600, color: Colors.grey.shade600)),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16),
+            child: Text(
+              "Selected Packages",
+              style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold, color: Colors.black87),
+            ),
+          ),
           const SizedBox(height: 12),
-          ...categoryPackages.map((pkg) {
-            final index = controller.packages.indexOf(pkg);
-            return _buildPackageCard(controller, pkg, index, theme);
+
+          Obx(() {
+            final selectedIndices = controller.selectedPackageIndices.toList();
+            if (selectedIndices.isEmpty) {
+              return const Padding(
+                padding: EdgeInsets.symmetric(horizontal: 16),
+                child: Text("No package selected.", style: TextStyle(color: Colors.grey)),
+              );
+            }
+
+            return Column(
+              children: selectedIndices.map((index) {
+                final pkg = controller.packages[index];
+                return Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
+                  child: _buildPackageCard(controller, pkg, index, theme),
+                );
+              }).toList(),
+            );
           }),
+
+          const SizedBox(height: 16),
         ],
       ),
     );
@@ -161,101 +169,151 @@ class PackagesGridView extends StatelessWidget {
       final priceMap = pkg["priceMap"] as Map<String, int>;
       final updatedPrice = priceMap[selectedHour] ?? pkg["price"];
 
-      return GestureDetector(
-        onTap: () => controller.togglePackageSelection(index),
-        child: Container(
-          margin: const EdgeInsets.only(bottom: 12),
-          padding: const EdgeInsets.all(16),
-          decoration: BoxDecoration(
-            color: theme.colorScheme.surface,
-            borderRadius: BorderRadius.circular(12),
-            border: isSelected ? Border.all(color: const Color(0xFF4A6CF7), width: 2) : null,
-            boxShadow: [BoxShadow(color: Colors.black.withAlpha(10), blurRadius: 8, offset: const Offset(0, 2))],
-          ),
-          child: Row(
-            children: [
-              Expanded(
-                flex: 2,
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
+      return Stack(
+        clipBehavior: Clip.none,
+        children: [
+          Container(
+            padding: const EdgeInsets.all(16),
+            margin: const EdgeInsets.only(top: 12),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              border: Border.all(color: const Color(0xFF4A6CF7), width: 1),
+              borderRadius: BorderRadius.circular(12),
+              boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 4)],
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // Top Row with Price and Title
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    Text("₹$updatedPrice/-", style: theme.textTheme.titleLarge?.copyWith(color: const Color(0xFF4A6CF7), fontWeight: FontWeight.bold)),
-                    const SizedBox(height: 4),
-                    Text(pkg["type"], style: theme.textTheme.bodySmall?.copyWith(color: Colors.grey, fontWeight: FontWeight.w500)),
-                  ],
-                ),
-              ),
-              Expanded(
-                flex: 3,
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(pkg["title"], style: theme.textTheme.bodyLarge?.copyWith(color: const Color(0xFF4A6CF7), fontWeight: FontWeight.w600)),
-                    const SizedBox(height: 8),
-                    Row(
-                      children: pkg["hours"].map<Widget>((hour) {
-                        return Obx(() {
-                          final selected = controller.selectedHours[index]?.contains(hour) ?? false;
-                          return GestureDetector(
-                            onTap: () => controller.toggleHour(index, hour),
-                            child: Container(
-                              margin: const EdgeInsets.only(right: 6),
-                              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
-                              decoration: BoxDecoration(
-                                color: selected ? const Color(0xFF4A6CF7) : Colors.grey.shade100,
-                                borderRadius: BorderRadius.circular(10),
-                                border: Border.all(color: selected ? const Color(0xFF4A6CF7) : Colors.grey.shade300),
-                              ),
-                              child: Text(
-                                hour,
-                                style: TextStyle(
-                                  fontSize: 9,
-                                  color: selected ? Colors.white : Colors.black54,
-                                  fontWeight: FontWeight.w500,
-                                ),
-                              ),
-                            ),
-                          );
-                        });
-                      }).toList(),
+                    Text(
+                      "₹$updatedPrice/-",
+                      style: const TextStyle(
+                        fontSize: 22,
+                        fontWeight: FontWeight.bold,
+                        color: Color(0xFF4A6CF7),
+                      ),
                     ),
-                    const SizedBox(height: 12),
                     Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        const Text("More Details", style: TextStyle(fontSize: 10, color: Colors.grey)),
-                        ElevatedButton(
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: const Color(0xFF4A6CF7),
-                            foregroundColor: Colors.white,
-                            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
-                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(6)),
-                            minimumSize: Size.zero,
+                        Text(
+                          pkg["title"] ?? '',
+                          style: const TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.w600,
+                            color: Color(0xFF4A6CF7),
                           ),
-                          onPressed: () {
-                            controller.togglePackageSelection(index);
-                          },
-                          child: const Text("BUY", style: TextStyle(fontSize: 10, fontWeight: FontWeight.w600)),
+                        ),
+                        const SizedBox(width: 8),
+                        Container(
+                          width: 20,
+                          height: 20,
+                          decoration: BoxDecoration(
+                            shape: BoxShape.circle,
+                            color: isSelected ? const Color(0xFF4A6CF7) : Colors.transparent,
+                            border: Border.all(color: const Color(0xFF4A6CF7), width: 2),
+                          ),
+                          child: isSelected
+                              ? const Icon(Icons.check, color: Colors.white, size: 14)
+                              : null,
                         ),
                       ],
                     ),
                   ],
                 ),
-              ),
-              const SizedBox(width: 8),
-              Container(
-                width: 20,
-                height: 20,
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  color: isSelected ? const Color(0xFF4A6CF7) : Colors.transparent,
-                  border: Border.all(color: isSelected ? const Color(0xFF4A6CF7) : Colors.grey.shade300, width: 2),
+
+                const SizedBox(height: 10),
+
+                // Duration Chips
+                Row(
+                  children: pkg["hours"].map<Widget>((hour) {
+                    final selected = controller.selectedHours[index]?.contains(hour) ?? false;
+                    return GestureDetector(
+                      onTap: () => controller.toggleHour(index, hour),
+                      child: Container(
+                        margin: const EdgeInsets.only(right: 6),
+                        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                        decoration: BoxDecoration(
+                          color: selected ? const Color(0xFF4A6CF7) : const Color(0xFFF0F3FF),
+                          borderRadius: BorderRadius.circular(6),
+                        ),
+                        child: Text(
+                          hour,
+                          style: TextStyle(
+                            fontSize: 12,
+                            fontWeight: FontWeight.w600,
+                            color: selected ? Colors.white : const Color(0xFF4A6CF7),
+                          ),
+                        ),
+                      ),
+                    );
+                  }).toList(),
                 ),
-                child: isSelected ? const Icon(Icons.check, color: Colors.white, size: 12) : null,
-              ),
-            ],
+
+                const SizedBox(height: 12),
+
+                const Divider(height: 1, thickness: 1, color: Color(0xFFE6E6E6)),
+
+                const SizedBox(height: 10),
+
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    GestureDetector(
+                      onTap: () => controller.switchToListView(),
+                      child: const Text(
+                        "More Details",
+                        style: TextStyle(
+                          fontWeight: FontWeight.w600,
+                          fontSize: 13,
+                          color: Colors.grey,
+                        ),
+                      ),
+                    ),
+                    ElevatedButton(
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: const Color(0xFF4A6CF7),
+                        foregroundColor: Colors.white,
+                        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(6)),
+                        minimumSize: Size.zero,
+                      ),
+                      onPressed: () => controller.togglePackageSelection(index),
+                      child: const Text(
+                        "BUY",
+                        style: TextStyle(fontSize: 13, fontWeight: FontWeight.bold),
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
           ),
-        ),
+
+          // Sticky Top Label (e.g. HomeShoot)
+          Positioned(
+            top: 0,
+            left: 12,
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(4),
+                boxShadow: [BoxShadow(color: Colors.black12, blurRadius: 4)],
+              ),
+              child: Text(
+                pkg["type"] ?? '',
+                style: const TextStyle(
+                  fontSize: 11,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.black54,
+                ),
+              ),
+            ),
+          ),
+        ],
       );
     });
   }

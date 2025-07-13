@@ -37,6 +37,15 @@ class AuthController extends GetxController implements GetxService {
       log(response.bodyString ?? "", name: "***** Response in fetchUserProfile () ******");
       if (response.statusCode == 200 && response.body['data'] != null) {
         userProfile = UserProfile.fromJson(response.body['data']);
+
+        // Populate controllers with user profile data
+        if (userProfile!.phone != null && userProfile!.phone!.isNotEmpty) {
+          phoneController.text = userProfile!.phone!;
+        }
+        if (userProfile!.email != null && userProfile!.email!.isNotEmpty) {
+          emailController.text = userProfile!.email!;
+        }
+
         responseModel = ResponseModel(true, "User profile fetched successfully");
       } else {
         responseModel = ResponseModel(false, "Failed to fetch user profile");
@@ -58,7 +67,7 @@ class AuthController extends GetxController implements GetxService {
       Response response = await authRepo.updateUserProfile(name: name, email: email, dob: dob, gender: gender, phone: phone);
       log("${response.bodyString}", name: "***** Response in updateUserProfile () ******");
       if (response.statusCode == 200) {
-        await fetchUserProfile();
+        fetchUserProfile();
         responseModel = ResponseModel(true, "User profile updated successfully");
       } else {
         responseModel = ResponseModel(false, "Failed to update user profile");
@@ -99,7 +108,9 @@ class AuthController extends GetxController implements GetxService {
     ResponseModel responseModel;
 
     try {
-      final GoogleSignInAccount? googleUser = await GoogleSignIn().signIn();
+      final GoogleSignIn googleSignIn = GoogleSignIn();
+      await googleSignIn.signOut(); // Force account picker
+      final GoogleSignInAccount? googleUser = await googleSignIn.signIn();
       if (googleUser == null) {
         Fluttertoast.showToast(msg: "Google sign-in cancelled");
         return null;
