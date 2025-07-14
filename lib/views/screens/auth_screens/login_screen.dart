@@ -83,15 +83,15 @@ class _LoginScreenState extends State<LoginScreen> {
                                   height: 50,
                                   child: ElevatedButton(
                                     onPressed:
-                                        authController.isLoading
-                                            ? null
-                                            : () {
-                                              authController.sendOtp().then((value) {
-                                                if (value.isSuccess) {
-                                                  Navigator.push(context, MaterialPageRoute(builder: (context) => OtpScreen()));
-                                                }
-                                              });
-                                            },
+                                    authController.isLoading
+                                        ? null
+                                        : () {
+                                      authController.sendOtp().then((value) {
+                                        if (value.isSuccess) {
+                                          Navigator.push(context, MaterialPageRoute(builder: (context) => OtpScreen()));
+                                        }
+                                      });
+                                    },
                                     style: ElevatedButton.styleFrom(
                                       backgroundColor: theme.primaryColor,
                                       side: BorderSide(color: theme.primaryColor),
@@ -114,15 +114,15 @@ class _LoginScreenState extends State<LoginScreen> {
                                   height: 50,
                                   child: OutlinedButton.icon(
                                     onPressed:
-                                        authController.isLoading
-                                            ? null
-                                            : () async {
-                                              final result = await authController.signInWithGoogle();
+                                    authController.isLoading
+                                        ? null
+                                        : () async {
+                                      final result = await authController.signInWithGoogle();
 
-                                              if (result?.isSuccess ?? false) {
-                                                Navigator.push(context, MaterialPageRoute(builder: (context) => WelcomeScreen()));
-                                              }
-                                            },
+                                      if (result?.isSuccess ?? false) {
+                                        Navigator.push(context, MaterialPageRoute(builder: (context) => WelcomeScreen()));
+                                      }
+                                    },
                                     icon: Image.asset('assets/images/img.png', height: 24),
                                     label: Text("Continue with Google", style: Theme.of(context).textTheme.bodyMedium?.copyWith(color: Theme.of(context).primaryColor)),
                                     style: OutlinedButton.styleFrom(

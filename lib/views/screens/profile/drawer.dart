@@ -1,25 +1,30 @@
 import 'dart:developer';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:get/get.dart';
-import 'package:streammly/controllers/auth_controller.dart'; // Added
+import 'package:streammly/controllers/auth_controller.dart';
 import 'package:streammly/generated/assets.dart';
 import 'package:streammly/services/route_helper.dart';
 import 'package:streammly/views/screens/profile/about_page.dart';
 import 'package:streammly/views/screens/profile/components/profile_section_widget.dart';
 import 'package:streammly/views/screens/profile/faq_page.dart';
+import 'package:streammly/views/screens/profile/invoice_screen.dart';
 import 'package:streammly/views/screens/profile/language_preferences.dart';
 import 'package:streammly/views/screens/profile/linked_pages.dart';
+import 'package:streammly/views/screens/profile/my_wallet.dart';
+import 'package:streammly/views/screens/profile/notifications_page.dart';
 import 'package:streammly/views/screens/profile/notification_preferences.dart';
 import 'package:streammly/views/screens/profile/offers_page.dart';
 import 'package:streammly/views/screens/profile/profile_screen.dart';
+import 'package:streammly/views/screens/profile/rate_your_experience.dart';
+import 'package:streammly/views/screens/profile/refer_and_earn.dart';
 import 'package:streammly/views/screens/profile/settings.dart';
+import 'package:streammly/views/screens/profile/support_screen.dart';
 
 import 'chatbot_page.dart';
 import 'components/profile_item_widget.dart';
-import 'notifications_page.dart';
+import 'components/transcation_histroy_screen.dart';
 
 class ProfilePage extends StatefulWidget {
   const ProfilePage({super.key});
@@ -44,7 +49,7 @@ class _ProfilePageState extends State<ProfilePage> {
 
   @override
   Widget build(BuildContext context) {
-    final authController = Get.find<AuthController>(); // Added
+    final authController = Get.find<AuthController>();
     final screenWidth = MediaQuery.of(context).size.width;
     final screenHeight = MediaQuery.of(context).size.height;
 
@@ -221,7 +226,9 @@ class _ProfilePageState extends State<ProfilePage> {
           ProfileItemWidget(
             icon: SvgPicture.asset(Assets.svgSaved, height: 26, width: 26),
             title: "My Wallet",
-            onTap: () {},
+            onTap: () {
+              Get.to(() => WalletScreen());
+            },
           ),
           ProfileItemWidget(
             icon: SvgPicture.asset(
@@ -230,7 +237,9 @@ class _ProfilePageState extends State<ProfilePage> {
               width: 26,
             ),
             title: "Transaction History",
-            onTap: () {},
+            onTap: () {
+              Get.to(() => TransactionHistoryScreen());
+            },
           ),
           ProfileItemWidget(
             icon: SvgPicture.asset(
@@ -239,12 +248,14 @@ class _ProfilePageState extends State<ProfilePage> {
               width: 26,
             ),
             title: "Invoice",
-            onTap: () {},
+            onTap: () {
+              Get.to(() => InvoiceScreen());
+            },
           ),
           ProfileItemWidget(
             icon: SvgPicture.asset(Assets.svgRefer, height: 26, width: 26),
             title: "Refer & Earn",
-            onTap: () {},
+            onTap: () { Get.to(() => ReferAndEarnPage());},
           ),
           ProfileItemWidget(
             icon: SvgPicture.asset(Assets.svgPromo, height: 26, width: 26),
@@ -257,7 +268,7 @@ class _ProfilePageState extends State<ProfilePage> {
           ProfileItemWidget(
             icon: SvgPicture.asset(Assets.svgRate, height: 26, width: 26),
             title: "Rate your Experience",
-            onTap: () {},
+            onTap: () { Get.to(() =>  RateExperiencePage());},
           ),
           SizedBox(height: screenHeight * 0.03),
 
@@ -304,7 +315,7 @@ class _ProfilePageState extends State<ProfilePage> {
           ProfileItemWidget(
             icon: SvgPicture.asset(Assets.svgSupport, height: 26, width: 26),
             title: "Support",
-            onTap: () {},
+            onTap: () { Get.to(() => SupportTicketPage());},
           ),
           ProfileItemWidget(
             icon: SvgPicture.asset(Assets.svgLogout, height: 26, width: 26),

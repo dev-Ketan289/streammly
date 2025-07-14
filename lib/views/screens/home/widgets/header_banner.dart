@@ -139,8 +139,8 @@ class _HeaderBannerState extends State<HeaderBanner> {
               right: 16,
               bottom: 20,
               child: currentSlide!.isSvg
-                  ? SvgPicture.network("http://192.168.1.113:8000/${currentSlide.vectorImage}", height: 140)
-                  : Image.network("http://192.168.1.113:8000/${currentSlide.vectorImage}", height: 140),
+                  ? SvgPicture.network("https://admin.streammly.com/${currentSlide.vectorImage}", height: 140)
+                  : Image.network("https://admin.streammly.com/${currentSlide.vectorImage}", height: 140),
             ),
 
           // --- Top Content (location, search, title, subtitle, specialities) ---
@@ -259,25 +259,40 @@ class _HeaderBannerState extends State<HeaderBanner> {
                     const SizedBox(height: 6),
                     Wrap(
                       spacing: 8,
-                      children: widget.specialities!
-                          .map(
-                            (speciality) => Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-                          decoration: BoxDecoration(
-                            color: theme.colorScheme.surface,
-                            borderRadius: BorderRadius.circular(8),
-                            border: Border.all(color: theme.colorScheme.surface.withValues(alpha: 0.4)),
-                          ),
-                          child: Text(
-                            speciality,
-                            style: theme.textTheme.bodySmall?.copyWith(
-                              color: Colors.indigo,
-                              fontSize: 12,
+                      children: [
+                        for (var i = 0; i < (widget.specialities!.length > 2 ? 2 : widget.specialities!.length); i++)
+                          Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                            decoration: BoxDecoration(
+                              color: theme.colorScheme.surface,
+                              borderRadius: BorderRadius.circular(8),
+                              border: Border.all(color: theme.colorScheme.surface.withValues(alpha: 0.4)),
+                            ),
+                            child: Text(
+                              widget.specialities![i],
+                              style: theme.textTheme.bodySmall?.copyWith(
+                                color: Colors.indigo,
+                                fontSize: 12,
+                              ),
                             ),
                           ),
-                        ),
-                      )
-                          .toList(),
+                        if (widget.specialities!.length > 2)
+                          Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                            decoration: BoxDecoration(
+                              color: theme.colorScheme.surface,
+                              borderRadius: BorderRadius.circular(8),
+                              border: Border.all(color: theme.colorScheme.surface.withValues(alpha: 0.4)),
+                            ),
+                            child: Text(
+                              "+${widget.specialities!.length - 2} more",
+                              style: theme.textTheme.bodySmall?.copyWith(
+                                color: Colors.indigo,
+                                fontSize: 12,
+                              ),
+                            ),
+                          ),
+                      ],
                     ),
                   ],
                 ],

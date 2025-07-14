@@ -1,12 +1,11 @@
 import 'dart:async';
-
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:streammly/controllers/auth_controller.dart';
 import 'package:streammly/generated/assets.dart';
 import 'package:streammly/navigation_menu.dart';
 import 'package:streammly/services/route_helper.dart';
-// Add your custom image widget if needed
+
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});

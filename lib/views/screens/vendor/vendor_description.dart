@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:streammly/controllers/company_controller.dart';
-import 'package:streammly/views/screens/vendor/vendor_detail.dart';
+import 'package:streammly/views/screens/vendor/vendoer_detail.dart';
 
 class VendorDescription extends StatelessWidget {
   const VendorDescription({super.key});

@@ -22,6 +22,11 @@ class PackagesListView extends StatelessWidget {
           child: Obx(() {
             final isExpanded = controller.expandedStates[index] ?? false;
             final isSelected = controller.isPackageSelected(index);
+            final selectedHour = (controller.selectedHours[index]?.isNotEmpty ?? false)
+                ? controller.selectedHours[index]!.first
+                : pkg["hours"].first;
+            final priceMap = pkg["priceMap"] as Map<String, int>;
+            final updatedPrice = priceMap[selectedHour] ?? pkg["price"];
 
             return GestureDetector(
               onTap: () => controller.togglePackageSelection(index),
@@ -30,7 +35,7 @@ class PackagesListView extends StatelessWidget {
                   color: theme.colorScheme.surface,
                   borderRadius: BorderRadius.circular(12),
                   border: isSelected ? Border.all(color: const Color(0xFF4A6CF7), width: 2) : null,
-                  boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: 0.08), blurRadius: 8, offset: const Offset(0, 2))],
+                  boxShadow: [BoxShadow(color: Colors.black.withAlpha(20), blurRadius: 8, offset: const Offset(0, 2))],
                 ),
                 child: IntrinsicHeight(
                   child: Row(
@@ -39,10 +44,26 @@ class PackagesListView extends StatelessWidget {
                       if (pkg["specialOffer"] == true)
                         Container(
                           width: 40,
-                          decoration: const BoxDecoration(color: Color(0xFFE67E22), borderRadius: BorderRadius.only(topLeft: Radius.circular(12), bottomLeft: Radius.circular(12))),
+                          decoration: const BoxDecoration(
+                            color: Color(0xFFE67E22),
+                            borderRadius: BorderRadius.only(
+                              topLeft: Radius.circular(12),
+                              bottomLeft: Radius.circular(12),
+                            ),
+                          ),
                           child: const RotatedBox(
                             quarterTurns: 3,
-                            child: Center(child: Text("SPECIAL OFFER", style: TextStyle(color: Colors.white, fontSize: 10, fontWeight: FontWeight.w600, letterSpacing: 0.5))),
+                            child: Center(
+                              child: Text(
+                                "SPECIAL OFFER",
+                                style: TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 10,
+                                  fontWeight: FontWeight.w600,
+                                  letterSpacing: 0.5,
+                                ),
+                              ),
+                            ),
                           ),
                         ),
                       Expanded(
@@ -51,7 +72,6 @@ class PackagesListView extends StatelessWidget {
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              /// TITLE + TYPE
                               Row(
                                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                 children: [
@@ -59,9 +79,18 @@ class PackagesListView extends StatelessWidget {
                                     child: Column(
                                       crossAxisAlignment: CrossAxisAlignment.start,
                                       children: [
-                                        Text(pkg["title"] ?? '', style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold, color: Colors.black87)),
+                                        Text(
+                                          pkg["title"] ?? '',
+                                          style: theme.textTheme.titleMedium?.copyWith(
+                                            fontWeight: FontWeight.bold,
+                                            color: Colors.black87,
+                                          ),
+                                        ),
                                         const SizedBox(height: 4),
-                                        Text(pkg["type"] ?? '', style: theme.textTheme.bodySmall?.copyWith(color: Colors.grey)),
+                                        Text(
+                                          pkg["type"] ?? '',
+                                          style: theme.textTheme.bodySmall?.copyWith(color: Colors.grey),
+                                        ),
                                       ],
                                     ),
                                   ),
@@ -73,61 +102,82 @@ class PackagesListView extends StatelessWidget {
                                       decoration: BoxDecoration(
                                         shape: BoxShape.circle,
                                         color: isSelected ? const Color(0xFF4A6CF7) : Colors.transparent,
-                                        border: Border.all(color: isSelected ? const Color(0xFF4A6CF7) : Colors.grey.shade300, width: 2),
+                                        border: Border.all(
+                                          color: isSelected ? const Color(0xFF4A6CF7) : Colors.grey.shade300,
+                                          width: 2,
+                                        ),
                                       ),
-                                      child: isSelected ? const Icon(Icons.check, color: Colors.white, size: 16) : null,
+                                      child: isSelected
+                                          ? const Icon(Icons.check, color: Colors.white, size: 16)
+                                          : null,
                                     ),
                                   ),
                                 ],
                               ),
-
                               const SizedBox(height: 12),
-
-                              /// PRICE
                               Wrap(
                                 crossAxisAlignment: WrapCrossAlignment.center,
                                 children: [
                                   const Text("Just For", style: TextStyle(fontSize: 12, color: Colors.grey)),
                                   const SizedBox(width: 8),
                                   if (pkg["oldPrice"] != null) ...[
-                                    Text("Rs. ${pkg["oldPrice"]}", style: const TextStyle(fontSize: 14, color: Colors.grey, decoration: TextDecoration.lineThrough)),
+                                    Text(
+                                      "Rs. ${pkg["oldPrice"]}",
+                                      style: const TextStyle(
+                                        fontSize: 14,
+                                        color: Colors.grey,
+                                        decoration: TextDecoration.lineThrough,
+                                      ),
+                                    ),
                                     const SizedBox(width: 8),
                                   ],
-                                  Text("Rs. ${pkg["price"]}/-", style: theme.textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold, color: const Color(0xFF4A6CF7))),
+                                  Text(
+                                    "Rs. $updatedPrice/-",
+                                    style: theme.textTheme.titleLarge?.copyWith(
+                                      fontWeight: FontWeight.bold,
+                                      color: const Color(0xFF4A6CF7),
+                                    ),
+                                  ),
                                 ],
                               ),
-
                               const SizedBox(height: 12),
-
-                              /// HOURS
                               Wrap(
                                 spacing: 8,
-                                children:
-                                    (pkg["hours"] as List).map<Widget>((h) {
-                                      final selected = controller.selectedHours[index]?.contains(h) ?? false;
-                                      return GestureDetector(
-                                        onTap: () => controller.toggleHour(index, h),
-                                        child: Container(
-                                          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                                          decoration: BoxDecoration(
-                                            color: selected ? const Color(0xFF4A6CF7) : Colors.grey.shade100,
-                                            borderRadius: BorderRadius.circular(20),
-                                            border: Border.all(color: selected ? const Color(0xFF4A6CF7) : Colors.grey.shade300),
-                                          ),
-                                          child: Text(h, style: TextStyle(fontSize: 12, color: selected ? Colors.white : Colors.black54, fontWeight: FontWeight.w500)),
+                                children: (pkg["hours"] as List).map<Widget>((h) {
+                                  final selected = controller.selectedHours[index]?.contains(h) ?? false;
+                                  return GestureDetector(
+                                    onTap: () => controller.toggleHour(index, h),
+                                    child: Container(
+                                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                                      decoration: BoxDecoration(
+                                        color: selected ? const Color(0xFF4A6CF7) : Colors.grey.shade100,
+                                        borderRadius: BorderRadius.circular(20),
+                                        border: Border.all(
+                                          color: selected ? const Color(0xFF4A6CF7) : Colors.grey.shade300,
                                         ),
-                                      );
-                                    }).toList(),
+                                      ),
+                                      child: Text(
+                                        h,
+                                        style: TextStyle(
+                                          fontSize: 12,
+                                          color: selected ? Colors.white : Colors.black54,
+                                          fontWeight: FontWeight.w500,
+                                        ),
+                                      ),
+                                    ),
+                                  );
+                                }).toList(),
                               ),
-
-                              /// HIGHLIGHT
                               if ((pkg["highlight"] ?? '').isNotEmpty) ...[
                                 const SizedBox(height: 12),
-                                Text(pkg["highlight"], style: theme.textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.w600, color: Colors.black87)),
+                                Text(
+                                  pkg["highlight"],
+                                  style: theme.textTheme.bodyMedium?.copyWith(
+                                    fontWeight: FontWeight.w600,
+                                    color: Colors.black87,
+                                  ),
+                                ),
                               ],
-
-                              /// SHORT / FULL DESCRIPTION
-                              /// SHORT / FULL DESCRIPTION
                               if ((pkg["shortDescription"] ?? '').isNotEmpty || (pkg["fullDescription"] ?? '').isNotEmpty) ...[
                                 const SizedBox(height: 8),
                                 Text(
@@ -139,7 +189,11 @@ class PackagesListView extends StatelessWidget {
                                     onTap: () => controller.toggleExpanded(index),
                                     child: Text(
                                       isExpanded ? "Read Less" : "Read More",
-                                      style: const TextStyle(fontSize: 12, color: Color(0xFF4A6CF7), fontWeight: FontWeight.w500),
+                                      style: const TextStyle(
+                                        fontSize: 12,
+                                        color: Color(0xFF4A6CF7),
+                                        fontWeight: FontWeight.w500,
+                                      ),
                                     ),
                                   ),
                               ],
