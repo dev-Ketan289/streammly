@@ -2,8 +2,13 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:streammly/controllers/location_controller.dart';
+import 'package:streammly/controllers/promo_slider_controller.dart';
 import 'package:streammly/navigation_menu.dart';
 import 'package:streammly/views/screens/common/widgets/add_new_address.dart';
+
+import '../../../controllers/category_controller.dart';
+import '../../../controllers/company_controller.dart';
+import '../../../controllers/home_screen_controller.dart';
 
 class EnterLocationManuallyScreen extends StatelessWidget {
   final controller = Get.put(LocationController());
@@ -183,6 +188,11 @@ class EnterLocationManuallyScreen extends StatelessWidget {
                           child: ElevatedButton(
                             onPressed: () {
                               controller.saveSelectedLocation();
+                              Get.find<HomeController>().fetchSlides();
+                              Get.find<HomeController>().fetchRecommendedCompanies();
+                              Get.find<CategoryController>().fetchCategories();
+                              Get.find<PromoSliderController>().fetchSliders();
+                              Get.find<CompanyController>().fetchAndCacheCompanyById(1);
                               Get.to(() => NavigationMenu());
                             },
                             style: ElevatedButton.styleFrom(
