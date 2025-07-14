@@ -5,9 +5,7 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:get/get.dart';
 import 'package:streammly/controllers/auth_controller.dart'; // Added
-import 'package:streammly/controllers/home_screen_controller.dart';
 import 'package:streammly/generated/assets.dart';
-import 'package:streammly/navigation_menu.dart';
 import 'package:streammly/services/route_helper.dart';
 import 'package:streammly/views/screens/profile/about_page.dart';
 import 'package:streammly/views/screens/profile/components/profile_section_widget.dart';
@@ -15,12 +13,13 @@ import 'package:streammly/views/screens/profile/faq_page.dart';
 import 'package:streammly/views/screens/profile/language_preferences.dart';
 import 'package:streammly/views/screens/profile/linked_pages.dart';
 import 'package:streammly/views/screens/profile/notification_preferences.dart';
-import 'package:streammly/views/screens/profile/notifications_page.dart';
 import 'package:streammly/views/screens/profile/offers_page.dart';
 import 'package:streammly/views/screens/profile/profile_screen.dart';
 import 'package:streammly/views/screens/profile/settings.dart';
 
+import 'chatbot_page.dart';
 import 'components/profile_item_widget.dart';
+import 'notifications_page.dart';
 
 class ProfilePage extends StatefulWidget {
   const ProfilePage({super.key});
@@ -167,14 +166,15 @@ class _ProfilePageState extends State<ProfilePage> {
             icon: SvgPicture.asset(Assets.svgBell, height: 26, width: 26),
             title: "Notification",
             onTap: () {
-              Navigator.push(context, getCustomRoute(child: NotificationPreferencesPage()));
-              // Get.to(() => NotificationsPage());
+              Navigator.push(context, getCustomRoute(child: NotificationsPage()));
             },
           ),
           ProfileItemWidget(
             icon: SvgPicture.asset(Assets.svgBell, height: 26, width: 26),
             title: "Chat",
-            onTap: () {},
+            onTap: () {
+              Navigator.push(context, getCustomRoute(child: ChatbotPage()));
+            },
           ),
           ProfileItemWidget(
             icon: SvgPicture.asset(Assets.svgLinked, height: 26, width: 26),

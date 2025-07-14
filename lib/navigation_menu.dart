@@ -5,7 +5,6 @@ import 'package:iconsax/iconsax.dart';
 import 'package:streammly/generated/assets.dart';
 import 'package:streammly/services/theme.dart' as theme;
 import 'package:streammly/views/screens/home/home_screen.dart';
-import 'package:streammly/views/screens/package/booking/booking_page.dart';
 
 class NavigationMenu extends StatefulWidget {
   const NavigationMenu({super.key});

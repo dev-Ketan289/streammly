@@ -31,13 +31,8 @@ class CustomSwitch extends StatelessWidget {
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
           ),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withValues(alpha: 0.10),
-              blurRadius: 8,
-              offset: Offset(0, 2),
-            ),
-          ],
+         
+          
         ),
         child: Stack(
           children: [
