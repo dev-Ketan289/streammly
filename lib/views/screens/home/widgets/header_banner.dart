@@ -197,16 +197,24 @@ class _HeaderBannerState extends State<HeaderBanner> {
                       const SizedBox(width: 8),
                       Expanded(
                         child: Container(
+                          height: 37,
                           decoration: BoxDecoration(
-                            color: theme.colorScheme.surface,
+                            color: Colors.transparent,
                             borderRadius: BorderRadius.circular(30),
+                            border: Border.all(color: theme.colorScheme.onPrimary),
                           ),
                           child: TextField(
                             decoration: InputDecoration(
-                              hintText: "What are you looking for?",
-                              prefixIcon: Icon(Icons.search, color: theme.iconTheme.color),
+                              hintText: "Searching...",
+                              hintStyle: GoogleFonts.openSans(
+                                color: theme.colorScheme.onPrimary,
+                                fontWeight: FontWeight.w400,
+                                fontSize: 14,
+                              ),
+                              prefixIcon: Icon(Icons.search, color: theme.colorScheme.onPrimary),
                               border: InputBorder.none,
-                              contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+                              isDense: true,
+                              contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                             ),
                           ),
                         ),
@@ -223,25 +231,36 @@ class _HeaderBannerState extends State<HeaderBanner> {
                   const SizedBox(height: 24),
 
                   // Title & Subtitle
-                  if (title.isNotEmpty)
-                    Text(
-                      title,
-                      style: GoogleFonts.openSans(
-                        fontSize: 29,
-                        fontWeight: FontWeight.w700,
-                        color: theme.colorScheme.onPrimary,
+                  if (title.isNotEmpty || subtitle.isNotEmpty)
+                    Container(
+                      padding: const EdgeInsets.only(left: 20),
+                      width: 280,
+                      // You can add padding, decoration, or other properties here as needed
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          if (title.isNotEmpty)
+                            Text(
+                              title,
+                              style: GoogleFonts.openSans(
+                                fontSize: 29,
+                                fontWeight: FontWeight.w700,
+                                color: theme.colorScheme.onPrimary,
+                              ),
+                            ),
+                          if (subtitle.isNotEmpty) const SizedBox(height: 6),
+                          if (subtitle.isNotEmpty)
+                            Text(
+                              subtitle,
+                              style: GoogleFonts.openSans(
+                                color: theme.colorScheme.onPrimary,
+                                fontSize: 16,
+                              ),
+                              maxLines: 2,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                        ],
                       ),
-                    ),
-                  if (subtitle.isNotEmpty) const SizedBox(height: 6),
-                  if (subtitle.isNotEmpty)
-                    Text(
-                      subtitle,
-                      style: GoogleFonts.openSans(
-                        color: theme.colorScheme.onPrimary,
-                        fontSize: 16,
-                      ),
-                      maxLines: 4,
-                      overflow: TextOverflow.clip,
                     ),
 
                   const SizedBox(height: 12),

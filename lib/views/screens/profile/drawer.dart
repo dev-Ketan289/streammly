@@ -3,23 +3,24 @@ import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:get/get.dart';
-import 'package:streammly/controllers/auth_controller.dart';
+
+import 'package:streammly/controllers/auth_controller.dart'; // Added
 import 'package:streammly/generated/assets.dart';
 import 'package:streammly/services/route_helper.dart';
 import 'package:streammly/views/screens/profile/about_page.dart';
 import 'package:streammly/views/screens/profile/components/profile_section_widget.dart';
-import 'package:streammly/views/screens/profile/faq_page.dart';
-import 'package:streammly/views/screens/profile/invoice_screen.dart';
 import 'package:streammly/views/screens/profile/language_preferences.dart';
 import 'package:streammly/views/screens/profile/linked_pages.dart';
-import 'package:streammly/views/screens/profile/my_wallet.dart';
-import 'package:streammly/views/screens/profile/notifications_page.dart';
-import 'package:streammly/views/screens/profile/notification_preferences.dart';
 import 'package:streammly/views/screens/profile/offers_page.dart';
 import 'package:streammly/views/screens/profile/profile_screen.dart';
+import 'package:streammly/views/screens/profile/settings.dart';
+import 'package:streammly/views/screens/profile/faq_page.dart';
+
+import 'package:streammly/views/screens/profile/invoice_screen.dart';
+import 'package:streammly/views/screens/profile/my_wallet.dart';
+import 'notifications_page.dart';
 import 'package:streammly/views/screens/profile/rate_your_experience.dart';
 import 'package:streammly/views/screens/profile/refer_and_earn.dart';
-import 'package:streammly/views/screens/profile/settings.dart';
 import 'package:streammly/views/screens/profile/support_screen.dart';
 
 import 'chatbot_page.dart';
@@ -35,6 +36,7 @@ class ProfilePage extends StatefulWidget {
 
 class _ProfilePageState extends State<ProfilePage> {
   final authController = Get.find<AuthController>();
+
   @override
   void initState() {
     super.initState();
@@ -49,7 +51,7 @@ class _ProfilePageState extends State<ProfilePage> {
 
   @override
   Widget build(BuildContext context) {
-    final authController = Get.find<AuthController>();
+    final authController = Get.find<AuthController>(); // Added
     final screenWidth = MediaQuery.of(context).size.width;
     final screenHeight = MediaQuery.of(context).size.height;
 
