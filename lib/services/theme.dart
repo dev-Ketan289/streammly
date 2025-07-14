@@ -8,6 +8,7 @@ Color primaryColor = const Color(0xFF2864A6);
 Color secondaryColor = const Color(0xFF4867B7);
 Color backgroundDark = const Color(0xff231F20);
 Color backgroundLight = const Color(0xffffffff);
+Color ratingColor = const Color(0xFF3645B8);
 
 const Color textPrimary = Color(0xff000000);
 const Color textSecondary = Color(0xff838383);

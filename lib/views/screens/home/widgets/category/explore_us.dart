@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/svg.dart';
 import 'package:get/get.dart';
 import 'package:shimmer/shimmer.dart';
 import 'package:streammly/controllers/company_controller.dart';
+import 'package:streammly/generated/assets.dart';
+import 'package:streammly/services/theme.dart';
 import '../../../vendor/vendoer_detail.dart';
 import '../../vendor_locator.dart';
 
@@ -56,7 +59,7 @@ class _ExploreUsState extends State<ExploreUs> {
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Text("Explore Us !!!", style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold, fontSize: 18)),
+              Text("Explore Us !!!", style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold, fontSize: 13, color: Color(0xff1E2742))),
               InkWell(
                 onTap: () {
                   Navigator.push(context, MaterialPageRoute(builder: (_) => CompanyLocatorMapScreen(categoryId: 1)));
@@ -65,7 +68,7 @@ class _ExploreUsState extends State<ExploreUs> {
                   children: [
                     Text("View Map", style: theme.textTheme.bodyMedium?.copyWith(color: theme.colorScheme.primary, fontWeight: FontWeight.w500)),
                     const SizedBox(width: 4),
-                    Icon(Icons.map_outlined, color: theme.colorScheme.primary, size: 18),
+                    SvgPicture.asset(Assets.svgMap, height: 15, width: 15), 
                   ],
                 ),
               ),
@@ -103,16 +106,15 @@ class _ExploreUsState extends State<ExploreUs> {
                     Navigator.push(context, MaterialPageRoute(builder: (_) => VendorDetailScreen(company: vendor)));
                   },
                   child: Container(
-                    margin: const EdgeInsets.only(bottom: 20),
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(18),
-                      color: Colors.white,
-                      boxShadow: [BoxShadow(blurRadius: 10, color: Colors.black12, offset: const Offset(0, 4))],
-                    ),
+                    padding: const EdgeInsets.all(10),
+
+                    margin: const EdgeInsets.only(bottom: 10),
+
+                    decoration: BoxDecoration(borderRadius: BorderRadius.circular(18), border: Border.all(color: Color(0xffE2EDF9), width: 2), color: Colors.white),
                     child: Column(
                       children: [
                         ClipRRect(
-                          borderRadius: const BorderRadius.vertical(top: Radius.circular(18)),
+                          borderRadius: const BorderRadius.vertical(top: Radius.circular(18), bottom: Radius.circular(18)),
                           child: vendor.bannerImage != null && vendor.bannerImage!.isNotEmpty
                               ? Image.network(vendor.bannerImage!, height: 150, width: double.infinity, fit: BoxFit.fill)
                               : Image.asset('assets/images/recommended_banner/FocusPointVendor.png', height: 150, width: double.infinity, fit: BoxFit.cover),
@@ -126,23 +128,20 @@ class _ExploreUsState extends State<ExploreUs> {
                                 child: Column(
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
-                                    Text(vendor.companyName, style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold)),
+                                    Text(vendor.companyName, style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold, fontSize: 20)),
                                     const SizedBox(height: 4),
-                                    Text(vendor.categoryName ?? "Unknown", style: theme.textTheme.bodySmall?.copyWith(color: Colors.grey)),
+                                    Text(vendor.categoryName ?? "Unknown", style: theme.textTheme.bodySmall?.copyWith(color: Colors.grey, fontSize: 12)),
                                     const SizedBox(height: 6),
                                     Row(
                                       children: [
-                                        const Icon(Icons.access_time, size: 14, color: Colors.grey),
-                                        const SizedBox(width: 4),
-                                        Text(vendor.estimatedTime ?? "N/A", style: theme.textTheme.bodySmall?.copyWith(color: Colors.grey, fontSize: 12)),
-                                        const SizedBox(width: 10),
                                         const Icon(Icons.location_on, size: 14, color: Colors.grey),
                                         const SizedBox(width: 4),
+                                        Text(vendor.estimatedTime?? "N/A", style: theme.textTheme.bodySmall?.copyWith(color: Color(0xffB8B7C8), fontSize: 12)),
                                         Text(
                                           vendor.distanceKm != null && vendor.distanceKm! > 1
-                                              ? "${vendor.distanceKm!.toStringAsFixed(1)} km"
+                                              ? " . ${vendor.distanceKm!.toStringAsFixed(1)} km"
                                               : "${(vendor.distanceKm ?? 0) * 1000 ~/ 1} m",
-                                          style: theme.textTheme.bodySmall?.copyWith(color: Colors.grey, fontSize: 12),
+                                          style: theme.textTheme.bodySmall?.copyWith(color: Color(0xffB8B7C8), fontSize: 12),
                                         ),
                                       ],
                                     ),
@@ -151,8 +150,13 @@ class _ExploreUsState extends State<ExploreUs> {
                               ),
                               Container(
                                 padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                                decoration: BoxDecoration(color: theme.colorScheme.primary, borderRadius: BorderRadius.circular(8)),
-                                child: Text("${vendor.rating?.toStringAsFixed(1) ?? "0.0"} ★", style: theme.textTheme.bodySmall?.copyWith(color: Colors.white, fontSize: 12)),
+                                decoration: BoxDecoration(color:  ratingColor, borderRadius: BorderRadius.circular(8)),
+                                child: Row(
+                                  children: [
+                                    Text("${vendor.rating?.toStringAsFixed(1) ?? "0.0"} ", style: theme.textTheme.bodySmall?.copyWith(color: Colors.white, fontSize: 12)),
+                                    Icon(Icons.star, color: Color(0xffF8DE1E), size: 8),
+                                  ],
+                                ),
                               ),
                             ],
                           ),

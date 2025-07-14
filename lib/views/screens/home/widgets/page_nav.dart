@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:streammly/services/theme.dart';
 import 'package:streammly/views/screens/bundle/bundle_information.dart';
 import 'package:streammly/views/screens/wishlist/wishlistpage.dart';
+import 'package:flutter_svg/flutter_svg.dart';
+import 'package:streammly/generated/assets.dart';
 
 class PageNav extends StatelessWidget {
   const PageNav({super.key});
@@ -10,7 +13,11 @@ class PageNav extends StatelessWidget {
   Widget build(BuildContext context) {
     final filters = ['Wishlist', 'Recommended', 'Bundles'];
     final selectedIndex = 1.obs; // Default to 'Recommended'
-    final icons = [Icons.favorite, Icons.recommend, Icons.card_giftcard];
+    final svgIcons = [
+      Assets.svgWishlist, // Wishlist
+      Assets.svgDiamondhome, // Recommended
+      Assets.svgDiamondhome, // Bundles
+    ];
     final theme = Theme.of(context);
 
     return Stack(
@@ -47,7 +54,11 @@ class PageNav extends StatelessWidget {
                               decoration: BoxDecoration(color: isSelected ? theme.colorScheme.primary : Colors.transparent, borderRadius: BorderRadius.circular(30)),
                               child: Row(
                                 children: [
-                                  Icon(icons[index], size: 16, color: isSelected ? theme.colorScheme.onPrimary : theme.colorScheme.onSurfaceVariant),
+                                  SvgPicture.asset(
+                                    svgIcons[index],
+                                    width: 12,
+                                    height: 10,
+                                  ),
                                   const SizedBox(width: 4),
                                   Text(
                                     filters[index],
@@ -76,9 +87,10 @@ class PageNav extends StatelessWidget {
             },
             child: Row(
               children: [
-                Text("See all", style: TextStyle(color: theme.colorScheme.primary, fontWeight: FontWeight.w500, fontSize: 13)),
+                Text("See all", style: TextStyle(color: primaryColor, fontWeight: FontWeight.bold, fontSize: 12)),
                 const SizedBox(width: 4),
-                Icon(Icons.arrow_forward_ios, size: 14, color: theme.colorScheme.primary),
+                Icon(Icons.arrow_forward_ios, size: 14, color: primaryColor),
+                SizedBox(width: 4,)
               ],
             ),
           ),

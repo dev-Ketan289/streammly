@@ -86,6 +86,14 @@ class Assets {
   /// assets/images/photographer.png
   static const String imagesPhotographer = "assets/images/photographer.png";
 
+  /// Assets for imagesProfileCompoPdfFile21
+  /// assets/images/profile_compo/pdf-file-21.png
+  static const String imagesProfileCompoPdfFile21 = "assets/images/profile_compo/pdf-file-21.png";
+
+  /// Assets for imagesProfileCompoXL
+  /// assets/images/profile_compo/XL.png
+  static const String imagesProfileCompoXL = "assets/images/profile_compo/XL.png";
+
   /// Assets for imagesRecommendedBannerFlavor
   /// assets/images/recommended_banner/flavor.png
   static const String imagesRecommendedBannerFlavor = "assets/images/recommended_banner/flavor.png";
@@ -106,9 +114,49 @@ class Assets {
   /// assets/images/recommended_banner/velvet.png
   static const String imagesRecommendedBannerVelvet = "assets/images/recommended_banner/velvet.png";
 
+  /// Assets for imagesReferafriend
+  /// assets/images/Referafriend.png
+  static const String imagesReferafriend = "assets/images/Referafriend.png";
+
+  /// Assets for imagesSocailMediaBox
+  /// assets/images/socail_media/box.png
+  static const String imagesSocailMediaBox = "assets/images/socail_media/box.png";
+
+  /// Assets for imagesSocailMediaFacebook
+  /// assets/images/socail_media/facebook.png
+  static const String imagesSocailMediaFacebook = "assets/images/socail_media/facebook.png";
+
+  /// Assets for imagesSocailMediaLeftarrow
+  /// assets/images/socail_media/leftarrow.png
+  static const String imagesSocailMediaLeftarrow = "assets/images/socail_media/leftarrow.png";
+
+  /// Assets for imagesSocailMediaLink
+  /// assets/images/socail_media/link.png
+  static const String imagesSocailMediaLink = "assets/images/socail_media/link.png";
+
+  /// Assets for imagesSocailMediaMail
+  /// assets/images/socail_media/mail.png
+  static const String imagesSocailMediaMail = "assets/images/socail_media/mail.png";
+
+  /// Assets for imagesSocailMediaRightarrow
+  /// assets/images/socail_media/rightarrow.png
+  static const String imagesSocailMediaRightarrow = "assets/images/socail_media/rightarrow.png";
+
+  /// Assets for imagesSocailMediaWallet
+  /// assets/images/socail_media/wallet.png
+  static const String imagesSocailMediaWallet = "assets/images/socail_media/wallet.png";
+
+  /// Assets for imagesSocailMediaWhatsapp
+  /// assets/images/socail_media/whatsapp.png
+  static const String imagesSocailMediaWhatsapp = "assets/images/socail_media/whatsapp.png";
+
   /// Assets for imagesSplash
   /// assets/images/splash.gif
   static const String imagesSplash = "assets/images/splash.gif";
+
+  /// Assets for imagesSupport
+  /// assets/images/support.png
+  static const String imagesSupport = "assets/images/support.png";
 
   /// Assets for imagesThumb
   /// assets/images/Thumb.gif
@@ -117,6 +165,10 @@ class Assets {
   /// Assets for imagesVendorDemo
   /// assets/images/vendor_demo.png
   static const String imagesVendorDemo = "assets/images/vendor_demo.png";
+
+  /// Assets for imagesWallet
+  /// assets/images/wallet.png
+  static const String imagesWallet = "assets/images/wallet.png";
 
   /// Assets for svgAbout
   /// assets/svg/about.svg
@@ -153,6 +205,10 @@ class Assets {
   /// Assets for svgDiamond
   /// assets/svg/diamond.svg
   static const String svgDiamond = "assets/svg/diamond.svg";
+
+  /// Assets for svgDiamondhome
+  /// assets/svg/diamondhome.svg
+  static const String svgDiamondhome = "assets/svg/diamondhome.svg";
 
   /// Assets for svgEye
   /// assets/svg/eye.svg
@@ -198,6 +254,10 @@ class Assets {
   /// assets/svg/logout.svg
   static const String svgLogout = "assets/svg/logout.svg";
 
+  /// Assets for svgMap
+  /// assets/svg/map.svg
+  static const String svgMap = "assets/svg/map.svg";
+
   /// Assets for svgMore
   /// assets/svg/more.svg
   static const String svgMore = "assets/svg/more.svg";
@@ -234,6 +294,10 @@ class Assets {
   /// assets/svg/saved.svg
   static const String svgSaved = "assets/svg/saved.svg";
 
+  /// Assets for svgSearch
+  /// assets/svg/search.svg
+  static const String svgSearch = "assets/svg/search.svg";
+
   /// Assets for svgSettings
   /// assets/svg/settings.svg
   static const String svgSettings = "assets/svg/settings.svg";
@@ -241,6 +305,10 @@ class Assets {
   /// Assets for svgShop
   /// assets/svg/shop.svg
   static const String svgShop = "assets/svg/shop.svg";
+
+  /// Assets for svgStar
+  /// assets/svg/star.svg
+  static const String svgStar = "assets/svg/star.svg";
 
   /// Assets for svgSupport
   /// assets/svg/support.svg
@@ -253,6 +321,10 @@ class Assets {
   /// Assets for svgWallet
   /// assets/svg/wallet.svg
   static const String svgWallet = "assets/svg/wallet.svg";
+
+  /// Assets for svgWishlist
+  /// assets/svg/wishlist.svg
+  static const String svgWishlist = "assets/svg/wishlist.svg";
 
   /// Assets for svgWorks
   /// assets/svg/works.svg

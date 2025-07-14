@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:streammly/controllers/wishlist_controller.dart';
 import 'package:streammly/models/vendors/recommanded_vendors.dart';
+import 'package:streammly/services/theme.dart';
 import '../../../../../models/company/company_location.dart';
 import '../../../vendor/vendoer_detail.dart';
 
@@ -69,7 +70,7 @@ class _RecommendedListState extends State<RecommendedList> {
               : "${distanceKm.toStringAsFixed(1)} km")
               : "--";
           final time =
-          distanceKm != null ? "${(distanceKm * 7).round()} mins" : "--";
+          distanceKm != null ? "${(distanceKm * 7).round()} mins . ${distanceKm.toStringAsFixed(1)} km" : "--";
 
           return InkWell(
             onTap: () {
@@ -95,9 +96,11 @@ class _RecommendedListState extends State<RecommendedList> {
             },
 
             child: Container(
+              padding: EdgeInsets.all(10),
               width: itemWidth,
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(16),
+                border: Border.all(color:Color(0xffE2EDF9), width: 2),
                 color: theme.colorScheme.surface,
                 boxShadow: [
                   BoxShadow(
@@ -115,6 +118,7 @@ class _RecommendedListState extends State<RecommendedList> {
                       ClipRRect(
                         borderRadius: const BorderRadius.vertical(
                           top: Radius.circular(16),
+                          bottom: Radius.circular(16),
                         ),
                         child: Image.network(
                           imageUrl,
@@ -172,9 +176,9 @@ class _RecommendedListState extends State<RecommendedList> {
                                 companyName,
                                 style: TextStyle(
                                   fontWeight: FontWeight.bold,
-                                  fontSize: itemWidth * 0.09,
+                                  fontSize: itemWidth * 0.08,
                                   color: theme.colorScheme.onSurface,
-                                  overflow: TextOverflow.ellipsis,
+                                  overflow: TextOverflow.visible,
                                 ),
                               ),
                             ),
@@ -184,15 +188,25 @@ class _RecommendedListState extends State<RecommendedList> {
                                 vertical: itemWidth * 0.015,
                               ),
                               decoration: BoxDecoration(
-                                color: theme.colorScheme.primary,
+                                color: ratingColor,
                                 borderRadius: BorderRadius.circular(6),
                               ),
-                              child: Text(
-                                "$rating ★",
-                                style: TextStyle(
-                                  color: theme.colorScheme.onPrimary,
-                                  fontSize: itemWidth * 0.075,
-                                ),
+                              child: Row(
+                                children: [
+                                  Text(
+                                    "$rating",
+                                    style: TextStyle(
+                                      color: theme.colorScheme.onPrimary,
+                                      fontSize: itemWidth * 0.075,
+                                    ),
+                                  ),
+                                  SizedBox(width: 2),
+                                  Icon(
+                                    Icons.star,
+                                    size: itemWidth * 0.075,
+                                    color: Color(0xffF8DE1E),
+                                  ),
+                                ],
                               ),
                             ),
                           ],
@@ -210,44 +224,47 @@ class _RecommendedListState extends State<RecommendedList> {
                         Row(
                           children: [
                             Icon(
-                              Icons.access_time,
+                              Icons.location_on,
                               size: itemWidth * 0.085,
-                              color: theme.colorScheme.onSurfaceVariant,
+                              color: Color(0xffB8B7C8),
+
                             ),
+
                             SizedBox(width: itemWidth * 0.025),
+                            
                             Expanded(
                               child: Text(
                                 time,
                                 style: TextStyle(
                                   fontSize: itemWidth * 0.075,
-                                  color: theme.colorScheme.onSurfaceVariant,
+                                  color: Color(0xffB8B7C8),
                                 ),
-                                overflow: TextOverflow.ellipsis,
+                                overflow: TextOverflow.visible,
                               ),
                             ),
                           ],
                         ),
-                        SizedBox(height: itemWidth * 0.015),
-                        Row(
-                          children: [
-                            Icon(
-                              Icons.location_on,
-                              size: itemWidth * 0.085,
-                              color: theme.colorScheme.onSurfaceVariant,
-                            ),
-                            SizedBox(width: itemWidth * 0.025),
-                            Expanded(
-                              child: Text(
-                                distanceText,
-                                style: TextStyle(
-                                  fontSize: itemWidth * 0.075,
-                                  color: theme.colorScheme.onSurfaceVariant,
-                                ),
-                                overflow: TextOverflow.ellipsis,
-                              ),
-                            ),
-                          ],
-                        ),
+                        // SizedBox(height: itemWidth * 0.015),
+                        // Row(
+                        //   children: [
+                        //     Icon(
+                        //       Icons.location_on,
+                        //       size: itemWidth * 0.085,
+                        //       color: theme.colorScheme.onSurfaceVariant,
+                        //     ),
+                        //     SizedBox(width: itemWidth * 0.025),
+                        //     Expanded(
+                        //       child: Text(
+                        //         distanceText,
+                        //         style: TextStyle(
+                        //           fontSize: itemWidth * 0.075,
+                        //           color: theme.colorScheme.onSurfaceVariant,
+                        //         ),
+                        //         overflow: TextOverflow.ellipsis,
+                        //       ),
+                        //     ),
+                        //   ],
+                        // ),
                         // Specialities Added Below
                         if (vendor.specialities != null &&
                             vendor.specialities!.isNotEmpty)

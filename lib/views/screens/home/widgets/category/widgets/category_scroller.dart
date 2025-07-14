@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:streammly/services/theme.dart';
 
 import '../../../../../../models/category/category_item.dart';
 
@@ -20,15 +21,15 @@ class CategoryScroller extends StatelessWidget {
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Text(title!, style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 20, color: Colors.black)),
+                Text(title!, style: Theme.of(context).textTheme.bodyLarge?.copyWith(fontWeight: FontWeight.bold)),
                 if (onSeeAll != null)
                   InkWell(
                     onTap: onSeeAll,
                     child: Row(
-                      children: const [
-                        Text("See all", style: TextStyle(color: Colors.blue, fontSize: 13)),
+                      children:  [
+                        Text("See all", style: TextStyle(color: primaryColor, fontSize: 13)),
                         SizedBox(width: 4),
-                        Icon(Icons.arrow_forward_ios, size: 14, color: Colors.blue),
+                        Icon(Icons.arrow_forward_ios, size: 14, color: primaryColor),
                       ],
                     ),
                   ),
@@ -70,7 +71,7 @@ class CategoryScroller extends StatelessWidget {
                     Flexible(
                       child: Padding(
                         padding: const EdgeInsets.symmetric(horizontal: 4),
-                        child: Text(item.label, style: const TextStyle(fontSize: 9, fontWeight: FontWeight.bold), textAlign: TextAlign.center),
+                        child: Text(item.label, style: const TextStyle(fontSize: 9, fontWeight: FontWeight.bold, color: Color(0xff575861)), textAlign: TextAlign.center),
                       ),
                     ),
                   ],
