@@ -5,6 +5,7 @@ import 'package:streammly/controllers/company_controller.dart';
 import 'package:streammly/models/company/company_location.dart';
 
 import '../home/vendor_locator.dart';
+import 'bundle_package_selection.dart';
 
 class BundleCategories extends StatefulWidget {
   const BundleCategories({super.key, required this.selectedCategories});
@@ -80,15 +81,11 @@ class _BundleCategoriesState extends State<BundleCategories> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
+              // Top Row
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  GestureDetector(
-                    onTap: () {
-                      // This just rebuilds or shows categories (optional)
-                    },
-                    child: const Text('View Categories ', style: TextStyle(fontSize: 15, color: Color(0xFF997D15))),
-                  ),
+                  GestureDetector(onTap: () {}, child: const Text('View Categories ', style: TextStyle(fontSize: 15, color: Color(0xFF997D15)))),
                   GestureDetector(
                     onTap: () {
                       final selectedCategory = categoryController.categories.firstWhereOrNull((e) => e.title == widget.selectedCategories.first);
@@ -102,7 +99,10 @@ class _BundleCategoriesState extends State<BundleCategories> {
                   ),
                 ],
               ),
+
               const SizedBox(height: 20),
+
+              // Vendor Cards
               GetBuilder<CompanyController>(
                 builder: (controller) {
                   if (controller.isLoading) {
@@ -159,6 +159,8 @@ class _BundleCategoriesState extends State<BundleCategories> {
               ),
 
               const SizedBox(height: 20),
+
+              // Selected Vendors
               const Center(child: Text('Selected Vendors', style: TextStyle(fontSize: 17, fontWeight: FontWeight.bold, color: Color(0xFF4867B7)))),
               const SizedBox(height: 10),
               GetBuilder<CompanyController>(
@@ -192,6 +194,33 @@ class _BundleCategoriesState extends State<BundleCategories> {
                   );
                 },
               ),
+
+              const SizedBox(height: 30),
+
+              // Continue Button
+              Center(
+                child: SizedBox(
+                  width: double.infinity,
+                  child: ElevatedButton(
+                    onPressed: () {
+                      if (_selectedVendorIds.isEmpty) {
+                        Get.snackbar("No Vendors", "Please select at least one vendor to continue.");
+                        return;
+                      }
+
+                      Get.to(() => BundlePackageSelectionScreen(selectedVendorIds: _selectedVendorIds));
+                    },
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: const Color(0xFF2E5CDA),
+                      padding: const EdgeInsets.symmetric(vertical: 16),
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                    ),
+                    child: const Text("Continue", style: TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.bold)),
+                  ),
+                ),
+              ),
+
+              const SizedBox(height: 20),
             ],
           ),
         ),
@@ -305,7 +334,7 @@ class VendorRect extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(8),
       height: 178,
-      width: 350,
+      width: double.infinity,
       decoration: BoxDecoration(border: Border.all(color: Colors.grey[200] ?? Colors.grey, width: 2), borderRadius: BorderRadius.circular(16), color: Colors.white),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,

@@ -263,6 +263,24 @@ class _VendorGroupState extends State<VendorGroup> {
                 ],
               ),
               const SizedBox(height: 16),
+
+              SizedBox(
+                width: double.infinity,
+                child: ElevatedButton(
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.blue[800], // You can match the theme
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                    padding: const EdgeInsets.symmetric(vertical: 14),
+                  ),
+                  onPressed: () {
+                    Navigator.pop(context);
+                    // Get.to(() => ViewPortfolioPage(companyId: companyId));
+                  },
+                  child: const Text("View Portfolio", style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 16)),
+                ),
+              ),
+              const SizedBox(height: 16),
+              const SizedBox(height: 16),
             ],
           ),
         );
