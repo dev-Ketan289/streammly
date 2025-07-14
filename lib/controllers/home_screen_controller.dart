@@ -15,8 +15,8 @@ class HomeController extends GetxController {
   List<BannerSlideItem> headerSlides = [];
   // List<Map<String, dynamic>> recommendedCompanies = [];
 
-  bool isHeaderLoading = true;
-  bool isRecommendedLoading = true;
+  bool isHeaderLoading = false;
+  bool isRecommendedLoading = false;
 
   @override
   void onInit() {

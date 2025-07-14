@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:streammly/controllers/wishlist_controller.dart';
 import 'package:streammly/models/vendors/recommanded_vendors.dart';
+import '../../../../../models/company/company_location.dart';
+import '../../../vendor/vendoer_detail.dart';
 
 class RecommendedList extends StatefulWidget {
   final BuildContext context;
@@ -34,7 +36,7 @@ class _RecommendedListState extends State<RecommendedList> {
     final itemWidth = (screenWidth * 0.45).clamp(140.0, 180.0);
     final itemHeight = itemWidth * 1.7;
 
-    const baseUrl = "http://192.168.1.113:8000/";
+    const baseUrl = "https://admin.streammly.com/";
 
     return SizedBox(
       height: itemHeight + 16,
@@ -50,9 +52,9 @@ class _RecommendedListState extends State<RecommendedList> {
           final vendor = widget.recommendedVendors[index];
 
           final imageUrl =
-              vendor.bannerImage != null
-                  ? baseUrl + (vendor.bannerImage ?? '')
-                  : "assets/images/placeholder.jpg";
+          vendor.bannerImage != null
+              ? baseUrl + (vendor.bannerImage ?? '')
+              : "assets/images/placeholder.jpg";
 
           final rating = vendor.rating?.toStringAsFixed(1) ?? "--";
           final companyName = vendor.companyName ?? "Unknown";
@@ -61,26 +63,45 @@ class _RecommendedListState extends State<RecommendedList> {
 
           final distanceKm = vendor.id;
           final distanceText =
-              distanceKm != null
-                  ? (distanceKm < 1
-                      ? "${(distanceKm * 1000).toStringAsFixed(0)} m"
-                      : "${distanceKm.toStringAsFixed(1)} km")
-                  : "--";
+          distanceKm != null
+              ? (distanceKm < 1
+              ? "${(distanceKm * 1000).toStringAsFixed(0)} m"
+              : "${distanceKm.toStringAsFixed(1)} km")
+              : "--";
           final time =
-              distanceKm != null ? "${(distanceKm * 7).round()} mins" : "--";
+          distanceKm != null ? "${(distanceKm * 7).round()} mins" : "--";
 
           return InkWell(
             onTap: () {
-              // Navigator.push(context, MaterialPageRoute(builder: (_) => VendorDetailScreen(company: vendor)));
+              final company = CompanyLocation(
+                id: vendor.id,
+                companyName: vendor.companyName ?? "Unknown",
+                latitude: vendor.latitude != null ? double.tryParse(vendor.latitude.toString()) : null,
+                longitude: vendor.longitude != null ? double.tryParse(vendor.longitude.toString()) : null,
+                bannerImage: vendor.bannerImage != null ? 'https://admin.streammly.com/${vendor.bannerImage}' : null,
+                logo: vendor.logo != null ? 'https://admin.streammly.com/${vendor.logo}' : null,
+                description: vendor.description,
+                categoryName: vendor.vendorcategory?.isNotEmpty == true ? vendor.vendorcategory!.first.getCategory?.title : "Service",
+                rating: vendor.rating?.toDouble(),
+                specialities: vendor.specialities ?? [],
+              );
+
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (_) => VendorDetailScreen(company: company),
+                ),
+              );
             },
+
             child: Container(
               width: itemWidth,
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(16),
-                color: theme.colorScheme.surface, // Theme-based background
+                color: theme.colorScheme.surface,
                 boxShadow: [
                   BoxShadow(
-                    color: theme.shadowColor.withValues(alpha: .05),
+                    color: theme.shadowColor.withAlpha(15),
                     blurRadius: 3,
                     offset: const Offset(1, 2),
                   ),
@@ -120,24 +141,18 @@ class _RecommendedListState extends State<RecommendedList> {
                                 wishlistController
                                     .addBookmark(vendor.id, "company")
                                     .then((value) {
-                                      if (value.isSuccess) {
-                                        wishlistController.loadBookmarks();
-                                      }
-                                    });
-
-                                // if (isToggled) {
-                                //   isToggled = !isToggled;
-
-                                // }
+                                  if (value.isSuccess) {
+                                    wishlistController.loadBookmarks();
+                                  }
+                                });
                               },
-
                               child: Icon(
                                 Icons.favorite,
                                 size: 25,
                                 color:
-                                    vendor.isChecked == true
-                                        ? Colors.red
-                                        : Colors.white,
+                                vendor.isChecked == true
+                                    ? Colors.red
+                                    : Colors.white,
                               ),
                             );
                           },
@@ -233,6 +248,22 @@ class _RecommendedListState extends State<RecommendedList> {
                             ),
                           ],
                         ),
+                        // Specialities Added Below
+                        if (vendor.specialities != null &&
+                            vendor.specialities!.isNotEmpty)
+                          Padding(
+                            padding: EdgeInsets.only(top: itemWidth * 0.02),
+                            child: Text(
+                              "Specialities: ${vendor.specialities!.join(", ")}",
+                              style: TextStyle(
+                                fontSize: itemWidth * 0.07,
+                                color: theme.colorScheme.primary,
+                                fontWeight: FontWeight.w500,
+                              ),
+                              maxLines: 2,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ),
                       ],
                     ),
                   ),

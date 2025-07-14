@@ -18,8 +18,10 @@ class OtpScreen extends StatefulWidget {
 }
 
 class _OtpScreenState extends State<OtpScreen> {
+
   String fullNumber = "";
   late String phone;
+  final TextEditingController otpTextController = TextEditingController();
 
   @override
   void initState() {
@@ -32,7 +34,7 @@ class _OtpScreenState extends State<OtpScreen> {
       fullNumber = 'Via SMS $fullPhone';
 
       if (phone == "8111111111") {
-        Get.find<OtpController>().otpController.text = "123456";
+        otpTextController.text = "123456";
       }
 
       SmsAutoFill().listenForCode();
@@ -41,6 +43,7 @@ class _OtpScreenState extends State<OtpScreen> {
 
   @override
   void dispose() {
+    otpTextController.clear();
     SmsAutoFill().unregisterListener();
     super.dispose();
   }
@@ -89,7 +92,7 @@ class _OtpScreenState extends State<OtpScreen> {
                                       shake: otpController.shakeOnError.value,
                                       child: PinCodeTextField(
                                         appContext: context,
-                                        controller: otpController.otpController,
+                                        controller: otpTextController,
                                         length: 6,
                                         keyboardType: TextInputType.number,
                                         pinTheme: PinTheme(
@@ -142,7 +145,7 @@ class _OtpScreenState extends State<OtpScreen> {
                                       child: ElevatedButton(
                                         style: ElevatedButton.styleFrom(backgroundColor: theme.primaryColor),
                                         onPressed: () {
-                                          Get.find<OtpController>().verifyOtp(phone: phone).then((value) {
+                                          Get.find<OtpController>().verifyOtp(phone: phone, otp: otpTextController.text).then((value) {
                                             if (value.isSuccess) {
                                               Get.to(() => const WelcomeScreen());
                                             }

@@ -73,9 +73,9 @@ class _BundleInformationState extends State<BundleInformation> {
   void _toggleSelectAll(bool value) {
     setState(() {
       selectedCategories =
-          value
-              ? List.from(_categoryController.categories.map((e) => e.title))
-              : [];
+      value
+          ? List.from(_categoryController.categories.map((e) => e.title))
+          : [];
     });
   }
 
@@ -84,10 +84,10 @@ class _BundleInformationState extends State<BundleInformation> {
     return Scaffold(
       backgroundColor: const Color(0xFFF1F4FF), // light background
       appBar: AppBar(
-        title: const Text(
+        title: Text(
           'Bundle Information',
-          style: TextStyle(
-            color: Color(0xFF2E5CDA),
+          style: Theme.of(context).textTheme.titleLarge?.copyWith(
+            color: const Color(0xFF2E5CDA),
             fontWeight: FontWeight.bold,
           ),
         ),
@@ -113,37 +113,28 @@ class _BundleInformationState extends State<BundleInformation> {
           child: Column(
             children: [
               const SizedBox(height: 12),
-              const Text(
+              Text(
                 'Please Fill this following Details',
-                style: TextStyle(fontSize: 16),
+                style: Theme.of(context).textTheme.bodyLarge,
               ),
               const SizedBox(height: 20),
 
               /// EVENT TYPE
               GestureDetector(
-                onTap:
-                    () => setState(
-                      () => isEventDropdownOpen = !isEventDropdownOpen,
-                    ),
+                onTap: () => setState(() => isEventDropdownOpen = !isEventDropdownOpen),
                 child: _styledDropdownContainer(
                   child: Row(
                     children: [
                       Expanded(
                         child: Text(
                           selectedEventType ?? "Event Type *",
-                          style: TextStyle(
-                            color:
-                                selectedEventType == null
-                                    ? Colors.grey
-                                    : Colors.black,
-                            fontSize: 16,
+                          style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                            color: selectedEventType == null ? Colors.grey : Colors.black,
                           ),
                         ),
                       ),
                       Icon(
-                        isEventDropdownOpen
-                            ? Icons.keyboard_arrow_up
-                            : Icons.keyboard_arrow_down,
+                        isEventDropdownOpen ? Icons.keyboard_arrow_up : Icons.keyboard_arrow_down,
                       ),
                     ],
                   ),
@@ -151,20 +142,19 @@ class _BundleInformationState extends State<BundleInformation> {
               ),
               if (isEventDropdownOpen)
                 _dropdownBox(
-                  children:
-                      ['Birthday', 'Wedding', 'Engagement']
-                          .map(
-                            (event) => ListTile(
-                              title: Text(event),
-                              onTap: () {
-                                setState(() {
-                                  selectedEventType = event;
-                                  isEventDropdownOpen = false;
-                                });
-                              },
-                            ),
-                          )
-                          .toList(),
+                  children: ['Birthday', 'Wedding', 'Engagement']
+                      .map(
+                        (event) => ListTile(
+                      title: Text(event, style: Theme.of(context).textTheme.bodyMedium),
+                      onTap: () {
+                        setState(() {
+                          selectedEventType = event;
+                          isEventDropdownOpen = false;
+                        });
+                      },
+                    ),
+                  )
+                      .toList(),
                 ),
 
               _buildTextField('Event Name *', eventNameController),
@@ -172,8 +162,7 @@ class _BundleInformationState extends State<BundleInformation> {
               _buildTextField(
                 'Event Date *',
                 TextEditingController(
-                  text:
-                      "${selectedDate.day} ${_monthName(selectedDate.month)} ${selectedDate.year}",
+                  text: "${selectedDate.day} ${_monthName(selectedDate.month)} ${selectedDate.year}",
                 ),
                 readOnly: true,
                 onTap: _pickDate,
@@ -225,33 +214,20 @@ class _BundleInformationState extends State<BundleInformation> {
                   return Column(
                     children: [
                       GestureDetector(
-                        onTap:
-                            () => setState(
-                              () =>
-                                  isCategoryDropdownOpen =
-                                      !isCategoryDropdownOpen,
-                            ),
+                        onTap: () => setState(() => isCategoryDropdownOpen = !isCategoryDropdownOpen),
                         child: _styledDropdownContainer(
                           child: Row(
                             children: [
                               Expanded(
                                 child: Text(
-                                  selectedCategories.isEmpty
-                                      ? "Category *"
-                                      : selectedCategories.join(', '),
-                                  style: TextStyle(
-                                    color:
-                                        selectedCategories.isEmpty
-                                            ? Colors.grey
-                                            : Colors.black,
-                                    fontSize: 16,
+                                  selectedCategories.isEmpty ? "Category *" : selectedCategories.join(', '),
+                                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                                    color: selectedCategories.isEmpty ? Colors.grey : Colors.black,
                                   ),
                                 ),
                               ),
                               Icon(
-                                isCategoryDropdownOpen
-                                    ? Icons.keyboard_arrow_up
-                                    : Icons.keyboard_arrow_down,
+                                isCategoryDropdownOpen ? Icons.keyboard_arrow_up : Icons.keyboard_arrow_down,
                               ),
                             ],
                           ),
@@ -261,23 +237,19 @@ class _BundleInformationState extends State<BundleInformation> {
                         _dropdownBox(
                           children: [
                             CheckboxListTile(
-                              title: const Text("All"),
-                              value:
-                                  selectedCategories.length ==
-                                  controller.categories.length,
-                              onChanged:
-                                  (val) => _toggleSelectAll(val ?? false),
+                              title: Text("All", style: Theme.of(context).textTheme.bodyMedium),
+                              value: selectedCategories.length == controller.categories.length,
+                              onChanged: (val) => _toggleSelectAll(val ?? false),
                               controlAffinity: ListTileControlAffinity.trailing,
                               contentPadding: EdgeInsets.zero,
                             ),
                             const Divider(),
                             ...controller.categories.map((cat) {
                               return CheckboxListTile(
-                                title: Text(cat.title),
+                                title: Text(cat.title, style: Theme.of(context).textTheme.bodyMedium),
                                 value: selectedCategories.contains(cat.title),
                                 onChanged: (_) => _toggleCategory(cat.title),
-                                controlAffinity:
-                                    ListTileControlAffinity.trailing,
+                                controlAffinity: ListTileControlAffinity.trailing,
                                 contentPadding: EdgeInsets.zero,
                               );
                             }).toList(),
@@ -291,9 +263,9 @@ class _BundleInformationState extends State<BundleInformation> {
               const SizedBox(height: 20),
 
               /// RADIUS
-              const Text(
+              Text(
                 'Radius',
-                style: TextStyle(fontWeight: FontWeight.w600),
+                style: Theme.of(context).textTheme.bodyLarge?.copyWith(fontWeight: FontWeight.w600),
               ),
               Slider(
                 value: radius,
@@ -309,7 +281,7 @@ class _BundleInformationState extends State<BundleInformation> {
                 alignment: Alignment.centerRight,
                 child: Text(
                   "${radius.round()} KM",
-                  style: const TextStyle(color: Colors.grey),
+                  style: Theme.of(context).textTheme.bodySmall?.copyWith(color: Colors.grey),
                 ),
               ),
 
@@ -320,9 +292,7 @@ class _BundleInformationState extends State<BundleInformation> {
                 height: 48,
                 child: ElevatedButton(
                   onPressed: () {
-                    Get.to(
-                      () => Categories(selectedCategories: selectedCategories),
-                    );
+                    Get.to(() => Categories(selectedCategories: selectedCategories));
                     debugPrint("Selected Event: $selectedEventType");
                     debugPrint("Selected Categories: $selectedCategories");
                   },
@@ -332,7 +302,7 @@ class _BundleInformationState extends State<BundleInformation> {
                       borderRadius: BorderRadius.circular(8),
                     ),
                   ),
-                  child: const Text("Next Step"),
+                  child: Text("Next Step", style: Theme.of(context).textTheme.labelLarge?.copyWith(color: Colors.white)),
                 ),
               ),
             ],
@@ -343,13 +313,13 @@ class _BundleInformationState extends State<BundleInformation> {
   }
 
   Widget _buildTextField(
-    String label,
-    TextEditingController controller, {
-    bool readOnly = false,
-    VoidCallback? onTap,
-    IconData? suffixIcon,
-    String? hint,
-  }) {
+      String label,
+      TextEditingController controller, {
+        bool readOnly = false,
+        VoidCallback? onTap,
+        IconData? suffixIcon,
+        String? hint,
+      }) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 8),
       child: TextField(
@@ -394,18 +364,8 @@ class _BundleInformationState extends State<BundleInformation> {
 
   String _monthName(int month) {
     const months = [
-      'January',
-      'February',
-      'March',
-      'April',
-      'May',
-      'June',
-      'July',
-      'August',
-      'September',
-      'October',
-      'November',
-      'December',
+      'January', 'February', 'March', 'April', 'May', 'June',
+      'July', 'August', 'September', 'October', 'November', 'December',
     ];
     return months[month - 1];
   }

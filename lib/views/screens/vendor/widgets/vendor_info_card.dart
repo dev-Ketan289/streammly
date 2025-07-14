@@ -22,25 +22,41 @@ class VendorInfoCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final screenWidth = MediaQuery.of(context).size.width;
+
+    /// Adjust image size according to screen width
+    final imageSize = screenWidth * 0.4; // 40% of screen width
+    final cardPadding = screenWidth * 0.04; // 4% of screen width
+
     return Container(
-      margin: const EdgeInsets.all(16),
-      decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(20), boxShadow: const [BoxShadow(color: Colors.black12, blurRadius: 6)]),
+      margin: EdgeInsets.all(cardPadding),
+      decoration: BoxDecoration(
+        color: theme.cardColor,
+        borderRadius: BorderRadius.circular(20),
+        boxShadow: const [
+          BoxShadow(
+            color: Colors.black12,
+            blurRadius: 6,
+          ),
+        ],
+      ),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Left side: Logo Image
+          /// Left Side - Logo Image
           Container(
-            width: 180,
-            height: 180,
-            margin: const EdgeInsets.all(12),
+            width: imageSize,
+            height: imageSize,
+            margin: EdgeInsets.all(cardPadding),
             child: ClipRRect(
               borderRadius: BorderRadius.circular(16),
               child: Image.network(
                 logoImage,
-                fit: BoxFit.fill,
+                fit: BoxFit.cover,
                 errorBuilder: (context, error, stackTrace) {
                   return Image.asset(
-                    'assets/images/default_logo.png', // Make sure this image exists and is declared in pubspec.yaml
+                    'assets/images/default_logo.png',
                     fit: BoxFit.cover,
                   );
                 },
@@ -48,39 +64,78 @@ class VendorInfoCard extends StatelessWidget {
             ),
           ),
 
-          // Right side: Info
+          /// Right Side - Info
           Expanded(
             child: Padding(
-              padding: const EdgeInsets.only(top: 16, bottom: 16, right: 16),
+              padding: EdgeInsets.only(
+                top: cardPadding,
+                bottom: cardPadding,
+                right: cardPadding,
+              ),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  // Row with rating and estimated time
+                  /// Row with Rating & Estimated Time
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       if (rating != null)
                         Container(
                           padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                          decoration: BoxDecoration(color: Colors.blue.shade700, borderRadius: BorderRadius.circular(12)),
+                          decoration: BoxDecoration(
+                            color: Colors.blue.shade700,
+                            borderRadius: BorderRadius.circular(12),
+                          ),
                           child: Row(
                             children: [
                               const Icon(Icons.star, color: Colors.white, size: 16),
                               const SizedBox(width: 4),
-                              Text(rating!, style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+                              Text(
+                                rating!,
+                                style: const TextStyle(
+                                  color: Colors.white,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
                             ],
                           ),
                         ),
-                      if (estimatedTime != null && distanceKm != null) Text("$estimatedTime • $distanceKm", style: const TextStyle(fontSize: 13, color: Colors.black)),
+                      if (estimatedTime != null && distanceKm != null)
+                        Text(
+                          "$estimatedTime • $distanceKm",
+                          style: theme.textTheme.bodySmall?.copyWith(color: Colors.black),
+                        ),
                     ],
                   ),
                   const SizedBox(height: 8),
 
-                  Text(companyName, style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
-                  Text(category, style: const TextStyle(fontSize: 14, color: Colors.grey)),
+                  /// Company Name & Category
+                  Text(
+                    companyName,
+                    style: theme.textTheme.titleMedium?.copyWith(
+                      fontWeight: FontWeight.bold,
+                      fontSize: screenWidth * 0.045, // Responsive text
+                    ),
+                  ),
+                  Text(
+                    category,
+                    style: theme.textTheme.bodySmall?.copyWith(
+                      color: Colors.grey,
+                      fontSize: screenWidth * 0.035, // Responsive text
+                    ),
+                  ),
                   const SizedBox(height: 8),
 
-                  Text(_stripHtml(description), style: const TextStyle(fontSize: 13, color: Colors.grey), maxLines: 4, overflow: TextOverflow.ellipsis),
+                  /// Description (stripped HTML)
+                  Text(
+                    _stripHtml(description),
+                    style: theme.textTheme.bodySmall?.copyWith(
+                      color: Colors.grey,
+                      fontSize: screenWidth * 0.035,
+                    ),
+                    maxLines: 4,
+                    overflow: TextOverflow.ellipsis,
+                  ),
                 ],
               ),
             ),

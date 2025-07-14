@@ -17,7 +17,7 @@ class OtpController extends GetxController implements GetxService {
   final AuthRepo authRepo;
   OtpController({required this.authRepo});
 
-  final TextEditingController otpController = TextEditingController();
+
 
   RxInt secondsRemaining = 30.obs;
   RxString receivedOTP = ''.obs;
@@ -26,7 +26,7 @@ class OtpController extends GetxController implements GetxService {
 
   Timer? _timer;
 
-  Future<ResponseModel> verifyOtp({required String phone}) async {
+  Future<ResponseModel> verifyOtp({required String phone,required String otp}) async {
     isLoading = true;
     update();
     ResponseModel responseModel;
@@ -47,10 +47,11 @@ class OtpController extends GetxController implements GetxService {
       String deviceId = await Get.find<AuthController>().getOrCreateDeviceId();
 
       /// Verify OTP with device ID
-      Response response = await authRepo.verifyOtp(phone: phone, otp: otpController.text, deviceId: deviceId);
+      Response response = await authRepo.verifyOtp(phone: phone, otp: otp, deviceId: deviceId);
 
       if (response.statusCode == 200 && response.body['data']['token'] != null) {
         Get.find<AuthController>().setUserToken(response.body['data']['token']);
+        Get.find<AuthController>().loginMethod = 'phone';
 
         /// Fetch user profile after login
         await Get.find<AuthController>().fetchUserProfile();
@@ -95,8 +96,8 @@ class OtpController extends GetxController implements GetxService {
     });
   }
 
-  void confirmOTP(String phone, {VoidCallback? onVerified}) {
-    final enteredOTP = otpController.text.trim();
+  void confirmOTP(String phone,String otp, {VoidCallback? onVerified}) {
+    final enteredOTP = otp.trim();
 
     ///  Bypass check for test number
     if (phone == "8111111111") {
@@ -128,7 +129,7 @@ class OtpController extends GetxController implements GetxService {
     }
 
     try {
-      final url = Uri.parse("http://192.168.1.113:8000/api/v1/user/auth/generateOtp");
+      final url = Uri.parse("https://admin.streammly.com/api/v1/user/auth/generateOtp");
       final response = await http.post(url, headers: {'Content-Type': 'application/json'}, body: jsonEncode({"phone": phone}));
 
       final responseBody = jsonDecode(response.body);

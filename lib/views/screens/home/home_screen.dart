@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:streammly/controllers/company_controller.dart';
 import 'package:streammly/views/screens/home/vendor_locator.dart';
-import 'package:streammly/views/screens/home/widgets/category/page_nav.dart';
+import 'package:streammly/views/screens/home/widgets/page_nav.dart';
 
 import '../../../controllers/category_controller.dart';
 import '../../../controllers/home_screen_controller.dart';
@@ -27,6 +28,8 @@ class _HomeScreenState extends State<HomeScreen> {
   final HomeController headerController = Get.find<HomeController>();
   final CategoryController categoryController = Get.find<CategoryController>();
   final LocationController locationController = Get.put(LocationController());
+  final CompanyController companyController = Get.find<CompanyController>();
+
 
   @override
   void initState() {
@@ -34,10 +37,11 @@ class _HomeScreenState extends State<HomeScreen> {
     headerController.fetchSlides();
     headerController.fetchRecommendedCompanies();
     categoryController.fetchCategories();
+    companyController.fetchCompanyById(1);
   }
 
   List<CategoryItem> convertToCategoryItems(List<CategoryModel> models) {
-    final String baseUrl = 'http://192.168.1.113:8000';
+    final String baseUrl = 'https://admin.streammly.com/';
     return models.map((model) {
       String? fullImageUrl;
       if (model.image != null && model.image!.isNotEmpty) {
@@ -98,7 +102,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   ),
 
                   const SizedBox(height: 24),
-                  ExploreUs(vendorId: 1),
+                  ExploreUs(vendorIds: ([1])),
                   const SizedBox(height: 26),
                   PromoSlider(),
                   const SizedBox(height: 24),

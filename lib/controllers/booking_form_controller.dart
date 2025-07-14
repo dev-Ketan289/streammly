@@ -1,8 +1,10 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
 import 'package:streammly/views/screens/package/booking/booking_page.dart';
 
+import '../views/screens/package/booking/widgets/add_on_page.dart';
 class BookingController extends GetxController {
   var currentPage = 0.obs;
   var selectedPackages = <Map<String, dynamic>>[].obs;
@@ -12,23 +14,18 @@ class BookingController extends GetxController {
   final packageFormsData = <int, Map<String, dynamic>>{}.obs;
   var acceptTerms = false.obs;
 
-  /// Summary-specific data
   late RxList<int> packagePrices;
   late RxList<bool> showPackageDetails;
 
   void initSelectedPackages(List<Map<String, dynamic>> packages) {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       selectedPackages.assignAll(packages);
-
-      // Initialize prices & detail toggles
       packagePrices = List<int>.generate(packages.length, (index) => int.tryParse(packages[index]['packagevariations']?[0]?['amount']?.toString() ?? '0') ?? 0).obs;
-
       showPackageDetails = List<bool>.filled(packages.length, false).obs;
 
       for (int i = 0; i < packages.length; i++) {
         final package = packages[i];
         final packageTitle = package['title'];
-
         Map<String, String> extraAnswers = {};
         final extraQuestions = package['extraQuestions'] ?? package['packageextra_questions'] ?? [];
         for (var question in extraQuestions) {
@@ -54,7 +51,6 @@ class BookingController extends GetxController {
     });
   }
 
-  /// Summary Logic Methods
   int get totalPayment => packagePrices.fold(0, (sum, price) => sum + price);
 
   void editPackage(int index) {
@@ -66,7 +62,6 @@ class BookingController extends GetxController {
     showPackageDetails[index] = !showPackageDetails[index];
   }
 
-  /// Form Methods (your existing ones)
   void updatePersonalInfo(String key, String value) {
     if (personalInfo.containsKey(key)) {
       personalInfo[key]?.value = value;
@@ -116,12 +111,37 @@ class BookingController extends GetxController {
     return months[month];
   }
 
-  void toggleAddOn(int index, String type) {
-    final form = packageFormsData[index] ?? {};
-    final key = type == 'free' ? 'freeAddOn' : 'extraAddOn';
-    form[key] = form[key] == null ? 'Selected' : null;
-    packageFormsData[index] = form;
-    packageFormsData.refresh();
+  /// NEW toggleAddOn – fetch items and open selection page
+  void toggleAddOn(int index, String type) async {
+    final package = selectedPackages[index];
+    final packageId = package['id'];
+
+    final response = await GetConnect().get(
+      'https://admin.streammly.com/api/v1/package/getproductinpackage?company_id=1&package_id=$packageId',
+    );
+
+    if (response.statusCode == 200 && response.body['success'] == true) {
+      final List<dynamic> data = response.body['data'];
+      final products = data.expand((cat) {
+        return cat['product_in_packages']?.map((p) => p['products']) ?? [];
+      }).toList();
+
+      final selected = await Get.to(() => ItemSelectionPage(
+        packageIndex: index,
+        type: type,
+        items: List<Map<String, dynamic>>.from(products),
+      ));
+
+      if (selected != null) {
+        final form = packageFormsData[index] ?? {};
+        final key = type == 'free' ? 'freeAddOn' : 'extraAddOn';
+        form[key] = selected;
+        packageFormsData[index] = form;
+        packageFormsData.refresh();
+      }
+    } else {
+      Get.snackbar("Error", "Failed to load items for selection");
+    }
   }
 
   void toggleTermsAcceptance() {
@@ -185,6 +205,8 @@ class BookingController extends GetxController {
       }),
       'termsAccepted': acceptTerms.value,
     };
-    print('Booking Data Submitted:\n$data');
+    if (kDebugMode) {
+      print('Booking Data Submitted:\n$data');
+    }
   }
 }

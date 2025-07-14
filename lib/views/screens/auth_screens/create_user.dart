@@ -8,7 +8,7 @@ import 'package:streammly/views/screens/common/location_screen.dart';
 import '../../../controllers/auth_controller.dart';
 
 class ProfileFormScreen extends StatefulWidget {
-  ProfileFormScreen({super.key});
+  const ProfileFormScreen({super.key});
 
   @override
   State<ProfileFormScreen> createState() => _ProfileFormScreenState();
@@ -22,16 +22,33 @@ class _ProfileFormScreenState extends State<ProfileFormScreen> {
 
   String? selectedGender;
   bool isLoading = false;
+  late final AuthController authController;
 
   @override
   void initState() {
     super.initState();
-    phoneController.text = Get.find<AuthController>().phoneController.text;
-    emailController.text = Get.find<AuthController>().emailController.text;
+    authController = Get.find<AuthController>();
+
+    // Prefill fields from existing user profile if available
+    if (authController.userProfile != null) {
+      nameController.text = authController.userProfile?.name ?? '';
+      emailController.text = authController.userProfile?.email ?? '';
+      phoneController.text = authController.userProfile?.phone ?? '';
+      dobController.text = authController.userProfile?.dob ?? '';
+      selectedGender = authController.userProfile?.gender;
+    } else {
+      phoneController.text = authController.phoneController.text;
+      emailController.text = authController.emailController.text;
+    }
   }
 
   Future<void> _pickDate() async {
-    DateTime? picked = await showDatePicker(context: context, initialDate: DateTime(2000, 1, 1), firstDate: DateTime(1900), lastDate: DateTime.now());
+    DateTime? picked = await showDatePicker(
+      context: context,
+      initialDate: DateTime(2000, 1, 1),
+      firstDate: DateTime(1900),
+      lastDate: DateTime.now(),
+    );
     if (picked != null) {
       dobController.text = "${picked.year.toString().padLeft(4, '0')}-${picked.month.toString().padLeft(2, '0')}-${picked.day.toString().padLeft(2, '0')}";
     }
@@ -53,11 +70,18 @@ class _ProfileFormScreenState extends State<ProfileFormScreen> {
     });
 
     try {
-      final response = await Get.find<AuthController>().updateUserProfile(name: name, email: email, dob: dob.isEmpty ? null : dob, gender: selectedGender, phone: phone);
+      final response = await authController.updateUserProfile(
+        name: name,
+        email: email,
+        dob: dob.isEmpty ? null : dob,
+        gender: selectedGender,
+        phone: phone,
+      );
+
       log("${response?.message}", name: "saveProfile");
 
       if (response?.isSuccess ?? false) {
-        await Get.find<AuthController>().fetchUserProfile();
+        await authController.fetchUserProfile();
         Fluttertoast.showToast(msg: response?.message ?? "");
         Get.offAll(() => const LocationScreen());
       } else {
@@ -78,7 +102,11 @@ class _ProfileFormScreenState extends State<ProfileFormScreen> {
       canPop: false,
       child: Scaffold(
         backgroundColor: const Color(0xFFF5F6FA),
-        appBar: AppBar(title: const Text("Complete Your Profile"), centerTitle: true, automaticallyImplyLeading: false),
+        appBar: AppBar(
+          title: const Text("Complete Your Profile"),
+          centerTitle: true,
+          automaticallyImplyLeading: false,
+        ),
         body: Center(
           child: SingleChildScrollView(
             child: Card(
@@ -90,22 +118,6 @@ class _ProfileFormScreenState extends State<ProfileFormScreen> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
-                    // Center(
-                    //   child: Stack(
-                    //     children: [
-                    //       CircleAvatar(
-                    //         radius: 40,
-                    //         backgroundColor: Colors.grey[300],
-                    //         child: const Icon(
-                    //           Icons.person,
-                    //           size: 50,
-                    //           color: Colors.white,
-                    //         ),
-                    //       ),
-                    //       // Optionally add an edit icon overlay here
-                    //     ],
-                    //   ),
-                    // ),
                     const SizedBox(height: 24),
                     TextField(
                       controller: nameController,
@@ -121,11 +133,12 @@ class _ProfileFormScreenState extends State<ProfileFormScreen> {
                     TextField(
                       controller: emailController,
                       keyboardType: TextInputType.emailAddress,
+                      readOnly: authController.isGoogleLogin(),
                       decoration: InputDecoration(
                         labelText: "Email *",
                         prefixIcon: const Icon(Icons.email_outlined),
                         filled: true,
-                        fillColor: Colors.white,
+                        fillColor: authController.isGoogleLogin() ? Colors.grey[100] : Colors.white,
                         border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
                       ),
                     ),
@@ -133,11 +146,12 @@ class _ProfileFormScreenState extends State<ProfileFormScreen> {
                     TextField(
                       controller: phoneController,
                       keyboardType: TextInputType.phone,
+                      readOnly: authController.isPhoneLogin(),
                       decoration: InputDecoration(
                         labelText: "Phone *",
                         prefixIcon: const Icon(Icons.phone_outlined),
                         filled: true,
-                        fillColor: Colors.white,
+                        fillColor: authController.isPhoneLogin() ? Colors.grey[100] : Colors.white,
                         border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
                       ),
                     ),
@@ -149,7 +163,8 @@ class _ProfileFormScreenState extends State<ProfileFormScreen> {
                           controller: dobController,
                           keyboardType: TextInputType.datetime,
                           decoration: InputDecoration(
-                            labelText: "Date of Birth (Optional, YYYY-MM-DD)",
+                            labelText: "Date of Birth (Optional)",
+                            hintText: "YYYY-MM-DD",
                             prefixIcon: const Icon(Icons.cake_outlined),
                             filled: true,
                             fillColor: Colors.white,
@@ -190,10 +205,9 @@ class _ProfileFormScreenState extends State<ProfileFormScreen> {
                           textStyle: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                         ),
                         onPressed: isLoading ? null : saveProfile,
-                        child:
-                            isLoading
-                                ? const SizedBox(width: 24, height: 24, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white))
-                                : const Text("Save Profile", style: TextStyle(color: Colors.white)),
+                        child: isLoading
+                            ? const SizedBox(width: 24, height: 24, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white))
+                            : const Text("Save Profile", style: TextStyle(color: Colors.white)),
                       ),
                     ),
                   ],

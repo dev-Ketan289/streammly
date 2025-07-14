@@ -90,7 +90,7 @@ class NavigationController extends GetxController {
     HomeScreen(),
     const Center(child: Text("Shop Page Coming Soon")),
     const Center(child: Text("My Cart Page Coming Soon")),
-    BookingPage(),
+    const Center(child: Text("Bookings Page Coming Soon")),
     const Center(child: Text("More Page Coming Soon")),
   ];
 }

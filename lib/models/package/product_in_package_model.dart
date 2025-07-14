@@ -1,33 +1,70 @@
-import 'package:streammly/models/package/product_model.dart';
+class Product {
+  final int id;
+  final String uniqueId;
+  final String title;
+  final String description;
+  final String coverImage;
+  final String productUsageType;
+
+  Product({
+    required this.id,
+    required this.uniqueId,
+    required this.title,
+    required this.description,
+    required this.coverImage,
+    required this.productUsageType,
+  });
+
+  factory Product.fromJson(Map<String, dynamic> json) {
+    return Product(
+      id: json['id'],
+      uniqueId: json['unique_id'],
+      title: json['title'],
+      description: json['decription'] ?? '',
+      coverImage: json['cover_image'],
+      productUsageType: json['product_usage_type'],
+    );
+  }
+}
 
 class ProductInPackage {
   final int id;
-  final int packageId;
-  final int productId;
-  final String itemType;
-  final String dataRequestStage;
   final int quantity;
+  final String dataRequestStage;
   final Product product;
 
   ProductInPackage({
     required this.id,
-    required this.packageId,
-    required this.productId,
-    required this.itemType,
-    required this.dataRequestStage,
     required this.quantity,
+    required this.dataRequestStage,
     required this.product,
   });
 
   factory ProductInPackage.fromJson(Map<String, dynamic> json) {
     return ProductInPackage(
       id: json['id'],
-      packageId: json['package_id'],
-      productId: json['product_id'],
-      itemType: json['item_type'] ?? '',
+      quantity: json['quantity'],
       dataRequestStage: json['data_request_stage'] ?? '',
-      quantity: json['quantity'] ?? 0,
-      product: Product.fromJson(json['products'] ?? {}),
+      product: Product.fromJson(json['products']),
+    );
+  }
+}
+
+class ProductCategory {
+  final String title;
+  final List<ProductInPackage> items;
+
+  ProductCategory({
+    required this.title,
+    required this.items,
+  });
+
+  factory ProductCategory.fromJson(Map<String, dynamic> json) {
+    return ProductCategory(
+      title: json['product_and_service_category']['title'] ?? '',
+      items: (json['product_in_packages'] as List)
+          .map((e) => ProductInPackage.fromJson(e))
+          .toList(),
     );
   }
 }

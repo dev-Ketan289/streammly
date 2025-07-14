@@ -9,7 +9,7 @@ class CategoryController extends GetxController implements GetxService {
   CategoryController({required this.categoryRepo});
 
   List<CategoryModel> categories = [];
-  bool isLoading = true;
+  bool isLoading = false;
 
   @override
   void onInit() {
@@ -33,9 +33,9 @@ class CategoryController extends GetxController implements GetxService {
     } catch (e) {
       categories.clear();
       Get.snackbar("Error", e.toString());
-    } finally {
+    }
       isLoading = false;
       update(); // notify done loading
-    }
+    
   }
 }
