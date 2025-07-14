@@ -2,13 +2,9 @@ import 'dart:convert';
 import 'dart:developer';
 
 import 'package:flutter/foundation.dart';
-import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:streammly/controllers/auth_controller.dart';
-import 'package:streammly/main.dart';
-import 'package:streammly/views/screens/splash_screen/splash_screen.dart';
 
 import '../../models/response/error_response.dart';
 import '../../services/constants.dart';

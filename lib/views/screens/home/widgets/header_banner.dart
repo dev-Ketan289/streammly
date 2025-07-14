@@ -4,6 +4,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:streammly/generated/assets.dart';
+import 'package:streammly/services/theme.dart';
 import 'package:streammly/views/screens/common/enter_location_manually.dart';
 import 'package:streammly/views/screens/profile/drawer.dart';
 
@@ -184,28 +186,51 @@ class _HeaderBannerState extends State<HeaderBanner> {
                       const SizedBox(width: 8),
                       Expanded(
                         child: Container(
-                          decoration: BoxDecoration(color: theme.colorScheme.surface, borderRadius: BorderRadius.circular(30)),
+                          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                          height: 37,
+                          width: 302,
+                          decoration: BoxDecoration(
+                            color: Colors.transparent,
+                            borderRadius: BorderRadius.circular(30),
+                            border: Border.all(color: theme.colorScheme.onPrimary, width: 1),
+                          ),
                           child: TextField(
+                            style: const TextStyle(color: Colors.white), // Set typed text to white
                             decoration: InputDecoration(
-                              hintText: "Search",
-                              prefixIcon: Icon(Icons.search, color: theme.iconTheme.color),
+                              
+                              hintText: "Searching...",
+                              hintStyle: GoogleFonts.openSans(color: theme.colorScheme.onPrimary, fontSize: 12),
+                              prefixIcon: Icon(Icons.search, color: backgroundLight, size: 24,),
                               border: InputBorder.none,
-                              contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+                              isDense: true,
+                              contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                             ),
                           ),
                         ),
                       ),
                       const SizedBox(width: 8),
-                      CircleAvatar(radius: 16, backgroundColor: theme.colorScheme.surface, child: Icon(Icons.diamond_outlined, color: Colors.amber)),
+                      CircleAvatar(radius: 16, backgroundColor: theme.colorScheme.surface, child: SvgPicture.asset(Assets.svgDiamondhome, )),
                     ],
                   ),
 
-                  const SizedBox(height: 24),
 
                   // Title & Subtitle
-                  if (title.isNotEmpty) Text(title, style: GoogleFonts.openSans(fontSize: 29, fontWeight: FontWeight.w700, color: theme.colorScheme.onPrimary)),
-                  if (subtitle.isNotEmpty) const SizedBox(height: 6),
-                  if (subtitle.isNotEmpty) Text(subtitle, style: GoogleFonts.openSans(color: theme.colorScheme.onPrimary, fontSize: 16), maxLines: 4, overflow: TextOverflow.clip),
+                  if (title.isNotEmpty || subtitle.isNotEmpty)
+                    Container(
+                      width: 280,
+                      padding: const EdgeInsets.symmetric(horizontal: 10, ),
+                      child: Column(
+
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          if (title.isNotEmpty)
+                            Text(title, style: GoogleFonts.openSans(fontSize: 29, fontWeight: FontWeight.w700, color: theme.colorScheme.onPrimary)),
+                          if (subtitle.isNotEmpty) const SizedBox(height: 6),
+                          if (subtitle.isNotEmpty)
+                            Text(subtitle, style: GoogleFonts.openSans(color: theme.colorScheme.onPrimary, fontSize: 16),  overflow: TextOverflow.visible),
+                        ],
+                      ),
+                    ),
 
                   const SizedBox(height: 12),
 

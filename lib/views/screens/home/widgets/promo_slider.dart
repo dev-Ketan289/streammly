@@ -52,6 +52,7 @@ class _PromoSliderState extends State<PromoSlider> {
                         margin: const EdgeInsets.symmetric(horizontal: 6),
                         decoration: BoxDecoration(
                           borderRadius: BorderRadius.circular(18),
+                          border: Border.all(color: Color(0xffE2EDF9), width: 2),
                           boxShadow: [BoxShadow(color: theme.shadowColor.withAlpha(25), blurRadius: 6, offset: const Offset(0, 4))],
                         ),
                         child: ClipRRect(
@@ -60,13 +61,14 @@ class _PromoSliderState extends State<PromoSlider> {
                             imageUrl,
                             fit: BoxFit.cover,
                             width: double.infinity,
+                            height: 150,
                             errorBuilder: (_, __, ___) => Icon(Icons.error, color: theme.colorScheme.error),
                           ),
                         ),
                       ),
                     );
                   }).toList(),
-              options: CarouselOptions(height: 180, autoPlay: true, enlargeCenterPage: true, viewportFraction: 0.9, onPageChanged: (index, _) => controller.setCurrentIndex(index)),
+              options: CarouselOptions(height: 180, autoPlay: true, enlargeCenterPage: true, viewportFraction: 0.9, onPageChanged: (index, _) => controller.setCurrentIndex(index),),
             ),
             const SizedBox(height: 8),
             Row(

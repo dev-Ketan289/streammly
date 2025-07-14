@@ -4,20 +4,27 @@ import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:get/get.dart';
-import 'package:streammly/controllers/auth_controller.dart';
+
+import 'package:streammly/controllers/auth_controller.dart'; // Added
 import 'package:streammly/generated/assets.dart';
+import 'package:streammly/services/route_helper.dart';
+import 'package:streammly/views/screens/profile/about_page.dart';
 import 'package:streammly/views/screens/profile/components/profile_section_widget.dart';
-import 'package:streammly/views/screens/profile/invoice_screen.dart';
 import 'package:streammly/views/screens/profile/language_preferences.dart';
 import 'package:streammly/views/screens/profile/linked_pages.dart';
-import 'package:streammly/views/screens/profile/my_wallet.dart';
-import 'package:streammly/views/screens/profile/notifications_page.dart';
 import 'package:streammly/views/screens/profile/offers_page.dart';
 import 'package:streammly/views/screens/profile/profile_screen.dart';
+import 'package:streammly/views/screens/profile/settings.dart';
+import 'package:streammly/views/screens/profile/faq_page.dart';
+
+import 'package:streammly/views/screens/profile/invoice_screen.dart';
+import 'package:streammly/views/screens/profile/my_wallet.dart';
+import 'notifications_page.dart';
 import 'package:streammly/views/screens/profile/rate_your_experience.dart';
 import 'package:streammly/views/screens/profile/refer_and_earn.dart';
 import 'package:streammly/views/screens/profile/support_screen.dart';
 
+import 'chatbot_page.dart';
 import 'components/profile_item_widget.dart';
 import 'components/transcation_histroy_screen.dart';
 
@@ -30,6 +37,7 @@ class ProfilePage extends StatefulWidget {
 
 class _ProfilePageState extends State<ProfilePage> {
   final authController = Get.find<AuthController>();
+
   @override
   void initState() {
     super.initState();
@@ -128,10 +136,16 @@ class _ProfilePageState extends State<ProfilePage> {
             icon: SvgPicture.asset(Assets.svgBell, height: 26, width: 26),
             title: "Notification",
             onTap: () {
-              Get.to(() => NotificationsPage());
+              Navigator.push(context, getCustomRoute(child: NotificationsPage()));
             },
           ),
-          ProfileItemWidget(icon: SvgPicture.asset(Assets.svgBell, height: 26, width: 26), title: "Chat", onTap: () {}),
+          ProfileItemWidget(
+            icon: SvgPicture.asset(Assets.svgBell, height: 26, width: 26),
+            title: "Chat",
+            onTap: () {
+              Navigator.push(context, getCustomRoute(child: ChatbotPage()));
+            },
+          ),
           ProfileItemWidget(
             icon: SvgPicture.asset(Assets.svgLinked, height: 26, width: 26),
             title: "Linked Accounts",
@@ -201,14 +215,20 @@ class _ProfilePageState extends State<ProfilePage> {
 
           ProfileSectionWidget(title: "Help & Support"),
           ProfileItemWidget(icon: SvgPicture.asset(Assets.svgChat, height: 26, width: 26), title: "Chat with Support", onTap: () {}),
-          ProfileItemWidget(icon: SvgPicture.asset(Assets.svgFaq, height: 26, width: 26), title: "FAQ's", onTap: () {}),
+          ProfileItemWidget(icon: SvgPicture.asset(Assets.svgFaq, height: 26, width: 26), title: "FAQ's", onTap: () {
+            Navigator.push(context, getCustomRoute(child: FaqScreen()));
+          }),
           ProfileItemWidget(icon: SvgPicture.asset(Assets.svgReport, height: 26, width: 26), title: "Report an Issue", onTap: () {}),
           ProfileItemWidget(icon: SvgPicture.asset(Assets.svgWorks, height: 26, width: 26), title: "How it Works", onTap: () {}),
           SizedBox(height: screenHeight * 0.03),
 
           ProfileSectionWidget(title: "More"),
-          ProfileItemWidget(icon: SvgPicture.asset(Assets.svgAbout, height: 26, width: 26), title: "About", onTap: () {}),
-          ProfileItemWidget(icon: SvgPicture.asset(Assets.svgSettings, height: 26, width: 26), title: "Settings", onTap: () {}),
+          ProfileItemWidget(icon: SvgPicture.asset(Assets.svgAbout, height: 26, width: 26), title: "About", onTap: () {
+            Navigator.push(context, getCustomRoute(child: AboutScreen()));
+          }),
+          ProfileItemWidget(icon: SvgPicture.asset(Assets.svgSettings, height: 26, width: 26), title: "Settings", onTap: () {
+            Navigator.push(context, getCustomRoute(child: Settings()));
+          }),
           ProfileItemWidget(
             icon: SvgPicture.asset(Assets.svgSupport, height: 26, width: 26),
             title: "Support",
