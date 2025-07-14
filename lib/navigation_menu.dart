@@ -5,7 +5,6 @@ import 'package:iconsax/iconsax.dart';
 import 'package:streammly/generated/assets.dart';
 import 'package:streammly/services/theme.dart' as theme;
 import 'package:streammly/views/screens/home/home_screen.dart';
-import 'package:streammly/views/screens/package/booking/booking_page.dart';
 
 class NavigationMenu extends StatefulWidget {
   const NavigationMenu({super.key});
@@ -22,7 +21,7 @@ class _NavigationMenuState extends State<NavigationMenu> {
     return PopScope(
       canPop: false,
       child: Scaffold(
-        body: Obx(() => controller.screens[controller.selectedIndex.value]),
+        body: Obx(() => controller.screens[controller.selectedIndex.value]()),
         floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
         floatingActionButton: Obx(
           () => CircleAvatar(
@@ -86,12 +85,12 @@ class _NavigationMenuState extends State<NavigationMenu> {
 class NavigationController extends GetxController {
   final RxInt selectedIndex = 0.obs;
 
-  final List<Widget> screens = [
-    HomeScreen(),
-    const Center(child: Text("Shop Page Coming Soon")),
-    const Center(child: Text("My Cart Page Coming Soon")),
-    const Center(child: Text("Bookings Page Coming Soon")),
-    const Center(child: Text("More Page Coming Soon")),
+  final List<Widget Function()> screens = [
+    () => const HomeScreen(), // ✅ Good: Rebuilds fresh
+    () => const Placeholder(),
+    () => const Placeholder(),
+    () => const Placeholder(),
+    () => const Placeholder(),
   ];
 }
 

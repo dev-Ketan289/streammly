@@ -1,9 +1,12 @@
 import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:streammly/views/screens/common/enter_location_manually.dart';
 import 'package:streammly/views/screens/profile/drawer.dart';
+
 import '../../../../controllers/location_controller.dart';
 import '../../../../models/banner/banner_item.dart';
 
@@ -84,25 +87,15 @@ class _HeaderBannerState extends State<HeaderBanner> {
           // --- Background image ---
           widget.backgroundImage.startsWith("http")
               ? Image.network(
-            widget.backgroundImage,
-            fit: BoxFit.cover,
-            width: double.infinity,
-            height: double.infinity,
-            errorBuilder: (context, error, stackTrace) {
-              return Image.asset(
-                'assets/images/recommended_banner/FocusPointVendor.png',
+                widget.backgroundImage,
                 fit: BoxFit.cover,
                 width: double.infinity,
                 height: double.infinity,
-              );
-            },
-          )
-              : Image.asset(
-            widget.backgroundImage,
-            fit: BoxFit.cover,
-            width: double.infinity,
-            height: double.infinity,
-          ),
+                errorBuilder: (context, error, stackTrace) {
+                  return Image.asset('assets/images/recommended_banner/FocusPointVendor.png', fit: BoxFit.cover, width: double.infinity, height: double.infinity);
+                },
+              )
+              : Image.asset(widget.backgroundImage, fit: BoxFit.cover, width: double.infinity, height: double.infinity),
 
           // --- Overlay ---
           Container(color: widget.overlayColor),
@@ -138,9 +131,10 @@ class _HeaderBannerState extends State<HeaderBanner> {
             Positioned(
               right: 16,
               bottom: 20,
-              child: currentSlide!.isSvg
-                  ? SvgPicture.network("https://admin.streammly.com/${currentSlide.vectorImage}", height: 140)
-                  : Image.network("https://admin.streammly.com/${currentSlide.vectorImage}", height: 140),
+              child:
+                  currentSlide!.isSvg
+                      ? SvgPicture.network("https://admin.streammly.com/${currentSlide.vectorImage}", height: 140)
+                      : Image.network("https://admin.streammly.com/${currentSlide.vectorImage}", height: 140),
             ),
 
           // --- Top Content (location, search, title, subtitle, specialities) ---
@@ -151,36 +145,29 @@ class _HeaderBannerState extends State<HeaderBanner> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Obx(
-                        () => Row(
-                      children: [
-                        Icon(Icons.location_on, color: theme.colorScheme.onPrimary),
-                        const SizedBox(width: 8),
-                        Flexible(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                "Current Location",
-                                style: theme.textTheme.bodySmall?.copyWith(
-                                  color: theme.colorScheme.onPrimary,
-                                  fontWeight: FontWeight.bold,
-                                  fontSize: 13,
+                    () => GestureDetector(
+                      onTap: () {
+                        Navigator.push(context, MaterialPageRoute(builder: (_) => EnterLocationManuallyScreen()));
+                      },
+                      child: Row(
+                        children: [
+                          Icon(Icons.location_on, color: theme.colorScheme.onPrimary),
+                          const SizedBox(width: 8),
+                          Flexible(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text("Current Location", style: theme.textTheme.bodySmall?.copyWith(color: theme.colorScheme.onPrimary, fontWeight: FontWeight.bold, fontSize: 13)),
+                                Text(
+                                  locationController.selectedAddress.value.isNotEmpty ? locationController.selectedAddress.value : "Fetching...",
+                                  style: theme.textTheme.bodySmall?.copyWith(color: theme.colorScheme.onPrimary, fontSize: 10),
+                                  overflow: TextOverflow.ellipsis,
                                 ),
-                              ),
-                              Text(
-                                locationController.selectedAddress.value.isNotEmpty
-                                    ? locationController.selectedAddress.value
-                                    : "Fetching...",
-                                style: theme.textTheme.bodySmall?.copyWith(
-                                  color: theme.colorScheme.onPrimary,
-                                  fontSize: 10,
-                                ),
-                                overflow: TextOverflow.ellipsis,
-                              ),
-                            ],
+                              ],
+                            ),
                           ),
-                        ),
-                      ],
+                        ],
+                      ),
                     ),
                   ),
                   const SizedBox(height: 16),
@@ -197,13 +184,10 @@ class _HeaderBannerState extends State<HeaderBanner> {
                       const SizedBox(width: 8),
                       Expanded(
                         child: Container(
-                          decoration: BoxDecoration(
-                            color: theme.colorScheme.surface,
-                            borderRadius: BorderRadius.circular(30),
-                          ),
+                          decoration: BoxDecoration(color: theme.colorScheme.surface, borderRadius: BorderRadius.circular(30)),
                           child: TextField(
                             decoration: InputDecoration(
-                              hintText: "What are you looking for?",
+                              hintText: "Search",
                               prefixIcon: Icon(Icons.search, color: theme.iconTheme.color),
                               border: InputBorder.none,
                               contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
@@ -212,50 +196,22 @@ class _HeaderBannerState extends State<HeaderBanner> {
                         ),
                       ),
                       const SizedBox(width: 8),
-                      CircleAvatar(
-                        radius: 16,
-                        backgroundColor: theme.colorScheme.surface,
-                        child: Icon(Icons.diamond_outlined, color: Colors.amber),
-                      ),
+                      CircleAvatar(radius: 16, backgroundColor: theme.colorScheme.surface, child: Icon(Icons.diamond_outlined, color: Colors.amber)),
                     ],
                   ),
 
                   const SizedBox(height: 24),
 
                   // Title & Subtitle
-                  if (title.isNotEmpty)
-                    Text(
-                      title,
-                      style: GoogleFonts.openSans(
-                        fontSize: 29,
-                        fontWeight: FontWeight.w700,
-                        color: theme.colorScheme.onPrimary,
-                      ),
-                    ),
+                  if (title.isNotEmpty) Text(title, style: GoogleFonts.openSans(fontSize: 29, fontWeight: FontWeight.w700, color: theme.colorScheme.onPrimary)),
                   if (subtitle.isNotEmpty) const SizedBox(height: 6),
-                  if (subtitle.isNotEmpty)
-                    Text(
-                      subtitle,
-                      style: GoogleFonts.openSans(
-                        color: theme.colorScheme.onPrimary,
-                        fontSize: 16,
-                      ),
-                      maxLines: 4,
-                      overflow: TextOverflow.clip,
-                    ),
+                  if (subtitle.isNotEmpty) Text(subtitle, style: GoogleFonts.openSans(color: theme.colorScheme.onPrimary, fontSize: 16), maxLines: 4, overflow: TextOverflow.clip),
 
                   const SizedBox(height: 12),
 
                   // Specialized In + Specialities Section
                   if (widget.specialities != null && widget.specialities!.isNotEmpty) ...[
-                    Text(
-                      "Specialized in",
-                      style: theme.textTheme.bodyMedium?.copyWith(
-                        color: theme.colorScheme.onPrimary,
-                        fontWeight: FontWeight.w600,
-                        fontSize: 14,
-                      ),
-                    ),
+                    Text("Specialized in", style: theme.textTheme.bodyMedium?.copyWith(color: theme.colorScheme.onPrimary, fontWeight: FontWeight.w600, fontSize: 14)),
                     const SizedBox(height: 6),
                     Wrap(
                       spacing: 8,
@@ -268,13 +224,7 @@ class _HeaderBannerState extends State<HeaderBanner> {
                               borderRadius: BorderRadius.circular(8),
                               border: Border.all(color: theme.colorScheme.surface.withValues(alpha: 0.4)),
                             ),
-                            child: Text(
-                              widget.specialities![i],
-                              style: theme.textTheme.bodySmall?.copyWith(
-                                color: Colors.indigo,
-                                fontSize: 12,
-                              ),
-                            ),
+                            child: Text(widget.specialities![i], style: theme.textTheme.bodySmall?.copyWith(color: Colors.indigo, fontSize: 12)),
                           ),
                         if (widget.specialities!.length > 2)
                           Container(
@@ -284,13 +234,7 @@ class _HeaderBannerState extends State<HeaderBanner> {
                               borderRadius: BorderRadius.circular(8),
                               border: Border.all(color: theme.colorScheme.surface.withValues(alpha: 0.4)),
                             ),
-                            child: Text(
-                              "+${widget.specialities!.length - 2} more",
-                              style: theme.textTheme.bodySmall?.copyWith(
-                                color: Colors.indigo,
-                                fontSize: 12,
-                              ),
-                            ),
+                            child: Text("+${widget.specialities!.length - 2} more", style: theme.textTheme.bodySmall?.copyWith(color: Colors.indigo, fontSize: 12)),
                           ),
                       ],
                     ),

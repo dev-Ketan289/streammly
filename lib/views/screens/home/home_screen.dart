@@ -27,9 +27,8 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreenState extends State<HomeScreen> {
   final HomeController headerController = Get.find<HomeController>();
   final CategoryController categoryController = Get.find<CategoryController>();
-  final LocationController locationController = Get.put(LocationController());
+  final LocationController locationController = Get.find<LocationController>();
   final CompanyController companyController = Get.find<CompanyController>();
-
 
   @override
   void initState() {
