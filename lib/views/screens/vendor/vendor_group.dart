@@ -39,6 +39,7 @@ class _VendorGroupState extends State<VendorGroup> {
   String resolveImageUrl(String? url) {
     if (url == null || url.isEmpty) return '';
     return url.startsWith('http') ? url : 'https://admin.streammly.com/${url.replaceFirst(RegExp(r'^/'), '')}';
+    // return url.startsWith('http') ? url : 'http://192.168.1.113/${url.replaceFirst(RegExp(r'^/'), '')}';
   }
 
   @override
@@ -224,7 +225,7 @@ class _VendorGroupState extends State<VendorGroup> {
                 label: "Get Quote",
                 onTap: () {
                   Navigator.pop(context);
-                  Get.to(() => const GetQuoteScreen());
+                  Get.to(() => const GetQuoteScreen(), arguments: {"companyId": companyId, "subCategoryId": subCategoryId, "subVerticalId": subVerticalId});
                 },
               ),
               const SizedBox(height: 12),

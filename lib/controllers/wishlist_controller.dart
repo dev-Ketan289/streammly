@@ -20,10 +20,7 @@ class WishlistController extends GetxController implements GetxService {
       Response response = await categoryRepo.getBookMark();
       log('${response.bodyString}', name: 'ljkdfs');
       if (response.statusCode == 200) {
-        bookmarks =
-            (response.body['data'] as List<dynamic>)
-                .map((item) => Bookmark.fromJson(item))
-                .toList();
+        bookmarks = (response.body['data'] as List<dynamic>).map((item) => Bookmark.fromJson(item)).toList();
         responseModel = ResponseModel(true, "Got Bookmarks");
       } else {
         bookmarks = [];

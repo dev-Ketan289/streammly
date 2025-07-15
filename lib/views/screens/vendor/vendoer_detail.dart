@@ -33,6 +33,7 @@ class _VendorDetailScreenState extends State<VendorDetailScreen> {
   String resolveImageUrl(String? url) {
     if (url == null || url.isEmpty) return '';
     return url.startsWith('http') ? url : 'https://admin.streammly.com/${url.replaceFirst(RegExp(r'^/'), '')}';
+    // return url.startsWith('http') ? url : 'http://192.168.1.113:8000/${url.replaceFirst(RegExp(r'^/'), '')}';
   }
 
   @override

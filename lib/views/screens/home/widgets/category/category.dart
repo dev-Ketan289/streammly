@@ -40,13 +40,7 @@ class _CategoryListScreenState extends State<CategoryListScreen> {
         elevation: 0,
         backgroundColor: Colors.transparent,
         leading: const BackButton(color: Colors.black),
-        title: Text(
-          "Categories",
-          style: theme.textTheme.titleLarge?.copyWith(
-            fontWeight: FontWeight.bold,
-            color: Colors.black,
-          ),
-        ),
+        title: Text("Categories", style: theme.textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold, color: Colors.black)),
         centerTitle: true,
       ),
       body: GetBuilder<CategoryController>(
@@ -54,12 +48,7 @@ class _CategoryListScreenState extends State<CategoryListScreen> {
           if (controller.isLoading) {
             return const Center(child: CircularProgressIndicator());
           } else if (controller.categories.isEmpty) {
-            return Center(
-              child: Text(
-                "No categories found.",
-                style: theme.textTheme.bodyMedium,
-              ),
-            );
+            return Center(child: Text("No categories found.", style: theme.textTheme.bodyMedium));
           }
 
           return ListView.builder(
@@ -77,13 +66,7 @@ class _CategoryListScreenState extends State<CategoryListScreen> {
                   decoration: BoxDecoration(
                     color: Colors.white,
                     borderRadius: BorderRadius.circular(16),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.grey.withAlpha(40),
-                        blurRadius: 8,
-                        offset: const Offset(0, 4),
-                      ),
-                    ],
+                    boxShadow: [BoxShadow(color: Colors.grey.withAlpha(40), blurRadius: 8, offset: const Offset(0, 4))],
                   ),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -110,13 +93,11 @@ class _CategoryListScreenState extends State<CategoryListScreen> {
                               builder: (wishlistController) {
                                 return GestureDetector(
                                   onTap: () {
-                                    wishlistController
-                                        .addBookmark(cat.id, "category")
-                                        .then((value) {
-                                          if (value.isSuccess) {
-                                            wishlistController.loadBookmarks();
-                                          }
-                                        });
+                                    wishlistController.addBookmark(cat.id, "category").then((value) {
+                                      if (value.isSuccess) {
+                                        wishlistController.loadBookmarks();
+                                      }
+                                    });
 
                                     // if (isToggled) {
                                     //   isToggled = !isToggled;
@@ -124,14 +105,7 @@ class _CategoryListScreenState extends State<CategoryListScreen> {
                                     // }
                                   },
 
-                                  child: Icon(
-                                    Icons.bookmark,
-                                    size: 25,
-                                    color:
-                                        cat.isBookMarked
-                                            ? Colors.red
-                                            : Colors.white,
-                                  ),
+                                  child: Icon(Icons.bookmark, size: 25, color: cat.isBookMarked ? Colors.red : Colors.white),
                                 );
                               },
                             ),
@@ -139,27 +113,13 @@ class _CategoryListScreenState extends State<CategoryListScreen> {
                         ],
                       ),
                       Padding(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 16,
-                          vertical: 12,
-                        ),
+                        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Text(
-                              cat.title,
-                              style: theme.textTheme.bodyLarge?.copyWith(
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
+                            Text(cat.title, style: theme.textTheme.bodyLarge?.copyWith(fontWeight: FontWeight.bold)),
                             const SizedBox(height: 4),
-                            Text(
-                              cat.shortDescription ??
-                                  "No description available",
-                              style: theme.textTheme.bodySmall?.copyWith(
-                                color: Colors.grey,
-                              ),
-                            ),
+                            Text(cat.shortDescription ?? "No description available", style: theme.textTheme.bodySmall?.copyWith(color: Colors.grey)),
                           ],
                         ),
                       ),

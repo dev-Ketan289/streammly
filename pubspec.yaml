@@ -105,6 +105,7 @@ flutter:
     - assets/images/profile_compo/
     - assets/images/category/
     - assets/images/category/vendor_category/
+    - assets/images/booking_images/
 
 
 flutter_assets:

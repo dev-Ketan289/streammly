@@ -17,8 +17,6 @@ class OtpController extends GetxController implements GetxService {
   final AuthRepo authRepo;
   OtpController({required this.authRepo});
 
-
-
   RxInt secondsRemaining = 30.obs;
   RxString receivedOTP = ''.obs;
   RxBool shakeOnError = false.obs;
@@ -26,7 +24,7 @@ class OtpController extends GetxController implements GetxService {
 
   Timer? _timer;
 
-  Future<ResponseModel> verifyOtp({required String phone,required String otp}) async {
+  Future<ResponseModel> verifyOtp({required String phone, required String otp}) async {
     isLoading = true;
     update();
     ResponseModel responseModel;
@@ -96,7 +94,7 @@ class OtpController extends GetxController implements GetxService {
     });
   }
 
-  void confirmOTP(String phone,String otp, {VoidCallback? onVerified}) {
+  void confirmOTP(String phone, String otp, {VoidCallback? onVerified}) {
     final enteredOTP = otp.trim();
 
     ///  Bypass check for test number
@@ -130,6 +128,7 @@ class OtpController extends GetxController implements GetxService {
 
     try {
       final url = Uri.parse("https://admin.streammly.com/api/v1/user/auth/generateOtp");
+      // final url = Uri.parse("http://192.168.1.113:8000/api/v1/user/auth/generateOtp");
       final response = await http.post(url, headers: {'Content-Type': 'application/json'}, body: jsonEncode({"phone": phone}));
 
       final responseBody = jsonDecode(response.body);

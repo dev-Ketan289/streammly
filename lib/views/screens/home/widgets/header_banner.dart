@@ -136,7 +136,9 @@ class _HeaderBannerState extends State<HeaderBanner> {
               child:
                   currentSlide!.isSvg
                       ? SvgPicture.network("https://admin.streammly.com/${currentSlide.vectorImage}", height: 140)
+                      // ? SvgPicture.network("http://192.168.1.113/${currentSlide.vectorImage}", height: 140)
                       : Image.network("https://admin.streammly.com/${currentSlide.vectorImage}", height: 140),
+              // : Image.network("http://192.168.1.113:8000/${currentSlide.vectorImage}", height: 140),
             ),
 
           // --- Top Content (location, search, title, subtitle, specialities) ---
@@ -197,10 +199,9 @@ class _HeaderBannerState extends State<HeaderBanner> {
                           child: TextField(
                             style: const TextStyle(color: Colors.white), // Set typed text to white
                             decoration: InputDecoration(
-                              
                               hintText: "Searching...",
                               hintStyle: GoogleFonts.openSans(color: theme.colorScheme.onPrimary, fontSize: 12),
-                              prefixIcon: Icon(Icons.search, color: backgroundLight, size: 24,),
+                              prefixIcon: Icon(Icons.search, color: backgroundLight, size: 24),
                               border: InputBorder.none,
                               isDense: true,
                               contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
@@ -209,25 +210,21 @@ class _HeaderBannerState extends State<HeaderBanner> {
                         ),
                       ),
                       const SizedBox(width: 8),
-                      CircleAvatar(radius: 16, backgroundColor: theme.colorScheme.surface, child: SvgPicture.asset(Assets.svgDiamondhome, )),
+                      CircleAvatar(radius: 16, backgroundColor: theme.colorScheme.surface, child: SvgPicture.asset(Assets.svgDiamondhome)),
                     ],
                   ),
-
 
                   // Title & Subtitle
                   if (title.isNotEmpty || subtitle.isNotEmpty)
                     Container(
                       width: 280,
-                      padding: const EdgeInsets.symmetric(horizontal: 10, ),
+                      padding: const EdgeInsets.symmetric(horizontal: 10),
                       child: Column(
-
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          if (title.isNotEmpty)
-                            Text(title, style: GoogleFonts.openSans(fontSize: 29, fontWeight: FontWeight.w700, color: theme.colorScheme.onPrimary)),
+                          if (title.isNotEmpty) Text(title, style: GoogleFonts.openSans(fontSize: 29, fontWeight: FontWeight.w700, color: theme.colorScheme.onPrimary)),
                           if (subtitle.isNotEmpty) const SizedBox(height: 6),
-                          if (subtitle.isNotEmpty)
-                            Text(subtitle, style: GoogleFonts.openSans(color: theme.colorScheme.onPrimary, fontSize: 16),  overflow: TextOverflow.visible),
+                          if (subtitle.isNotEmpty) Text(subtitle, style: GoogleFonts.openSans(color: theme.colorScheme.onPrimary, fontSize: 16), overflow: TextOverflow.visible),
                         ],
                       ),
                     ),

@@ -1,10 +1,15 @@
+// Your import statements remain unchanged
 import 'package:dotted_border/dotted_border.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:streammly/views/screens/package/booking/widgets/free_add_on.dart';
 import 'package:streammly/views/screens/package/booking/widgets/time_picker.dart';
+
 import '../../../../../controllers/booking_form_controller.dart';
+import '../../../../../services/route_helper.dart';
 import '../../../common/widgets/custom_textfield.dart' show CustomTextField;
+import 'extra_add_on.dart';
 
 class PackageFormCard extends StatefulWidget {
   final int index;
@@ -56,9 +61,7 @@ class _PackageFormCardState extends State<PackageFormCard> {
 
   @override
   Widget build(BuildContext context) {
-    TextEditingController studioAddController = TextEditingController(
-      text: widget.package['address'] ?? '305/A, Navneet Building, Saivihar Road, Bhandup (W), Mumbai 400078.',
-    );
+    TextEditingController studioAddController = TextEditingController(text: widget.package['address'] ?? '305/A, Navneet Building, Saivihar Road, Bhandup (W), Mumbai 400078.');
     final controller = Get.find<BookingController>();
     final packageTitle = widget.package['title'] as String;
 
@@ -77,23 +80,13 @@ class _PackageFormCardState extends State<PackageFormCard> {
 
       return Container(
         padding: const EdgeInsets.all(20),
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(10),
-          color: Colors.white,
-        ),
+        decoration: BoxDecoration(borderRadius: BorderRadius.circular(10), color: Colors.white),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(
-              "$packageTitle Booking Schedule",
-              style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w600, color: Colors.black87),
-            ),
+            Text("$packageTitle Booking Schedule", style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w600, color: Colors.black87)),
             const SizedBox(height: 20),
-            CustomTextField(
-              labelText: 'Studio Address *',
-              controller: studioAddController,
-              readOnly: true,
-            ),
+            CustomTextField(labelText: 'Studio Address *', controller: studioAddController, readOnly: true),
             const SizedBox(height: 16),
             CustomTextField(
               labelText: 'Date of Shoot *',
@@ -181,14 +174,84 @@ class _PackageFormCardState extends State<PackageFormCard> {
             _buildExpandableSection(
               title: 'Choose Free Item',
               isSelected: form['freeAddOn'] != null,
-              onTap: () => controller.toggleAddOn(widget.index, 'free'),
+              onTap: () async {
+                final result = await Navigator.push(context, getCustomRoute(child: FreeItemsPage()));
+                if (result != null) {
+                  controller.updatePackageForm(widget.index, 'freeAddOn', result);
+                }
+              },
             ),
+            if (form['freeAddOn'] != null) ...[
+              const SizedBox(height: 12),
+              Container(
+                decoration: BoxDecoration(color: const Color(0xffF9F9F9), border: Border.all(color: Colors.grey.shade300), borderRadius: BorderRadius.circular(10)),
+                padding: const EdgeInsets.all(12),
+                child: Row(
+                  children: [
+                    ClipRRect(borderRadius: BorderRadius.circular(8), child: Image.asset(form['freeAddOn']['image'], height: 50, width: 50, fit: BoxFit.cover)),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(form['freeAddOn']['title'], style: const TextStyle(fontWeight: FontWeight.bold)),
+                          const SizedBox(height: 2),
+                          Text(form['freeAddOn']['description'], style: TextStyle(color: Colors.grey.shade600)),
+                          const SizedBox(height: 2),
+                          const Text('Shoot Duration : 1', style: TextStyle(color: Colors.grey)),
+                        ],
+                      ),
+                    ),
+                    IconButton(icon: const Icon(Icons.close, color: Colors.red), onPressed: () => controller.updatePackageForm(widget.index, 'freeAddOn', null)),
+                  ],
+                ),
+              ),
+            ],
             const SizedBox(height: 16),
             _buildExpandableSection(
               title: 'Extra Add-Ons (Extra Charged)',
-              isSelected: form['extraAddOn'] != null,
-              onTap: () => controller.toggleAddOn(widget.index, 'extra'),
+              isSelected: (form['extraAddOn'] is List && (form['extraAddOn'] as List).isNotEmpty),
+              onTap: () async {
+                final result = await Navigator.push(context, getCustomRoute(child: ExtraAddOnsPage()));
+                if (result != null && result is List) {
+                  controller.updatePackageForm(widget.index, 'extraAddOn', result);
+                }
+              },
             ),
+            if (form['extraAddOn'] is List) ...[
+              const SizedBox(height: 12),
+              ...(form['extraAddOn'] as List).map<Widget>((item) {
+                return Container(
+                  margin: const EdgeInsets.only(bottom: 10),
+                  decoration: BoxDecoration(color: const Color(0xffF9F9F9), border: Border.all(color: Colors.grey.shade300), borderRadius: BorderRadius.circular(10)),
+                  padding: const EdgeInsets.all(12),
+                  child: Row(
+                    children: [
+                      Container(height: 50, width: 50, color: Colors.grey.shade200, child: const Icon(Icons.image, color: Colors.grey)),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(item['title'], style: const TextStyle(fontWeight: FontWeight.bold)),
+                            Text(item['description'], style: const TextStyle(color: Colors.grey, fontSize: 12)),
+                            Text('Shoot Duration : ${item['duration']}', style: const TextStyle(color: Colors.grey, fontSize: 12)),
+                          ],
+                        ),
+                      ),
+                      IconButton(
+                        icon: const Icon(Icons.close, color: Colors.red),
+                        onPressed: () {
+                          final updated = List.from(form['extraAddOn']);
+                          updated.remove(item);
+                          controller.updatePackageForm(widget.index, 'extraAddOn', updated);
+                        },
+                      ),
+                    ],
+                  ),
+                );
+              }).toList(),
+            ],
             const SizedBox(height: 32),
             Row(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -200,14 +263,10 @@ class _PackageFormCardState extends State<PackageFormCard> {
                     height: 20,
                     decoration: BoxDecoration(
                       color: form['termsAccepted'] == true ? const Color(0xFF4A6CF7) : Colors.white,
-                      border: Border.all(
-                        color: form['termsAccepted'] == true ? const Color(0xFF4A6CF7) : Colors.grey.shade400,
-                      ),
+                      border: Border.all(color: form['termsAccepted'] == true ? const Color(0xFF4A6CF7) : Colors.grey.shade400),
                       borderRadius: BorderRadius.circular(4),
                     ),
-                    child: form['termsAccepted'] == true
-                        ? const Icon(Icons.check, color: Colors.white, size: 14)
-                        : null,
+                    child: form['termsAccepted'] == true ? const Icon(Icons.check, color: Colors.white, size: 14) : null,
                   ),
                 ),
                 const SizedBox(width: 12),
@@ -220,21 +279,17 @@ class _PackageFormCardState extends State<PackageFormCard> {
                         TextSpan(
                           text: 'Terms and Conditions',
                           style: const TextStyle(color: Color(0xFF4A6CF7), decoration: TextDecoration.underline),
-                          recognizer: TapGestureRecognizer()
-                            ..onTap = () {
-                              Get.defaultDialog(
-                                title: 'Terms and Conditions',
-                                content: SingleChildScrollView(
-                                  child: Text(widget.package['termsAndCondition'] ?? 'No terms found.'),
-                                ),
-                              );
-                            },
+                          recognizer:
+                              TapGestureRecognizer()
+                                ..onTap = () {
+                                  Get.defaultDialog(
+                                    title: 'Terms and Conditions',
+                                    content: SingleChildScrollView(child: Text(widget.package['termsAndCondition'] ?? 'No terms found.')),
+                                  );
+                                },
                         ),
                         const TextSpan(text: ' and agree to the '),
-                        const TextSpan(
-                          text: 'Privacy Policy',
-                          style: TextStyle(color: Color(0xFF4A6CF7), decoration: TextDecoration.underline),
-                        ),
+                        const TextSpan(text: 'Privacy Policy', style: TextStyle(color: Color(0xFF4A6CF7), decoration: TextDecoration.underline)),
                       ],
                     ),
                   ),
@@ -267,12 +322,7 @@ class _PackageFormCardState extends State<PackageFormCard> {
             readOnly: true,
             prefixIcon: Icons.calendar_today,
             onTap: () async {
-              final picked = await showDatePicker(
-                context: context,
-                initialDate: DateTime.now(),
-                firstDate: DateTime(2000),
-                lastDate: DateTime(2100),
-              );
+              final picked = await showDatePicker(context: context, initialDate: DateTime.now(), firstDate: DateTime(2000), lastDate: DateTime(2100));
               if (picked != null) {
                 final formatted = "${picked.day}-${picked.month}-${picked.year}";
                 _extraQuestionControllers[id]?.text = formatted;
@@ -312,13 +362,7 @@ class _PackageFormCardState extends State<PackageFormCard> {
           ),
         );
       } else {
-        fields.add(
-          CustomTextField(
-            labelText: label,
-            controller: _extraQuestionControllers[id],
-            onChanged: (val) => controller.updateExtraAnswer(widget.index, qid, val),
-          ),
-        );
+        fields.add(CustomTextField(labelText: label, controller: _extraQuestionControllers[id], onChanged: (val) => controller.updateExtraAnswer(widget.index, qid, val)));
       }
     }
 
@@ -329,29 +373,14 @@ class _PackageFormCardState extends State<PackageFormCard> {
     return GestureDetector(
       onTap: onTap,
       child: DottedBorder(
-        options: const RoundedRectDottedBorderOptions(
-          dashPattern: [10, 5],
-          strokeWidth: 2,
-          color: Color.fromARGB(255, 157, 155, 155),
-          radius: Radius.circular(10),
-        ),
+        options: const RoundedRectDottedBorderOptions(dashPattern: [10, 5], strokeWidth: 2, color: Color.fromARGB(255, 157, 155, 155), radius: Radius.circular(10)),
         child: Container(
           padding: const EdgeInsets.all(16),
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Text(
-                title,
-                style: TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.w500,
-                  color: isSelected ? const Color(0xFF4A6CF7) : Colors.black87,
-                ),
-              ),
-              Icon(
-                isSelected ? Icons.remove : Icons.add,
-                color: isSelected ? const Color(0xFF4A6CF7) : Colors.grey.shade600,
-              ),
+              Text(title, style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500, color: isSelected ? const Color(0xFF4A6CF7) : Colors.black87)),
+              Icon(isSelected ? Icons.remove : Icons.add, color: isSelected ? const Color(0xFF4A6CF7) : Colors.grey.shade600),
             ],
           ),
         ),
