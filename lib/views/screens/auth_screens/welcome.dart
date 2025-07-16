@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:streammly/navigation_menu.dart'; // <-- Updated import
+import 'package:streammly/navigation_menu.dart';
 import 'package:streammly/views/screens/auth_screens/create_user.dart';
 
 import '../../../controllers/auth_controller.dart';
@@ -23,11 +23,17 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
 
       if (!mounted) return;
 
+      final args = Get.arguments ?? {};
+      final redirectTo = args['redirectTo'];
+      final formData = args['formData'];
+
       if (authController.userProfile == null || (authController.userProfile!.name ?? '').isEmpty || (authController.userProfile!.email ?? '').isEmpty) {
         // New user: show profile form
         Get.off(() => ProfileFormScreen());
+      } else if (redirectTo == 'GetQuoteScreen') {
+        Get.offNamed('/getQuote', arguments: formData);
       } else {
-        // Existing user: go to navigation menu instead of location screen
+        // Default: go to main navigation
         Get.off(() => const NavigationMenu());
       }
     });

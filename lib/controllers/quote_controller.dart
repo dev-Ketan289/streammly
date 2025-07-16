@@ -21,6 +21,8 @@ class QuoteController extends GetxController {
     isSubmitting.value = true;
 
     final String token = authController.getUserToken();
+    print("DEBUG TOKEN: $token");
+
     if (token.isEmpty) {
       Get.snackbar("Error", "You must be logged in to submit a quote.");
       isSubmitting.value = false;
@@ -37,24 +39,29 @@ class QuoteController extends GetxController {
       "message": message,
     };
 
+    final url = Uri.parse("https://admin.streammly.com/api/v1/quotation/addquotation");
+
+    print("POST URL: $url");
+    print("POST BODY: $body");
+    print("HEADERS: ${{"Content-Type": "application/json", "Authorization": "Bearer $token"}}");
+
     try {
-      final response = await http.post(
-        Uri.parse("https://admin.streammly.com/api/v1/quotation/addquotation"),
-        headers: {"Content-Type": "application/json", "Authorization": "Bearer $token"},
-        body: jsonEncode(body),
-      );
+      final response = await http.post(url, headers: {"Content-Type": "application/json", "Authorization": "Bearer $token"}, body: jsonEncode(body));
+
+      print("STATUS CODE: ${response.statusCode}");
+      print("RESPONSE: ${response.body}");
 
       if (response.statusCode == 200) {
         Get.snackbar("Success", "Quote request submitted!");
-        Get.back(); // Optionally close screen
+        Get.back(); // Optionally close the screen
+      } else if (response.statusCode == 302) {
+        Get.snackbar("Redirected", "You were redirected. Check token or endpoint.");
       } else {
         Get.snackbar("Error", "Failed to submit quote. Please try again.");
-        print("Status Code: ${response.statusCode}");
-
-        print("Response: ${response.body}");
       }
     } catch (e) {
       Get.snackbar("Exception", e.toString());
+      print("EXCEPTION: $e");
     } finally {
       isSubmitting.value = false;
     }

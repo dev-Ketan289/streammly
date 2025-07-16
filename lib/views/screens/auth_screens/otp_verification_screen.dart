@@ -18,7 +18,6 @@ class OtpScreen extends StatefulWidget {
 }
 
 class _OtpScreenState extends State<OtpScreen> {
-
   String fullNumber = "";
   late String phone;
   final TextEditingController otpTextController = TextEditingController();
@@ -147,10 +146,15 @@ class _OtpScreenState extends State<OtpScreen> {
                                         onPressed: () {
                                           Get.find<OtpController>().verifyOtp(phone: phone, otp: otpTextController.text).then((value) {
                                             if (value.isSuccess) {
-                                              Get.to(() => const WelcomeScreen());
+                                              final loginArgs = Get.arguments;
+                                              final redirectTo = loginArgs?['redirectTo'];
+                                              final formData = loginArgs?['formData'];
+
+                                              Get.off(() => const WelcomeScreen(), arguments: {'redirectTo': redirectTo, 'formData': formData});
                                             }
                                           });
                                         },
+
                                         child: Text("Confirm OTP", style: appTheme.textTheme.bodyLarge?.copyWith(fontSize: 19, color: Colors.white)),
                                       ),
                                     ),
