@@ -34,8 +34,8 @@ class _RecommendedListState extends State<RecommendedList> {
     final itemWidth = (screenWidth * 0.45).clamp(140.0, 180.0);
     final itemHeight = itemWidth * 1.7;
 
-    const baseUrl = "https://admin.streammly.com/";
-    // const baseUrl = "http://192.168.1.113/";
+    // const baseUrl = "https://admin.streammly.com/";
+    const baseUrl = "http://192.168.1.113/";
 
     return SizedBox(
       height: itemHeight + 16,
@@ -64,10 +64,10 @@ class _RecommendedListState extends State<RecommendedList> {
                 companyName: vendor.companyName ?? "Unknown",
                 latitude: vendor.latitude != null ? double.tryParse(vendor.latitude.toString()) : null,
                 longitude: vendor.longitude != null ? double.tryParse(vendor.longitude.toString()) : null,
-                bannerImage: vendor.bannerImage != null ? 'https://admin.streammly.com/${vendor.bannerImage}' : null,
-                // bannerImage: vendor.bannerImage != null ? 'http://192.168.1.113/${vendor.bannerImage}' : null,
-                logo: vendor.logo != null ? 'https://admin.streammly.com/${vendor.logo}' : null,
-                // logo: vendor.logo != null ? 'http://192.168.1.113/${vendor.logo}' : null,
+                // bannerImage: vendor.bannerImage != null ? 'https://admin.streammly.com/${vendor.bannerImage}' : null,
+                bannerImage: vendor.bannerImage != null ? 'http://192.168.1.113/${vendor.bannerImage}' : null,
+                // logo: vendor.logo != null ? 'https://admin.streammly.com/${vendor.logo}' : null,
+                logo: vendor.logo != null ? 'http://192.168.1.113/${vendor.logo}' : null,
                 description: vendor.description,
                 categoryName: vendor.vendorcategory?.isNotEmpty == true ? vendor.vendorcategory!.first.getCategory?.title : "Service",
                 rating: vendor.rating?.toDouble(),

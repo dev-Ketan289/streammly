@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:intl/intl.dart';
 
 import '../../../controllers/auth_controller.dart';
 import '../../../controllers/quote_controller.dart';
@@ -26,12 +27,15 @@ class _GetQuoteScreenState extends State<GetQuoteScreen> {
   late int companyId;
   late int subCategoryId;
   late int subVerticalId;
+  late String subCategoryTitle;
+  late String subVerticalTitle;
 
   DateTime selectedDate = DateTime.now();
-  String? startTime = "08:00 AM";
-  String? endTime = "00:00 PM";
-  String? favStartTime = "08:00 AM";
-  String? favEndTime = "00:00 PM";
+  String? startTime;
+  String? endTime;
+  String? favStartTime;
+  String? favEndTime;
+
   bool showTimePicker = false;
   bool showFavTimePicker = false;
   bool isStartTime = true;
@@ -46,21 +50,25 @@ class _GetQuoteScreenState extends State<GetQuoteScreen> {
     companyId = args['companyId'] ?? 0;
     subCategoryId = args['subCategoryId'] ?? 0;
     subVerticalId = args['subVerticalId'] ?? 0;
+    subCategoryTitle = args['subCategoryTitle'] ?? '';
+    subVerticalTitle = args['subVerticalTitle'] ?? '';
+
+    final nowFormatted = DateFormat('hh:mm a').format(DateTime.now());
 
     nameController.text = args['name'] ?? '';
     mobileController.text = args['mobile'] ?? '';
     emailController.text = args['email'] ?? '';
     requirementsController.text = args['requirements'] ?? '';
     dateController.text = args['date'] ?? _formatDate(selectedDate);
-    startTime = args['startTime'] ?? startTime;
-    endTime = args['endTime'] ?? endTime;
-    favStartTime = args['favStartTime'] ?? favStartTime;
-    favEndTime = args['favEndTime'] ?? favEndTime;
+
+    startTime = args['startTime'] ?? nowFormatted;
+    endTime = args['endTime'] ?? nowFormatted;
+    favStartTime = args['favStartTime'] ?? nowFormatted;
+    favEndTime = args['favEndTime'] ?? nowFormatted;
   }
 
   void _pickDate() async {
     final picked = await showDatePicker(context: context, initialDate: selectedDate, firstDate: DateTime.now(), lastDate: DateTime(2100));
-
     if (picked != null) {
       setState(() {
         selectedDate = picked;
@@ -97,13 +105,6 @@ class _GetQuoteScreenState extends State<GetQuoteScreen> {
       return;
     }
 
-    final message = '''
-Date of Shoot: ${dateController.text}
-Time: $startTime to $endTime
-Favorable Time: $favStartTime to $favEndTime
-Requirements: ${requirementsController.text}
-''';
-
     if (!authController.isLoggedIn()) {
       final shouldLogin = await Get.dialog<bool>(
         AlertDialog(
@@ -125,6 +126,8 @@ Requirements: ${requirementsController.text}
               'companyId': companyId,
               'subCategoryId': subCategoryId,
               'subVerticalId': subVerticalId,
+              'subCategoryTitle': subCategoryTitle,
+              'subVerticalTitle': subVerticalTitle,
               'name': nameController.text,
               'mobile': mobileController.text,
               'email': emailController.text,
@@ -148,7 +151,14 @@ Requirements: ${requirementsController.text}
       userName: nameController.text,
       phone: mobileController.text,
       email: emailController.text,
-      message: message,
+      dateOfShoot: dateController.text,
+      startTime: startTime!,
+      endTime: endTime!,
+      favorableDate: dateController.text,
+      favorableStartTime: favStartTime!,
+      favorableEndTime: favEndTime!,
+      requirement: requirementsController.text,
+      shootType: "$subCategoryTitle / $subVerticalTitle",
     );
   }
 
@@ -169,21 +179,16 @@ Requirements: ${requirementsController.text}
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Text("Baby Shoot / Baby Name", style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Color(0xFF2864A6))),
+            Text("$subCategoryTitle / $subVerticalTitle", style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Color(0xFF2864A6))),
             const SizedBox(height: 5),
-
             TextField(controller: nameController, decoration: _buildDecoration('Name *', 'Enter name')),
             const SizedBox(height: 16),
-
             TextField(controller: mobileController, decoration: _buildDecoration('Mobile No. *', 'Enter mobile number'), keyboardType: TextInputType.phone),
             const SizedBox(height: 16),
-
             TextField(controller: emailController, decoration: _buildDecoration('Email *', 'Enter email'), keyboardType: TextInputType.emailAddress),
             const SizedBox(height: 16),
-
             _buildTextField('Date of Shoot *', dateController, readOnly: true, onTap: _pickDate, suffixIcon: Icons.calendar_today),
             const SizedBox(height: 16),
-
             Row(
               children: [
                 Expanded(
@@ -213,14 +218,10 @@ Requirements: ${requirementsController.text}
                 ),
               ],
             ),
-
             if (showTimePicker) CustomTimePicker(isStart: isStartTime, onCancel: () => setState(() => showTimePicker = false), onTimeSelected: _onTimeSelected),
-
             const SizedBox(height: 16),
-
             TextField(controller: requirementsController, decoration: _buildDecoration('Describe your Requirements *', 'Enter requirements'), maxLines: 3),
             const SizedBox(height: 16),
-
             Row(
               children: [
                 Expanded(
@@ -250,11 +251,8 @@ Requirements: ${requirementsController.text}
                 ),
               ],
             ),
-
             if (showFavTimePicker) CustomTimePicker(isStart: isFavTime, onCancel: () => setState(() => showFavTimePicker = false), onTimeSelected: _onFavTimeSelected),
-
             const SizedBox(height: 16),
-
             Text.rich(
               TextSpan(
                 children: [
@@ -267,7 +265,6 @@ Requirements: ${requirementsController.text}
               ),
             ),
             const SizedBox(height: 16),
-
             Obx(() {
               return SizedBox(
                 width: double.infinity,
@@ -321,7 +318,6 @@ Requirements: ${requirementsController.text}
   }
 
   String _formatDate(DateTime date) {
-    const months = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
-    return '${date.day} ${months[date.month - 1]} ${date.year}';
+    return "${date.year}-${date.month.toString().padLeft(2, '0')}-${date.day.toString().padLeft(2, '0')}";
   }
 }

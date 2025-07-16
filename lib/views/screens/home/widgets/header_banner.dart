@@ -135,10 +135,10 @@ class _HeaderBannerState extends State<HeaderBanner> {
               bottom: 20,
               child:
                   currentSlide!.isSvg
-                      ? SvgPicture.network("https://admin.streammly.com/${currentSlide.vectorImage}", height: 140)
-                      // ? SvgPicture.network("http://192.168.1.113/${currentSlide.vectorImage}", height: 140)
-                      : Image.network("https://admin.streammly.com/${currentSlide.vectorImage}", height: 140),
-              // : Image.network("http://192.168.1.113:8000/${currentSlide.vectorImage}", height: 140),
+                      // ? SvgPicture.network("https://admin.streammly.com/${currentSlide.vectorImage}", height: 140)
+                      ? SvgPicture.network("http://192.168.1.113/${currentSlide.vectorImage}", height: 140)
+                      // : Image.network("https://admin.streammly.com/${currentSlide.vectorImage}", height: 140),
+                      : Image.network("http://192.168.1.113:8000/${currentSlide.vectorImage}", height: 140),
             ),
 
           // --- Top Content (location, search, title, subtitle, specialities) ---

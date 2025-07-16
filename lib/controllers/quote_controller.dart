@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:get/get.dart';
 import 'package:http/http.dart' as http;
 
+import '../views/screens/package/widgets/get_quote_conformation.dart';
 import 'auth_controller.dart';
 
 class QuoteController extends GetxController {
@@ -16,7 +17,14 @@ class QuoteController extends GetxController {
     required String userName,
     required String phone,
     required String email,
-    required String message,
+    required String dateOfShoot,
+    required String startTime,
+    required String endTime,
+    required String favorableDate,
+    required String favorableStartTime,
+    required String favorableEndTime,
+    required String requirement,
+    required String shootType, // <-- Added shootType dynamically
   }) async {
     isSubmitting.value = true;
 
@@ -33,13 +41,19 @@ class QuoteController extends GetxController {
       "company_id": companyId,
       "sub_category_id": subCategoryId,
       "sub_vertical_id": subVerticalId,
-      "user_name": userName,
+      "name": userName,
       "phone": phone,
       "email": email,
-      "message": message,
+      "date_of_shoot": dateOfShoot,
+      "start_time": startTime,
+      "end_time": endTime,
+      "requirement": requirement,
+      "favorable_date": favorableDate,
+      "favorable_start_time": favorableStartTime,
+      "favorable_end_time": favorableEndTime,
     };
 
-    final url = Uri.parse("https://admin.streammly.com/api/v1/quotation/addquotation");
+    final url = Uri.parse("http://192.168.1.113:8000/api/v1/quotation/addquotation");
 
     print("POST URL: $url");
     print("POST BODY: $body");
@@ -52,10 +66,13 @@ class QuoteController extends GetxController {
       print("RESPONSE: ${response.body}");
 
       if (response.statusCode == 200) {
+        // Combine date and time into a readable format
+        final formattedDateTime = "$dateOfShoot, $startTime";
+
+        // Navigate to confirmation screen
+        Get.off(() => QuoteSubmittedScreen(shootType: shootType, submittedDateTime: formattedDateTime));
+
         Get.snackbar("Success", "Quote request submitted!");
-        Get.back(); // Optionally close the screen
-      } else if (response.statusCode == 302) {
-        Get.snackbar("Redirected", "You were redirected. Check token or endpoint.");
       } else {
         Get.snackbar("Error", "Failed to submit quote. Please try again.");
       }
