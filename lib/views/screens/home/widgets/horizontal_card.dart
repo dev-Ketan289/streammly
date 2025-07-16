@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:streammly/services/theme.dart';
 
 class PackageSection extends StatelessWidget {
   final String title;
@@ -30,7 +31,7 @@ class PackageSection extends StatelessWidget {
                   children: [
                     Text("See All", style: textTheme.bodySmall?.copyWith(color: theme.hintColor, fontWeight: FontWeight.w500)),
                     const SizedBox(width: 4),
-                    Icon(Icons.arrow_forward_ios, size: 12, color: theme.hintColor),
+                    Icon(Icons.arrow_right, size: 24, color: Colors.grey),
                   ],
                 ),
               ),
@@ -57,17 +58,20 @@ class PackageSection extends StatelessWidget {
 
   // Popular Package Card
   Widget _buildPopularCard(Map<String, String> pkg, ThemeData theme) {
-    return Container(
-      width: 130,
-      margin: const EdgeInsets.only(right: 12),
-      decoration: BoxDecoration(borderRadius: BorderRadius.circular(12), image: DecorationImage(image: AssetImage(pkg['image']!), fit: BoxFit.cover)),
-      child: Align(
-        alignment: Alignment.bottomCenter,
-        child: Container(
-          margin: const EdgeInsets.all(8),
-          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-          decoration: BoxDecoration(color: theme.colorScheme.surface.withValues(alpha: 0.7), borderRadius: BorderRadius.circular(8)),
-          child: Text(pkg['label']!, style: theme.textTheme.bodySmall?.copyWith(fontWeight: FontWeight.w500)),
+    return Padding(
+      padding: const EdgeInsets.all(8.0),
+      child: Container(
+        height: 115,
+        width: 150,
+        decoration: BoxDecoration(color: backgroundLight, border: Border.all(color: Color(0xffE0E0E0), width: 2),borderRadius: BorderRadius.circular(12), image: DecorationImage(image: AssetImage(pkg['image']!), fit: BoxFit.cover)),
+        child: Align(
+          alignment: Alignment.bottomCenter,
+          child: Container(
+            margin: const EdgeInsets.all(8),
+            padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 4),
+            decoration: BoxDecoration(color: theme.colorScheme.surface.withValues(alpha: 0.7), borderRadius: BorderRadius.circular(8)),
+            child: Text(pkg['label']!, style: theme.textTheme.bodySmall?.copyWith(fontWeight: FontWeight.bold, color: primaryColor, fontSize: 9)),
+          ),
         ),
       ),
     );

@@ -10,6 +10,18 @@ class Assets {
   /// assets/images/banner.png
   static const String imagesBanner = "assets/images/banner.png";
 
+  /// Assets for imagesBookingImagesFrame 2118060031
+  /// assets/images/booking_images/Frame 2118060031.png
+  static const String imagesBookingImagesFrame2118060031 = "assets/images/booking_images/Frame 2118060031.png";
+
+  /// Assets for imagesBookingImagesFrame 2118060031 (1)
+  /// assets/images/booking_images/Frame 2118060031 (1).png
+  static const String imagesBookingImagesFrame21180600311 = "assets/images/booking_images/Frame 2118060031 (1).png";
+
+  /// Assets for imagesBookingImagesFrame 2118060031 (2)
+  /// assets/images/booking_images/Frame 2118060031 (2).png
+  static const String imagesBookingImagesFrame21180600312 = "assets/images/booking_images/Frame 2118060031 (2).png";
+
   /// Assets for imagesCategoryDJ
   /// assets/images/category/DJ.png
   static const String imagesCategoryDJ = "assets/images/category/DJ.png";
@@ -45,6 +57,10 @@ class Assets {
   /// Assets for imagesDemoprofile
   /// assets/images/demoprofile.png
   static const String imagesDemoprofile = "assets/images/demoprofile.png";
+
+  /// Assets for imagesDoodle
+  /// assets/images/doodle.png
+  static const String imagesDoodle = "assets/images/doodle.png";
 
   /// Assets for imagesEdit
   /// assets/images/edit.png
@@ -197,10 +213,6 @@ class Assets {
   /// Assets for svgCart
   /// assets/svg/cart.svg
   static const String svgCart = "assets/svg/cart.svg";
-
-  /// Assets for svgCartt
-  /// assets/svg/cartt.svg
-  static const String svgCartt = "assets/svg/cartt.svg";
 
   /// Assets for svgCarttt
   /// assets/svg/carttt.svg

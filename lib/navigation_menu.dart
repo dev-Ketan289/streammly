@@ -111,15 +111,15 @@ class NavigationHelper {
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceAround,
             children: [
-              _buildNavItem(icon: Iconsax.home, label: 'Home', index: 0),
-              _buildNavItem(icon: Iconsax.shop, label: 'Shop', index: 1),
+              _buildNavItem(icon: Assets.svgHome, label: 'Home', index: 0),
+              _buildNavItem(icon: Assets.svgShop, label: 'Shop', index: 1),
               const SizedBox(width: 25), // Space for FAB
               _buildNavItem(
-                icon: Iconsax.calendar,
+                icon: Assets.svgBooking,
                 label: 'Bookings',
                 index: 3,
               ),
-              _buildNavItem(icon: Iconsax.more, label: 'More', index: 4),
+              _buildNavItem(icon: Assets.svgMore, label: 'More', index: 4),
             ],
           ),
         ),
@@ -128,7 +128,7 @@ class NavigationHelper {
   }
 
   static Widget _buildNavItem({
-    required IconData icon,
+    required String icon,
     required String label,
     required int index,
   }) {
@@ -144,7 +144,7 @@ class NavigationHelper {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(icon, color: Colors.black54),
+            SvgPicture.asset(icon, ),
           const SizedBox(height: 4),
           Text(
             label,
@@ -157,11 +157,14 @@ class NavigationHelper {
 
   static Widget buildFloatingButton() {
     return CircleAvatar(
-      radius: 20,
-      backgroundColor: Colors.white,
-      child: FloatingActionButton(
-        backgroundColor: Colors.black,
-        elevation: 3,
+                radius: 25,
+                backgroundColor: Colors.white,
+                child: FloatingActionButton(
+                  shape: const CircleBorder(
+                  ),
+                  backgroundColor: Colors.white,
+                  elevation: 3,
+
         onPressed: () {
           try {
             Get.find<NavigationController>().setIndex(2);
@@ -170,7 +173,7 @@ class NavigationHelper {
             Get.offAll(() => const NavigationMenu());
           }
         },
-        child: const Icon(Iconsax.bag, size: 26, color: Colors.grey),
+        child:  Container(height: 40, width: 40, decoration: BoxDecoration(color: const Color(0xffD9D9D9),shape: BoxShape.circle ), child: SvgPicture.asset(Assets.svgCarttt, fit: BoxFit.scaleDown,),),
       ),
     );
   }

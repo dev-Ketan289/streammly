@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:streammly/controllers/company_controller.dart';
+import 'package:streammly/services/theme.dart';
 
 import '../../../models/category/category_item.dart';
 import '../../../models/company/company_location.dart';
@@ -61,6 +62,7 @@ class _VendorDetailScreenState extends State<VendorDetailScreen> {
                 overlayColor: Colors.indigo.withValues(alpha: 0.6),
                 overrideTitle: widget.company.companyName,
                 overrideSubtitle: widget.company.categoryName,
+
                 specialities: widget.company.specialities,
               ),
 
@@ -108,14 +110,14 @@ class _VendorDetailScreenState extends State<VendorDetailScreen> {
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    Text("Reviews", style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold)),
+                    Text("Reviews", style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold, color: primaryColor, fontSize: 14)),
+                    SizedBox(width: 10,),
                     InkWell(
                       onTap: () {},
                       child: Row(
                         children: [
-                          Text("See All", style: theme.textTheme.bodySmall?.copyWith(color: theme.primaryColor, fontWeight: FontWeight.w500)),
-                          const SizedBox(width: 4),
-                          Icon(Icons.arrow_forward_ios, size: 14, color: theme.primaryColor),
+                          Text("See All", style: theme.textTheme.bodySmall?.copyWith(color: Colors.grey,fontSize: 12, fontWeight: FontWeight.w500)),
+                          Icon(Icons.arrow_right, size: 24, color: Colors.grey),
                         ],
                       ),
                     ),

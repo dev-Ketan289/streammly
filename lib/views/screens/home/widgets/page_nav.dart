@@ -15,7 +15,7 @@ class PageNav extends StatelessWidget {
     final selectedIndex = 1.obs; // Default to 'Recommended'
     final svgIcons = [
       Assets.svgWishlist, // Wishlist
-      Assets.svgDiamondhome, // Recommended
+      null, // Recommended (no icon)
       Assets.svgDiamondhome, // Bundles
     ];
     final theme = Theme.of(context);
@@ -54,8 +54,10 @@ class PageNav extends StatelessWidget {
                               decoration: BoxDecoration(color: isSelected ? theme.colorScheme.primary : Colors.transparent, borderRadius: BorderRadius.circular(30)),
                               child: Row(
                                 children: [
-                                  SvgPicture.asset(svgIcons[index], width: 12, height: 10),
-                                  const SizedBox(width: 4),
+                                  if (svgIcons[index] != null)
+                                    SvgPicture.asset(svgIcons[index]!, width: 12, height: 10),
+                                  if (svgIcons[index] != null)
+                                    const SizedBox(width: 4),
                                   Text(
                                     filters[index],
                                     style: TextStyle(fontSize: 9, color: isSelected ? theme.colorScheme.onPrimary : theme.colorScheme.onSurface, fontWeight: FontWeight.w500),

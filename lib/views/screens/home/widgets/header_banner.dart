@@ -180,12 +180,12 @@ class _HeaderBannerState extends State<HeaderBanner> {
                         );
                       },
                       child: Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
                         children: [
+                          SizedBox(width: 50,),
                           Icon(
                             Icons.location_on,
                             color: theme.colorScheme.onPrimary,
-                            size: 14,
+                            size: 20,
                           ),
                           const SizedBox(width: 8),
                           Flexible(
@@ -211,7 +211,7 @@ class _HeaderBannerState extends State<HeaderBanner> {
                                     color: theme.colorScheme.onPrimary,
                                     fontSize: 8,
                                   ),
-                                  overflow: TextOverflow.ellipsis,
+                                  overflow: TextOverflow.visible,
                                 ),
                               ],
                             ),

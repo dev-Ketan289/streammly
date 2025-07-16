@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:streammly/controllers/company_controller.dart';
+import 'package:streammly/services/theme.dart';
 
 import '../../../controllers/package_page_controller.dart';
 import '../../../models/company/company_location.dart';
@@ -100,10 +101,11 @@ class _VendorGroupState extends State<VendorGroup> {
                             Container(
                               width: 70,
                               height: 70,
-                              decoration: BoxDecoration(shape: BoxShape.rectangle, border: Border.all(color: isSelected ? theme.primaryColor : Colors.grey.shade300, width: 2)),
+                              decoration: BoxDecoration(borderRadius: BorderRadius.circular(10), border: Border.all(color: isSelected ? theme.primaryColor : Colors.grey.shade300, width: 2)),
                               child: Stack(
                                 children: [
                                   ClipRRect(
+                                    borderRadius: BorderRadius.circular(10),
                                     child: Image.network(
                                       resolveImageUrl(sub.image),
                                       width: 70,
@@ -113,10 +115,11 @@ class _VendorGroupState extends State<VendorGroup> {
                                     ),
                                   ),
                                   if (isSelected)
-                                    const Positioned(
-                                      right: 4,
-                                      top: 4,
-                                      child: CircleAvatar(backgroundColor: Colors.white, radius: 10, child: Icon(Icons.check, color: Colors.indigo, size: 14)),
+                                    Container(
+                                      width: 70,
+                                      height: 70,
+                                      decoration: BoxDecoration(color:Color(0xff3367A3).withValues(alpha: 0.5),),
+                                      child: Icon(Icons.check, color: Colors.white, size: 24),
                                     ),
                                 ],
                               ),
@@ -171,22 +174,27 @@ class _VendorGroupState extends State<VendorGroup> {
                         child: Column(
                           children: [
                             Expanded(
-                              child: ClipRRect(
-                                borderRadius: BorderRadius.circular(12),
-                                child:
-                                    imageUrl.isNotEmpty
-                                        ? Image.network(
-                                          resolveImageUrl(imageUrl),
-                                          fit: BoxFit.cover,
-                                          errorBuilder: (_, __, ___) {
-                                            return Image.asset("assets/images/category/vendor_category/img.png", fit: BoxFit.cover);
-                                          },
-                                        )
-                                        : Image.asset("assets/images/category/vendor_category/img.png", fit: BoxFit.cover),
+                              child: Container(
+                                height: 111,
+                                width: 111,
+                                decoration: BoxDecoration(borderRadius: BorderRadius.circular(10), border: Border.all(color: Color(0xffE0E0E0), width: 1)),
+                                child: ClipRRect(
+                                  borderRadius: BorderRadius.circular(10),
+                                  child:
+                                      imageUrl.isNotEmpty
+                                          ? Image.network(
+                                            resolveImageUrl(imageUrl),
+                                            fit: BoxFit.cover,
+                                            errorBuilder: (_, __, ___) {
+                                              return Image.asset("assets/images/category/vendor_category/img.png", fit: BoxFit.cover);
+                                            },
+                                          )
+                                          : Image.asset("assets/images/category/vendor_category/img.png", fit: BoxFit.cover),
+                                ),
                               ),
                             ),
                             const SizedBox(height: 8),
-                            Text(label, textAlign: TextAlign.center, style: TextStyle(fontWeight: FontWeight.bold, color: theme.primaryColor)),
+                            Text(label, textAlign: TextAlign.center, style: TextStyle(color: primaryColor,fontSize: 13, fontWeight: FontWeight.bold)),
                           ],
                         ),
                       );

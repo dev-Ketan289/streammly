@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:streammly/controllers/company_controller.dart';
+import 'package:streammly/services/theme.dart';
 import 'package:streammly/views/screens/vendor/vendoer_detail.dart';
 
 class VendorDescription extends StatelessWidget {
@@ -57,7 +58,7 @@ class VendorDescription extends StatelessWidget {
                         onTap: () => Navigator.pop(context),
                         child: Row(
                           children: [
-                            const Icon(Icons.arrow_back_ios, color: Colors.white),
+                            const Icon(Icons.arrow_back_ios, color: Colors.white,size: 18,),
                             const SizedBox(width: 10),
                             Flexible(
                               child: Center(
@@ -79,12 +80,7 @@ class VendorDescription extends StatelessWidget {
                         children: [
                           Flexible(child: Text(company.categoryName ?? 'Service', style: theme.textTheme.titleMedium?.copyWith(color: Colors.white, fontWeight: FontWeight.bold , fontSize: 20))),
                           const SizedBox(width: 20),
-                          if (company.rating != null)
-                            Container(
-                              padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-                              decoration: BoxDecoration(color: theme.primaryColor, borderRadius: BorderRadius.circular(6)),
-                              child: Text("${company.rating!.toStringAsFixed(1)} ★", style: theme.textTheme.bodySmall?.copyWith(color: Colors.white)),
-                            ),
+                          
                         ],
                       ),
                       const SizedBox(height: 10),
@@ -100,6 +96,19 @@ class VendorDescription extends StatelessWidget {
                               overflow: TextOverflow.ellipsis,
                             ),
                           ),
+                          const SizedBox(width: 10),
+                          if (company.rating != null)
+                            Container(
+                              margin: const EdgeInsets.only(left: 140),
+                              padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                              decoration: BoxDecoration(color: ratingColor, borderRadius: BorderRadius.circular(6)),
+                              child: Row(
+                                children: [
+                                  Text("${company.rating!.toStringAsFixed(1)} ", style: theme.textTheme.bodySmall?.copyWith(color: Colors.white)),
+                                  Icon(Icons.star, color: Color(0xffFFD700), size: 12),
+                                ],
+                              ),
+                            ),
                         ],
                       ),
                       const SizedBox(height: 10),
@@ -112,10 +121,16 @@ class VendorDescription extends StatelessWidget {
                       ),
                       const SizedBox(height: 10),
 
-                      Center(
+                      Center( 
                         child: TextButton(
                           onPressed: () => _showMoreDetailsBottomSheet(context, company),
-                          child: Text("View More Details ▼", style: theme.textTheme.bodySmall?.copyWith(color: Colors.white, fontWeight: FontWeight.w500)),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Text("View More Details ", style: theme.textTheme.bodySmall?.copyWith(color: Colors.white, fontWeight: FontWeight.w500)),
+                              Icon(Icons.keyboard_arrow_down_rounded, color: Colors.white, size: 16),
+                            ],
+                          ),
                         ),
                       ),
                       const SizedBox(height: 20),
@@ -125,7 +140,7 @@ class VendorDescription extends StatelessWidget {
                           style: ElevatedButton.styleFrom(
                             fixedSize: Size(double.infinity, 50),
                             backgroundColor: Colors.transparent,
-                            side: BorderSide(color: Colors.white, width: 1),
+                            side: BorderSide(color: Colors.white, width: 2),
                             padding: const EdgeInsets.symmetric(horizontal: 100, vertical: 14),
                             shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                           ),
@@ -156,7 +171,7 @@ class VendorDescription extends StatelessWidget {
       backgroundColor: Colors.white,
       builder: (context) {
         return Padding(
-          padding: EdgeInsets.fromLTRB(screenWidth * 0.05, 20, screenWidth * 0.05, 30),
+          padding: EdgeInsets.fromLTRB(screenWidth * 0.08, 20, screenWidth * 0.08, 30),
           child: SingleChildScrollView(
             child: Column(
               mainAxisSize: MainAxisSize.min,
@@ -173,54 +188,85 @@ class VendorDescription extends StatelessWidget {
 
                 Row(
                   children: [
-                    Expanded(child: Text(company.companyName, style: theme.textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold))),
+                    Text(company.companyName, style: theme.textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold)),
+                    SizedBox(width: 10,),
                     if (company.rating != null)
                       Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-                        decoration: BoxDecoration(color: theme.primaryColor, borderRadius: BorderRadius.circular(6)),
-                        child: Text("${company.rating!.toStringAsFixed(1)} ★", style: theme.textTheme.bodySmall?.copyWith(color: Colors.white)),
+                        padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 4),
+                        decoration: BoxDecoration(color: ratingColor, borderRadius: BorderRadius.circular(6)),
+                        child: Row(
+                          children: [
+                            Text("${company.rating!.toStringAsFixed(1)} ", style: theme.textTheme.bodySmall?.copyWith(color: Colors.white)),
+                            Icon(Icons.star, color: Color(0xffFFD700), size: 12),
+                          ],
+                        ),
                       ),
                   ],
                 ),
                 Align(alignment: Alignment.centerLeft, child: Text(company.categoryName ?? 'Photographer', style: theme.textTheme.bodySmall?.copyWith(color: Colors.black54))),
                 const SizedBox(height: 16),
 
-                Align(alignment: Alignment.centerLeft, child: Text("About", style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold))),
+                Align(alignment: Alignment.centerLeft, child: Text("About", style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold, fontSize: 16),)),
                 const SizedBox(height: 8),
                 Text(
                   (company.description?.trim().isNotEmpty ?? false)
                       ? company.description!.replaceAll(RegExp(r'<[^>]*>|&[^;]+;'), '')
                       : "FocusPoint Studios is a premium photography and videography studio, offering state-of-the-art facilities...",
-                  style: theme.textTheme.bodyMedium,
+                  style: theme.textTheme.bodyMedium?.copyWith(color: Colors.grey.shade600),
                 ),
                 const SizedBox(height: 16),
 
-                Text("Opening Hours", style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold)),
+                Align(alignment: Alignment.centerLeft, child: Text("Opening Hours", style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold, fontSize: 16))),
                 const SizedBox(height: 12),
                 Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: const [
+                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                  children: [
+                    Center(child: Icon(Icons.circle, size: 6, color: Colors.teal)),
                     Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
+                      crossAxisAlignment: CrossAxisAlignment.center,
                       children: [
                         Text("Monday – Friday"),
                         SizedBox(height: 4),
-                        Row(children: [Icon(Icons.circle, size: 6, color: Colors.teal), SizedBox(width: 6), Text("08:00am - 03:00pm")]),
+                        Row(children: [SizedBox(width: 12), Text("08:00am - 03:00pm",style: TextStyle(fontWeight: FontWeight.bold),)]),
                       ],
                     ),
+                    SizedBox(width: 20,),
+                    Center(child: Icon(Icons.circle, size: 6, color: Colors.teal)),
                     Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
+                      crossAxisAlignment: CrossAxisAlignment.center,
                       children: [
                         Text("Saturday – Sunday"),
                         SizedBox(height: 4),
-                        Row(children: [Icon(Icons.circle, size: 6, color: Colors.teal), SizedBox(width: 6), Text("09:00am - 02:00pm")]),
+                        Row(children: [SizedBox(width: 12), Text("08:00am - 03:00pm",style: TextStyle(fontWeight: FontWeight.bold),)]),
                       ],
                     ),
+                    
                   ],
                 ),
-                const SizedBox(height: 20),
+                // Row(
+                //   mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                //   children: const [
+                //     Column(
+                //       crossAxisAlignment: CrossAxisAlignment.start,
+                //       children: [
+                //         Text("Monday – Friday"),
+                //         SizedBox(height: 4),
+                //         Row(children: [Icon(Icons.circle, size: 6, color: Colors.teal), SizedBox(width: 6), Text("08:00am - 03:00pm")]),
+                //       ],
+                //     ),
+                //     Column(
+                //       crossAxisAlignment: CrossAxisAlignment.start,
+                //       children: [
+                //         Text("Saturday – Sunday"),
+                //         SizedBox(height: 4),
+                //         Row(children: [Icon(Icons.circle, size: 6, color: Colors.teal), SizedBox(width: 6), Text("09:00am - 02:00pm")]),
+                //       ],
+                //     ),
+                //   ],
+                // ),
+                 SizedBox(height: 20),
 
-                Align(alignment: Alignment.centerLeft, child: Text("Reviews", style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold))),
+                Align(alignment: Alignment.centerLeft, child: Text("Reviews", style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold, fontSize: 14))),
                 const SizedBox(height: 12),
                 Container(
                   padding: const EdgeInsets.all(12),
