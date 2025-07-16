@@ -43,33 +43,6 @@ class _GetQuoteScreenState extends State<GetQuoteScreen> {
 
     final args = Get.arguments ?? {};
 
-    if (!authController.isLoggedIn()) {
-      Future.microtask(() {
-        Get.offAll(
-          () => const LoginScreen(),
-          arguments: {
-            'redirectTo': 'GetQuoteScreen',
-            'formData': {
-              'companyId': args['companyId'] ?? 0,
-              'subCategoryId': args['subCategoryId'] ?? 0,
-              'subVerticalId': args['subVerticalId'] ?? 0,
-              'name': nameController.text,
-              'mobile': mobileController.text,
-              'email': emailController.text,
-              'requirements': requirementsController.text,
-              'date': dateController.text,
-              'startTime': startTime,
-              'endTime': endTime,
-              'favStartTime': favStartTime,
-              'favEndTime': favEndTime,
-            },
-          },
-        );
-        Get.snackbar("Login Required", "Please login to request a quote");
-      });
-      return;
-    }
-
     companyId = args['companyId'] ?? 0;
     subCategoryId = args['subCategoryId'] ?? 0;
     subVerticalId = args['subVerticalId'] ?? 0;
@@ -118,7 +91,7 @@ class _GetQuoteScreenState extends State<GetQuoteScreen> {
     });
   }
 
-  void _submitQuote() {
+  void _submitQuote() async {
     if (nameController.text.isEmpty || mobileController.text.isEmpty || emailController.text.isEmpty || requirementsController.text.isEmpty) {
       Get.snackbar("Validation", "Please fill all required fields");
       return;
@@ -130,6 +103,43 @@ Time: $startTime to $endTime
 Favorable Time: $favStartTime to $favEndTime
 Requirements: ${requirementsController.text}
 ''';
+
+    if (!authController.isLoggedIn()) {
+      final shouldLogin = await Get.dialog<bool>(
+        AlertDialog(
+          title: const Text("Login Required"),
+          content: const Text("You are not logged in. Do you want to login to submit this quote?"),
+          actions: [
+            TextButton(onPressed: () => Get.back(result: false), child: const Text("Continue as Guest")),
+            ElevatedButton(onPressed: () => Get.back(result: true), child: const Text("Login")),
+          ],
+        ),
+      );
+
+      if (shouldLogin == true) {
+        Get.to(
+          () => const LoginScreen(),
+          arguments: {
+            'redirectTo': 'GetQuoteScreen',
+            'formData': {
+              'companyId': companyId,
+              'subCategoryId': subCategoryId,
+              'subVerticalId': subVerticalId,
+              'name': nameController.text,
+              'mobile': mobileController.text,
+              'email': emailController.text,
+              'requirements': requirementsController.text,
+              'date': dateController.text,
+              'startTime': startTime,
+              'endTime': endTime,
+              'favStartTime': favStartTime,
+              'favEndTime': favEndTime,
+            },
+          },
+        );
+        return;
+      }
+    }
 
     quoteController.submitQuote(
       companyId: companyId,

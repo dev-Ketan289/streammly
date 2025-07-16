@@ -1,11 +1,13 @@
 import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:streammly/controllers/auth_controller.dart';
+import 'package:streammly/controllers/location_controller.dart';
 import 'package:streammly/generated/assets.dart';
 import 'package:streammly/navigation_menu.dart';
 import 'package:streammly/services/route_helper.dart';
-
+import 'package:streammly/views/screens/common/location_screen.dart';
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
@@ -19,19 +21,20 @@ class _SplashScreenState extends State<SplashScreen> {
   void initState() {
     super.initState();
 
-    Timer(const Duration(seconds: 3), () {
-      // Navigate to next screen after splash
-      if (Get.find<AuthController>().isLoggedIn()) {
-        Navigator.push(context, getCustomRoute(child: NavigationMenu()));
+    Timer(const Duration(seconds: 3), () async {
+      final authController = Get.find<AuthController>();
+      final locationController = Get.find<LocationController>();
 
-        // Navigator.pushReplacementNamed(context, '/home'); //
-      } else {
+      final hasSavedLocation = await locationController.hasSavedLocation();
+
+      if (hasSavedLocation) {
+        // Get current GPS location and navigate to home
+        await locationController.getCurrentLocation();
+        locationController.saveSelectedLocation();
         Navigator.push(context, getCustomRoute(child: NavigationMenu()));
-        // Navigator.pushReplacementNamed(
-        //   context,
-        //   '/login',
-        // ); // change route as needed
-        // Navigator.push(context, getCustomRoute(child: LocationScreen()));
+      } else {
+        // First time - go to Location screen
+        Navigator.push(context, getCustomRoute(child: const LocationScreen()));
       }
     });
   }
@@ -49,12 +52,7 @@ class _SplashScreenState extends State<SplashScreen> {
           crossAxisAlignment: CrossAxisAlignment.end,
           children: [
             // App Logo or GIF
-            Image.asset(
-              Assets.imagesSplash,
-              height: size.height,
-              width: size.height,
-              fit: BoxFit.cover,
-            ),
+            Image.asset(Assets.imagesSplash, height: size.height, width: size.height, fit: BoxFit.cover),
           ],
         ),
       ),

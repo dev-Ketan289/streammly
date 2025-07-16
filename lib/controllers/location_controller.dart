@@ -103,6 +103,7 @@ class LocationController extends GetxController {
       }
 
       final position = await Geolocator.getCurrentPosition(locationSettings: const LocationSettings(accuracy: LocationAccuracy.high, timeLimit: Duration(seconds: 10)));
+
       await updateLocation(position.latitude, position.longitude);
     } catch (e) {
       print('Location error: $e');
@@ -139,7 +140,6 @@ class LocationController extends GetxController {
       _mapController!.animateCamera(CameraUpdate.newLatLngZoom(LatLng(lat, lng), 15));
     }
 
-    // Also fetch address
     await getAddressFromCoordinates(lat, lng);
     await _saveLastLocation(lat, lng);
   }
@@ -262,6 +262,11 @@ class LocationController extends GetxController {
 
   String get formattedCurrentLocation {
     return selectedAddress.value.isNotEmpty ? selectedAddress.value : 'Lat: ${rxLat.value.toStringAsFixed(6)}, Lng: ${rxLng.value.toStringAsFixed(6)}';
+  }
+
+  Future<bool> hasSavedLocation() async {
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.containsKey(_lastLocationKey);
   }
 }
 

@@ -61,4 +61,26 @@ class Init {
       log('---- ${e.toString()} ----', name: "ERROR AT initialize()");
     }
   }
+
+  // Location save & check methods
+
+  Future<bool> isLocationSaved() async {
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.containsKey('saved_location');
+  }
+
+  Future<void> saveUserLocation(String location) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString('saved_location', location);
+  }
+
+  Future<String?> getUserLocation() async {
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.getString('saved_location');
+  }
+
+  Future<void> clearLocation() async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.remove('saved_location');
+  }
 }
