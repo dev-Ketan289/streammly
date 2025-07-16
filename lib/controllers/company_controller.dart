@@ -26,9 +26,7 @@ class CompanyController extends GetxController {
   Position? userPosition;
 
   Future<Position> _getCurrentLocation() async {
-    return await Geolocator.getCurrentPosition(
-      locationSettings: const LocationSettings(accuracy: LocationAccuracy.best),
-    );
+    return await Geolocator.getCurrentPosition(locationSettings: const LocationSettings(accuracy: LocationAccuracy.best));
   }
 
   double calculateDistance(double lat1, double lon1, double lat2, double lon2) {
@@ -57,18 +55,9 @@ class CompanyController extends GetxController {
 
       final enrichedCompanies =
           data.map((company) {
-            if (company.latitude != null &&
-                company.longitude != null &&
-                userPosition != null) {
-              company.distanceKm = calculateDistance(
-                userPosition!.latitude,
-                userPosition!.longitude,
-                company.latitude!,
-                company.longitude!,
-              );
-              company.estimatedTime = _estimateTimeFromDistance(
-                company.distanceKm!,
-              );
+            if (company.latitude != null && company.longitude != null && userPosition != null) {
+              company.distanceKm = calculateDistance(userPosition!.latitude, userPosition!.longitude, company.latitude!, company.longitude!);
+              company.estimatedTime = _estimateTimeFromDistance(company.distanceKm!);
             }
             return company;
           }).toList();
@@ -88,15 +77,8 @@ class CompanyController extends GetxController {
       userPosition ??= await _getCurrentLocation();
       final company = await companyRepo.fetchCompanyById(companyId);
 
-      if (company?.latitude != null &&
-          company?.longitude != null &&
-          userPosition != null) {
-        company?.distanceKm = calculateDistance(
-          userPosition!.latitude,
-          userPosition!.longitude,
-          company.latitude!,
-          company.longitude!,
-        );
+      if (company?.latitude != null && company?.longitude != null && userPosition != null) {
+        company?.distanceKm = calculateDistance(userPosition!.latitude, userPosition!.longitude, company.latitude!, company.longitude!);
         company?.estimatedTime = _estimateTimeFromDistance(company.distanceKm!);
       }
 
@@ -111,9 +93,7 @@ class CompanyController extends GetxController {
     try {
       final data = await companyRepo.fetchCompanySubCategories(companyId);
       subCategories.clear();
-      subCategories.addAll(
-        data.map((e) => CompanySubCategory.fromJson(e['subcategory'])),
-      );
+      subCategories.addAll(data.map((e) => CompanySubCategory.fromJson(e['subcategory'])));
       update();
     } catch (e) {
       Get.snackbar("Error", "Something went wrong: $e");
@@ -122,10 +102,7 @@ class CompanyController extends GetxController {
 
   Future<void> fetchSubVerticals(int companyId, int subCategoryId) async {
     try {
-      final data = await companyRepo.fetchSubVerticals(
-        companyId: companyId,
-        subCategoryId: subCategoryId,
-      );
+      final data = await companyRepo.fetchSubVerticals(companyId: companyId, subCategoryId: subCategoryId);
       subVerticals.clear();
       subVerticals.addAll(data.map((e) => SubVertical.fromJson(e)));
       update();
@@ -141,10 +118,7 @@ class CompanyController extends GetxController {
       isSubVerticalLoading = true;
       update();
 
-      final data = await companyRepo.fetchSubVerticals(
-        companyId: companyId,
-        subCategoryId: subCategoryId,
-      );
+      final data = await companyRepo.fetchSubVerticals(companyId: companyId, subCategoryId: subCategoryId);
 
       subVerticalCards.clear();
 
@@ -155,13 +129,10 @@ class CompanyController extends GetxController {
           final imageUrl =
               cleanedPath.isNotEmpty
                   ? "https://admin.streammly.com/$cleanedPath"
+                  // ? "http://192.168.1.113:8000/$cleanedPath"
                   : "";
 
-          return {
-            "id": item["id"].toString(),
-            "image": imageUrl,
-            "label": item["title"] ?? "Untitled",
-          };
+          return {"id": item["id"].toString(), "image": imageUrl, "label": item["title"] ?? "Untitled"};
         }),
       );
     } catch (e) {
@@ -177,15 +148,8 @@ class CompanyController extends GetxController {
       userPosition ??= await _getCurrentLocation();
       final company = await companyRepo.fetchCompanyById(companyId);
 
-      if (company?.latitude != null &&
-          company?.longitude != null &&
-          userPosition != null) {
-        company?.distanceKm = calculateDistance(
-          userPosition!.latitude,
-          userPosition!.longitude,
-          company.latitude!,
-          company.longitude!,
-        );
+      if (company?.latitude != null && company?.longitude != null && userPosition != null) {
+        company?.distanceKm = calculateDistance(userPosition!.latitude, userPosition!.longitude, company.latitude!, company.longitude!);
         company?.estimatedTime = _estimateTimeFromDistance(company.distanceKm!);
       }
 

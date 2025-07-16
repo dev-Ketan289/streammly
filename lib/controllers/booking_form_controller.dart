@@ -4,7 +4,6 @@ import 'package:get/get.dart';
 import 'package:intl/intl.dart';
 import 'package:streammly/views/screens/package/booking/booking_page.dart';
 
-import '../views/screens/package/booking/widgets/add_on_page.dart';
 class BookingController extends GetxController {
   var currentPage = 0.obs;
   var selectedPackages = <Map<String, dynamic>>[].obs;
@@ -42,7 +41,7 @@ class BookingController extends GetxController {
           'outfitChanges': packageTitle == 'Moments' ? null : null,
           'locationPreference': packageTitle == 'Wonders' ? null : null,
           'freeAddOn': null,
-          'extraAddOn': null,
+          'extraAddOn': <Map<String, dynamic>>[],
           'termsAccepted': false,
           'extraAnswers': extraAnswers,
         };
@@ -96,6 +95,13 @@ class BookingController extends GetxController {
     packageFormsData[index] = data;
   }
 
+  void updateExtraAddOns(int index, List<Map<String, dynamic>> selectedAddOns) {
+    final data = packageFormsData[index] ?? {};
+    data['extraAddOn'] = selectedAddOns;
+    packageFormsData[index] = data;
+    packageFormsData.refresh();
+  }
+
   Future<String> selectDate(int index, BuildContext context) async {
     final picked = await showDatePicker(context: context, initialDate: DateTime.now(), firstDate: DateTime.now(), lastDate: DateTime.now().add(const Duration(days: 365)));
     String formatted = "";
@@ -111,37 +117,8 @@ class BookingController extends GetxController {
     return months[month];
   }
 
-  /// NEW toggleAddOn – fetch items and open selection page
   void toggleAddOn(int index, String type) async {
-    final package = selectedPackages[index];
-    final packageId = package['id'];
-
-    final response = await GetConnect().get(
-      'https://admin.streammly.com/api/v1/package/getproductinpackage?company_id=1&package_id=$packageId',
-    );
-
-    if (response.statusCode == 200 && response.body['success'] == true) {
-      final List<dynamic> data = response.body['data'];
-      final products = data.expand((cat) {
-        return cat['product_in_packages']?.map((p) => p['products']) ?? [];
-      }).toList();
-
-      final selected = await Get.to(() => ItemSelectionPage(
-        packageIndex: index,
-        type: type,
-        items: List<Map<String, dynamic>>.from(products),
-      ));
-
-      if (selected != null) {
-        final form = packageFormsData[index] ?? {};
-        final key = type == 'free' ? 'freeAddOn' : 'extraAddOn';
-        form[key] = selected;
-        packageFormsData[index] = form;
-        packageFormsData.refresh();
-      }
-    } else {
-      Get.snackbar("Error", "Failed to load items for selection");
-    }
+    Get.snackbar("Info", "This feature is currently disabled.");
   }
 
   void toggleTermsAcceptance() {
@@ -208,5 +185,16 @@ class BookingController extends GetxController {
     if (kDebugMode) {
       print('Booking Data Submitted:\n$data');
     }
+  }
+
+  int get totalExtraAddOnPrice {
+    int total = 0;
+    for (final form in packageFormsData.values) {
+      final extras = form['extraAddOn'] as List<Map<String, dynamic>>? ?? [];
+      for (final item in extras) {
+        total += int.tryParse(item['price'].toString()) ?? 0;
+      }
+    }
+    return total;
   }
 }

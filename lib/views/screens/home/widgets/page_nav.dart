@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:get/get.dart';
+import 'package:streammly/generated/assets.dart';
 import 'package:streammly/services/theme.dart';
 import 'package:streammly/views/screens/bundle/bundle_information.dart';
 import 'package:streammly/views/screens/wishlist/wishlistpage.dart';
-import 'package:flutter_svg/flutter_svg.dart';
-import 'package:streammly/generated/assets.dart';
 
 class PageNav extends StatelessWidget {
   const PageNav({super.key});
@@ -45,7 +45,7 @@ class PageNav extends StatelessWidget {
                                 await Get.to(() => const BundleInformation());
                                 selectedIndex.value = 1;
                               } else if (filters[index] == 'Wishlist') {
-                                await Get.to(() => Wishlistpage());
+                                await Get.to(() => WishlistPage());
                                 selectedIndex.value = 1;
                               }
                             },
@@ -54,11 +54,7 @@ class PageNav extends StatelessWidget {
                               decoration: BoxDecoration(color: isSelected ? theme.colorScheme.primary : Colors.transparent, borderRadius: BorderRadius.circular(30)),
                               child: Row(
                                 children: [
-                                  SvgPicture.asset(
-                                    svgIcons[index],
-                                    width: 12,
-                                    height: 10,
-                                  ),
+                                  SvgPicture.asset(svgIcons[index], width: 12, height: 10),
                                   const SizedBox(width: 4),
                                   Text(
                                     filters[index],
@@ -90,7 +86,7 @@ class PageNav extends StatelessWidget {
                 Text("See all", style: TextStyle(color: primaryColor, fontWeight: FontWeight.bold, fontSize: 12)),
                 const SizedBox(width: 4),
                 Icon(Icons.arrow_forward_ios, size: 14, color: primaryColor),
-                SizedBox(width: 4,)
+                SizedBox(width: 4),
               ],
             ),
           ),

@@ -8,14 +8,14 @@ import '../../../controllers/category_controller.dart';
 import '../../../models/company/company_location.dart';
 import 'components/vendor_card.dart';
 
-class Wishlistpage extends StatefulWidget {
-  const Wishlistpage({super.key});
+class WishlistPage extends StatefulWidget {
+  const WishlistPage({super.key});
 
   @override
-  State<Wishlistpage> createState() => _WishlistpageState();
+  State<WishlistPage> createState() => _WishlistPageState();
 }
 
-class _WishlistpageState extends State<Wishlistpage> {
+class _WishlistPageState extends State<WishlistPage> {
   final wishlistController = Get.find<WishlistController>();
 
   final CategoryController categoryController = Get.find<CategoryController>();
@@ -36,13 +36,9 @@ class _WishlistpageState extends State<Wishlistpage> {
       companiesByCategory.clear();
       for (var category in categoryController.categories) {
         Get.find<CompanyController>().setCategoryId(category.id);
-        await Get.find<CompanyController>().fetchCompaniesByCategory(
-          category.id,
-        );
+        await Get.find<CompanyController>().fetchCompaniesByCategory(category.id);
         setState(() {
-          companiesByCategory[category.title] = List.from(
-            Get.find<CompanyController>().companies,
-          );
+          companiesByCategory[category.title] = List.from(Get.find<CompanyController>().companies);
         });
       }
       if (companiesByCategory.isEmpty) {
@@ -65,14 +61,7 @@ class _WishlistpageState extends State<Wishlistpage> {
             Get.back();
           },
         ),
-        title: const Text(
-          'Wishlist',
-          style: TextStyle(
-            color: Color(0xFF2864A6),
-            fontSize: 20,
-            fontWeight: FontWeight.bold,
-          ),
-        ),
+        title: const Text('Wishlist', style: TextStyle(color: Color(0xFF2864A6), fontSize: 20, fontWeight: FontWeight.bold)),
         centerTitle: true,
       ),
       body: SafeArea(
@@ -95,30 +84,17 @@ class _WishlistpageState extends State<Wishlistpage> {
                 ),
               ),
               SingleChildScrollView(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 16,
-                  vertical: 16,
-                ),
+                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     GetBuilder<CompanyController>(
                       builder: (controller) {
                         if (controller.isLoading) {
-                          return const Center(
-                            child: CircularProgressIndicator(),
-                          );
+                          return const Center(child: CircularProgressIndicator());
                         }
                         if (companiesByCategory.isEmpty) {
-                          return const Center(
-                            child: Text(
-                              "No items in your wishlist.",
-                              style: TextStyle(
-                                fontSize: 14,
-                                color: Colors.grey,
-                              ),
-                            ),
-                          );
+                          return const Center(child: Text("No items in your wishlist.", style: TextStyle(fontSize: 14, color: Colors.grey)));
                         }
                         return Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
@@ -129,14 +105,7 @@ class _WishlistpageState extends State<Wishlistpage> {
                                 return Column(
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
-                                    Text(
-                                      categoryTitle,
-                                      style: const TextStyle(
-                                        fontSize: 16,
-                                        fontWeight: FontWeight.bold,
-                                        color: Color(0xFF4867B7),
-                                      ),
-                                    ),
+                                    Text(categoryTitle, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Color(0xFF4867B7))),
                                     const SizedBox(height: 8),
                                     SingleChildScrollView(
                                       scrollDirection: Axis.horizontal,
@@ -145,29 +114,14 @@ class _WishlistpageState extends State<Wishlistpage> {
                                             companies.map((company) {
                                               return GestureDetector(
                                                 onTap: () {
-                                                  showModalBottomSheet(
-                                                    isScrollControlled: true,
-                                                    context: context,
-                                                    builder:
-                                                        (context) =>
-                                                            WishlistBottomSheet(),
-                                                  );
+                                                  showModalBottomSheet(isScrollControlled: true, context: context, builder: (context) => WishlistBottomSheet());
                                                 },
                                                 child: VendorCard(
-                                                  companyName:
-                                                      company.companyName,
+                                                  companyName: company.companyName,
                                                   rating: '3.9 ★',
-                                                  timeDistance:
-                                                      '${company.estimatedTime ?? '35-40 mins'} . ${company.distanceKm?.toStringAsFixed(1) ?? '4.2'} km',
+                                                  timeDistance: '${company.estimatedTime ?? '35-40 mins'} . ${company.distanceKm?.toStringAsFixed(1) ?? '4.2'} km',
                                                   category: categoryTitle,
-                                                  imageUrl:
-                                                      company.bannerImage !=
-                                                                  null &&
-                                                              company
-                                                                  .bannerImage!
-                                                                  .isNotEmpty
-                                                          ? company.bannerImage!
-                                                          : 'assets/images/demo.png',
+                                                  imageUrl: company.bannerImage != null && company.bannerImage!.isNotEmpty ? company.bannerImage! : 'assets/images/demo.png',
                                                   isSelected: false,
                                                 ),
                                               );
@@ -201,32 +155,14 @@ class WishlistBottomSheet extends StatelessWidget {
       child: Container(
         padding: EdgeInsets.all(30),
 
-        decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(12),
-        ),
+        decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(12)),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           mainAxisSize: MainAxisSize.min,
           children: [
-            Center(
-              child: Text(
-                'Remove from Wishlist',
-                style: TextStyle(
-                  fontSize: 22,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.black,
-                ),
-              ),
-            ),
+            Center(child: Text('Remove from Wishlist', style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold, color: Colors.black))),
             SizedBox(height: 20),
-            Text(
-              'Are you sure you want to remove this?',
-              style: TextStyle(
-                color: Colors.black,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
+            Text('Are you sure you want to remove this?', style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold)),
             Text('Removing this will delete it from your saved Wishlist.'),
             SizedBox(height: 24),
             SizedBox(
@@ -235,18 +171,12 @@ class WishlistBottomSheet extends StatelessWidget {
               child: ElevatedButton(
                 style: ElevatedButton.styleFrom(
                   backgroundColor: Colors.white,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(10),
-                    side: BorderSide(color: Colors.blue.shade700),
-                  ),
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10), side: BorderSide(color: Colors.blue.shade700)),
                 ),
                 onPressed: () {
                   Get.back();
                 },
-                child: Text(
-                  'Yes, Remove',
-                  style: TextStyle(color: Colors.blue[700]),
-                ),
+                child: Text('Yes, Remove', style: TextStyle(color: Colors.blue[700])),
               ),
             ),
             SizedBox(height: 10),
@@ -258,18 +188,12 @@ class WishlistBottomSheet extends StatelessWidget {
                 style: ElevatedButton.styleFrom(
                   backgroundColor: Colors.blue[700],
                   foregroundColor: Colors.blue.shade700,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(10),
-                    side: BorderSide(color: Theme.of(context).primaryColor),
-                  ),
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10), side: BorderSide(color: Theme.of(context).primaryColor)),
                 ),
                 onPressed: () {
                   Get.back();
                 },
-                child: Text(
-                  'Keep Wishlist',
-                  style: TextStyle(color: Colors.white),
-                ),
+                child: Text('Keep Wishlist', style: TextStyle(color: Colors.white)),
               ),
             ),
           ],

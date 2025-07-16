@@ -17,8 +17,13 @@ import '../vendor/widgets/vendor_info_card.dart';
 
 class CompanyLocatorMapScreen extends StatefulWidget {
   final int categoryId;
+  final List<int>? allowedCategoryIds;
 
-  const CompanyLocatorMapScreen({super.key, required this.categoryId});
+  const CompanyLocatorMapScreen({
+    super.key,
+    required this.categoryId,
+    this.allowedCategoryIds,
+  });
 
   @override
   State<CompanyLocatorMapScreen> createState() =>
@@ -393,11 +398,29 @@ class _CompanyLocatorMapScreenState extends State<CompanyLocatorMapScreen> {
                     borderRadius: BorderRadius.circular(12),
                   ),
                   child: DropdownButton<int>(
-                    value: controller.selectedCategoryId,
+                    value:
+                        (() {
+                          final allowed = widget.allowedCategoryIds;
+                          if (allowed != null &&
+                              allowed.contains(controller.selectedCategoryId)) {
+                            return controller.selectedCategoryId;
+                          } else if (allowed != null && allowed.isNotEmpty) {
+                            return allowed.first;
+                          } else {
+                            return controller.selectedCategoryId;
+                          }
+                        })(),
                     isExpanded: true,
                     underline: const SizedBox(),
                     items:
                         categoryController.categories
+                            .where(
+                              (category) =>
+                                  widget.allowedCategoryIds == null ||
+                                  widget.allowedCategoryIds!.contains(
+                                    category.id,
+                                  ),
+                            )
                             .map(
                               (category) => DropdownMenuItem<int>(
                                 value: category.id,
@@ -413,7 +436,7 @@ class _CompanyLocatorMapScreenState extends State<CompanyLocatorMapScreen> {
                           _showSlider = false;
                           _currentPageIndex = 0;
                         });
-                        _loadData(); // ✅ Reload for new category
+                        _loadData();
                       }
                     },
                   ),
@@ -445,14 +468,14 @@ class _CompanyLocatorMapScreenState extends State<CompanyLocatorMapScreen> {
                         end: Alignment.bottomCenter,
                         colors: [
                           Colors.transparent,
-                          Colors.black.withOpacity(0.1),
-                          Colors.black.withOpacity(0.3),
+                          Colors.black.withValues(alpha: 0.1),
+                          Colors.black.withValues(alpha: 0.3),
                         ],
                       ),
                     ),
                     child: Column(
                       children: [
-                        // Page indicator
+                        // Page indicator                   rop
                         Container(
                           child: Row(
                             mainAxisAlignment: MainAxisAlignment.center,
@@ -470,7 +493,7 @@ class _CompanyLocatorMapScreenState extends State<CompanyLocatorMapScreen> {
                                   color:
                                       _currentPageIndex == index
                                           ? Colors.blue
-                                          : Colors.grey.withOpacity(0.5),
+                                          : Colors.grey.withValues(alpha: 0.5),
                                 ),
                               ),
                             ),
@@ -497,7 +520,12 @@ class _CompanyLocatorMapScreenState extends State<CompanyLocatorMapScreen> {
                                         await controller.fetchCompanyById(
                                           company.id!,
                                         );
-                                        Get.to(() => const VendorDescription());
+                                        Navigator.push(
+                                          context,
+                                          getCustomRoute(
+                                            child: VendorDescription(),
+                                          ),
+                                        );
                                       },
                                       child: VendorInfoCard(
                                         logoImage: company.logo ?? '',

@@ -1,6 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 
-import '../package/booking/widgets/time_picker.dart'; // Adjust if needed
+import '../../../controllers/auth_controller.dart';
+import '../../../controllers/quote_controller.dart';
+import '../auth_screens/login_screen.dart';
+import '../package/booking/widgets/time_picker.dart';
 
 class GetQuoteScreen extends StatefulWidget {
   const GetQuoteScreen({super.key});
@@ -10,12 +14,18 @@ class GetQuoteScreen extends StatefulWidget {
 }
 
 class _GetQuoteScreenState extends State<GetQuoteScreen> {
-  final TextEditingController eventNameController = TextEditingController();
+  final QuoteController quoteController = Get.put(QuoteController());
+  final AuthController authController = Get.find<AuthController>();
+
+  final TextEditingController nameController = TextEditingController();
+  final TextEditingController mobileController = TextEditingController();
+  final TextEditingController emailController = TextEditingController();
   final TextEditingController requirementsController = TextEditingController();
   final TextEditingController dateController = TextEditingController();
 
-  String? selectedEventType;
-  bool isEventDropdownOpen = false;
+  late int companyId;
+  late int subCategoryId;
+  late int subVerticalId;
 
   DateTime selectedDate = DateTime.now();
   String? startTime = "08:00 AM";
@@ -27,40 +37,63 @@ class _GetQuoteScreenState extends State<GetQuoteScreen> {
   bool isStartTime = true;
   bool isFavTime = false;
 
-  List<String> allCategories = ['Photographer', 'Makeup Artist', 'Event Organiser'];
-  List<String> selectedCategories = [];
-  bool isCategoryDropdownOpen = false;
-
-  double radius = 0.0;
-
   @override
   void initState() {
     super.initState();
-    dateController.text = _formatDate(selectedDate);
+
+    final args = Get.arguments ?? {};
+
+    if (!authController.isLoggedIn()) {
+      Future.microtask(() {
+        Get.offAll(
+          () => const LoginScreen(),
+          arguments: {
+            'redirectTo': 'GetQuoteScreen',
+            'formData': {
+              'companyId': args['companyId'] ?? 0,
+              'subCategoryId': args['subCategoryId'] ?? 0,
+              'subVerticalId': args['subVerticalId'] ?? 0,
+              'name': nameController.text,
+              'mobile': mobileController.text,
+              'email': emailController.text,
+              'requirements': requirementsController.text,
+              'date': dateController.text,
+              'startTime': startTime,
+              'endTime': endTime,
+              'favStartTime': favStartTime,
+              'favEndTime': favEndTime,
+            },
+          },
+        );
+        Get.snackbar("Login Required", "Please login to request a quote");
+      });
+      return;
+    }
+
+    companyId = args['companyId'] ?? 0;
+    subCategoryId = args['subCategoryId'] ?? 0;
+    subVerticalId = args['subVerticalId'] ?? 0;
+
+    nameController.text = args['name'] ?? '';
+    mobileController.text = args['mobile'] ?? '';
+    emailController.text = args['email'] ?? '';
+    requirementsController.text = args['requirements'] ?? '';
+    dateController.text = args['date'] ?? _formatDate(selectedDate);
+    startTime = args['startTime'] ?? startTime;
+    endTime = args['endTime'] ?? endTime;
+    favStartTime = args['favStartTime'] ?? favStartTime;
+    favEndTime = args['favEndTime'] ?? favEndTime;
   }
 
   void _pickDate() async {
     final picked = await showDatePicker(context: context, initialDate: selectedDate, firstDate: DateTime.now(), lastDate: DateTime(2100));
+
     if (picked != null) {
       setState(() {
         selectedDate = picked;
         dateController.text = _formatDate(picked);
       });
     }
-  }
-
-  void _showTimePicker(bool isStart) {
-    setState(() {
-      isStartTime = isStart;
-      showTimePicker = true;
-    });
-  }
-
-  void _showFavTimePicker(bool isStart) {
-    setState(() {
-      isFavTime = isStart;
-      showFavTimePicker = true;
-    });
   }
 
   void _onTimeSelected(String value) {
@@ -85,8 +118,28 @@ class _GetQuoteScreenState extends State<GetQuoteScreen> {
     });
   }
 
-  String _formatDate(DateTime date) {
-    return '${date.day} ${_monthName(date.month)} ${date.year}';
+  void _submitQuote() {
+    if (nameController.text.isEmpty || mobileController.text.isEmpty || emailController.text.isEmpty || requirementsController.text.isEmpty) {
+      Get.snackbar("Validation", "Please fill all required fields");
+      return;
+    }
+
+    final message = '''
+Date of Shoot: ${dateController.text}
+Time: $startTime to $endTime
+Favorable Time: $favStartTime to $favEndTime
+Requirements: ${requirementsController.text}
+''';
+
+    quoteController.submitQuote(
+      companyId: companyId,
+      subCategoryId: subCategoryId,
+      subVerticalId: subVerticalId,
+      userName: nameController.text,
+      phone: mobileController.text,
+      email: emailController.text,
+      message: message,
+    );
   }
 
   @override
@@ -108,82 +161,94 @@ class _GetQuoteScreenState extends State<GetQuoteScreen> {
           children: [
             const Text("Baby Shoot / Baby Name", style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Color(0xFF2864A6))),
             const SizedBox(height: 5),
-            TextField(
-              controller: eventNameController,
-              decoration: InputDecoration(
-                enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(10), borderSide: BorderSide(color: Colors.grey.shade400)),
-                focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(10), borderSide: BorderSide(color: Colors.grey.shade400)),
-                fillColor: Colors.white,
-                filled: true,
-                labelText: 'Name *',
-                hintText: 'Enter name',
-                border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
-              ),
-            ),
+
+            TextField(controller: nameController, decoration: _buildDecoration('Name *', 'Enter name')),
             const SizedBox(height: 16),
-            TextField(
-              controller: eventNameController,
-              decoration: InputDecoration(
-                enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(10), borderSide: BorderSide(color: Colors.grey.shade400)),
-                focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(10), borderSide: BorderSide(color: Colors.grey.shade400)),
-                fillColor: Colors.white,
-                filled: true,
-                labelText: 'Mobile No. *',
-                hintText: 'Enter mobile number',
-                border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
-              ),
-            ),
+
+            TextField(controller: mobileController, decoration: _buildDecoration('Mobile No. *', 'Enter mobile number'), keyboardType: TextInputType.phone),
             const SizedBox(height: 16),
-            TextField(
-              controller: eventNameController,
-              decoration: InputDecoration(
-                enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(10), borderSide: BorderSide(color: Colors.grey.shade400)),
-                focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(10), borderSide: BorderSide(color: Colors.grey.shade400)),
-                fillColor: Colors.white,
-                filled: true,
-                labelText: 'Email *',
-                hintText: 'Enter email',
-                border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
-              ),
-            ),
+
+            TextField(controller: emailController, decoration: _buildDecoration('Email *', 'Enter email'), keyboardType: TextInputType.emailAddress),
             const SizedBox(height: 16),
+
             _buildTextField('Date of Shoot *', dateController, readOnly: true, onTap: _pickDate, suffixIcon: Icons.calendar_today),
             const SizedBox(height: 16),
+
             Row(
               children: [
-                Expanded(child: _buildTextField('Start Time *', TextEditingController(text: startTime), readOnly: true, onTap: () => _showTimePicker(true))),
+                Expanded(
+                  child: _buildTextField(
+                    'Start Time *',
+                    TextEditingController(text: startTime),
+                    readOnly: true,
+                    onTap: () {
+                      isStartTime = true;
+                      showTimePicker = true;
+                      setState(() {});
+                    },
+                  ),
+                ),
                 const SizedBox(width: 12),
-                Expanded(child: _buildTextField('End Time *', TextEditingController(text: endTime), readOnly: true, onTap: () => _showTimePicker(false))),
+                Expanded(
+                  child: _buildTextField(
+                    'End Time *',
+                    TextEditingController(text: endTime),
+                    readOnly: true,
+                    onTap: () {
+                      isStartTime = false;
+                      showTimePicker = true;
+                      setState(() {});
+                    },
+                  ),
+                ),
               ],
             ),
+
             if (showTimePicker) CustomTimePicker(isStart: isStartTime, onCancel: () => setState(() => showTimePicker = false), onTimeSelected: _onTimeSelected),
+
             const SizedBox(height: 16),
-            TextField(
-              controller: requirementsController,
-              decoration: InputDecoration(
-                enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(10), borderSide: BorderSide(color: Colors.grey.shade400)),
-                focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(10), borderSide: BorderSide(color: Colors.grey.shade400)),
-                fillColor: Colors.white,
-                filled: true,
-                labelText: 'Describe your Requirements *',
-                hintText: 'Enter requirements',
-                border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
-              ),
-            ),
+
+            TextField(controller: requirementsController, decoration: _buildDecoration('Describe your Requirements *', 'Enter requirements'), maxLines: 3),
             const SizedBox(height: 16),
+
             Row(
               children: [
-                Expanded(child: _buildTextField('Fav Time *', TextEditingController(text: favStartTime), readOnly: true, onTap: () => _showFavTimePicker(true))),
+                Expanded(
+                  child: _buildTextField(
+                    'Fav Time *',
+                    TextEditingController(text: favStartTime),
+                    readOnly: true,
+                    onTap: () {
+                      isFavTime = true;
+                      showFavTimePicker = true;
+                      setState(() {});
+                    },
+                  ),
+                ),
                 const SizedBox(width: 12),
-                Expanded(child: _buildTextField('Fav Time *', TextEditingController(text: favEndTime), readOnly: true, onTap: () => _showFavTimePicker(false))),
+                Expanded(
+                  child: _buildTextField(
+                    'Fav Time *',
+                    TextEditingController(text: favEndTime),
+                    readOnly: true,
+                    onTap: () {
+                      isFavTime = false;
+                      showFavTimePicker = true;
+                      setState(() {});
+                    },
+                  ),
+                ),
               ],
             ),
+
             if (showFavTimePicker) CustomTimePicker(isStart: isFavTime, onCancel: () => setState(() => showFavTimePicker = false), onTimeSelected: _onFavTimeSelected),
+
             const SizedBox(height: 16),
+
             Text.rich(
               TextSpan(
                 children: [
-                  TextSpan(text: 'Note: ', style: Theme.of(context).textTheme.bodySmall?.copyWith(color: Colors.red, fontSize: 13)),
+                  TextSpan(text: 'Note: ', style: Theme.of(context).textTheme.bodySmall?.copyWith(color: Colors.red, fontSize: 13, fontWeight: FontWeight.w500)),
                   TextSpan(
                     text: 'Vendor team will contact you within the favorable Date & Favorable time only',
                     style: Theme.of(context).textTheme.bodySmall?.copyWith(color: Colors.grey, fontSize: 13),
@@ -192,22 +257,40 @@ class _GetQuoteScreenState extends State<GetQuoteScreen> {
               ),
             ),
             const SizedBox(height: 16),
-            SizedBox(
-              width: double.infinity,
-              height: 48,
-              child: ElevatedButton(
-                onPressed: () {},
-                style: ElevatedButton.styleFrom(backgroundColor: const Color(0xFF2E5CDA), shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8))),
-                child: const Text("Continue", style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.white)),
-              ),
-            ),
+
+            Obx(() {
+              return SizedBox(
+                width: double.infinity,
+                height: 48,
+                child: ElevatedButton(
+                  onPressed: quoteController.isSubmitting.value ? null : _submitQuote,
+                  style: ElevatedButton.styleFrom(backgroundColor: const Color(0xFF2E5CDA), shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8))),
+                  child:
+                      quoteController.isSubmitting.value
+                          ? const CircularProgressIndicator(color: Colors.white)
+                          : const Text("Continue", style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.white)),
+                ),
+              );
+            }),
           ],
         ),
       ),
     );
   }
 
-  Widget _buildTextField(String label, TextEditingController controller, {bool readOnly = false, VoidCallback? onTap, IconData? suffixIcon, String? hint}) {
+  InputDecoration _buildDecoration(String label, String hint) {
+    return InputDecoration(
+      enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(10), borderSide: BorderSide(color: Colors.grey.shade400)),
+      focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(10), borderSide: BorderSide(color: Colors.grey.shade400)),
+      fillColor: Colors.white,
+      filled: true,
+      labelText: label,
+      hintText: hint,
+      border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
+    );
+  }
+
+  Widget _buildTextField(String label, TextEditingController controller, {bool readOnly = false, VoidCallback? onTap, IconData? suffixIcon}) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 8),
       child: TextField(
@@ -220,7 +303,6 @@ class _GetQuoteScreenState extends State<GetQuoteScreen> {
           fillColor: Colors.white,
           filled: true,
           labelText: label,
-          hintText: hint,
           suffixIcon: suffixIcon != null ? Icon(suffixIcon, size: 18) : null,
           border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
         ),
@@ -228,8 +310,8 @@ class _GetQuoteScreenState extends State<GetQuoteScreen> {
     );
   }
 
-  String _monthName(int month) {
+  String _formatDate(DateTime date) {
     const months = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
-    return months[month - 1];
+    return '${date.day} ${months[date.month - 1]} ${date.year}';
   }
 }

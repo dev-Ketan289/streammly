@@ -152,10 +152,12 @@ class _HeaderBannerState extends State<HeaderBanner> {
                         "https://admin.streammly.com/${currentSlide.vectorImage}",
                         height: 140,
                       )
+                      // ? SvgPicture.network("http://192.168.1.113/${currentSlide.vectorImage}", height: 140)
                       : Image.network(
                         "https://admin.streammly.com/${currentSlide.vectorImage}",
                         height: 140,
                       ),
+              // : Image.network("http://192.168.1.113:8000/${currentSlide.vectorImage}", height: 140),
             ),
 
           // --- Top Content (location, search, title, subtitle, specialities) ---
@@ -252,9 +254,14 @@ class _HeaderBannerState extends State<HeaderBanner> {
                             ), // Set typed text to white
                             decoration: InputDecoration(
                               hintText: "Searching...",
+                              hintStyle: GoogleFonts.openSans(
+                                color: theme.colorScheme.onPrimary,
+                                fontSize: 12,
+                              ),
                               prefixIcon: Icon(
                                 Icons.search,
-                                color: theme.iconTheme.color,
+                                color: backgroundLight,
+                                size: 24,
                               ),
                               border: InputBorder.none,
                               isDense: true,

@@ -116,13 +116,7 @@ class _NavigationMenuState extends State<NavigationMenu> {
 class NavigationController extends GetxController {
   final RxInt selectedIndex = 0.obs;
 
-  final List<Widget Function()> screens = [
-    () => const HomeScreen(), // ✅ Good: Rebuilds fresh
-    () => const Placeholder(),
-    () => const Placeholder(),
-    () => const Placeholder(),
-    () => const Placeholder(),
-  ];
+  final List<Widget Function()> screens = [() => const HomeScreen(), () => const Placeholder(), () => const Placeholder(), () => const Placeholder(), () => const Placeholder()];
 }
 
 // ADD THIS STATIC METHOD TO CREATE STANDALONE BOTTOM NAV

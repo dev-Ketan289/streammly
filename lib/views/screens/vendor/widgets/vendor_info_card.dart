@@ -71,54 +71,56 @@ class VendorInfoCard extends StatelessWidget {
     final availableWidth = screenWidth - (imageMargin * 4) - contentPadding;
     final imageSize = (availableWidth * 0.4).clamp(80.0, maxImageSize);
 
-    return Row(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        // Left side: Logo Image
-        Flexible(
-          flex: 2,
-          child: Container(
-            width: imageSize,
-            height: imageSize,
-            margin: EdgeInsets.all(imageMargin),
-            child: ClipRRect(
-              borderRadius: BorderRadius.circular(16),
-              child: Image.network(
-                logoImage,
-                fit: BoxFit.cover,
-                errorBuilder: (context, error, stackTrace) {
-                  return Image.asset(
-                    'assets/images/default_logo.png',
-                    fit: BoxFit.cover,
-                  );
-                },
+    return IntrinsicHeight(
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Left side: Logo Image
+          Flexible(
+            flex: 2,
+            child: Container(
+              width: imageSize,
+              height: imageSize,
+              margin: EdgeInsets.all(imageMargin),
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(16),
+                child: Image.network(
+                  logoImage,
+                  fit: BoxFit.cover,
+                  errorBuilder: (context, error, stackTrace) {
+                    return Image.asset(
+                      'assets/images/default_logo.png',
+                      fit: BoxFit.cover,
+                    );
+                  },
+                ),
               ),
             ),
           ),
-        ),
 
-        // Right side: Info
-        Flexible(
-          flex: 3,
-          child: Padding(
-            padding: EdgeInsets.only(
-              top: contentPadding,
-              bottom: contentPadding,
-              right: contentPadding,
-            ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                _buildRatingAndTimeRow(context),
-                const SizedBox(height: 8),
-                _buildCompanyInfo(context),
-                const SizedBox(height: 4),
-                _buildDescription(context),
-              ],
+          // Right side: Info
+          Flexible(
+            flex: 3,
+            child: Padding(
+              padding: EdgeInsets.only(
+                top: contentPadding,
+                bottom: contentPadding,
+                right: contentPadding,
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  _buildRatingAndTimeRow(context),
+                  const SizedBox(height: 8),
+                  _buildCompanyInfo(context),
+                  const SizedBox(height: 4),
+                  _buildDescription(context),
+                ],
+              ),
             ),
           ),
-        ),
-      ],
+        ],
+      ),
     );
   }
 
@@ -151,7 +153,7 @@ class VendorInfoCard extends StatelessWidget {
                   borderRadius: BorderRadius.circular(16),
                   child: Image.network(
                     logoImage,
-                    fit: BoxFit.cover,
+                    fit: BoxFit.fill,
                     errorBuilder: (context, error, stackTrace) {
                       return Image.asset(
                         'assets/images/default_logo.png',

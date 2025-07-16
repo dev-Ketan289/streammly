@@ -32,6 +32,7 @@ class CompanyLocation {
     String _fullUrl(String? path) {
       if (path == null || path.isEmpty) return '';
       return 'https://admin.streammly.com/${path.replaceFirst(RegExp(r'^/+'), '')}';
+      // return 'https://192.168.1.113/${path.replaceFirst(RegExp(r'^/+'), '')}';
     }
 
     return CompanyLocation(

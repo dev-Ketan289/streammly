@@ -10,15 +10,7 @@ class CategoryModel {
   final double? latitude;
   final double? longitude;
 
-  CategoryModel({
-    required this.id,
-    required this.title,
-    this.image,
-    this.shortDescription,
-    this.companyName,
-    this.latitude,
-    this.longitude,
-  });
+  CategoryModel({required this.id, required this.title, this.image, this.shortDescription, this.companyName, this.latitude, this.longitude});
 
   factory CategoryModel.fromJson(Map<String, dynamic> json) {
     return CategoryModel(
@@ -27,20 +19,12 @@ class CategoryModel {
       image: json['image'],
       shortDescription: json['short_description'],
       companyName: json['company_name'],
-      latitude:
-          json['latitude'] != null
-              ? double.tryParse(json['latitude'].toString())
-              : null,
-      longitude:
-          json['longitude'] != null
-              ? double.tryParse(json['longitude'].toString())
-              : null,
+      latitude: json['latitude'] != null ? double.tryParse(json['latitude'].toString()) : null,
+      longitude: json['longitude'] != null ? double.tryParse(json['longitude'].toString()) : null,
     );
   }
   bool get isBookMarked {
-    return Get.find<WishlistController>().bookmarks.any(
-      (e) => id == e.bookmarkableId && (e.bookmarkableType?.contains("Category")??false),
-    );
+    return Get.find<WishlistController>().bookmarks.any((e) => id == e.bookmarkableId && (e.bookmarkableType?.contains("Category") ?? false));
   }
 }
 
@@ -54,16 +38,7 @@ class Bookmark {
   DateTime? updatedAt;
   String? status;
 
-  Bookmark({
-    this.id,
-    this.userId,
-    this.bookmarkableType,
-    this.bookmarkableId,
-    this.deletedAt,
-    this.createdAt,
-    this.updatedAt,
-    this.status,
-  });
+  Bookmark({this.id, this.userId, this.bookmarkableType, this.bookmarkableId, this.deletedAt, this.createdAt, this.updatedAt, this.status});
 
   factory Bookmark.fromJson(Map<String, dynamic> json) => Bookmark(
     id: json["id"],
@@ -71,10 +46,8 @@ class Bookmark {
     bookmarkableType: json["bookmarkable_type"],
     bookmarkableId: json["bookmarkable_id"],
     deletedAt: json["deleted_at"],
-    createdAt:
-        json["created_at"] == null ? null : DateTime.parse(json["created_at"]),
-    updatedAt:
-        json["updated_at"] == null ? null : DateTime.parse(json["updated_at"]),
+    createdAt: json["created_at"] == null ? null : DateTime.parse(json["created_at"]),
+    updatedAt: json["updated_at"] == null ? null : DateTime.parse(json["updated_at"]),
     status: json["status"],
   );
 

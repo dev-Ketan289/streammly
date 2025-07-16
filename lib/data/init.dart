@@ -25,15 +25,12 @@ class Init {
 
     try {
       //Repo initialization
-      Get.lazyPut(
-        () => ApiClient(
-          appBaseUrl: AppConstants.baseUrl,
-          sharedPreferences: Get.find(),
-        ),
-      );
-      Get.lazyPut(
-        () => AuthRepo(apiClient: Get.find(), sharedPreferences: Get.find()),
-      );
+      final String token = sharedPreferences.getString(AppConstants.token) ?? "";
+      final apiClient = ApiClient(appBaseUrl: AppConstants.baseUrl, sharedPreferences: sharedPreferences);
+      apiClient.updateHeader(token);
+      Get.lazyPut(() => apiClient);
+
+      Get.lazyPut(() => AuthRepo(apiClient: Get.find(), sharedPreferences: Get.find()));
 
       // Home
       Get.lazyPut(() => CategoryRepo(apiClient: Get.find()));
