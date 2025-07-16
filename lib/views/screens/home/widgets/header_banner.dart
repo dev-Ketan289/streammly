@@ -252,14 +252,9 @@ class _HeaderBannerState extends State<HeaderBanner> {
                             ), // Set typed text to white
                             decoration: InputDecoration(
                               hintText: "Searching...",
-                              hintStyle: GoogleFonts.openSans(
-                                color: theme.colorScheme.onPrimary,
-                                fontSize: 12,
-                              ),
                               prefixIcon: Icon(
                                 Icons.search,
-                                color: backgroundLight,
-                                size: 24,
+                                color: theme.iconTheme.color,
                               ),
                               border: InputBorder.none,
                               isDense: true,

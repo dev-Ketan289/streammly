@@ -21,7 +21,8 @@ class CompanyLocatorMapScreen extends StatefulWidget {
   const CompanyLocatorMapScreen({super.key, required this.categoryId});
 
   @override
-  State<CompanyLocatorMapScreen> createState() => _CompanyLocatorMapScreenState();
+  State<CompanyLocatorMapScreen> createState() =>
+      _CompanyLocatorMapScreenState();
 }
 
 class _CompanyLocatorMapScreenState extends State<CompanyLocatorMapScreen> {
@@ -72,8 +73,15 @@ class _CompanyLocatorMapScreenState extends State<CompanyLocatorMapScreen> {
     final gMap = await _mapController.future;
 
     if (controller.userPosition != null) {
-      final userLatLng = LatLng(controller.userPosition!.latitude, controller.userPosition!.longitude);
-      gMap.animateCamera(CameraUpdate.newCameraPosition(CameraPosition(target: userLatLng, zoom: 12)));
+      final userLatLng = LatLng(
+        controller.userPosition!.latitude,
+        controller.userPosition!.longitude,
+      );
+      gMap.animateCamera(
+        CameraUpdate.newCameraPosition(
+          CameraPosition(target: userLatLng, zoom: 12),
+        ),
+      );
     } else if (_customMarkers.isNotEmpty) {
       final first = _customMarkers.first.position;
       gMap.animateCamera(CameraUpdate.newLatLngZoom(first, 13));
@@ -123,10 +131,18 @@ class _CompanyLocatorMapScreenState extends State<CompanyLocatorMapScreen> {
       usedPositions.add(posKey);
 
       final distanceText =
-      company.distanceKm != null ? (company.distanceKm! < 1 ? "${(company.distanceKm! * 1000).toStringAsFixed(0)} m" : "${company.distanceKm!.toStringAsFixed(1)} km") : "--";
+          company.distanceKm != null
+              ? (company.distanceKm! < 1
+                  ? "${(company.distanceKm! * 1000).toStringAsFixed(0)} m"
+                  : "${company.distanceKm!.toStringAsFixed(1)} km")
+              : "--";
 
-
-      final bytes = await _createCustomMarkerBitmap(context, company.companyName, distanceText, company.logo);
+      final bytes = await _createCustomMarkerBitmap(
+        context,
+        company.companyName,
+        distanceText,
+        company.logo,
+      );
 
       _customMarkers.add(
         Marker(
@@ -136,7 +152,6 @@ class _CompanyLocatorMapScreenState extends State<CompanyLocatorMapScreen> {
           onTap: () => _onMarkerTapped(i),
         ),
       );
-
     }
 
     setState(() {});
@@ -182,16 +197,21 @@ class _CompanyLocatorMapScreenState extends State<CompanyLocatorMapScreen> {
     }
   }
 
-  Future<Uint8List> _createCustomMarkerBitmap(BuildContext context, String title, String distance, String? logoUrl) async {
+  Future<Uint8List> _createCustomMarkerBitmap(
+    BuildContext context,
+    String title,
+    String distance,
+    String? logoUrl,
+  ) async {
     final key = GlobalKey();
     final completer = Completer<void>();
 
     final markerWidget = Material(
-        type: MaterialType.transparency,
-        child: RepaintBoundary(
-            key: key,
-            child: _buildCustomMarker(title, distance, logoUrl, completer)
-        )
+      type: MaterialType.transparency,
+      child: RepaintBoundary(
+        key: key,
+        child: _buildCustomMarker(title, distance, logoUrl, completer),
+      ),
     );
 
     final overlay = Overlay.of(context);
@@ -221,7 +241,8 @@ class _CompanyLocatorMapScreenState extends State<CompanyLocatorMapScreen> {
     // Additional delay to ensure rendering is complete
     await Future.delayed(const Duration(milliseconds: 100));
 
-    RenderRepaintBoundary boundary = key.currentContext!.findRenderObject() as RenderRepaintBoundary;
+    RenderRepaintBoundary boundary =
+        key.currentContext!.findRenderObject() as RenderRepaintBoundary;
     final image = await boundary.toImage(pixelRatio: 1.5);
     final byteData = await image.toByteData(format: ui.ImageByteFormat.png);
     final pngBytes = byteData!.buffer.asUint8List();
@@ -230,7 +251,12 @@ class _CompanyLocatorMapScreenState extends State<CompanyLocatorMapScreen> {
     return pngBytes;
   }
 
-  Widget _buildCustomMarker(String title, String distance, String? logoUrl, Completer<void> completer) {
+  Widget _buildCustomMarker(
+    String title,
+    String distance,
+    String? logoUrl,
+    Completer<void> completer,
+  ) {
     // Complete the completer immediately if no logo URL
     if (logoUrl == null || logoUrl.isEmpty) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -245,8 +271,18 @@ class _CompanyLocatorMapScreenState extends State<CompanyLocatorMapScreen> {
       children: [
         Container(
           padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 2),
-          decoration: BoxDecoration(color: Colors.blueAccent, borderRadius: BorderRadius.circular(20)),
-          child: Text(distance, style: const TextStyle(color: Colors.white, fontSize: 12, fontWeight: FontWeight.bold)),
+          decoration: BoxDecoration(
+            color: Colors.blueAccent,
+            borderRadius: BorderRadius.circular(20),
+          ),
+          child: Text(
+            distance,
+            style: const TextStyle(
+              color: Colors.white,
+              fontSize: 12,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
         ),
         const SizedBox(height: 2),
         Container(
@@ -259,44 +295,50 @@ class _CompanyLocatorMapScreenState extends State<CompanyLocatorMapScreen> {
           ),
           child: ClipRRect(
             borderRadius: BorderRadius.circular(30),
-            child: logoUrl != null && logoUrl.isNotEmpty
-                ? Image.network(
-              logoUrl,
-              fit: BoxFit.cover,
-              frameBuilder: (context, child, frame, wasSynchronouslyLoaded) {
-                if (frame != null && !completer.isCompleted) {
-                  completer.complete();
-                }
-                return child;
-              },
-              errorBuilder: (context, error, stackTrace) {
-                if (!completer.isCompleted) {
-                  completer.complete();
-                }
-                return Container(
-                  decoration: BoxDecoration(
-                    color: Colors.grey[200],
-                    borderRadius: BorderRadius.circular(30),
-                  ),
-                  child: Icon(
-                    Icons.business,
-                    color: Colors.grey[600],
-                    size: 24,
-                  ),
-                );
-              },
-            )
-                : Container(
-              decoration: BoxDecoration(
-                color: Colors.grey[200],
-                borderRadius: BorderRadius.circular(30),
-              ),
-              child: Icon(
-                Icons.business,
-                color: Colors.grey[600],
-                size: 24,
-              ),
-            ),
+            child:
+                logoUrl != null && logoUrl.isNotEmpty
+                    ? Image.network(
+                      logoUrl,
+                      fit: BoxFit.cover,
+                      frameBuilder: (
+                        context,
+                        child,
+                        frame,
+                        wasSynchronouslyLoaded,
+                      ) {
+                        if (frame != null && !completer.isCompleted) {
+                          completer.complete();
+                        }
+                        return child;
+                      },
+                      errorBuilder: (context, error, stackTrace) {
+                        if (!completer.isCompleted) {
+                          completer.complete();
+                        }
+                        return Container(
+                          decoration: BoxDecoration(
+                            color: Colors.grey[200],
+                            borderRadius: BorderRadius.circular(30),
+                          ),
+                          child: Icon(
+                            Icons.business,
+                            color: Colors.grey[600],
+                            size: 24,
+                          ),
+                        );
+                      },
+                    )
+                    : Container(
+                      decoration: BoxDecoration(
+                        color: Colors.grey[200],
+                        borderRadius: BorderRadius.circular(30),
+                      ),
+                      child: Icon(
+                        Icons.business,
+                        color: Colors.grey[600],
+                        size: 24,
+                      ),
+                    ),
           ),
         ),
       ],
@@ -309,7 +351,10 @@ class _CompanyLocatorMapScreenState extends State<CompanyLocatorMapScreen> {
       body: Stack(
         children: [
           GoogleMap(
-            initialCameraPosition: const CameraPosition(target: LatLng(19.2189, 72.9805), zoom: 12),
+            initialCameraPosition: const CameraPosition(
+              target: LatLng(19.2189, 72.9805),
+              zoom: 12,
+            ),
             onMapCreated: (controller) => _mapController.complete(controller),
             markers: _customMarkers,
             myLocationEnabled: true,
@@ -322,7 +367,11 @@ class _CompanyLocatorMapScreenState extends State<CompanyLocatorMapScreen> {
               final showOverlay = controller.selectedCompany != null;
               return IgnorePointer(
                 ignoring: true,
-                child: AnimatedOpacity(opacity: showOverlay ? 0.2 : 0.0, duration: const Duration(milliseconds: 300), child: Container(color: Colors.indigo)),
+                child: AnimatedOpacity(
+                  opacity: showOverlay ? 0.2 : 0.0,
+                  duration: const Duration(milliseconds: 300),
+                  child: Container(color: Colors.indigo),
+                ),
               );
             },
           ),
@@ -339,12 +388,23 @@ class _CompanyLocatorMapScreenState extends State<CompanyLocatorMapScreen> {
 
                 return Container(
                   padding: const EdgeInsets.symmetric(horizontal: 16),
-                  decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(12)),
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(12),
+                  ),
                   child: DropdownButton<int>(
                     value: controller.selectedCategoryId,
                     isExpanded: true,
                     underline: const SizedBox(),
-                    items: categoryController.categories.map((category) => DropdownMenuItem<int>(value: category.id, child: Center(child: Text(category.title)))).toList(),
+                    items:
+                        categoryController.categories
+                            .map(
+                              (category) => DropdownMenuItem<int>(
+                                value: category.id,
+                                child: Center(child: Text(category.title)),
+                              ),
+                            )
+                            .toList(),
                     onChanged: (int? newId) {
                       if (newId != null) {
                         controller.setCategoryId(newId);
@@ -353,7 +413,7 @@ class _CompanyLocatorMapScreenState extends State<CompanyLocatorMapScreen> {
                           _showSlider = false;
                           _currentPageIndex = 0;
                         });
-                        _loadData();
+                        _loadData(); // ✅ Reload for new category
                       }
                     },
                   ),
@@ -371,18 +431,22 @@ class _CompanyLocatorMapScreenState extends State<CompanyLocatorMapScreen> {
               child: LayoutBuilder(
                 builder: (context, constraints) {
                   final screenHeight = MediaQuery.of(context).size.height;
-                  final sliderHeight = screenHeight * 0.28; // 28% of screen height, responsive
+                  final sliderHeight =
+                      screenHeight * 0.28; // 28% of screen height, responsive
                   return AnimatedContainer(
                     duration: const Duration(milliseconds: 300),
-                    height: sliderHeight.clamp(180.0, 320.0), // min 180, max 320
+                    height: sliderHeight.clamp(
+                      180.0,
+                      320.0,
+                    ), // min 180, max 320
                     decoration: BoxDecoration(
                       gradient: LinearGradient(
                         begin: Alignment.topCenter,
                         end: Alignment.bottomCenter,
                         colors: [
                           Colors.transparent,
-                          Colors.black.withValues(alpha: 0.1),
-                          Colors.black.withValues(alpha: 0.3),
+                          Colors.black.withOpacity(0.1),
+                          Colors.black.withOpacity(0.3),
                         ],
                       ),
                     ),
@@ -390,22 +454,23 @@ class _CompanyLocatorMapScreenState extends State<CompanyLocatorMapScreen> {
                       children: [
                         // Page indicator
                         Container(
-
-
                           child: Row(
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: List.generate(
                               controller.companies.length,
-                                  (index) => AnimatedContainer(
+                              (index) => AnimatedContainer(
                                 duration: const Duration(milliseconds: 200),
                                 width: _currentPageIndex == index ? 12 : 8,
                                 height: _currentPageIndex == index ? 12 : 8,
-                                margin: const EdgeInsets.symmetric(horizontal: 4),
+                                margin: const EdgeInsets.symmetric(
+                                  horizontal: 4,
+                                ),
                                 decoration: BoxDecoration(
                                   shape: BoxShape.circle,
-                                  color: _currentPageIndex == index
-                                      ? Colors.blue
-                                      : Colors.grey.withValues(alpha:0.5),
+                                  color:
+                                      _currentPageIndex == index
+                                          ? Colors.blue
+                                          : Colors.grey.withOpacity(0.5),
                                 ),
                               ),
                             ),
@@ -429,22 +494,36 @@ class _CompanyLocatorMapScreenState extends State<CompanyLocatorMapScreen> {
                                   return Container(
                                     child: GestureDetector(
                                       onTap: () async {
-                                        await controller.fetchCompanyById(company.id!);
-                                        Navigator.push(context, getCustomRoute(child: VendorDescription()));
+                                        await controller.fetchCompanyById(
+                                          company.id!,
+                                        );
+                                        Get.to(() => const VendorDescription());
                                       },
                                       child: VendorInfoCard(
                                         logoImage: company.logo ?? '',
                                         companyName: company.companyName,
-                                        category: categoryController.categories.firstWhere((cat) => cat.id == controller.selectedCategoryId).title,
+                                        category:
+                                            categoryController.categories
+                                                .firstWhere(
+                                                  (cat) =>
+                                                      cat.id ==
+                                                      controller
+                                                          .selectedCategoryId,
+                                                )
+                                                .title,
                                         description: company.description ?? '',
-                                        rating: company.rating?.toStringAsFixed(1) ?? '3.9',
+                                        rating:
+                                            company.rating?.toStringAsFixed(
+                                              1,
+                                            ) ??
+                                            '3.9',
                                         estimatedTime: company.estimatedTime,
                                         distanceKm:
-                                        company.distanceKm != null
-                                            ? (company.distanceKm! < 1
-                                            ? "${(company.distanceKm! * 1000).toStringAsFixed(0)} m"
-                                            : "${company.distanceKm!.toStringAsFixed(1)} km")
-                                            : null,
+                                            company.distanceKm != null
+                                                ? (company.distanceKm! < 1
+                                                    ? "${(company.distanceKm! * 1000).toStringAsFixed(0)} m"
+                                                    : "${company.distanceKm!.toStringAsFixed(1)} km")
+                                                : null,
                                       ),
                                     ),
                                   );
