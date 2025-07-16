@@ -244,7 +244,7 @@ class VendorInfoCard extends StatelessWidget {
                 fontSize: isSmallScreen ? 11 : 13,
                 color: Colors.black,
               ),
-              overflow: TextOverflow.ellipsis,
+              overflow: TextOverflow.clip,
             ),
           ),
       ],
@@ -288,8 +288,8 @@ class VendorInfoCard extends StatelessWidget {
     return Text(
       _stripHtml(description),
       style: TextStyle(fontSize: isSmallScreen ? 11 : 13, color: Colors.grey),
-      maxLines: 3,
-      overflow: TextOverflow.ellipsis,
+      maxLines: 2,
+      overflow: TextOverflow.visible,
     );
   }
 

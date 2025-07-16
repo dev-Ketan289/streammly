@@ -70,6 +70,7 @@ dependencies:
   flutter_phoenix: ^1.1.1
   flutter_assets: ^0.0.6
   file_picker: ^10.2.0
+  dropdown_button2: ^2.3.9
 
 
 dev_dependencies:

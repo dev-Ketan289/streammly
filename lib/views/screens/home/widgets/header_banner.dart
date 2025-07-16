@@ -107,7 +107,7 @@ class _HeaderBannerState extends State<HeaderBanner> {
               )
               : Image.asset(
                 widget.backgroundImage,
-                fit: BoxFit.cover,
+                fit: BoxFit.fill,
                 width: double.infinity,
                 height: double.infinity,
               ),
@@ -144,20 +144,22 @@ class _HeaderBannerState extends State<HeaderBanner> {
           // --- Vector image ---
           if (currentSlide?.vectorImage != null)
             Positioned(
-              right: 16,
-              bottom: 20,
-              child:
-                  currentSlide!.isSvg
+              right: 20,
+              bottom: 10,
+              child: Builder(
+                builder: (context) {
+                  final double vectorImageHeight = MediaQuery.of(context).size.height * 0.25;
+                  return currentSlide!.isSvg
                       ? SvgPicture.network(
-                        "https://admin.streammly.com/${currentSlide.vectorImage}",
-                        height: 140,
-                      )
-                      // ? SvgPicture.network("http://192.168.1.113/${currentSlide.vectorImage}", height: 140)
+                          "https://admin.streammly.com/${currentSlide.vectorImage}",
+                          height: vectorImageHeight,
+                        )
                       : Image.network(
-                        "https://admin.streammly.com/${currentSlide.vectorImage}",
-                        height: 140,
-                      ),
-              // : Image.network("http://192.168.1.113:8000/${currentSlide.vectorImage}", height: 140),
+                          "https://admin.streammly.com/${currentSlide.vectorImage}",
+                          height: vectorImageHeight,
+                        );
+                },
+              ),
             ),
 
           // --- Top Content (location, search, title, subtitle, specialities) ---
@@ -178,10 +180,12 @@ class _HeaderBannerState extends State<HeaderBanner> {
                         );
                       },
                       child: Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
                         children: [
                           Icon(
                             Icons.location_on,
                             color: theme.colorScheme.onPrimary,
+                            size: 14,
                           ),
                           const SizedBox(width: 8),
                           Flexible(
@@ -193,7 +197,7 @@ class _HeaderBannerState extends State<HeaderBanner> {
                                   style: theme.textTheme.bodySmall?.copyWith(
                                     color: theme.colorScheme.onPrimary,
                                     fontWeight: FontWeight.bold,
-                                    fontSize: 13,
+                                    fontSize: 12,
                                   ),
                                 ),
                                 Text(
@@ -205,7 +209,7 @@ class _HeaderBannerState extends State<HeaderBanner> {
                                       : "Fetching...",
                                   style: theme.textTheme.bodySmall?.copyWith(
                                     color: theme.colorScheme.onPrimary,
-                                    fontSize: 10,
+                                    fontSize: 8,
                                   ),
                                   overflow: TextOverflow.ellipsis,
                                 ),
@@ -216,7 +220,6 @@ class _HeaderBannerState extends State<HeaderBanner> {
                       ),
                     ),
                   ),
-                  const SizedBox(height: 16),
 
                   // Search Bar
                   Row(
@@ -285,8 +288,9 @@ class _HeaderBannerState extends State<HeaderBanner> {
                   // Title & Subtitle
                   if (title.isNotEmpty || subtitle.isNotEmpty)
                     Container(
-                      width: 280,
-                      padding: const EdgeInsets.symmetric(horizontal: 10),
+                      width: double.infinity,
+                      alignment: Alignment.centerLeft,
+                      padding: const EdgeInsets.symmetric(horizontal: 40,),
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
@@ -301,13 +305,19 @@ class _HeaderBannerState extends State<HeaderBanner> {
                             ),
                           if (subtitle.isNotEmpty) const SizedBox(height: 6),
                           if (subtitle.isNotEmpty)
-                            Text(
-                              subtitle,
-                              style: GoogleFonts.openSans(
-                                color: theme.colorScheme.onPrimary,
-                                fontSize: 16,
+                            Container(
+                              height: 90,
+                              width:168,
+                              child: Text(
+                                subtitle,
+                                style: GoogleFonts.openSans(
+                                  color: theme.colorScheme.onPrimary,
+                                  fontSize: 12,
+                                ),
+                                overflow: TextOverflow.visible,
+
+                                textAlign: TextAlign.left,
                               ),
-                              overflow: TextOverflow.visible,
                             ),
                         ],
                       ),

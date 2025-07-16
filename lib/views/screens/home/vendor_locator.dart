@@ -3,6 +3,7 @@ import 'dart:math' as Math;
 import 'dart:typed_data';
 import 'dart:ui' as ui;
 
+import 'package:dropdown_button2/dropdown_button2.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:get/get.dart';
@@ -397,7 +398,7 @@ class _CompanyLocatorMapScreenState extends State<CompanyLocatorMapScreen> {
                     color: Colors.white,
                     borderRadius: BorderRadius.circular(12),
                   ),
-                  child: DropdownButton<int>(
+                  child: DropdownButtonHideUnderline(child: DropdownButton2<int>(
                     value:
                         (() {
                           final allowed = widget.allowedCategoryIds;
@@ -412,6 +413,13 @@ class _CompanyLocatorMapScreenState extends State<CompanyLocatorMapScreen> {
                         })(),
                     isExpanded: true,
                     underline: const SizedBox(),
+                    dropdownStyleData: DropdownStyleData(
+                      elevation: 0,
+                      decoration: BoxDecoration(
+                        color: Colors.white, // Change this to your desired color
+                        borderRadius: BorderRadius.only(bottomLeft: Radius.circular(12),bottomRight: Radius.circular(12)),
+                      ),
+                    ),
                     items:
                         categoryController.categories
                             .where(
@@ -440,7 +448,7 @@ class _CompanyLocatorMapScreenState extends State<CompanyLocatorMapScreen> {
                       }
                     },
                   ),
-                );
+                ));
               },
             ),
           ),

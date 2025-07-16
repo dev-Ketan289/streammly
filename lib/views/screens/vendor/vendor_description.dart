@@ -27,6 +27,7 @@ class VendorDescription extends StatelessWidget {
             bannerWidget = Image.network(
               bannerUrl,
               fit: BoxFit.cover,
+            
               errorBuilder: (context, error, stackTrace) {
                 return Image.asset('assets/images/newBorn.jpg', fit: BoxFit.cover);
               },
@@ -56,13 +57,15 @@ class VendorDescription extends StatelessWidget {
                         onTap: () => Navigator.pop(context),
                         child: Row(
                           children: [
-                            const Icon(Icons.arrow_back, color: Colors.white),
+                            const Icon(Icons.arrow_back_ios, color: Colors.white),
                             const SizedBox(width: 10),
                             Flexible(
-                              child: Text(
-                                company.companyName,
-                                style: theme.textTheme.titleLarge?.copyWith(color: Colors.white, fontWeight: FontWeight.bold),
-                                overflow: TextOverflow.ellipsis,
+                              child: Center(
+                                child: Text(
+                                  company.companyName,
+                                  style: theme.textTheme.titleLarge?.copyWith(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 20),
+                                  overflow: TextOverflow.ellipsis,
+                                ),
                               ),
                             ),
                           ],
@@ -74,7 +77,7 @@ class VendorDescription extends StatelessWidget {
 
                       Row(
                         children: [
-                          Flexible(child: Text(company.categoryName ?? 'Service', style: theme.textTheme.titleMedium?.copyWith(color: Colors.white, fontWeight: FontWeight.bold))),
+                          Flexible(child: Text(company.categoryName ?? 'Service', style: theme.textTheme.titleMedium?.copyWith(color: Colors.white, fontWeight: FontWeight.bold , fontSize: 20))),
                           const SizedBox(width: 20),
                           if (company.rating != null)
                             Container(
@@ -105,7 +108,7 @@ class VendorDescription extends StatelessWidget {
                         (company.description?.trim().isNotEmpty ?? false)
                             ? company.description!.replaceAll(RegExp(r'<[^>]*>|&[^;]+;'), '')
                             : "FocusPoint Studio is a premium photography and videography studio...",
-                        style: theme.textTheme.bodySmall?.copyWith(color: Colors.white70, fontSize: 13),
+                        style: theme.textTheme.bodySmall?.copyWith(color: Colors.white, fontSize: 14),
                       ),
                       const SizedBox(height: 10),
 
@@ -120,9 +123,11 @@ class VendorDescription extends StatelessWidget {
                       Center(
                         child: ElevatedButton(
                           style: ElevatedButton.styleFrom(
+                            fixedSize: Size(double.infinity, 50),
                             backgroundColor: Colors.transparent,
+                            side: BorderSide(color: Colors.white, width: 1),
+                            padding: const EdgeInsets.symmetric(horizontal: 100, vertical: 14),
                             shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                            padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 14),
                           ),
                           onPressed: () {
                             Navigator.push(context, MaterialPageRoute(builder: (_) => VendorDetailScreen(company: company)));

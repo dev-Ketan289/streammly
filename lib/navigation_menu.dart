@@ -26,22 +26,25 @@ class _NavigationMenuState extends State<NavigationMenu> {
         floatingActionButton: GetBuilder<NavigationController>(
           builder:
               (_) => CircleAvatar(
-                radius: 20,
+                radius: 25,
                 backgroundColor: Colors.white,
                 child: FloatingActionButton(
+                  shape: const CircleBorder(
+                    
+                  ),
                   backgroundColor: Colors.white,
                   elevation: 3,
                   onPressed: () {
                     controller.setIndex(2);
                   },
-                  child: Icon(Iconsax.bag, size: 26, color: controller.selectedIndex == 2 ? theme.primaryColor : Colors.grey),
+                  child: Container(height: 40, width: 40, decoration: BoxDecoration(color: const Color(0xffD9D9D9),shape: BoxShape.circle ), child: SvgPicture.asset(Assets.svgCarttt, fit: BoxFit.scaleDown,),),
                 ),
               ),
         ),
         bottomNavigationBar: GetBuilder<NavigationController>(
           builder: (_) {
             return ClipRRect(
-              borderRadius: const BorderRadius.only(topLeft: Radius.circular(20), topRight: Radius.circular(20)),
+              borderRadius: const BorderRadius.all(Radius.circular(10)),
               child: BottomAppBar(
                 shape: const CircularNotchedRectangle(),
                 notchMargin: 5,

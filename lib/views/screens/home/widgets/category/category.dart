@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:streammly/controllers/wishlist_controller.dart';
 import 'package:streammly/services/constants.dart';
+import 'package:streammly/services/theme.dart';
 
 import '../../../../../controllers/category_controller.dart';
 import '../../../../../navigation_menu.dart';
@@ -37,11 +38,18 @@ class _CategoryListScreenState extends State<CategoryListScreen> {
       floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
       floatingActionButton: NavigationHelper.buildFloatingButton(),
       appBar: AppBar(
+        surfaceTintColor: Colors.transparent,
+        
         elevation: 0,
         backgroundColor: Colors.transparent,
-        leading: const BackButton(color: Colors.black),
-        title: Text("Categories", style: theme.textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold, color: Colors.black)),
+        title: Text("Categorie's", style: theme.textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold, color: primaryColor)),
         centerTitle: true,
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back_ios_new, color: Color(0xff666666)),
+          onPressed: () {
+            Get.back();
+          },
+        ),
       ),
       body: GetBuilder<CategoryController>(
         builder: (controller) {
@@ -75,7 +83,7 @@ class _CategoryListScreenState extends State<CategoryListScreen> {
                         children: [
                           Center(
                             child: Padding(
-                              padding: const EdgeInsets.only(top: 8.0),
+                              padding: const EdgeInsets.only(top: 8.0, left: 15, right: 15),
                               child: TRoundedImage(
                                 imageUrl: "${AppConstants.baseUrl}${cat.image}",
                                 height: 100,
@@ -105,7 +113,10 @@ class _CategoryListScreenState extends State<CategoryListScreen> {
                                     // }
                                   },
 
-                                  child: Icon(Icons.bookmark, size: 25, color: cat.isBookMarked ? Colors.red : Colors.white),
+                                  child: Padding(
+                                    padding: const EdgeInsets.fromLTRB(10, 5, 10, 10),
+                                    child: Container(height: 30, width: 30, decoration: BoxDecoration(color: backgroundLight.withAlpha(70), borderRadius: BorderRadius.circular(10)), child: Icon(Icons.bookmark_rounded, size: 25, color: cat.isBookMarked ? Colors.red : Colors.white)),
+                                  ),
                                 );
                               },
                             ),
@@ -117,7 +128,7 @@ class _CategoryListScreenState extends State<CategoryListScreen> {
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Text(cat.title, style: theme.textTheme.bodyLarge?.copyWith(fontWeight: FontWeight.bold)),
+                            Text(cat.title, style: theme.textTheme.labelMedium?.copyWith(fontWeight: FontWeight.bold,fontSize: 14)),
                             const SizedBox(height: 4),
                             Text(cat.shortDescription ?? "No description available", style: theme.textTheme.bodySmall?.copyWith(color: Colors.grey)),
                           ],
