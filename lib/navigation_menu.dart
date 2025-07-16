@@ -21,74 +21,77 @@ class _NavigationMenuState extends State<NavigationMenu> {
     return PopScope(
       canPop: false,
       child: Scaffold(
-        body: Obx(() => controller.screens[controller.selectedIndex.value]()),
+        body: GetBuilder<NavigationController>(builder: (_) => controller.screens[controller.selectedIndex]()),
         floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
-        floatingActionButton: Obx(
-          () => CircleAvatar(
-            radius: 20,
-            backgroundColor: Colors.white,
-            child: FloatingActionButton(
-              backgroundColor: Colors.white,
-              elevation: 3,
-              onPressed: () {
-                controller.selectedIndex.value = 2;
-              },
-              child: Icon(Iconsax.bag, size: 26, color: controller.selectedIndex.value == 2 ? theme.primaryColor : Colors.grey),
-            ),
-          ),
-        ),
-        bottomNavigationBar: Obx(() {
-          return ClipRRect(
-            borderRadius: const BorderRadius.only(topLeft: Radius.circular(20), topRight: Radius.circular(20)),
-            child: BottomAppBar(
-              shape: const CircularNotchedRectangle(),
-              notchMargin: 5,
-              color: const Color(0xffF1F6FB),
-              child: SizedBox(
-                height: 30,
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceAround,
-                  children: [
-                    _buildNavItem(icon: Assets.svgHome, label: 'Home', index: 0),
-                    _buildNavItem(icon: Assets.svgShop, label: 'Shop', index: 1),
-                    const SizedBox(width: 25), // Space for FAB
-                    _buildNavItem(icon: Assets.svgBooking, label: 'Bookings', index: 3),
-                    _buildNavItem(icon: Assets.svgMore, label: 'More', index: 4),
-                  ],
+        floatingActionButton: GetBuilder<NavigationController>(
+          builder:
+              (_) => CircleAvatar(
+                radius: 20,
+                backgroundColor: Colors.white,
+                child: FloatingActionButton(
+                  backgroundColor: Colors.white,
+                  elevation: 3,
+                  onPressed: () {
+                    controller.setIndex(2);
+                  },
+                  child: Icon(Iconsax.bag, size: 26, color: controller.selectedIndex == 2 ? theme.primaryColor : Colors.grey),
                 ),
               ),
-            ),
-          );
-        }),
+        ),
+        bottomNavigationBar: GetBuilder<NavigationController>(
+          builder: (_) {
+            return ClipRRect(
+              borderRadius: const BorderRadius.only(topLeft: Radius.circular(20), topRight: Radius.circular(20)),
+              child: BottomAppBar(
+                shape: const CircularNotchedRectangle(),
+                notchMargin: 5,
+                color: const Color(0xffF1F6FB),
+                child: SizedBox(
+                  height: 30,
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceAround,
+                    children: [
+                      _buildNavItem(icon: Assets.svgHome, label: 'Home', index: 0),
+                      _buildNavItem(icon: Assets.svgShop, label: 'Shop', index: 1),
+                      const SizedBox(width: 25), // Space for FAB
+                      _buildNavItem(icon: Assets.svgBooking, label: 'Bookings', index: 3),
+                      _buildNavItem(icon: Assets.svgMore, label: 'More', index: 4),
+                    ],
+                  ),
+                ),
+              ),
+            );
+          },
+        ),
       ),
     );
   }
 
   Widget _buildNavItem({required String icon, required String label, required int index}) {
-    final isSelected = controller.selectedIndex.value == index;
+    final isSelected = controller.selectedIndex == index;
 
     return GestureDetector(
-      onTap: () => controller.selectedIndex.value = index,
+      onTap: () => controller.setIndex(index),
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          // Icon(icon, color: isSelected ? Colors.indigo : Colors.black54),
-          SvgPicture.asset(icon),
-          const SizedBox(height: 4),
-          Text(label, style: TextStyle(fontSize: 12, color: isSelected ? Colors.indigo : Colors.black54)),
-        ],
+        children: [SvgPicture.asset(icon), const SizedBox(height: 4), Text(label, style: TextStyle(fontSize: 12, color: isSelected ? Colors.indigo : Colors.black54))],
       ),
     );
   }
 }
 
 class NavigationController extends GetxController {
-  final RxInt selectedIndex = 0.obs;
+  int selectedIndex = 0;
 
   final List<Widget Function()> screens = [() => const HomeScreen(), () => const Placeholder(), () => const Placeholder(), () => const Placeholder(), () => const Placeholder()];
+
+  void setIndex(int index) {
+    selectedIndex = index;
+    update();
+  }
 }
 
-// ADD THIS STATIC METHOD TO CREATE STANDALONE BOTTOM NAV
+// Static methods for use outside NavigationMenu
 class NavigationHelper {
   static Widget buildBottomNav() {
     return ClipRRect(
@@ -118,7 +121,7 @@ class NavigationHelper {
     return GestureDetector(
       onTap: () {
         try {
-          Get.find<NavigationController>().selectedIndex.value = index;
+          Get.find<NavigationController>().setIndex(index);
           Get.back();
         } catch (e) {
           Get.offAll(() => const NavigationMenu());
@@ -140,7 +143,7 @@ class NavigationHelper {
         elevation: 3,
         onPressed: () {
           try {
-            Get.find<NavigationController>().selectedIndex.value = 2;
+            Get.find<NavigationController>().setIndex(2);
             Get.back();
           } catch (e) {
             Get.offAll(() => const NavigationMenu());
