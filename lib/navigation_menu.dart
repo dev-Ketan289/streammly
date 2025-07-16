@@ -33,13 +33,18 @@ class _NavigationMenuState extends State<NavigationMenu> {
               onPressed: () {
                 controller.selectedIndex.value = 2;
               },
-              child: Icon(Iconsax.bag, size: 26, color: controller.selectedIndex.value == 2 ? theme.primaryColor : Colors.grey),
+              child: Container(decoration: BoxDecoration(
+                color: Colors.grey,
+              ),child:SvgPicture.asset(Assets.svgCarttt)),
             ),
           ),
         ),
         bottomNavigationBar: Obx(() {
           return ClipRRect(
-            borderRadius: const BorderRadius.only(topLeft: Radius.circular(20), topRight: Radius.circular(20)),
+            borderRadius: const BorderRadius.only(
+              topLeft: Radius.circular(20),
+              topRight: Radius.circular(20),
+            ),
             child: BottomAppBar(
               shape: const CircularNotchedRectangle(),
               notchMargin: 5,
@@ -49,11 +54,27 @@ class _NavigationMenuState extends State<NavigationMenu> {
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceAround,
                   children: [
-                    _buildNavItem(icon: Assets.svgHome, label: 'Home', index: 0),
-                    _buildNavItem(icon: Assets.svgShop, label: 'Shop', index: 1),
+                    _buildNavItem(
+                      icon: Assets.svgHome,
+                      label: 'Home',
+                      index: 0,
+                    ),
+                    _buildNavItem(
+                      icon: Assets.svgShop,
+                      label: 'Shop',
+                      index: 1,
+                    ),
                     const SizedBox(width: 25), // Space for FAB
-                    _buildNavItem(icon: Assets.svgBooking, label: 'Bookings', index: 3),
-                    _buildNavItem(icon: Assets.svgMore, label: 'More', index: 4),
+                    _buildNavItem(
+                      icon: Assets.svgBooking,
+                      label: 'Bookings',
+                      index: 3,
+                    ),
+                    _buildNavItem(
+                      icon: Assets.svgMore,
+                      label: 'More',
+                      index: 4,
+                    ),
                   ],
                 ),
               ),
@@ -64,7 +85,11 @@ class _NavigationMenuState extends State<NavigationMenu> {
     );
   }
 
-  Widget _buildNavItem({required String icon, required String label, required int index}) {
+  Widget _buildNavItem({
+    required String icon,
+    required String label,
+    required int index,
+  }) {
     final isSelected = controller.selectedIndex.value == index;
 
     return GestureDetector(
@@ -75,7 +100,13 @@ class _NavigationMenuState extends State<NavigationMenu> {
           // Icon(icon, color: isSelected ? Colors.indigo : Colors.black54),
           SvgPicture.asset(icon),
           const SizedBox(height: 4),
-          Text(label, style: TextStyle(fontSize: 12, color: isSelected ? Colors.indigo : Colors.black54)),
+          Text(
+            label,
+            style: TextStyle(
+              fontSize: 12,
+              color: isSelected ? Colors.indigo : Colors.black54,
+            ),
+          ),
         ],
       ),
     );
@@ -98,7 +129,10 @@ class NavigationController extends GetxController {
 class NavigationHelper {
   static Widget buildBottomNav() {
     return ClipRRect(
-      borderRadius: const BorderRadius.only(topLeft: Radius.circular(20), topRight: Radius.circular(20)),
+      borderRadius: const BorderRadius.only(
+        topLeft: Radius.circular(20),
+        topRight: Radius.circular(20),
+      ),
       child: BottomAppBar(
         shape: const CircularNotchedRectangle(),
         notchMargin: 5,
@@ -111,7 +145,11 @@ class NavigationHelper {
               _buildNavItem(icon: Iconsax.home, label: 'Home', index: 0),
               _buildNavItem(icon: Iconsax.shop, label: 'Shop', index: 1),
               const SizedBox(width: 25), // Space for FAB
-              _buildNavItem(icon: Iconsax.calendar, label: 'Bookings', index: 3),
+              _buildNavItem(
+                icon: Iconsax.calendar,
+                label: 'Bookings',
+                index: 3,
+              ),
               _buildNavItem(icon: Iconsax.more, label: 'More', index: 4),
             ],
           ),
@@ -120,7 +158,11 @@ class NavigationHelper {
     );
   }
 
-  static Widget _buildNavItem({required IconData icon, required String label, required int index}) {
+  static Widget _buildNavItem({
+    required IconData icon,
+    required String label,
+    required int index,
+  }) {
     return GestureDetector(
       onTap: () {
         try {
@@ -132,7 +174,14 @@ class NavigationHelper {
       },
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
-        children: [Icon(icon, color: Colors.black54), const SizedBox(height: 4), Text(label, style: const TextStyle(fontSize: 12, color: Colors.black54))],
+        children: [
+          Icon(icon, color: Colors.black54),
+          const SizedBox(height: 4),
+          Text(
+            label,
+            style: const TextStyle(fontSize: 12, color: Colors.black54),
+          ),
+        ],
       ),
     );
   }

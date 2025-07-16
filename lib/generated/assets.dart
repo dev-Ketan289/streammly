@@ -198,6 +198,14 @@ class Assets {
   /// assets/svg/cart.svg
   static const String svgCart = "assets/svg/cart.svg";
 
+  /// Assets for svgCartt
+  /// assets/svg/cartt.svg
+  static const String svgCartt = "assets/svg/cartt.svg";
+
+  /// Assets for svgCarttt
+  /// assets/svg/carttt.svg
+  static const String svgCarttt = "assets/svg/carttt.svg";
+
   /// Assets for svgChat
   /// assets/svg/chat.svg
   static const String svgChat = "assets/svg/chat.svg";
@@ -257,6 +265,10 @@ class Assets {
   /// Assets for svgMap
   /// assets/svg/map.svg
   static const String svgMap = "assets/svg/map.svg";
+
+  /// Assets for svgMenu
+  /// assets/svg/menu.svg
+  static const String svgMenu = "assets/svg/menu.svg";
 
   /// Assets for svgMore
   /// assets/svg/more.svg
