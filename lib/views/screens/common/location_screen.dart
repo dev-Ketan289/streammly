@@ -3,6 +3,8 @@ import 'package:get/get.dart';
 import 'package:streammly/controllers/location_controller.dart';
 import 'package:streammly/views/screens/common/enter_location_manually.dart';
 
+import '../../../navigation_menu.dart';
+
 class LocationScreen extends StatelessWidget {
   const LocationScreen({super.key});
 
@@ -83,7 +85,8 @@ class LocationScreen extends StatelessWidget {
                                   : () async {
                                     try {
                                       await locationController.getCurrentLocation();
-                                      Get.to(() => EnterLocationManuallyScreen());
+                                      locationController.saveSelectedLocation();
+                                      Get.to(() => NavigationMenu());
                                     } catch (e) {
                                       Get.snackbar(
                                         'Error',
@@ -94,6 +97,7 @@ class LocationScreen extends StatelessWidget {
                                       );
                                     }
                                   },
+
                           child:
                               locationController.isLoading.value
                                   ? const SizedBox(height: 20, width: 20, child: CircularProgressIndicator(strokeWidth: 2, valueColor: AlwaysStoppedAnimation<Color>(Colors.white)))
