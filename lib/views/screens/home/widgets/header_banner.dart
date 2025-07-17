@@ -148,16 +148,17 @@ class _HeaderBannerState extends State<HeaderBanner> {
               bottom: 10,
               child: Builder(
                 builder: (context) {
-                  final double vectorImageHeight = MediaQuery.of(context).size.height * 0.25;
+                  final double vectorImageHeight =
+                      MediaQuery.of(context).size.height * 0.25;
                   return currentSlide!.isSvg
                       ? SvgPicture.network(
-                          "https://admin.streammly.com/${currentSlide.vectorImage}",
-                          height: vectorImageHeight,
-                        )
+                        "https://admin.streammly.com/${currentSlide.vectorImage}",
+                        height: vectorImageHeight,
+                      )
                       : Image.network(
-                          "https://admin.streammly.com/${currentSlide.vectorImage}",
-                          height: vectorImageHeight,
-                        );
+                        "https://admin.streammly.com/${currentSlide.vectorImage}",
+                        height: vectorImageHeight,
+                      );
                 },
               ),
             ),
@@ -181,7 +182,7 @@ class _HeaderBannerState extends State<HeaderBanner> {
                       },
                       child: Row(
                         children: [
-                          SizedBox(width: 50,),
+                          SizedBox(width: 50),
                           Icon(
                             Icons.location_on,
                             color: theme.colorScheme.onPrimary,
@@ -284,20 +285,20 @@ class _HeaderBannerState extends State<HeaderBanner> {
                       ),
                     ],
                   ),
-
+                  const SizedBox(height: 5),
                   // Title & Subtitle
                   if (title.isNotEmpty || subtitle.isNotEmpty)
                     Container(
                       width: double.infinity,
                       alignment: Alignment.centerLeft,
-                      padding: const EdgeInsets.symmetric(horizontal: 40,),
+                      padding: const EdgeInsets.symmetric(horizontal: 40),
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           if (title.isNotEmpty)
                             Text(
                               title,
-                              style: GoogleFonts.openSans(
+                              style: GoogleFonts.dmSerifDisplay(
                                 fontSize: 29,
                                 fontWeight: FontWeight.w700,
                                 color: theme.colorScheme.onPrimary,
@@ -307,10 +308,10 @@ class _HeaderBannerState extends State<HeaderBanner> {
                           if (subtitle.isNotEmpty)
                             Container(
                               height: 90,
-                              width:168,
+                              width: 168,
                               child: Text(
                                 subtitle,
-                                style: GoogleFonts.openSans(
+                                style: GoogleFonts.dmSerifDisplay(
                                   color: theme.colorScheme.onPrimary,
                                   fontSize: 12,
                                 ),
@@ -365,7 +366,7 @@ class _HeaderBannerState extends State<HeaderBanner> {
                             child: Text(
                               widget.specialities![i],
                               style: theme.textTheme.bodySmall?.copyWith(
-                                color: primaryColor,
+                                color: Colors.indigo,
                                 fontSize: 12,
                               ),
                             ),
@@ -388,7 +389,7 @@ class _HeaderBannerState extends State<HeaderBanner> {
                             child: Text(
                               "+${widget.specialities!.length - 2} more",
                               style: theme.textTheme.bodySmall?.copyWith(
-                                color: primaryColor,
+                                color: Colors.indigo,
                                 fontSize: 12,
                               ),
                             ),
