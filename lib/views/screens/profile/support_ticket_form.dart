@@ -1,9 +1,11 @@
 import 'dart:convert';
 import 'dart:io';
-import 'package:flutter/material.dart';
+
 import 'package:file_picker/file_picker.dart';
-import 'package:http/http.dart' as http;
+import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:http/http.dart' as http;
+
 import '../../../controllers/auth_controller.dart';
 
 class SupportTicketFormPage extends StatefulWidget {
@@ -23,10 +25,7 @@ class _SupportTicketFormPageState extends State<SupportTicketFormPage> {
   bool _isSubmitting = false; // <-- Flag to prevent multiple taps
 
   Future<void> pickImages() async {
-    final result = await FilePicker.platform.pickFiles(
-      type: FileType.image,
-      allowMultiple: true,
-    );
+    final result = await FilePicker.platform.pickFiles(type: FileType.image, allowMultiple: true);
 
     if (result != null) {
       final files = result.paths.map((path) => File(path!)).toList();
@@ -60,23 +59,18 @@ class _SupportTicketFormPageState extends State<SupportTicketFormPage> {
 
     final uri = Uri.parse('http://192.168.1.113:8000/api/v1/support-ticket/addsupportticket');
 
-    final request = http.MultipartRequest('POST', uri)
-      ..headers['Authorization'] = 'Bearer $token'
-      ..fields['booking_id'] = '1'
-      ..fields['title'] = titleController.text
-      ..fields['description'] = descriptionController.text;
+    final request =
+        http.MultipartRequest('POST', uri)
+          ..headers['Authorization'] = 'Bearer $token'
+          ..fields['booking_id'] = '1'
+          ..fields['title'] = titleController.text
+          ..fields['description'] = descriptionController.text;
 
     if (selectedFiles.isNotEmpty) {
       final file = selectedFiles.first;
       final fileName = file.path.split('/').last;
 
-      request.files.add(
-        await http.MultipartFile.fromPath(
-          'reference_image',
-          file.path,
-          filename: fileName,
-        ),
-      );
+      request.files.add(await http.MultipartFile.fromPath('reference_image', file.path, filename: fileName));
     }
 
     try {
@@ -90,9 +84,7 @@ class _SupportTicketFormPageState extends State<SupportTicketFormPage> {
         final resBody = json.decode(response.body);
 
         if (context.mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Support ticket submitted successfully!')),
-          );
+          ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Support ticket submitted successfully!')));
           titleController.clear();
           descriptionController.clear();
           setState(() {
@@ -101,15 +93,11 @@ class _SupportTicketFormPageState extends State<SupportTicketFormPage> {
         }
       } else {
         debugPrint('Error: ${response.body}');
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Failed: ${response.statusCode}')),
-        );
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Failed: ${response.statusCode}')));
       }
     } catch (e) {
       debugPrint('Exception: $e');
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Error: $e')),
-      );
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Error: $e')));
     } finally {
       setState(() {
         _isSubmitting = false;
@@ -130,23 +118,14 @@ class _SupportTicketFormPageState extends State<SupportTicketFormPage> {
         backgroundColor: Colors.transparent,
         leading: const BackButton(color: Colors.black87),
         centerTitle: true,
-        title: Text(
-          'Support Ticket',
-          style: textTheme.titleMedium?.copyWith(
-            color: colorScheme.primary,
-            fontWeight: FontWeight.w600,
-          ),
-        ),
+        title: Text('Support Ticket', style: textTheme.titleMedium?.copyWith(color: colorScheme.primary, fontWeight: FontWeight.w600)),
       ),
       body: Padding(
         padding: const EdgeInsets.all(16),
         child: Container(
           height: screenHeight * 0.9,
           padding: const EdgeInsets.all(24),
-          decoration: BoxDecoration(
-            color: const Color(0xFFF4F4F7),
-            borderRadius: BorderRadius.circular(16),
-          ),
+          decoration: BoxDecoration(color: const Color(0xFFF4F4F7), borderRadius: BorderRadius.circular(16)),
           child: SingleChildScrollView(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -155,22 +134,14 @@ class _SupportTicketFormPageState extends State<SupportTicketFormPage> {
                 const SizedBox(height: 8),
                 DropdownButtonFormField<String>(
                   value: selectedBooking,
-                  items: ['Booking #1234', 'Booking #5678']
-                      .map((booking) => DropdownMenuItem(
-                    value: booking,
-                    child: Text(booking, style: textTheme.bodyMedium),
-                  ))
-                      .toList(),
+                  items: ['Booking #1234', 'Booking #5678'].map((booking) => DropdownMenuItem(value: booking, child: Text(booking, style: textTheme.bodyMedium))).toList(),
                   onChanged: (value) => setState(() => selectedBooking = value),
                   decoration: InputDecoration(
                     filled: true,
                     fillColor: Colors.white,
                     hintText: 'Select Booking',
                     hintStyle: textTheme.bodyMedium?.copyWith(color: Colors.grey),
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(12),
-                      borderSide: BorderSide.none,
-                    ),
+                    border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide.none),
                     contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
                   ),
                 ),
@@ -185,10 +156,7 @@ class _SupportTicketFormPageState extends State<SupportTicketFormPage> {
                     hintStyle: textTheme.bodyMedium?.copyWith(color: Colors.grey),
                     filled: true,
                     fillColor: Colors.white,
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(12),
-                      borderSide: BorderSide.none,
-                    ),
+                    border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide.none),
                     contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
                   ),
                 ),
@@ -204,10 +172,7 @@ class _SupportTicketFormPageState extends State<SupportTicketFormPage> {
                     hintStyle: textTheme.bodyMedium?.copyWith(color: Colors.grey),
                     filled: true,
                     fillColor: Colors.white,
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(12),
-                      borderSide: BorderSide.none,
-                    ),
+                    border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide.none),
                     contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
                   ),
                 ),
@@ -218,24 +183,18 @@ class _SupportTicketFormPageState extends State<SupportTicketFormPage> {
                     width: double.infinity,
                     padding: const EdgeInsets.all(16),
                     decoration: BoxDecoration(
-                      color: colorScheme.primary.withOpacity(0.08),
+                      color: colorScheme.primary.withValues(alpha: 0.08),
                       borderRadius: BorderRadius.circular(12),
-                      border: Border.all(color: colorScheme.primary.withOpacity(0.3)),
+                      border: Border.all(color: colorScheme.primary.withValues(alpha: 0.3)),
                     ),
                     child: Column(
                       children: [
-                        Icon(Icons.upload_file, size: 40, color: theme.iconTheme.color?.withOpacity(0.6)),
+                        Icon(Icons.upload_file, size: 40, color: theme.iconTheme.color?.withValues(alpha: 0.6)),
                         const SizedBox(height: 10),
                         Text.rich(
                           TextSpan(
                             children: [
-                              TextSpan(
-                                text: "Click to upload",
-                                style: textTheme.bodyMedium?.copyWith(
-                                  color: colorScheme.primary,
-                                  fontWeight: FontWeight.w600,
-                                ),
-                              ),
+                              TextSpan(text: "Click to upload", style: textTheme.bodyMedium?.copyWith(color: colorScheme.primary, fontWeight: FontWeight.w600)),
                               const TextSpan(text: " or Drop files here"),
                             ],
                           ),
@@ -243,10 +202,7 @@ class _SupportTicketFormPageState extends State<SupportTicketFormPage> {
                           style: textTheme.bodyMedium,
                         ),
                         const SizedBox(height: 4),
-                        Text(
-                          "PNG, JPG, JPEG (max. 1mb )",
-                          style: textTheme.bodySmall?.copyWith(color: Colors.grey),
-                        ),
+                        Text("PNG, JPG, JPEG (max. 1mb )", style: textTheme.bodySmall?.copyWith(color: Colors.grey)),
                       ],
                     ),
                   ),
@@ -260,18 +216,10 @@ class _SupportTicketFormPageState extends State<SupportTicketFormPage> {
                     runSpacing: 12,
                     children: List.generate(
                       selectedFiles.length,
-                          (index) => Stack(
+                      (index) => Stack(
                         clipBehavior: Clip.none,
                         children: [
-                          ClipRRect(
-                            borderRadius: BorderRadius.circular(8),
-                            child: Image.file(
-                              selectedFiles[index],
-                              width: 80,
-                              height: 80,
-                              fit: BoxFit.cover,
-                            ),
-                          ),
+                          ClipRRect(borderRadius: BorderRadius.circular(8), child: Image.file(selectedFiles[index], width: 80, height: 80, fit: BoxFit.cover)),
                           Positioned(
                             top: -6,
                             right: -6,
@@ -279,10 +227,7 @@ class _SupportTicketFormPageState extends State<SupportTicketFormPage> {
                               onTap: () => removeImage(index),
                               child: Container(
                                 padding: const EdgeInsets.all(2),
-                                decoration: const BoxDecoration(
-                                  color: Colors.red,
-                                  shape: BoxShape.circle,
-                                ),
+                                decoration: const BoxDecoration(color: Colors.red, shape: BoxShape.circle),
                                 child: const Icon(Icons.close, size: 16, color: Colors.white),
                               ),
                             ),
@@ -296,29 +241,22 @@ class _SupportTicketFormPageState extends State<SupportTicketFormPage> {
                 SizedBox(
                   width: double.infinity,
                   child: ElevatedButton(
-                    onPressed: _isSubmitting
-                        ? null
-                        : () {
-                      if (titleController.text.isEmpty || descriptionController.text.isEmpty) {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(content: Text('Please fill all required fields')),
-                        );
-                        return;
-                      }
-                      submitSupportTicket();
-                    },
+                    onPressed:
+                        _isSubmitting
+                            ? null
+                            : () {
+                              if (titleController.text.isEmpty || descriptionController.text.isEmpty) {
+                                ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Please fill all required fields')));
+                                return;
+                              }
+                              submitSupportTicket();
+                            },
                     style: ElevatedButton.styleFrom(
                       backgroundColor: colorScheme.primary,
                       padding: const EdgeInsets.symmetric(vertical: 16),
                       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
                     ),
-                    child: Text(
-                      _isSubmitting ? "Submitting..." : "Submit",
-                      style: textTheme.bodyLarge?.copyWith(
-                        fontWeight: FontWeight.w600,
-                        color: colorScheme.onPrimary,
-                      ),
-                    ),
+                    child: Text(_isSubmitting ? "Submitting..." : "Submit", style: textTheme.bodyLarge?.copyWith(fontWeight: FontWeight.w600, color: colorScheme.onPrimary)),
                   ),
                 ),
               ],
