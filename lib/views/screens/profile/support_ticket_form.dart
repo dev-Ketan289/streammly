@@ -1,6 +1,10 @@
+import 'dart:convert';
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:file_picker/file_picker.dart';
+import 'package:http/http.dart' as http;
+import 'package:get/get.dart';
+import '../../../controllers/auth_controller.dart';
 
 class SupportTicketFormPage extends StatefulWidget {
   const SupportTicketFormPage({super.key});
@@ -10,10 +14,13 @@ class SupportTicketFormPage extends StatefulWidget {
 }
 
 class _SupportTicketFormPageState extends State<SupportTicketFormPage> {
-  String? selectedBooking;
   final TextEditingController titleController = TextEditingController();
   final TextEditingController descriptionController = TextEditingController();
   List<File> selectedFiles = [];
+  String? selectedBooking;
+
+  final AuthController authController = Get.find<AuthController>();
+  bool _isSubmitting = false; // <-- Flag to prevent multiple taps
 
   Future<void> pickImages() async {
     final result = await FilePicker.platform.pickFiles(
@@ -33,6 +40,81 @@ class _SupportTicketFormPageState extends State<SupportTicketFormPage> {
     setState(() {
       selectedFiles.removeAt(index);
     });
+  }
+
+  Future<void> submitSupportTicket() async {
+    if (_isSubmitting) return; // prevent multiple clicks
+    setState(() {
+      _isSubmitting = true;
+    });
+
+    final String token = authController.getUserToken();
+
+    if (token.isEmpty) {
+      Get.snackbar("Error", "You must be logged in to submit a ticket.");
+      setState(() {
+        _isSubmitting = false;
+      });
+      return;
+    }
+
+    final uri = Uri.parse('http://192.168.1.113:8000/api/v1/support-ticket/addsupportticket');
+
+    final request = http.MultipartRequest('POST', uri)
+      ..headers['Authorization'] = 'Bearer $token'
+      ..fields['booking_id'] = '1'
+      ..fields['title'] = titleController.text
+      ..fields['description'] = descriptionController.text;
+
+    if (selectedFiles.isNotEmpty) {
+      final file = selectedFiles.first;
+      final fileName = file.path.split('/').last;
+
+      request.files.add(
+        await http.MultipartFile.fromPath(
+          'reference_image',
+          file.path,
+          filename: fileName,
+        ),
+      );
+    }
+
+    try {
+      final streamedResponse = await request.send();
+      final response = await http.Response.fromStream(streamedResponse);
+
+      debugPrint("Status Code: ${response.statusCode}");
+      debugPrint("Response: ${response.body}");
+
+      if (response.statusCode == 200) {
+        final resBody = json.decode(response.body);
+
+        if (context.mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Support ticket submitted successfully!')),
+          );
+          titleController.clear();
+          descriptionController.clear();
+          setState(() {
+            selectedFiles.clear();
+          });
+        }
+      } else {
+        debugPrint('Error: ${response.body}');
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Failed: ${response.statusCode}')),
+        );
+      }
+    } catch (e) {
+      debugPrint('Exception: $e');
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Error: $e')),
+      );
+    } finally {
+      setState(() {
+        _isSubmitting = false;
+      });
+    }
   }
 
   @override
@@ -136,13 +218,13 @@ class _SupportTicketFormPageState extends State<SupportTicketFormPage> {
                     width: double.infinity,
                     padding: const EdgeInsets.all(16),
                     decoration: BoxDecoration(
-                      color: colorScheme.primary.withValues(alpha: 0.08),
+                      color: colorScheme.primary.withOpacity(0.08),
                       borderRadius: BorderRadius.circular(12),
-                      border: Border.all(color: colorScheme.primary.withValues(alpha: 0.3)),
+                      border: Border.all(color: colorScheme.primary.withOpacity(0.3)),
                     ),
                     child: Column(
                       children: [
-                        Icon(Icons.upload_file, size: 40, color: theme.iconTheme.color?.withValues(alpha: 0.6)),
+                        Icon(Icons.upload_file, size: 40, color: theme.iconTheme.color?.withOpacity(0.6)),
                         const SizedBox(height: 10),
                         Text.rich(
                           TextSpan(
@@ -214,8 +296,16 @@ class _SupportTicketFormPageState extends State<SupportTicketFormPage> {
                 SizedBox(
                   width: double.infinity,
                   child: ElevatedButton(
-                    onPressed: () {
-                      // Submit logic
+                    onPressed: _isSubmitting
+                        ? null
+                        : () {
+                      if (titleController.text.isEmpty || descriptionController.text.isEmpty) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(content: Text('Please fill all required fields')),
+                        );
+                        return;
+                      }
+                      submitSupportTicket();
                     },
                     style: ElevatedButton.styleFrom(
                       backgroundColor: colorScheme.primary,
@@ -223,7 +313,7 @@ class _SupportTicketFormPageState extends State<SupportTicketFormPage> {
                       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
                     ),
                     child: Text(
-                      "Submit",
+                      _isSubmitting ? "Submitting..." : "Submit",
                       style: textTheme.bodyLarge?.copyWith(
                         fontWeight: FontWeight.w600,
                         color: colorScheme.onPrimary,
