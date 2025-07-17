@@ -1,6 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
+import 'package:streammly/controllers/wishlist_controller.dart';
+import 'package:streammly/models/category/category_model.dart';
+import 'package:streammly/services/theme.dart';
 
-class VendorInfoCard extends StatelessWidget {
+class VendorInfoCard extends StatefulWidget {
   final String logoImage;
   final String companyName;
   final String category;
@@ -8,6 +12,7 @@ class VendorInfoCard extends StatelessWidget {
   final String? distanceKm;
   final String? estimatedTime;
   final String? rating;
+  final int? vendorId; // Add vendor ID for bookmark functionality
 
   const VendorInfoCard({
     super.key,
@@ -18,7 +23,25 @@ class VendorInfoCard extends StatelessWidget {
     this.distanceKm,
     this.estimatedTime,
     this.rating,
+    this.vendorId, // Add vendor ID parameter
   });
+
+  @override
+  State<VendorInfoCard> createState() => _VendorInfoCardState();
+}
+
+class _VendorInfoCardState extends State<VendorInfoCard> {
+  List<Bookmark> bookmarks = [];
+  bool isLoading = true;
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final wishlistController = Get.find<WishlistController>();
+      wishlistController.loadBookmarks();
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -85,7 +108,7 @@ class VendorInfoCard extends StatelessWidget {
               child: ClipRRect(
                 borderRadius: BorderRadius.circular(16),
                 child: Image.network(
-                  logoImage,
+                  widget.logoImage,
                   fit: BoxFit.cover,
                   errorBuilder: (context, error, stackTrace) {
                     return Image.asset(
@@ -152,7 +175,7 @@ class VendorInfoCard extends StatelessWidget {
                 child: ClipRRect(
                   borderRadius: BorderRadius.circular(16),
                   child: Image.network(
-                    logoImage,
+                    widget.logoImage,
                     fit: BoxFit.fill,
                     errorBuilder: (context, error, stackTrace) {
                       return Image.asset(
@@ -200,7 +223,7 @@ class VendorInfoCard extends StatelessWidget {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
-        if (rating != null)
+        if (widget.rating != null)
           Flexible(
             child: Container(
               padding: EdgeInsets.symmetric(
@@ -208,45 +231,70 @@ class VendorInfoCard extends StatelessWidget {
                 vertical: isSmallScreen ? 3 : 4,
               ),
               decoration: BoxDecoration(
-                color: Colors.blue.shade700,
-                borderRadius: BorderRadius.circular(12),
+                color: ratingColor,
+                borderRadius: BorderRadius.circular(10),
               ),
               child: Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
+                  SizedBox(width: isSmallScreen ? 2 : 4),
+                  Text(
+                    widget.rating!,
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontWeight: FontWeight.bold,
+                      fontSize: isSmallScreen ? 11 : 13,
+                    ),
+                    overflow: TextOverflow.ellipsis,
+                  ),
                   Icon(
                     Icons.star,
-                    color: Colors.white,
+                    color: const Color(0xFFF8DE1E),
                     size: isSmallScreen ? 14 : 16,
-                  ),
-                  SizedBox(width: isSmallScreen ? 2 : 4),
-                  Flexible(
-                    child: Text(
-                      rating!,
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontWeight: FontWeight.bold,
-                        fontSize: isSmallScreen ? 11 : 13,
-                      ),
-                      overflow: TextOverflow.ellipsis,
-                    ),
                   ),
                 ],
               ),
             ),
           ),
-        if (estimatedTime != null && distanceKm != null)
-          Flexible(
-            flex: 2,
-            child: Text(
-              "$estimatedTime • $distanceKm",
-              style: TextStyle(
-                fontSize: isSmallScreen ? 11 : 13,
-                color: Colors.black,
-              ),
-              overflow: TextOverflow.clip,
+        if (widget.estimatedTime != null && widget.distanceKm != null)
+          Text(
+            "${widget.estimatedTime} • ${widget.distanceKm}",
+            style: TextStyle(
+              fontSize: isSmallScreen ? 7 : 11,
+              color: Colors.black,
             ),
+            overflow: TextOverflow.visible,
+            maxLines: 1,
           ),
+        const SizedBox(width: 10),
+        GetBuilder<WishlistController>(
+          builder: (wishlistController) {
+            return GestureDetector(
+              onTap: () {
+                if (widget.vendorId != null) {
+                  wishlistController
+                      .addBookmark(widget.vendorId!, "company")
+                      .then((value) {
+                        if (value.isSuccess) {
+                          wishlistController.loadBookmarks();
+                        }
+                      });
+                }
+              },
+              child: Icon(
+                Icons.bookmark_rounded,
+                color:
+                    widget.vendorId != null &&
+                            wishlistController.bookmarks.any(
+                              (bookmark) => bookmark.id == widget.vendorId,
+                            )
+                        ? Colors.redAccent
+                        : Colors.grey,
+                size: isSmallScreen ? 20 : 25,
+              ),
+            );
+          },
+        ),
       ],
     );
   }
@@ -259,7 +307,7 @@ class VendorInfoCard extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          companyName,
+          widget.companyName,
           style: TextStyle(
             fontSize: isSmallScreen ? 16 : 18,
             fontWeight: FontWeight.bold,
@@ -269,7 +317,7 @@ class VendorInfoCard extends StatelessWidget {
         ),
         const SizedBox(height: 4),
         Text(
-          category,
+          widget.category,
           style: TextStyle(
             fontSize: isSmallScreen ? 12 : 14,
             color: Colors.grey,
@@ -286,7 +334,7 @@ class VendorInfoCard extends StatelessWidget {
     final isSmallScreen = screenWidth < 360;
 
     return Text(
-      _stripHtml(description),
+      _stripHtml(widget.description),
       style: TextStyle(fontSize: isSmallScreen ? 11 : 13, color: Colors.grey),
       maxLines: 2,
       overflow: TextOverflow.visible,
