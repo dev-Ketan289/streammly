@@ -60,10 +60,7 @@ class _HeaderBannerState extends State<HeaderBanner> {
     if (loopedSlides.isNotEmpty) {
       autoScrollTimer = Timer.periodic(const Duration(seconds: 4), (_) {
         if (pageController.hasClients) {
-          pageController.nextPage(
-            duration: const Duration(milliseconds: 500),
-            curve: Curves.easeInOut,
-          );
+          pageController.nextPage(duration: const Duration(milliseconds: 500), curve: Curves.easeInOut);
         }
       });
     }
@@ -97,20 +94,10 @@ class _HeaderBannerState extends State<HeaderBanner> {
                 width: double.infinity,
                 height: double.infinity,
                 errorBuilder: (context, error, stackTrace) {
-                  return Image.asset(
-                    'assets/images/recommended_banner/FocusPointVendor.png',
-                    fit: BoxFit.cover,
-                    width: double.infinity,
-                    height: double.infinity,
-                  );
+                  return Image.asset('assets/images/recommended_banner/FocusPointVendor.png', fit: BoxFit.cover, width: double.infinity, height: double.infinity);
                 },
               )
-              : Image.asset(
-                widget.backgroundImage,
-                fit: BoxFit.fill,
-                width: double.infinity,
-                height: double.infinity,
-              ),
+              : Image.asset(widget.backgroundImage, fit: BoxFit.fill, width: double.infinity, height: double.infinity),
 
           // --- Overlay ---
           Container(color: widget.overlayColor),
@@ -150,14 +137,8 @@ class _HeaderBannerState extends State<HeaderBanner> {
                 builder: (context) {
                   final double vectorImageHeight = MediaQuery.of(context).size.height * 0.25;
                   return currentSlide!.isSvg
-                      ? SvgPicture.network(
-                          "https://admin.streammly.com/${currentSlide.vectorImage}",
-                          height: vectorImageHeight,
-                        )
-                      : Image.network(
-                          "https://admin.streammly.com/${currentSlide.vectorImage}",
-                          height: vectorImageHeight,
-                        );
+                      ? SvgPicture.network("https://admin.streammly.com/${currentSlide.vectorImage}", height: vectorImageHeight)
+                      : Image.network("https://admin.streammly.com/${currentSlide.vectorImage}", height: vectorImageHeight);
                 },
               ),
             ),
@@ -172,45 +153,21 @@ class _HeaderBannerState extends State<HeaderBanner> {
                   Obx(
                     () => GestureDetector(
                       onTap: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (_) => EnterLocationManuallyScreen(),
-                          ),
-                        );
+                        Navigator.push(context, MaterialPageRoute(builder: (_) => EnterLocationManuallyScreen()));
                       },
                       child: Row(
                         children: [
-                          SizedBox(width: 50,),
-                          Icon(
-                            Icons.location_on,
-                            color: theme.colorScheme.onPrimary,
-                            size: 20,
-                          ),
+                          SizedBox(width: 50),
+                          Icon(Icons.location_on, color: theme.colorScheme.onPrimary, size: 20),
                           const SizedBox(width: 8),
                           Flexible(
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
+                                Text("Current Location", style: theme.textTheme.bodySmall?.copyWith(color: theme.colorScheme.onPrimary, fontWeight: FontWeight.bold, fontSize: 12)),
                                 Text(
-                                  "Current Location",
-                                  style: theme.textTheme.bodySmall?.copyWith(
-                                    color: theme.colorScheme.onPrimary,
-                                    fontWeight: FontWeight.bold,
-                                    fontSize: 12,
-                                  ),
-                                ),
-                                Text(
-                                  locationController
-                                          .selectedAddress
-                                          .value
-                                          .isNotEmpty
-                                      ? locationController.selectedAddress.value
-                                      : "Fetching...",
-                                  style: theme.textTheme.bodySmall?.copyWith(
-                                    color: theme.colorScheme.onPrimary,
-                                    fontSize: 8,
-                                  ),
+                                  locationController.selectedAddress.value.isNotEmpty ? locationController.selectedAddress.value : "Fetching...",
+                                  style: theme.textTheme.bodySmall?.copyWith(color: theme.colorScheme.onPrimary, fontSize: 8),
                                   overflow: TextOverflow.visible,
                                 ),
                               ],
@@ -227,93 +184,56 @@ class _HeaderBannerState extends State<HeaderBanner> {
                       IconButton(
                         icon: SvgPicture.asset(Assets.svgMenu),
                         onPressed: () {
-                          Get.to(
-                            () => const ProfilePage(),
-                            transition: Transition.leftToRight,
-                            duration: const Duration(milliseconds: 800),
-                          );
+                          Get.to(() => const ProfilePage(), transition: Transition.leftToRight, duration: const Duration(milliseconds: 800));
                         },
                       ),
                       const SizedBox(width: 8),
                       Expanded(
                         child: Container(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 10,
-                            vertical: 5,
-                          ),
+                          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
                           height: 37,
                           width: 302,
                           decoration: BoxDecoration(
                             color: Colors.transparent,
                             borderRadius: BorderRadius.circular(30),
-                            border: Border.all(
-                              color: theme.colorScheme.onPrimary,
-                              width: 1,
-                            ),
+                            border: Border.all(color: theme.colorScheme.onPrimary, width: 1),
                           ),
                           child: TextField(
-                            style: const TextStyle(
-                              color: Colors.white,
-                            ), // Set typed text to white
+                            style: const TextStyle(color: Colors.white), // Set typed text to white
                             decoration: InputDecoration(
                               hintText: "Searching...",
-                              hintStyle: GoogleFonts.openSans(
-                                color: theme.colorScheme.onPrimary,
-                                fontSize: 12,
-                              ),
-                              prefixIcon: Icon(
-                                Icons.search,
-                                color: backgroundLight,
-                                size: 24,
-                              ),
+                              hintStyle: GoogleFonts.openSans(color: theme.colorScheme.onPrimary, fontSize: 12),
+                              prefixIcon: Icon(Icons.search, color: backgroundLight, size: 24),
                               border: InputBorder.none,
                               isDense: true,
-                              contentPadding: const EdgeInsets.symmetric(
-                                horizontal: 16,
-                                vertical: 8,
-                              ),
+                              contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                             ),
                           ),
                         ),
                       ),
                       const SizedBox(width: 8),
-                      CircleAvatar(
-                        radius: 16,
-                        backgroundColor: theme.colorScheme.surface,
-                        child: SvgPicture.asset(Assets.svgDiamondhome),
-                      ),
+                      CircleAvatar(radius: 16, backgroundColor: theme.colorScheme.surface, child: SvgPicture.asset(Assets.svgDiamondhome)),
                     ],
                   ),
-
+                  const SizedBox(height: 5),
                   // Title & Subtitle
                   if (title.isNotEmpty || subtitle.isNotEmpty)
                     Container(
                       width: double.infinity,
                       alignment: Alignment.centerLeft,
-                      padding: const EdgeInsets.symmetric(horizontal: 40,),
+                      padding: const EdgeInsets.symmetric(horizontal: 40),
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          if (title.isNotEmpty)
-                            Text(
-                              title,
-                              style: GoogleFonts.openSans(
-                                fontSize: 29,
-                                fontWeight: FontWeight.w700,
-                                color: theme.colorScheme.onPrimary,
-                              ),
-                            ),
+                          if (title.isNotEmpty) Text(title, style: GoogleFonts.dmSerifDisplay(fontSize: 29, fontWeight: FontWeight.w700, color: theme.colorScheme.onPrimary)),
                           if (subtitle.isNotEmpty) const SizedBox(height: 6),
                           if (subtitle.isNotEmpty)
                             Container(
                               height: 90,
-                              width:168,
+                              width: 168,
                               child: Text(
                                 subtitle,
-                                style: GoogleFonts.openSans(
-                                  color: theme.colorScheme.onPrimary,
-                                  fontSize: 12,
-                                ),
+                                style: GoogleFonts.dmSerifDisplay(color: theme.colorScheme.onPrimary, fontSize: 12),
                                 overflow: TextOverflow.visible,
 
                                 textAlign: TextAlign.left,
@@ -326,72 +246,31 @@ class _HeaderBannerState extends State<HeaderBanner> {
                   const SizedBox(height: 12),
 
                   // Specialized In + Specialities Section
-                  if (widget.specialities != null &&
-                      widget.specialities!.isNotEmpty) ...[
-                    Text(
-                      "Specialized in",
-                      style: theme.textTheme.bodyMedium?.copyWith(
-                        color: theme.colorScheme.onPrimary,
-                        fontWeight: FontWeight.w600,
-                        fontSize: 14,
-                      ),
-                    ),
+                  if (widget.specialities != null && widget.specialities!.isNotEmpty) ...[
+                    Text("Specialized in", style: theme.textTheme.bodyMedium?.copyWith(color: theme.colorScheme.onPrimary, fontWeight: FontWeight.w600, fontSize: 14)),
                     const SizedBox(height: 6),
                     Wrap(
                       spacing: 8,
                       children: [
-                        for (
-                          var i = 0;
-                          i <
-                              (widget.specialities!.length > 2
-                                  ? 2
-                                  : widget.specialities!.length);
-                          i++
-                        )
+                        for (var i = 0; i < (widget.specialities!.length > 2 ? 2 : widget.specialities!.length); i++)
                           Container(
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 10,
-                              vertical: 6,
-                            ),
+                            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
                             decoration: BoxDecoration(
                               color: theme.colorScheme.surface,
                               borderRadius: BorderRadius.circular(8),
-                              border: Border.all(
-                                color: theme.colorScheme.surface.withValues(
-                                  alpha: 0.4,
-                                ),
-                              ),
+                              border: Border.all(color: theme.colorScheme.surface.withValues(alpha: 0.4)),
                             ),
-                            child: Text(
-                              widget.specialities![i],
-                              style: theme.textTheme.bodySmall?.copyWith(
-                                color: Colors.indigo,
-                                fontSize: 12,
-                              ),
-                            ),
+                            child: Text(widget.specialities![i], style: theme.textTheme.bodySmall?.copyWith(color: Colors.indigo, fontSize: 12)),
                           ),
                         if (widget.specialities!.length > 2)
                           Container(
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 10,
-                              vertical: 6,
-                            ),
+                            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
                             decoration: BoxDecoration(
                               color: theme.colorScheme.surface,
                               borderRadius: BorderRadius.circular(8),
-                              border: Border.all(
-                                color: theme.colorScheme.surface.withValues(
-                                  alpha: 0.4,
-                                ),
-                              ),
+                              border: Border.all(color: theme.colorScheme.surface.withValues(alpha: 0.4)),
                             ),
-                            child: Text(
-                              "+${widget.specialities!.length - 2} more",
-                              style: theme.textTheme.bodySmall?.copyWith(
-                                color: Colors.indigo,
-                                fontSize: 12,
-                              ),
-                            ),
+                            child: Text("+${widget.specialities!.length - 2} more", style: theme.textTheme.bodySmall?.copyWith(color: Colors.indigo, fontSize: 12)),
                           ),
                       ],
                     ),
