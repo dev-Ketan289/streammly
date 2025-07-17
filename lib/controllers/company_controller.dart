@@ -128,8 +128,8 @@ class CompanyController extends GetxController {
           final cleanedPath = rawPath.replaceFirst(RegExp(r'^/+'), '');
           final imageUrl =
               cleanedPath.isNotEmpty
-                  ? "https://admin.streammly.com/$cleanedPath"
-                  // ? "http://192.168.1.113:8000/$cleanedPath"
+                  // ? "https://admin.streammly.com/$cleanedPath"
+                  ? "http://192.168.1.113:8000/$cleanedPath"
                   : "";
 
           return {"id": item["id"].toString(), "image": imageUrl, "label": item["title"] ?? "Untitled"};

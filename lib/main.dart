@@ -14,6 +14,7 @@ import 'package:streammly/views/screens/auth_screens/login_screen.dart';
 import 'package:streammly/views/screens/common/location_screen.dart';
 import 'package:streammly/views/screens/common/webview_screen.dart';
 import 'package:streammly/views/screens/home/widgets/category/category.dart';
+import 'package:streammly/views/screens/package/get_quote_page.dart';
 
 import 'controllers/category_controller.dart';
 import 'controllers/company_controller.dart';
@@ -70,6 +71,7 @@ class StreammlyApp extends StatelessWidget {
         GetPage(name: '/Location', page: () => const LocationScreen()),
         GetPage(name: '/home', page: () => NavigationMenu()),
         GetPage(name: '/login', page: () => LoginScreen()),
+        GetPage(name: '/getQuote', page: () => GetQuoteScreen()),
 
         // Promo slider redirection routes
         GetPage(name: '/webview', page: () => const WebViewScreen()),
