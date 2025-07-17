@@ -365,7 +365,7 @@ class _HeaderBannerState extends State<HeaderBanner> {
                             child: Text(
                               widget.specialities![i],
                               style: theme.textTheme.bodySmall?.copyWith(
-                                color: Colors.indigo,
+                                color: primaryColor,
                                 fontSize: 12,
                               ),
                             ),
@@ -388,7 +388,7 @@ class _HeaderBannerState extends State<HeaderBanner> {
                             child: Text(
                               "+${widget.specialities!.length - 2} more",
                               style: theme.textTheme.bodySmall?.copyWith(
-                                color: Colors.indigo,
+                                color: primaryColor,
                                 fontSize: 12,
                               ),
                             ),

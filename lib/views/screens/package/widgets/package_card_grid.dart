@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:streammly/services/theme.dart';
 import '../../../../controllers/package_page_controller.dart';
 
 class PackagesGridView extends StatelessWidget {
@@ -24,11 +25,20 @@ class PackagesGridView extends StatelessWidget {
                 final pkg = controller.packages[index];
 
                 return Container(
-                  margin: const EdgeInsets.symmetric(horizontal: 8, vertical: 16),
+                  margin: const EdgeInsets.symmetric(
+                    horizontal: 8,
+                    vertical: 16,
+                  ),
                   decoration: BoxDecoration(
-                    color: const Color(0xFF4A6CF7),
+                    color: primaryColor,
                     borderRadius: BorderRadius.circular(16),
-                    boxShadow: [BoxShadow(color: Colors.black.withAlpha(25), blurRadius: 10, offset: const Offset(0, 4))],
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withAlpha(25),
+                        blurRadius: 10,
+                        offset: const Offset(0, 4),
+                      ),
+                    ],
                   ),
                   child: Stack(
                     children: [
@@ -37,48 +47,98 @@ class PackagesGridView extends StatelessWidget {
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Text(pkg["title"], style: theme.textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold, color: Colors.white)),
-                            Text(pkg["type"], style: theme.textTheme.bodySmall?.copyWith(color: Colors.white70, fontWeight: FontWeight.w500)),
+                            Text(
+                              pkg["title"],
+                              style: theme.textTheme.titleLarge?.copyWith(
+                                fontWeight: FontWeight.bold,
+                                color: Colors.white,
+                              ),
+                            ),
+                            Text(
+                              pkg["type"],
+                              style: theme.textTheme.bodySmall?.copyWith(
+                                color: Colors.white70,
+                                fontWeight: FontWeight.w500,
+                              ),
+                            ),
                             const SizedBox(height: 20),
-                            const Text("Just For", style: TextStyle(fontSize: 11, color: Colors.white70)),
+                            const Text(
+                              "Just For",
+                              style: TextStyle(
+                                fontSize: 11,
+                                color: Colors.white70,
+                              ),
+                            ),
                             Obx(() {
-                              final selectedHour = (controller.selectedHours[index]?.isNotEmpty ?? false)
-                                  ? controller.selectedHours[index]!.first
-                                  : pkg["hours"].first;
-                              final priceMap = pkg["priceMap"] as Map<String, int>;
-                              final updatedPrice = priceMap[selectedHour] ?? pkg["price"];
-                              return Text("₹$updatedPrice/-",
-                                  style: theme.textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.bold, color: Colors.white));
+                              final selectedHour =
+                                  (controller
+                                              .selectedHours[index]
+                                              ?.isNotEmpty ??
+                                          false)
+                                      ? controller.selectedHours[index]!.first
+                                      : pkg["hours"].first;
+                              final priceMap =
+                                  pkg["priceMap"] as Map<String, int>;
+                              final updatedPrice =
+                                  priceMap[selectedHour] ?? pkg["price"];
+                              return Text(
+                                "₹$updatedPrice/-",
+                                style: theme.textTheme.headlineSmall?.copyWith(
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.white,
+                                ),
+                              );
                             }),
                             const SizedBox(height: 16),
                             Row(
-                              children: pkg["hours"].map<Widget>((hour) {
-                                return Obx(() {
-                                  final isSelected = controller.selectedHours[index]?.contains(hour) ?? false;
-                                  return Container(
-                                    margin: const EdgeInsets.only(right: 8),
-                                    child: GestureDetector(
-                                      onTap: () => controller.toggleHour(index, hour),
-                                      child: Container(
-                                        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                                        decoration: BoxDecoration(
-                                          color: isSelected ? Colors.white : Colors.transparent,
-                                          borderRadius: BorderRadius.circular(12),
-                                          border: Border.all(color: Colors.white, width: 1),
-                                        ),
-                                        child: Text(
-                                          hour,
-                                          style: TextStyle(
-                                            fontSize: 11,
-                                            color: isSelected ? const Color(0xFF4A6CF7) : Colors.white,
-                                            fontWeight: FontWeight.w600,
+                              children:
+                                  pkg["hours"].map<Widget>((hour) {
+                                    return Obx(() {
+                                      final isSelected =
+                                          controller.selectedHours[index]
+                                              ?.contains(hour) ??
+                                          false;
+                                      return Container(
+                                        margin: const EdgeInsets.only(right: 8),
+                                        child: GestureDetector(
+                                          onTap:
+                                              () => controller.toggleHour(
+                                                index,
+                                                hour,
+                                              ),
+                                          child: Container(
+                                            padding: const EdgeInsets.symmetric(
+                                              horizontal: 12,
+                                              vertical: 6,
+                                            ),
+                                            decoration: BoxDecoration(
+                                              color:
+                                                  isSelected
+                                                      ? Colors.white
+                                                      : Colors.transparent,
+                                              borderRadius:
+                                                  BorderRadius.circular(12),
+                                              border: Border.all(
+                                                color: Colors.white,
+                                                width: 1,
+                                              ),
+                                            ),
+                                            child: Text(
+                                              hour,
+                                              style: TextStyle(
+                                                fontSize: 11,
+                                                color:
+                                                    isSelected
+                                                        ? primaryColor
+                                                        : Colors.white,
+                                                fontWeight: FontWeight.w600,
+                                              ),
+                                            ),
                                           ),
                                         ),
-                                      ),
-                                    ),
-                                  );
-                                });
-                              }).toList(),
+                                      );
+                                    });
+                                  }).toList(),
                             ),
                             const Spacer(),
                             SizedBox(
@@ -87,12 +147,22 @@ class PackagesGridView extends StatelessWidget {
                                 style: ElevatedButton.styleFrom(
                                   backgroundColor: Colors.transparent,
                                   foregroundColor: Colors.white,
-                                  padding: const EdgeInsets.symmetric(vertical: 12),
-                                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                                  padding: const EdgeInsets.symmetric(
+                                    vertical: 12,
+                                  ),
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(8),
+                                  ),
                                   elevation: 0,
                                 ),
                                 onPressed: () => controller.switchToListView(),
-                                child: const Text("View More", style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600)),
+                                child: const Text(
+                                  "View More",
+                                  style: TextStyle(
+                                    fontSize: 14,
+                                    fontWeight: FontWeight.w600,
+                                  ),
+                                ),
                               ),
                             ),
                           ],
@@ -102,16 +172,24 @@ class PackagesGridView extends StatelessWidget {
                         top: 16,
                         right: 16,
                         child: Obx(() {
-                          final isSelected = controller.isPackageSelected(index);
+                          final isSelected = controller.isPackageSelected(
+                            index,
+                          );
                           return GestureDetector(
-                            onTap: () => controller.togglePackageSelection(index),
+                            onTap:
+                                () => controller.togglePackageSelection(index),
                             child: Container(
                               padding: const EdgeInsets.all(4),
                               decoration: BoxDecoration(
                                 shape: BoxShape.circle,
-                                color: isSelected ? Colors.white : Colors.white54,
+                                color:
+                                    isSelected ? Colors.white : Colors.white54,
                               ),
-                              child: Icon(Icons.check, color: isSelected ? const Color(0xFF4A6CF7) : Colors.grey, size: 16),
+                              child: Icon(
+                                Icons.check,
+                                color: isSelected ? primaryColor : Colors.grey,
+                                size: 16,
+                              ),
                             ),
                           );
                         }),
@@ -129,7 +207,10 @@ class PackagesGridView extends StatelessWidget {
             padding: const EdgeInsets.symmetric(horizontal: 16),
             child: Text(
               "Selected Packages",
-              style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold, color: Colors.black87),
+              style: theme.textTheme.titleMedium?.copyWith(
+                fontWeight: FontWeight.bold,
+                color: Colors.black87,
+              ),
             ),
           ),
           const SizedBox(height: 12),
@@ -139,18 +220,25 @@ class PackagesGridView extends StatelessWidget {
             if (selectedIndices.isEmpty) {
               return const Padding(
                 padding: EdgeInsets.symmetric(horizontal: 16),
-                child: Text("No package selected.", style: TextStyle(color: Colors.grey)),
+                child: Text(
+                  "No package selected.",
+                  style: TextStyle(color: Colors.grey),
+                ),
               );
             }
 
             return Column(
-              children: selectedIndices.map((index) {
-                final pkg = controller.packages[index];
-                return Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
-                  child: _buildPackageCard(controller, pkg, index, theme),
-                );
-              }).toList(),
+              children:
+                  selectedIndices.map((index) {
+                    final pkg = controller.packages[index];
+                    return Padding(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 16,
+                        vertical: 6,
+                      ),
+                      child: _buildPackageCard(controller, pkg, index, theme),
+                    );
+                  }).toList(),
             );
           }),
 
@@ -160,12 +248,18 @@ class PackagesGridView extends StatelessWidget {
     );
   }
 
-  Widget _buildPackageCard(PackagesController controller, Map<String, dynamic> pkg, int index, ThemeData theme) {
+  Widget _buildPackageCard(
+    PackagesController controller,
+    Map<String, dynamic> pkg,
+    int index,
+    ThemeData theme,
+  ) {
     return Obx(() {
       final isSelected = controller.isPackageSelected(index);
-      final selectedHour = (controller.selectedHours[index]?.isNotEmpty ?? false)
-          ? controller.selectedHours[index]!.first
-          : pkg["hours"].first;
+      final selectedHour =
+          (controller.selectedHours[index]?.isNotEmpty ?? false)
+              ? controller.selectedHours[index]!.first
+              : pkg["hours"].first;
       final priceMap = pkg["priceMap"] as Map<String, int>;
       final updatedPrice = priceMap[selectedHour] ?? pkg["price"];
 
@@ -177,9 +271,11 @@ class PackagesGridView extends StatelessWidget {
             margin: const EdgeInsets.only(top: 12),
             decoration: BoxDecoration(
               color: Colors.white,
-              border: Border.all(color: const Color(0xFF4A6CF7), width: 1),
+              border: Border.all(color: primaryColor, width: 1),
               borderRadius: BorderRadius.circular(12),
-              boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 4)],
+              boxShadow: [
+                BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 4),
+              ],
             ),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -190,20 +286,20 @@ class PackagesGridView extends StatelessWidget {
                   children: [
                     Text(
                       "₹$updatedPrice/-",
-                      style: const TextStyle(
+                      style: TextStyle(
                         fontSize: 22,
                         fontWeight: FontWeight.bold,
-                        color: Color(0xFF4A6CF7),
+                        color: primaryColor,
                       ),
                     ),
                     Row(
                       children: [
                         Text(
                           pkg["title"] ?? '',
-                          style: const TextStyle(
+                          style: TextStyle(
                             fontSize: 16,
                             fontWeight: FontWeight.w600,
-                            color: Color(0xFF4A6CF7),
+                            color: primaryColor,
                           ),
                         ),
                         const SizedBox(width: 8),
@@ -212,12 +308,18 @@ class PackagesGridView extends StatelessWidget {
                           height: 20,
                           decoration: BoxDecoration(
                             shape: BoxShape.circle,
-                            color: isSelected ? const Color(0xFF4A6CF7) : Colors.transparent,
-                            border: Border.all(color: const Color(0xFF4A6CF7), width: 2),
+                            color:
+                                isSelected ? primaryColor : Colors.transparent,
+                            border: Border.all(color: primaryColor, width: 2),
                           ),
-                          child: isSelected
-                              ? const Icon(Icons.check, color: Colors.white, size: 14)
-                              : null,
+                          child:
+                              isSelected
+                                  ? const Icon(
+                                    Icons.check,
+                                    color: Colors.white,
+                                    size: 14,
+                                  )
+                                  : null,
                         ),
                       ],
                     ),
@@ -228,33 +330,46 @@ class PackagesGridView extends StatelessWidget {
 
                 // Duration Chips
                 Row(
-                  children: pkg["hours"].map<Widget>((hour) {
-                    final selected = controller.selectedHours[index]?.contains(hour) ?? false;
-                    return GestureDetector(
-                      onTap: () => controller.toggleHour(index, hour),
-                      child: Container(
-                        margin: const EdgeInsets.only(right: 6),
-                        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-                        decoration: BoxDecoration(
-                          color: selected ? const Color(0xFF4A6CF7) : const Color(0xFFF0F3FF),
-                          borderRadius: BorderRadius.circular(6),
-                        ),
-                        child: Text(
-                          hour,
-                          style: TextStyle(
-                            fontSize: 12,
-                            fontWeight: FontWeight.w600,
-                            color: selected ? Colors.white : const Color(0xFF4A6CF7),
+                  children:
+                      pkg["hours"].map<Widget>((hour) {
+                        final selected =
+                            controller.selectedHours[index]?.contains(hour) ??
+                            false;
+                        return GestureDetector(
+                          onTap: () => controller.toggleHour(index, hour),
+                          child: Container(
+                            margin: const EdgeInsets.only(right: 6),
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 10,
+                              vertical: 5,
+                            ),
+                            decoration: BoxDecoration(
+                              color:
+                                  selected
+                                      ? primaryColor
+                                      : const Color(0xFFF0F3FF),
+                              borderRadius: BorderRadius.circular(6),
+                            ),
+                            child: Text(
+                              hour,
+                              style: TextStyle(
+                                fontSize: 12,
+                                fontWeight: FontWeight.w600,
+                                color: selected ? Colors.white : primaryColor,
+                              ),
+                            ),
                           ),
-                        ),
-                      ),
-                    );
-                  }).toList(),
+                        );
+                      }).toList(),
                 ),
 
                 const SizedBox(height: 12),
 
-                const Divider(height: 1, thickness: 1, color: Color(0xFFE6E6E6)),
+                const Divider(
+                  height: 1,
+                  thickness: 1,
+                  color: Color(0xFFE6E6E6),
+                ),
 
                 const SizedBox(height: 10),
 
@@ -274,16 +389,24 @@ class PackagesGridView extends StatelessWidget {
                     ),
                     ElevatedButton(
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: const Color(0xFF4A6CF7),
+                        backgroundColor: primaryColor,
                         foregroundColor: Colors.white,
-                        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(6)),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 20,
+                          vertical: 10,
+                        ),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(6),
+                        ),
                         minimumSize: Size.zero,
                       ),
                       onPressed: () => controller.togglePackageSelection(index),
                       child: const Text(
                         "BUY",
-                        style: TextStyle(fontSize: 13, fontWeight: FontWeight.bold),
+                        style: TextStyle(
+                          fontSize: 13,
+                          fontWeight: FontWeight.bold,
+                        ),
                       ),
                     ),
                   ],

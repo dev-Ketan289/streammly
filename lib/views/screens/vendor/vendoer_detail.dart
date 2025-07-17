@@ -63,7 +63,7 @@ class _VendorDetailScreenState extends State<VendorDetailScreen> {
                             widget.company.bannerImage!.isNotEmpty)
                         ? resolveImageUrl(widget.company.bannerImage)
                         : 'assets/images/recommended_banner/FocusPointVendor.png',
-                overlayColor: Colors.indigo.withValues(alpha: 0.6),
+                overlayColor: primaryColor.withValues(alpha: 0.6),
                 overrideTitle: widget.company.companyName,
                 overrideSubtitle: widget.company.categoryName,
 

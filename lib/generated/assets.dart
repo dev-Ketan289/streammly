@@ -19,7 +19,6 @@ class Assets {
 
   /// Assets for imagesBookingImagesFrame2118060031(1)
   /// assets/images/booking_images/Frame2118060031(1).png
-
   /// Assets for imagesCategoryDJ
   /// assets/images/category/DJ.png
   static const String imagesCategoryDJ = "assets/images/category/DJ.png";

@@ -74,7 +74,7 @@ class _VendorGroupState extends State<VendorGroup> {
                   (widget.company.bannerImage?.isNotEmpty == true)
                       ? resolveImageUrl(widget.company.bannerImage)
                       : 'assets/images/recommended_banner/FocusPointVendor.png',
-              overlayColor: Colors.indigo.withValues(alpha: 0.6),
+              overlayColor: primaryColor.withValues(alpha: 0.6),
               overrideTitle: widget.company.companyName,
               overrideSubtitle: widget.company.categoryName,
               specialities: widget.company.specialities,

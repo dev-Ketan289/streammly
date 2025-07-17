@@ -14,7 +14,14 @@ class PersonalInfoSection extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Text("Personal Info", style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600, color: Colors.black87)),
+        const Text(
+          "Personal Info",
+          style: TextStyle(
+            fontSize: 18,
+            fontWeight: FontWeight.w600,
+            color: Colors.black87,
+          ),
+        ),
         const SizedBox(height: 5),
 
         // Name Field
@@ -35,7 +42,14 @@ class PersonalInfoSection extends StatelessWidget {
         const SizedBox(height: 16),
 
         // Mobile Number Section
-        const Text("Mobile No *", style: TextStyle(fontWeight: FontWeight.w500, fontSize: 16, color: Colors.black87)),
+        const Text(
+          "Mobile No *",
+          style: TextStyle(
+            fontWeight: FontWeight.w500,
+            fontSize: 16,
+            color: Colors.black87,
+          ),
+        ),
         const SizedBox(height: 8),
         CustomTextField(
           labelText: "Number",
@@ -57,7 +71,13 @@ class PersonalInfoSection extends StatelessWidget {
           children: [
             TextButton.icon(
               onPressed: () => controller.addAlternateMobile(),
-              label: const Text('Add +', style: TextStyle(color: Color.fromARGB(255, 143, 149, 170), fontWeight: FontWeight.w500)),
+              label: const Text(
+                'Add +',
+                style: TextStyle(
+                  color: Color.fromARGB(255, 143, 149, 170),
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
             ),
           ],
         ),
@@ -80,7 +100,9 @@ class PersonalInfoSection extends StatelessWidget {
                             onChanged: (val) => rxStr.value = val,
                             validator: (value) {
                               if (value != null && value.isNotEmpty) {
-                                if (!RegExp(r'^\+?\d{10,12}$').hasMatch(value)) {
+                                if (!RegExp(
+                                  r'^\+?\d{10,12}$',
+                                ).hasMatch(value)) {
                                   return 'Please enter a valid mobile number';
                                 }
                               }
@@ -92,8 +114,15 @@ class PersonalInfoSection extends StatelessWidget {
                           onTap: () => controller.removeAlternateMobile(index),
                           child: Container(
                             padding: const EdgeInsets.all(8),
-                            decoration: BoxDecoration(color: Colors.red.shade50, borderRadius: BorderRadius.circular(6)),
-                            child: Icon(Icons.close, color: Colors.red.shade600, size: 18),
+                            decoration: BoxDecoration(
+                              color: Colors.red.shade50,
+                              borderRadius: BorderRadius.circular(6),
+                            ),
+                            child: Icon(
+                              Icons.close,
+                              color: Colors.red.shade600,
+                              size: 18,
+                            ),
                           ),
                         ),
                       ],
@@ -104,7 +133,14 @@ class PersonalInfoSection extends StatelessWidget {
         ),
 
         // Email Section
-        const Text("Mail ID *", style: TextStyle(fontWeight: FontWeight.w500, fontSize: 16, color: Colors.black87)),
+        const Text(
+          "Mail ID *",
+          style: TextStyle(
+            fontWeight: FontWeight.w500,
+            fontSize: 16,
+            color: Colors.black87,
+          ),
+        ),
         const SizedBox(height: 8),
         CustomTextField(
           labelText: "Email",
@@ -126,7 +162,13 @@ class PersonalInfoSection extends StatelessWidget {
           children: [
             TextButton.icon(
               onPressed: () => controller.addAlternateEmail(),
-              label: const Text('Add +', style: TextStyle(color: Color.fromARGB(255, 143, 149, 170), fontWeight: FontWeight.w500)),
+              label: const Text(
+                'Add +',
+                style: TextStyle(
+                  color: Color.fromARGB(255, 143, 149, 170),
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
             ),
           ],
         ),
@@ -149,7 +191,9 @@ class PersonalInfoSection extends StatelessWidget {
                             onChanged: (val) => rxStr.value = val,
                             validator: (value) {
                               if (value != null && value.isNotEmpty) {
-                                if (!RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$').hasMatch(value)) {
+                                if (!RegExp(
+                                  r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$',
+                                ).hasMatch(value)) {
                                   return 'Please enter a valid email';
                                 }
                               }
@@ -162,8 +206,15 @@ class PersonalInfoSection extends StatelessWidget {
                           onTap: () => controller.removeAlternateEmail(index),
                           child: Container(
                             padding: const EdgeInsets.all(8),
-                            decoration: BoxDecoration(color: Colors.red.shade50, borderRadius: BorderRadius.circular(6)),
-                            child: Icon(Icons.close, color: Colors.red.shade600, size: 18),
+                            decoration: BoxDecoration(
+                              color: Colors.red.shade50,
+                              borderRadius: BorderRadius.circular(6),
+                            ),
+                            child: Icon(
+                              Icons.close,
+                              color: Colors.red.shade600,
+                              size: 18,
+                            ),
                           ),
                         ),
                       ],

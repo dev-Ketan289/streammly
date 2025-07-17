@@ -377,7 +377,7 @@ class _CompanyLocatorMapScreenState extends State<CompanyLocatorMapScreen> {
                 child: AnimatedOpacity(
                   opacity: showOverlay ? 0.2 : 0.0,
                   duration: const Duration(milliseconds: 300),
-                  child: Container(color: Colors.indigo),
+                  child: Container(color: primaryColor),
                 ),
               );
             },
