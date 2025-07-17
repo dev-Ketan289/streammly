@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/svg.dart';
+import 'package:streammly/generated/assets.dart';
 
 class ReviewCard extends StatelessWidget {
   final String name;
@@ -6,44 +8,92 @@ class ReviewCard extends StatelessWidget {
   final String review;
   final double rating;
 
-  const ReviewCard({super.key, required this.name, required this.dateTime, required this.review, required this.rating});
+  const ReviewCard({
+    super.key,
+    required this.name,
+    required this.dateTime,
+    required this.review,
+    required this.rating,
+  });
 
   @override
   Widget build(BuildContext context) {
     return Container(
-      width: 240,
-      padding: const EdgeInsets.all(12),
-      margin: const EdgeInsets.only(right: 12),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(16),
-        boxShadow: const [BoxShadow(color: Colors.black12, blurRadius: 6, offset: Offset(0, 3))],
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.center,
+      decoration: BoxDecoration(color: Colors.transparent),
+      child: Stack(
+        clipBehavior: Clip.none,
         children: [
-          const CircleAvatar(radius: 20, backgroundColor: Colors.blue, child: Icon(Icons.person, color: Colors.white)),
-          const SizedBox(height: 8),
-
-          // Rating stars
-          Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: List.generate(5, (index) {
-              return const Icon(Icons.star, color: Colors.orange, size: 16);
-            }),
+          Container(
+            width: 200,
+            height: 180,
+            padding: const EdgeInsets.fromLTRB(16, 32, 16, 20),
+            margin: const EdgeInsets.only(
+              top: 28,
+              right: 12,
+              left: 12,
+              bottom: 12,
+            ),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(8),
+              border: Border.all(color: Color(0xffF5EEEE), width: 2),
+              // boxShadow: const [
+              //   BoxShadow(
+              //     color: Colors.black12,
+              //     blurRadius: 8,
+              //     offset: Offset(0, 4),
+              //   ),
+              // ],
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: List.generate(5, (index) {
+                    return Icon(
+                      index < rating ? Icons.star : Icons.star_border,
+                      color: Colors.orange,
+                      size: 22,
+                    );
+                  }),
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  name.endsWith('.') ? name : name + '.',
+                  style: const TextStyle(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 17,
+                  ),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  dateTime,
+                  style: const TextStyle(
+                    fontSize: 10,
+                    color: Color(0xff918181),
+                  ),
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  review,
+                  style: const TextStyle(fontSize: 8, color: Color(0xFF757575)),
+                  textAlign: TextAlign.center,
+                  overflow: TextOverflow.visible,
+                ),
+              ],
+            ),
           ),
-
-          const SizedBox(height: 8),
-
-          // Name & Date
-          Text(name, style: const TextStyle(fontWeight: FontWeight.bold)),
-          const SizedBox(height: 2),
-          Text(dateTime, style: const TextStyle(fontSize: 11, color: Colors.grey)),
-
-          const SizedBox(height: 8),
-
-          // Review text
-          Text(review, style: const TextStyle(fontSize: 13), textAlign: TextAlign.center, maxLines: 3, overflow: TextOverflow.ellipsis),
+          Positioned(
+            top: 0,
+            left: 0,
+            right: 0,
+            child: CircleAvatar(
+              radius: 28,
+              backgroundColor: Colors.transparent,
+              child: Image.asset(Assets.imagesReview, width: 55, height: 55),
+            ),
+          ),
         ],
       ),
     );

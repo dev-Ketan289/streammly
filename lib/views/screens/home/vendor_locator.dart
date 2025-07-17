@@ -3,12 +3,14 @@ import 'dart:math' as Math;
 import 'dart:typed_data';
 import 'dart:ui' as ui;
 
+import 'package:dropdown_button2/dropdown_button2.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:get/get.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:streammly/services/route_helper.dart';
+import 'package:streammly/services/theme.dart';
 
 import '../../../controllers/category_controller.dart';
 import '../../../controllers/company_controller.dart';
@@ -300,36 +302,51 @@ class _CompanyLocatorMapScreenState extends State<CompanyLocatorMapScreen> {
                 return Container(
                   padding: const EdgeInsets.symmetric(horizontal: 16),
                   decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(12)),
-                  child: DropdownButton<int>(
-                    value:
-                        (() {
-                          final allowed = widget.allowedCategoryIds;
-                          if (allowed != null && allowed.contains(controller.selectedCategoryId)) {
-                            return controller.selectedCategoryId;
-                          } else if (allowed != null && allowed.isNotEmpty) {
-                            return allowed.first;
-                          } else {
-                            return controller.selectedCategoryId;
-                          }
-                        })(),
-                    isExpanded: true,
-                    underline: const SizedBox(),
-                    items:
-                        categoryController.categories
-                            .where((category) => widget.allowedCategoryIds == null || widget.allowedCategoryIds!.contains(category.id))
-                            .map((category) => DropdownMenuItem<int>(value: category.id, child: Center(child: Text(category.title))))
-                            .toList(),
-                    onChanged: (int? newId) {
-                      if (newId != null) {
-                        controller.setCategoryId(newId);
-                        controller.clearSelectedCompany();
-                        setState(() {
-                          _showSlider = false;
-                          _currentPageIndex = 0;
-                        });
-                        _loadData();
-                      }
-                    },
+                  child: DropdownButtonHideUnderline(
+                    child: DropdownButton2<int>(
+                      value:
+                          (() {
+                            final allowed = widget.allowedCategoryIds;
+                            if (allowed != null && allowed.contains(controller.selectedCategoryId)) {
+                              return controller.selectedCategoryId;
+                            } else if (allowed != null && allowed.isNotEmpty) {
+                              return allowed.first;
+                            } else {
+                              return controller.selectedCategoryId;
+                            }
+                          })(),
+                      isExpanded: true,
+                      underline: const SizedBox(),
+                      iconStyleData: const IconStyleData(icon: Icon(Icons.keyboard_arrow_down), iconSize: 24, iconEnabledColor: Colors.grey, iconDisabledColor: Colors.grey),
+                      dropdownStyleData: DropdownStyleData(
+                        elevation: 0,
+                        decoration: BoxDecoration(
+                          color: Colors.white, // Change this to your desired color
+                          borderRadius: BorderRadius.only(bottomLeft: Radius.circular(12), bottomRight: Radius.circular(12)),
+                        ),
+                      ),
+                      items:
+                          categoryController.categories
+                              .where((category) => widget.allowedCategoryIds == null || widget.allowedCategoryIds!.contains(category.id))
+                              .map(
+                                (category) => DropdownMenuItem<int>(
+                                  value: category.id,
+                                  child: Center(child: Text(category.title, style: TextStyle(color: primaryColor, fontWeight: FontWeight.bold, fontSize: 17, letterSpacing: 0.5))),
+                                ),
+                              )
+                              .toList(),
+                      onChanged: (int? newId) {
+                        if (newId != null) {
+                          controller.setCategoryId(newId);
+                          controller.clearSelectedCompany();
+                          setState(() {
+                            _showSlider = false;
+                            _currentPageIndex = 0;
+                          });
+                          _loadData();
+                        }
+                      },
+                    ),
                   ),
                 );
               },
