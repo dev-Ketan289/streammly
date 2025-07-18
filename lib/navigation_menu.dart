@@ -1,20 +1,38 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_svg/svg.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:get/get.dart';
 import 'package:streammly/generated/assets.dart';
 import 'package:streammly/views/screens/home/home_screen.dart';
 
+// Add initialIndex parameter
 class NavigationMenu extends StatefulWidget {
   final Set<int> hiddenIndices;
   final bool hideFAB;
-  const NavigationMenu({super.key, this.hiddenIndices = const {}, this.hideFAB = false});
+  final int initialIndex;
+  const NavigationMenu({
+    super.key,
+    this.hiddenIndices = const {},
+    this.hideFAB = false,
+    this.initialIndex = 0, // New default param
+  });
 
   @override
   State<NavigationMenu> createState() => _NavigationMenuState();
 }
 
 class _NavigationMenuState extends State<NavigationMenu> {
-  final controller = Get.put(NavigationController());
+  late final NavigationController controller;
+
+  @override
+  void initState() {
+    super.initState();
+    controller = Get.put(NavigationController());
+
+    // Set initialIndex!
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      controller.setIndex(widget.initialIndex);
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -63,7 +81,7 @@ class _NavigationMenuState extends State<NavigationMenu> {
                     children: [
                       if (!widget.hiddenIndices.contains(0)) _buildNavItem(theme: Theme.of(context), icon: Assets.svgHome, height: 15, spacing: 4, label: 'Home', index: 0),
                       if (!widget.hiddenIndices.contains(1)) _buildNavItem(theme: Theme.of(context), icon: Assets.svgShop, height: 15, spacing: 4, label: 'Shop', index: 1),
-                      if (!widget.hideFAB) const SizedBox(width: 25), // FAB Space
+                      if (!widget.hideFAB) const SizedBox(width: 25),
                       if (!widget.hiddenIndices.contains(3)) _buildNavItem(theme: Theme.of(context), icon: Assets.svgBooking, height: 15, spacing: 4, label: 'Bookings', index: 3),
                       if (!widget.hiddenIndices.contains(4)) _buildNavItem(theme: Theme.of(context), icon: Assets.svgMore, height: 5, spacing: 15, label: 'More', index: 4),
                     ],
@@ -122,7 +140,7 @@ class NavigationHelper {
             children: [
               if (!hiddenIndices.contains(0)) _buildNavItem(icon: Assets.svgHome, label: 'Home', index: 0, height: 15, spacing: 4),
               if (!hiddenIndices.contains(1)) _buildNavItem(icon: Assets.svgShop, label: 'Shop', index: 1, height: 15, spacing: 4),
-              if (!hideFAB) const SizedBox(width: 25), // FAB space
+              if (!hideFAB) const SizedBox(width: 25),
               if (!hiddenIndices.contains(3)) _buildNavItem(icon: Assets.svgBooking, label: 'Bookings', index: 3, height: 15, spacing: 4),
               if (!hiddenIndices.contains(4)) _buildNavItem(icon: Assets.svgMore, label: 'More', index: 4, height: 5, spacing: 15),
             ],
@@ -135,12 +153,8 @@ class NavigationHelper {
   static Widget _buildNavItem({required String icon, required String label, required int index, required double height, required double spacing}) {
     return GestureDetector(
       onTap: () {
-        try {
-          Get.find<NavigationController>().setIndex(index);
-          Get.back();
-        } catch (e) {
-          Get.offAll(() => const NavigationMenu());
-        }
+        // Always rebuild full main nav screen with correct index!
+        Get.offAll(() => NavigationMenu(initialIndex: index));
       },
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
@@ -162,12 +176,8 @@ class NavigationHelper {
         backgroundColor: Colors.white,
         elevation: 3,
         onPressed: () {
-          try {
-            Get.find<NavigationController>().setIndex(2);
-            Get.back();
-          } catch (e) {
-            Get.offAll(() => const NavigationMenu());
-          }
+          // Go to navigation root, tab 2 (cart)
+          Get.offAll(() => NavigationMenu(initialIndex: 2));
         },
         child: Container(
           height: 40,
