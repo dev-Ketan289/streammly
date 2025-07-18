@@ -223,20 +223,17 @@ class PackagesListView extends StatelessWidget {
                                       );
                                     }).toList(),
                               ),
-                              // if ((pkg["highlight"] ?? '').isNotEmpty) ...[
-                              //   const SizedBox(height: 12),
-                              //   Text(
-                              //     pkg["highlight"],
-                              //     style: theme.textTheme.bodyMedium?.copyWith(
-                              //       fontWeight: FontWeight.w600,
-                              //       color: Colors.black87,
-                              //     ),
-                              //   ),
-                              // ],
-                              // Hide highlight and description by default, show only when expanded
-                              if (((pkg["highlight"] ?? '').isNotEmpty ||
-                                      (pkg["shortDescription"] ?? '')
-                                          .isNotEmpty ||
+                              if ((pkg["highlight"] ?? '').isNotEmpty) ...[
+                                const SizedBox(height: 12),
+                                Text(
+                                  pkg["highlight"],
+                                  style: theme.textTheme.bodyMedium?.copyWith(
+                                    fontWeight: FontWeight.w600,
+                                    color: Colors.black87,
+                                  ),
+                                ),
+                              ],
+                              if (((pkg["shortDescription"] ?? '').isNotEmpty ||
                                       (pkg["fullDescription"] ?? '')
                                           .isNotEmpty) &&
                                   !isExpanded) ...[
@@ -253,27 +250,25 @@ class PackagesListView extends StatelessWidget {
                                   ),
                                 ),
                               ],
-                              if (((pkg["highlight"] ?? '').isNotEmpty ||
-                                      (pkg["shortDescription"] ?? '')
-                                          .isNotEmpty ||
+                              if (((pkg["shortDescription"] ?? '').isNotEmpty ||
                                       (pkg["fullDescription"] ?? '')
                                           .isNotEmpty) &&
                                   isExpanded) ...[
                                 const SizedBox(height: 8),
-                                if ((pkg["highlight"] ?? '').isNotEmpty)
-                                  Text(
-                                    pkg["highlight"],
-                                    style: theme.textTheme.bodyMedium?.copyWith(
-                                      fontWeight: FontWeight.w600,
-                                      color: Colors.black87,
-                                    ),
-                                  ),
-                                if ((pkg["highlight"] ?? '').isNotEmpty &&
-                                    ((pkg["shortDescription"] ?? '')
-                                            .isNotEmpty ||
-                                        (pkg["fullDescription"] ?? '')
-                                            .isNotEmpty))
-                                  const SizedBox(height: 8),
+                                // if ((pkg["highlight"] ?? '').isNotEmpty)
+                                //   Text(
+                                //     pkg["highlight"],
+                                //     style: theme.textTheme.bodyMedium?.copyWith(
+                                //       fontWeight: FontWeight.w600,
+                                //       color: Colors.black87,
+                                //     ),
+                                //   ),
+                                // if ((pkg["highlight"] ?? '').isNotEmpty &&
+                                //     ((pkg["shortDescription"] ?? '')
+                                //             .isNotEmpty ||
+                                //         (pkg["fullDescription"] ?? '')
+                                //             .isNotEmpty))
+                                const SizedBox(height: 8),
                                 Builder(
                                   builder: (context) {
                                     final fullDesc =

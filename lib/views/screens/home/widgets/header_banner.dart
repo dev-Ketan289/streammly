@@ -88,6 +88,7 @@ class _HeaderBannerState extends State<HeaderBanner> {
       height: widget.height,
       width: double.infinity,
       child: Stack(
+        
         children: [
           // --- Background image ---
           widget.backgroundImage.startsWith("http")

@@ -1,9 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:get/get.dart';
-import 'package:iconsax/iconsax.dart';
 import 'package:streammly/generated/assets.dart';
-import 'package:streammly/services/theme.dart' as theme;
 import 'package:streammly/views/screens/home/home_screen.dart';
 
 class NavigationMenu extends StatefulWidget {
@@ -58,6 +56,7 @@ class _NavigationMenuState extends State<NavigationMenu> {
               borderRadius: const BorderRadius.all(Radius.circular(10)),
               child: BottomAppBar(
                 shape: const CircularNotchedRectangle(),
+                elevation: 0,
                 padding: const EdgeInsets.symmetric(horizontal: 10),
                 notchMargin: 5,
                 color: const Color(0xffF1F6FB),
@@ -131,7 +130,7 @@ class _NavigationMenuState extends State<NavigationMenu> {
             colorFilter:
                 isSelected
                     ? ColorFilter.mode(theme.primaryColor, BlendMode.srcIn)
-                    : null,
+                    : ColorFilter.mode(Colors.black54, BlendMode.srcIn),
           ),
           SizedBox(height: spacing),
           Text(
