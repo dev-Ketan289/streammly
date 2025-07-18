@@ -10,15 +10,4 @@ class CategoryRepo {
   Future<Response> getCategories() async {
     return await apiClient.getData(AppConstants.categoriesUrl);
   }
-
-  Future<Response> getBookMark() async {
-    return await apiClient.getData(AppConstants.getBookMark);
-  }
-
-  Future<Response> postBookmark(int? typeId,String type) async {
-    return await apiClient.postData(AppConstants.postBookmark, {
-      "type_id": typeId,
-      "type": type,
-    });
-  }
 }

@@ -4,6 +4,7 @@ import 'package:get/get.dart';
 import 'package:streammly/controllers/company_controller.dart';
 import 'package:streammly/generated/assets.dart';
 import 'package:streammly/services/theme.dart';
+import 'package:streammly/views/widgets/custom_doodle.dart';
 
 import '../../../controllers/package_page_controller.dart';
 import '../../../models/company/company_location.dart';
@@ -48,10 +49,12 @@ class _VendorGroupState extends State<VendorGroup> {
   /// Helper function to resolve image URL
   String resolveImageUrl(String? url) {
     if (url == null || url.isEmpty) return '';
-    // return url.startsWith('http') ? url : 'https://admin.streammly.com/${url.replaceFirst(RegExp(r'^/'), '')}';
     return url.startsWith('http')
         ? url
-        : 'http://192.168.1.113/${url.replaceFirst(RegExp(r'^/'), '')}';
+        : 'https://admin.streammly.com/${url.replaceFirst(RegExp(r'^/'), '')}';
+    // return url.startsWith('http')
+    //     ? url
+    //     : 'http://192.168.1.113/${url.replaceFirst(RegExp(r'^/'), '')}';
   }
 
   @override
@@ -64,186 +67,190 @@ class _VendorGroupState extends State<VendorGroup> {
       bottomNavigationBar: NavigationHelper.buildBottomNav(),
       floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
       floatingActionButton: NavigationHelper.buildFloatingButton(),
-      body: SafeArea(
-        child: Column(
-          children: [
-            /// Header Banner
-            HeaderBanner(
-              height: screenWidth * 0.7,
-              backgroundImage:
-                  (widget.company.bannerImage?.isNotEmpty == true)
-                      ? resolveImageUrl(widget.company.bannerImage)
-                      : 'assets/images/recommended_banner/FocusPointVendor.png',
-              overlayColor: Colors.indigo.withValues(alpha: 0.6),
-              overrideTitle: widget.company.companyName,
-              overrideSubtitle: widget.company.categoryName,
-              specialities: widget.company.specialities,
-            ),
+      body: CustomBackground(
+        child: SafeArea(
+          child: Column(
+            children: [
+              /// Header Banner
+              HeaderBanner(
+                height: screenWidth * 0.7,
+                backgroundImage:
+                    (widget.company.bannerImage?.isNotEmpty == true)
+                        ? resolveImageUrl(widget.company.bannerImage)
+                        : 'assets/images/recommended_banner/FocusPointVendor.png',
+                overlayColor: primaryColor.withValues(alpha: 0.6),
+                overrideTitle: widget.company.companyName,
+                overrideSubtitle: widget.company.categoryName,
+                specialities: widget.company.specialities,
+              ),
 
-            const SizedBox(height: 10),
+              const SizedBox(height: 10),
 
-            /// Category Scroller with selection
-            GetBuilder<CompanyController>(
-              builder: (_) {
-                final subs = controller.subCategories;
+              /// Category Scroller with selection
+              GetBuilder<CompanyController>(
+                builder: (_) {
+                  final subs = controller.subCategories;
 
-                if (subs.isEmpty) {
-                  return const SizedBox();
-                }
+                  if (subs.isEmpty) {
+                    return const SizedBox();
+                  }
 
-                return SizedBox(
-                  height: 120,
-                  child: ListView.separated(
-                    scrollDirection: Axis.horizontal,
-                    padding: const EdgeInsets.symmetric(horizontal: 16),
-                    itemCount: subs.length,
-                    separatorBuilder: (_, __) => const SizedBox(width: 12),
-                    itemBuilder: (context, index) {
-                      final sub = subs[index];
-                      final isSelected = selectedSubCategoryId == sub.id;
+                  return SizedBox(
+                    height: 120,
+                    child: ListView.separated(
+                      scrollDirection: Axis.horizontal,
+                      padding: const EdgeInsets.symmetric(horizontal: 16),
+                      itemCount: subs.length,
+                      separatorBuilder: (_, __) => const SizedBox(width: 12),
+                      itemBuilder: (context, index) {
+                        final sub = subs[index];
+                        final isSelected = selectedSubCategoryId == sub.id;
 
-                      return GestureDetector(
-                        onTap: () {
-                          setState(() {
-                            selectedSubCategoryId = sub.id;
-                          });
-                          controller.fetchSubVerticalCards(
-                            widget.company.id ?? 0,
-                            sub.id,
-                          );
-                        },
-                        child: Column(
-                          children: [
-                            Container(
-                              width: 70,
-                              height: 70,
-                              decoration: BoxDecoration(
-                                borderRadius: BorderRadius.circular(10),
-                                border: Border.all(
-                                  color:
-                                      isSelected
-                                          ? theme.primaryColor
-                                          : Colors.grey.shade300,
-                                  width: 2,
-                                ),
-                              ),
-                              child: Stack(
-                                children: [
-                                  ClipRRect(
-                                    borderRadius: BorderRadius.circular(10),
-                                    child: Image.network(
-                                      resolveImageUrl(sub.image),
-                                      width: 70,
-                                      height: 70,
-                                      fit: BoxFit.cover,
-                                      errorBuilder:
-                                          (_, __, ___) => Image.asset(
-                                            "assets/images/category/vendor_category/img.png",
-                                            fit: BoxFit.cover,
-                                          ),
-                                    ),
+                        return GestureDetector(
+                          onTap: () {
+                            setState(() {
+                              selectedSubCategoryId = sub.id;
+                            });
+                            controller.fetchSubVerticalCards(
+                              widget.company.id ?? 0,
+                              sub.id,
+                            );
+                          },
+                          child: Column(
+                            children: [
+                              Container(
+                                width: 70,
+                                height: 70,
+                                decoration: BoxDecoration(
+                                  borderRadius: BorderRadius.circular(10),
+                                  border: Border.all(
+                                    color:
+                                        isSelected
+                                            ? theme.primaryColor
+                                            : Colors.transparent,
+                                    width: 2,
                                   ),
-                                  if (isSelected)
-                                    Container(
-                                      width: 70,
-                                      height: 70,
-                                      decoration: BoxDecoration(
-                                        color: Color(
-                                          0xff3367A3,
-                                        ).withValues(alpha: 0.5),
-                                      ),
-                                      child: Icon(
-                                        Icons.check,
-                                        color: Colors.white,
-                                        size: 24,
+                                ),
+                                child: Stack(
+                                  alignment: Alignment.center,
+                                  children: [
+                                    Padding(
+                                      padding: const EdgeInsets.all(2.0),
+                                      child: ClipRRect(
+                                        borderRadius: BorderRadius.circular(10),
+                                        child: Image.network(
+                                          resolveImageUrl(sub.image),
+                                          width: 70,
+                                          height: 70,
+                                          fit: BoxFit.cover,
+                                          errorBuilder:
+                                              (_, __, ___) => Image.asset(
+                                                "assets/images/category/vendor_category/img.png",
+                                                fit: BoxFit.cover,
+                                              ),
+                                        ),
                                       ),
                                     ),
-                                ],
-                              ),
-                            ),
-                            const SizedBox(height: 6),
-                            SizedBox(
-                              width: 70,
-                              child: Text(
-                                sub.title,
-                                maxLines: 2,
-                                textAlign: TextAlign.center,
-                                style: TextStyle(
-                                  fontSize: 12,
-                                  color:
-                                      isSelected
-                                          ? theme.primaryColor
-                                          : Colors.black,
-                                  fontWeight:
-                                      isSelected
-                                          ? FontWeight.bold
-                                          : FontWeight.normal,
+                                    if (isSelected)
+                                      Container(
+                                        width: 70,
+                                        height: 70,
+                                        decoration: BoxDecoration(
+                                          color: Color(
+                                            0xff3367A3,
+                                          ).withValues(alpha: 0.5),
+                                        ),
+                                        child: Icon(
+                                          Icons.check,
+                                          color: Colors.white,
+                                          size: 24,
+                                        ),
+                                      ),
+                                  ],
                                 ),
                               ),
-                            ),
-                          ],
+                              const SizedBox(height: 6),
+                              SizedBox(
+                                width: 70,
+                                child: Text(
+                                  sub.title,
+                                  maxLines: 2,
+                                  textAlign: TextAlign.center,
+                                  style: theme.textTheme.labelSmall?.copyWith(
+                                    fontSize: 12,
+                                    color:
+                                        isSelected
+                                            ? theme.primaryColor
+                                            : Colors.black,
+                                    fontWeight:
+                                        isSelected
+                                            ? FontWeight.bold
+                                            : FontWeight.normal,
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        );
+                      },
+                    ),
+                  );
+                },
+              ),
+
+              const SizedBox(height: 10),
+
+              /// Sub-verticals Grid
+              Expanded(
+                child: GetBuilder<CompanyController>(
+                  builder: (controller) {
+                    if (controller.isSubVerticalLoading) {
+                      return const Center(child: CircularProgressIndicator());
+                    }
+
+                    final subVerticals = controller.subVerticalCards;
+
+                    if (subVerticals.isEmpty) {
+                      return const Padding(
+                        padding: EdgeInsets.all(16),
+                        child: Text(
+                          "No sub-verticals available.",
+                          style: TextStyle(color: Colors.grey),
                         ),
                       );
-                    },
-                  ),
-                );
-              },
-            ),
+                    }
 
-            const SizedBox(height: 10),
-
-            /// Sub-verticals Grid
-            Expanded(
-              child: GetBuilder<CompanyController>(
-                builder: (controller) {
-                  if (controller.isSubVerticalLoading) {
-                    return const Center(child: CircularProgressIndicator());
-                  }
-
-                  final subVerticals = controller.subVerticalCards;
-
-                  if (subVerticals.isEmpty) {
-                    return const Padding(
-                      padding: EdgeInsets.all(16),
-                      child: Text(
-                        "No sub-verticals available.",
-                        style: TextStyle(color: Colors.grey),
+                    return GridView.builder(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 16,
+                        vertical: 16,
                       ),
-                    );
-                  }
+                      itemCount: subVerticals.length,
+                      gridDelegate:
+                          const SliverGridDelegateWithFixedCrossAxisCount(
+                            crossAxisCount: 3,
+                            crossAxisSpacing: 16,
+                            mainAxisSpacing: 16,
+                            childAspectRatio: 0.65,
+                          ),
+                      itemBuilder: (context, index) {
+                        final item = subVerticals[index];
+                        final imageUrl = item['image'] ?? '';
+                        final label = item['label'] ?? '';
+                        final id = int.tryParse(item['id'] ?? '') ?? 0;
 
-                  return GridView.builder(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 16,
-                      vertical: 16,
-                    ),
-                    itemCount: subVerticals.length,
-                    gridDelegate:
-                        const SliverGridDelegateWithFixedCrossAxisCount(
-                          crossAxisCount: 3,
-                          crossAxisSpacing: 16,
-                          mainAxisSpacing: 16,
-                          childAspectRatio: 0.65,
-                        ),
-                    itemBuilder: (context, index) {
-                      final item = subVerticals[index];
-                      final imageUrl = item['image'] ?? '';
-                      final label = item['label'] ?? '';
-                      final id = int.tryParse(item['id'] ?? '') ?? 0;
-
-                      return GestureDetector(
-                        onTap:
-                            () => _showShootOptionsBottomSheet(
-                              context,
-                              label,
-                              id,
-                              widget.company.id ?? 0,
-                              selectedSubCategoryId,
-                            ),
-                        child: Column(
-                          children: [
-                            Expanded(
-                              child: Container(
+                        return GestureDetector(
+                          onTap:
+                              () => _showShootOptionsBottomSheet(
+                                context,
+                                label,
+                                id,
+                                widget.company.id ?? 0,
+                                selectedSubCategoryId,
+                              ),
+                          child: Column(
+                            children: [
+                              Container(
                                 padding: const EdgeInsets.all(5),
                                 height: 111,
                                 width: 111,
@@ -256,11 +263,11 @@ class _VendorGroupState extends State<VendorGroup> {
                                       imageUrl.isNotEmpty
                                           ? Image.network(
                                             resolveImageUrl(imageUrl),
-                                            fit: BoxFit.cover,
+                                            fit: BoxFit.fill,
                                             errorBuilder: (_, __, ___) {
                                               return Image.asset(
                                                 "assets/images/category/vendor_category/img.png",
-                                                fit: BoxFit.cover,
+                                                fit: BoxFit.contain,
                                               );
                                             },
                                           )
@@ -270,26 +277,25 @@ class _VendorGroupState extends State<VendorGroup> {
                                           ),
                                 ),
                               ),
-                            ),
-                            const SizedBox(height: 8),
-                            Text(
-                              label,
-                              textAlign: TextAlign.center,
-                              style: TextStyle(
-                                color: primaryColor,
-                                fontSize: 13,
-                                fontWeight: FontWeight.bold,
+                              Text(
+                                label,
+                                textAlign: TextAlign.center,
+                                style: theme.textTheme.labelSmall?.copyWith(
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 12,
+                                  color: primaryColor,
+                                ),
                               ),
-                            ),
-                          ],
-                        ),
-                      );
-                    },
-                  );
-                },
+                            ],
+                          ),
+                        );
+                      },
+                    );
+                  },
+                ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );

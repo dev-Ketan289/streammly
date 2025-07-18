@@ -11,6 +11,7 @@ import 'package:streammly/data/repository/category_repo.dart';
 import 'package:streammly/data/repository/company_repo.dart';
 import 'package:streammly/data/repository/header_repo.dart';
 import 'package:streammly/data/repository/promo_slider_repo.dart';
+import 'package:streammly/data/repository/wishlist_repo.dart';
 
 import '../controllers/business_setting_controller.dart';
 import '../controllers/category_controller.dart';
@@ -55,7 +56,8 @@ class Init {
       Get.lazyPut(() => CompanyController(companyRepo: Get.find()));
 
       //Wishlist
-      Get.lazyPut(() => WishlistController(categoryRepo: Get.find()));
+      Get.lazyPut(() => WishlistRepo(apiClient: Get.find()));
+      Get.lazyPut(() => WishlistController(companyController: Get.find()));
       // Package
       // Get.lazyPut(() => PackageRepo(apiClient: Get.find()));
       // Get.lazyPut(() => PackagesController(packageRepo: Get.find()));

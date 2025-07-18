@@ -130,8 +130,8 @@ class RecommendedVendors {
   bool get isChecked {
     return Get.find<WishlistController>().bookmarks.any(
           (e) =>
-      id == e.bookmarkableId &&
-          (e.bookmarkableType?.contains("VendorCompany") ?? false),
+      id == e.id &&
+          (e.companyType?.contains("company") ?? false),
     );
   }
 

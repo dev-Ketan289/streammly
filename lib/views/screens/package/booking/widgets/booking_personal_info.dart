@@ -17,7 +17,13 @@ class PersonalInfoSection extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text("Personal Info", style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w600, color: textColor)),
+        Text(
+          "Personal Info",
+          style: theme.textTheme.titleMedium?.copyWith(
+            fontWeight: FontWeight.w600,
+            color: textColor,
+          ),
+        ),
         const SizedBox(height: 5),
 
         // Name Field
@@ -38,7 +44,13 @@ class PersonalInfoSection extends StatelessWidget {
         const SizedBox(height: 16),
 
         // Mobile Number Section
-        Text("Mobile No *", style: theme.textTheme.bodyLarge?.copyWith(fontWeight: FontWeight.w500, color: textColor)),
+        Text(
+          "Mobile No *",
+          style: theme.textTheme.bodyLarge?.copyWith(
+            fontWeight: FontWeight.w500,
+            color: textColor,
+          ),
+        ),
         const SizedBox(height: 8),
         CustomTextField(
           labelText: "Number",
@@ -60,7 +72,13 @@ class PersonalInfoSection extends StatelessWidget {
           children: [
             TextButton.icon(
               onPressed: () => controller.addAlternateMobile(),
-              label: Text('Add +', style: theme.textTheme.bodyMedium?.copyWith(color: secondaryTextColor, fontWeight: FontWeight.w500)),
+              label: Text(
+                'Add +',
+                style: theme.textTheme.bodyMedium?.copyWith(
+                  color: secondaryTextColor,
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
             ),
           ],
         ),
@@ -84,7 +102,9 @@ class PersonalInfoSection extends StatelessWidget {
                             onChanged: (val) => rxStr.value = val,
                             validator: (value) {
                               if (value != null && value.isNotEmpty) {
-                                if (!RegExp(r'^\+?\d{10,12}\$').hasMatch(value)) {
+                                if (!RegExp(
+                                  r'^\+?\d{10,12}\$',
+                                ).hasMatch(value)) {
                                   return 'Please enter a valid mobile number';
                                 }
                               }
@@ -97,8 +117,17 @@ class PersonalInfoSection extends StatelessWidget {
                           onTap: () => controller.removeAlternateMobile(index),
                           child: Container(
                             padding: const EdgeInsets.all(8),
-                            decoration: BoxDecoration(color: theme.colorScheme.error.withValues(alpha: 0.1), borderRadius: BorderRadius.circular(6)),
-                            child: Icon(Icons.close, color: theme.colorScheme.error, size: 18),
+                            decoration: BoxDecoration(
+                              color: theme.colorScheme.error.withValues(
+                                alpha: 0.1,
+                              ),
+                              borderRadius: BorderRadius.circular(6),
+                            ),
+                            child: Icon(
+                              Icons.close,
+                              color: theme.colorScheme.error,
+                              size: 18,
+                            ),
                           ),
                         ),
                       ],
@@ -109,7 +138,13 @@ class PersonalInfoSection extends StatelessWidget {
         ),
 
         // Email Section
-        Text("Mail ID *", style: theme.textTheme.bodyLarge?.copyWith(fontWeight: FontWeight.w500, color: textColor)),
+        Text(
+          "Mail ID *",
+          style: theme.textTheme.bodyLarge?.copyWith(
+            fontWeight: FontWeight.w500,
+            color: textColor,
+          ),
+        ),
         const SizedBox(height: 8),
         CustomTextField(
           labelText: "Email",
@@ -131,7 +166,13 @@ class PersonalInfoSection extends StatelessWidget {
           children: [
             TextButton.icon(
               onPressed: () => controller.addAlternateEmail(),
-              label: Text('Add +', style: theme.textTheme.bodyMedium?.copyWith(color: secondaryTextColor, fontWeight: FontWeight.w500)),
+              label: Text(
+                'Add +',
+                style: theme.textTheme.bodyMedium?.copyWith(
+                  color: secondaryTextColor,
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
             ),
           ],
         ),
@@ -155,7 +196,9 @@ class PersonalInfoSection extends StatelessWidget {
                             onChanged: (val) => rxStr.value = val,
                             validator: (value) {
                               if (value != null && value.isNotEmpty) {
-                                if (!RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}\$').hasMatch(value)) {
+                                if (!RegExp(
+                                  r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}\$',
+                                ).hasMatch(value)) {
                                   return 'Please enter a valid email';
                                 }
                               }
@@ -168,8 +211,17 @@ class PersonalInfoSection extends StatelessWidget {
                           onTap: () => controller.removeAlternateEmail(index),
                           child: Container(
                             padding: const EdgeInsets.all(8),
-                            decoration: BoxDecoration(color: theme.colorScheme.error.withValues(alpha: 0.1), borderRadius: BorderRadius.circular(6)),
-                            child: Icon(Icons.close, color: theme.colorScheme.error, size: 18),
+                            decoration: BoxDecoration(
+                              color: theme.colorScheme.error.withValues(
+                                alpha: 0.1,
+                              ),
+                              borderRadius: BorderRadius.circular(6),
+                            ),
+                            child: Icon(
+                              Icons.close,
+                              color: theme.colorScheme.error,
+                              size: 18,
+                            ),
                           ),
                         ),
                       ],

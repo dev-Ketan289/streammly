@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:streammly/services/theme.dart';
 
 import '../../../../controllers/package_page_controller.dart';
 
@@ -19,7 +20,10 @@ class PackagesHeader extends StatelessWidget {
             child: Center(
               child: Text(
                 "Baby Shoot / New Born",
-                style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w600, color: const Color(0xFF4A6CF7)),
+                style: theme.textTheme.titleMedium?.copyWith(
+                  fontWeight: FontWeight.w600,
+                  color: primaryColor,
+                ),
                 overflow: TextOverflow.ellipsis,
               ),
             ),
@@ -29,11 +33,25 @@ class PackagesHeader extends StatelessWidget {
               mainAxisSize: MainAxisSize.min,
               children: [
                 IconButton(
-                  icon: Icon(Icons.grid_view, color: controller.isGridView.value ? const Color(0xFF4A6CF7) : theme.disabledColor, size: 20),
+                  icon: Icon(
+                    Icons.grid_view,
+                    color:
+                        controller.isGridView.value
+                            ? primaryColor
+                            : theme.disabledColor,
+                    size: 20,
+                  ),
                   onPressed: () => controller.setGridView(true),
                 ),
                 IconButton(
-                  icon: Icon(Icons.view_list, color: !controller.isGridView.value ? const Color(0xFF4A6CF7) : theme.disabledColor, size: 20),
+                  icon: Icon(
+                    Icons.view_list,
+                    color:
+                        !controller.isGridView.value
+                            ? primaryColor
+                            : theme.disabledColor,
+                    size: 20,
+                  ),
                   onPressed: () => controller.setGridView(false),
                 ),
               ],

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:streammly/controllers/wishlist_controller.dart';
 import 'package:streammly/models/category/category_model.dart';
+import 'package:streammly/models/vendors/recommanded_vendors.dart';
 import 'package:streammly/services/theme.dart';
 
 class VendorInfoCard extends StatefulWidget {
@@ -31,7 +32,7 @@ class VendorInfoCard extends StatefulWidget {
 }
 
 class _VendorInfoCardState extends State<VendorInfoCard> {
-  List<Bookmark> bookmarks = [];
+  List<RecommendedVendors> bookmarks = [];
   bool isLoading = true;
 
   @override

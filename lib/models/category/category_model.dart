@@ -24,41 +24,7 @@ class CategoryModel {
     );
   }
   bool get isBookMarked {
-    return Get.find<WishlistController>().bookmarks.any((e) => id == e.bookmarkableId && (e.bookmarkableType?.contains("Category") ?? false));
+    return Get.find<WishlistController>().bookmarks.any((e) => id == e.id && (e.companyType?.contains("company") ?? false));
   }
 }
 
-class Bookmark {
-  int? id;
-  int? userId;
-  String? bookmarkableType;
-  int? bookmarkableId;
-  dynamic deletedAt;
-  DateTime? createdAt;
-  DateTime? updatedAt;
-  String? status;
-
-  Bookmark({this.id, this.userId, this.bookmarkableType, this.bookmarkableId, this.deletedAt, this.createdAt, this.updatedAt, this.status});
-
-  factory Bookmark.fromJson(Map<String, dynamic> json) => Bookmark(
-    id: json["id"],
-    userId: json["user_id"],
-    bookmarkableType: json["bookmarkable_type"],
-    bookmarkableId: json["bookmarkable_id"],
-    deletedAt: json["deleted_at"],
-    createdAt: json["created_at"] == null ? null : DateTime.parse(json["created_at"]),
-    updatedAt: json["updated_at"] == null ? null : DateTime.parse(json["updated_at"]),
-    status: json["status"],
-  );
-
-  Map<String, dynamic> toJson() => {
-    "id": id,
-    "user_id": userId,
-    "bookmarkable_type": bookmarkableType,
-    "bookmarkable_id": bookmarkableId,
-    "deleted_at": deletedAt,
-    "created_at": createdAt?.toIso8601String(),
-    "updated_at": updatedAt?.toIso8601String(),
-    "status": status,
-  };
-}
