@@ -10,16 +10,18 @@ class PersonalInfoSection extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final controller = Get.find<BookingController>();
+    final theme = Theme.of(context);
+    final textColor = theme.colorScheme.onSurface;
+    final secondaryTextColor = textColor.withValues(alpha: 0.7);
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Text(
+        Text(
           "Personal Info",
-          style: TextStyle(
-            fontSize: 18,
+          style: theme.textTheme.titleMedium?.copyWith(
             fontWeight: FontWeight.w600,
-            color: Colors.black87,
+            color: textColor,
           ),
         ),
         const SizedBox(height: 5),
@@ -42,12 +44,11 @@ class PersonalInfoSection extends StatelessWidget {
         const SizedBox(height: 16),
 
         // Mobile Number Section
-        const Text(
+        Text(
           "Mobile No *",
-          style: TextStyle(
+          style: theme.textTheme.bodyLarge?.copyWith(
             fontWeight: FontWeight.w500,
-            fontSize: 16,
-            color: Colors.black87,
+            color: textColor,
           ),
         ),
         const SizedBox(height: 8),
@@ -60,7 +61,7 @@ class PersonalInfoSection extends StatelessWidget {
             if (value == null || value.isEmpty) {
               return 'Please enter your mobile number';
             }
-            if (!RegExp(r'^\+?\d{10,12}$').hasMatch(value)) {
+            if (!RegExp(r'^\+?\d{10,12}\$').hasMatch(value)) {
               return 'Please enter a valid mobile number';
             }
             return null;
@@ -71,16 +72,17 @@ class PersonalInfoSection extends StatelessWidget {
           children: [
             TextButton.icon(
               onPressed: () => controller.addAlternateMobile(),
-              label: const Text(
+              label: Text(
                 'Add +',
-                style: TextStyle(
-                  color: Color.fromARGB(255, 143, 149, 170),
+                style: theme.textTheme.bodyMedium?.copyWith(
+                  color: secondaryTextColor,
                   fontWeight: FontWeight.w500,
                 ),
               ),
             ),
           ],
         ),
+
         // Alternate Mobile Numbers
         Obx(
           () => Column(
@@ -101,7 +103,7 @@ class PersonalInfoSection extends StatelessWidget {
                             validator: (value) {
                               if (value != null && value.isNotEmpty) {
                                 if (!RegExp(
-                                  r'^\+?\d{10,12}$',
+                                  r'^\+?\d{10,12}\$',
                                 ).hasMatch(value)) {
                                   return 'Please enter a valid mobile number';
                                 }
@@ -110,17 +112,20 @@ class PersonalInfoSection extends StatelessWidget {
                             },
                           ),
                         ),
+                        const SizedBox(width: 8),
                         GestureDetector(
                           onTap: () => controller.removeAlternateMobile(index),
                           child: Container(
                             padding: const EdgeInsets.all(8),
                             decoration: BoxDecoration(
-                              color: Colors.red.shade50,
+                              color: theme.colorScheme.error.withValues(
+                                alpha: 0.1,
+                              ),
                               borderRadius: BorderRadius.circular(6),
                             ),
                             child: Icon(
                               Icons.close,
-                              color: Colors.red.shade600,
+                              color: theme.colorScheme.error,
                               size: 18,
                             ),
                           ),
@@ -133,12 +138,11 @@ class PersonalInfoSection extends StatelessWidget {
         ),
 
         // Email Section
-        const Text(
+        Text(
           "Mail ID *",
-          style: TextStyle(
+          style: theme.textTheme.bodyLarge?.copyWith(
             fontWeight: FontWeight.w500,
-            fontSize: 16,
-            color: Colors.black87,
+            color: textColor,
           ),
         ),
         const SizedBox(height: 8),
@@ -151,7 +155,7 @@ class PersonalInfoSection extends StatelessWidget {
             if (value == null || value.isEmpty) {
               return 'Please enter your email';
             }
-            if (!RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$').hasMatch(value)) {
+            if (!RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}\$').hasMatch(value)) {
               return 'Please enter a valid email';
             }
             return null;
@@ -162,16 +166,17 @@ class PersonalInfoSection extends StatelessWidget {
           children: [
             TextButton.icon(
               onPressed: () => controller.addAlternateEmail(),
-              label: const Text(
+              label: Text(
                 'Add +',
-                style: TextStyle(
-                  color: Color.fromARGB(255, 143, 149, 170),
+                style: theme.textTheme.bodyMedium?.copyWith(
+                  color: secondaryTextColor,
                   fontWeight: FontWeight.w500,
                 ),
               ),
             ),
           ],
         ),
+
         // Alternate Email Addresses
         Obx(
           () => Column(
@@ -192,7 +197,7 @@ class PersonalInfoSection extends StatelessWidget {
                             validator: (value) {
                               if (value != null && value.isNotEmpty) {
                                 if (!RegExp(
-                                  r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$',
+                                  r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}\$',
                                 ).hasMatch(value)) {
                                   return 'Please enter a valid email';
                                 }
@@ -207,12 +212,14 @@ class PersonalInfoSection extends StatelessWidget {
                           child: Container(
                             padding: const EdgeInsets.all(8),
                             decoration: BoxDecoration(
-                              color: Colors.red.shade50,
+                              color: theme.colorScheme.error.withValues(
+                                alpha: 0.1,
+                              ),
                               borderRadius: BorderRadius.circular(6),
                             ),
                             child: Icon(
                               Icons.close,
-                              color: Colors.red.shade600,
+                              color: theme.colorScheme.error,
                               size: 18,
                             ),
                           ),

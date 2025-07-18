@@ -175,9 +175,9 @@ class BookingSummaryPage extends StatelessWidget {
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.center,
                             children: [
-                              Text('Date of Shoot', style: Theme.of(context).textTheme.bodySmall?.copyWith(color: Colors.grey)),
+                              Text('Date of Shoot', style: GoogleFonts.roboto(fontWeight: FontWeight.w400, fontSize: 11, color: Colors.grey)),
                               const SizedBox(height: 4),
-                              Text(form['date']?.toString() ?? 'Not set', style: Theme.of(context).textTheme.bodyMedium?.copyWith(color: Colors.grey)),
+                              Text(form['date']?.toString() ?? 'Not set', style: GoogleFonts.roboto(fontWeight: FontWeight.w700, fontSize: 10, color: Colors.grey)),
                             ],
                           ),
                         ),
@@ -187,11 +187,11 @@ class BookingSummaryPage extends StatelessWidget {
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.center,
                             children: [
-                              Text('Timing', style: Theme.of(context).textTheme.bodySmall?.copyWith(color: Colors.grey)),
+                              Text('Timing', style: GoogleFonts.roboto(fontWeight: FontWeight.w400, fontSize: 11, color: Colors.grey)),
                               const SizedBox(height: 4),
                               Text(
                                 '${form['startTime']?.toString() ?? 'Not set'} - ${form['endTime']?.toString() ?? 'Not set'}',
-                                style: Theme.of(context).textTheme.bodyMedium?.copyWith(color: Colors.grey),
+                                style: GoogleFonts.roboto(fontWeight: FontWeight.w700, fontSize: 10, color: Colors.grey),
                               ),
                             ],
                           ),

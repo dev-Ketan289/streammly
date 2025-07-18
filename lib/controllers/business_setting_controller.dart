@@ -25,9 +25,19 @@ class BusinessSettingController extends GetxController {
       update();
 
       final response = await businessSettingRepo.getBusinessSettings();
-      settings = BusinessSettings.fromJson(response.body);
+
+      // Use only the 'data' part!
+      final data = response.body['data'];
+      if (response.body['success'] == true && data != null) {
+        settings = BusinessSettings.fromJson(data);
+        log(' Parsed terms: ${settings?.termsAndCondition}');
+      } else {
+        log('API did not return expected data');
+        log('Status: ${response.statusCode}');
+        log('Raw response: ${response.body}');
+      }
     } catch (e, st) {
-      log("Error fetching business settings: $e\n$st");
+      log(" Error fetching business settings: $e\n$st");
     } finally {
       isLoading = false;
       update();

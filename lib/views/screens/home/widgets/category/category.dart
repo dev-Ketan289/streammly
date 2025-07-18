@@ -24,8 +24,7 @@ class _CategoryListScreenState extends State<CategoryListScreen> {
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      // wishlistcontroller.loadBookmarks();
-      // wishlistController.loadBookmarks();
+      wishlistcontroller.loadBookmarks();
     });
   }
 
@@ -35,12 +34,8 @@ class _CategoryListScreenState extends State<CategoryListScreen> {
     return CustomBackground(
       child: Scaffold(
         backgroundColor: Colors.transparent,
-        bottomNavigationBar: NavigationHelper.buildBottomNav(),
-        floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
-        floatingActionButton: NavigationHelper.buildFloatingButton(),
         appBar: AppBar(
           surfaceTintColor: Colors.transparent,
-
           elevation: 0,
           backgroundColor: Colors.transparent,
           title: Text(
@@ -120,7 +115,52 @@ class _CategoryListScreenState extends State<CategoryListScreen> {
                                 ),
                               ),
                             ),
-                            // Bookmark icon and its functionality removed
+                            Positioned(
+                              top: 10,
+                              right: 10,
+                              child: GetBuilder<WishlistController>(
+                                builder: (wishlistController) {
+                                  return GestureDetector(
+                                    onTap: () {
+                                      wishlistController
+                                          .addBookmark(cat.id, "category")
+                                          .then((value) {
+                                            if (value.isSuccess) {
+                                              wishlistController
+                                                  .loadBookmarks();
+                                            }
+                                          });
+                                    },
+                                    child: Padding(
+                                      padding: const EdgeInsets.fromLTRB(
+                                        10,
+                                        5,
+                                        10,
+                                        10,
+                                      ),
+                                      child: Container(
+                                        height: 30,
+                                        width: 30,
+                                        decoration: BoxDecoration(
+                                          color: backgroundLight.withAlpha(70),
+                                          borderRadius: BorderRadius.circular(
+                                            10,
+                                          ),
+                                        ),
+                                        child: Icon(
+                                          Icons.bookmark_rounded,
+                                          size: 25,
+                                          color:
+                                              cat.isBookMarked
+                                                  ? Colors.red
+                                                  : Colors.white,
+                                        ),
+                                      ),
+                                    ),
+                                  );
+                                },
+                              ),
+                            ),
                           ],
                         ),
                         Padding(
@@ -157,6 +197,11 @@ class _CategoryListScreenState extends State<CategoryListScreen> {
             );
           },
         ),
+        bottomNavigationBar: NavigationHelper.buildBottomNav(),
+        floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
+        floatingActionButton: NavigationHelper.buildFloatingButton(),
+        // Optionally: hide tabs with `hiddenIndices`, e.g.
+        // bottomNavigationBar: NavigationHelper.buildBottomNav(hiddenIndices: {1}),
       ),
     );
   }

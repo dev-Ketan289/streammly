@@ -5,7 +5,13 @@ import 'package:streammly/generated/assets.dart';
 import 'package:streammly/views/screens/home/home_screen.dart';
 
 class NavigationMenu extends StatefulWidget {
-  const NavigationMenu({super.key});
+  final Set<int> hiddenIndices;
+  final bool hideFAB;
+  const NavigationMenu({
+    super.key,
+    this.hiddenIndices = const {},
+    this.hideFAB = false,
+  });
 
   @override
   State<NavigationMenu> createState() => _NavigationMenuState();
@@ -23,33 +29,36 @@ class _NavigationMenuState extends State<NavigationMenu> {
           builder: (_) => controller.screens[controller.selectedIndex](),
         ),
         floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
-        floatingActionButton: GetBuilder<NavigationController>(
-          builder:
-              (_) => CircleAvatar(
-                radius: 25,
-                backgroundColor: Colors.white,
-                child: FloatingActionButton(
-                  shape: const CircleBorder(),
-                  backgroundColor: Colors.white,
-                  elevation: 3,
-                  onPressed: () {
-                    controller.setIndex(2);
-                  },
-                  child: Container(
-                    height: 40,
-                    width: 40,
-                    decoration: BoxDecoration(
-                      color: const Color(0xffD9D9D9),
-                      shape: BoxShape.circle,
-                    ),
-                    child: SvgPicture.asset(
-                      Assets.svgCarttt,
-                      fit: BoxFit.scaleDown,
-                    ),
-                  ),
+        floatingActionButton:
+            widget.hideFAB
+                ? null
+                : GetBuilder<NavigationController>(
+                  builder:
+                      (_) => CircleAvatar(
+                        radius: 25,
+                        backgroundColor: Colors.white,
+                        child: FloatingActionButton(
+                          shape: const CircleBorder(),
+                          backgroundColor: Colors.white,
+                          elevation: 3,
+                          onPressed: () {
+                            controller.setIndex(2);
+                          },
+                          child: Container(
+                            height: 40,
+                            width: 40,
+                            decoration: BoxDecoration(
+                              color: const Color(0xffD9D9D9),
+                              shape: BoxShape.circle,
+                            ),
+                            child: SvgPicture.asset(
+                              Assets.svgCarttt,
+                              fit: BoxFit.scaleDown,
+                            ),
+                          ),
+                        ),
+                      ),
                 ),
-              ),
-        ),
         bottomNavigationBar: GetBuilder<NavigationController>(
           builder: (_) {
             return ClipRRect(
@@ -65,39 +74,44 @@ class _NavigationMenuState extends State<NavigationMenu> {
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceAround,
                     children: [
-                      _buildNavItem(
-                        theme: Theme.of(context),
-                        icon: Assets.svgHome,
-                        height: 15,
-                        spacing: 4,
-                        label: 'Home',
-                        index: 0,
-                      ),
-                      _buildNavItem(
-                        theme: Theme.of(context),
-                        icon: Assets.svgShop,
-                        height: 15,
-                        spacing: 4,
-                        label: 'Shop',
-                        index: 1,
-                      ),
-                      const SizedBox(width: 25), // Space for FAB
-                      _buildNavItem(
-                        theme: Theme.of(context),
-                        icon: Assets.svgBooking,
-                        height: 15,
-                        spacing: 4,
-                        label: 'Bookings',
-                        index: 3,
-                      ),
-                      _buildNavItem(
-                        theme: Theme.of(context),
-                        icon: Assets.svgMore,
-                        height: 5,
-                        spacing: 15,
-                        label: 'More',
-                        index: 4,
-                      ),
+                      if (!widget.hiddenIndices.contains(0))
+                        _buildNavItem(
+                          theme: Theme.of(context),
+                          icon: Assets.svgHome,
+                          height: 15,
+                          spacing: 4,
+                          label: 'Home',
+                          index: 0,
+                        ),
+                      if (!widget.hiddenIndices.contains(1))
+                        _buildNavItem(
+                          theme: Theme.of(context),
+                          icon: Assets.svgShop,
+                          height: 15,
+                          spacing: 4,
+                          label: 'Shop',
+                          index: 1,
+                        ),
+                      if (!widget.hideFAB)
+                        const SizedBox(width: 25), // FAB Space
+                      if (!widget.hiddenIndices.contains(3))
+                        _buildNavItem(
+                          theme: Theme.of(context),
+                          icon: Assets.svgBooking,
+                          height: 15,
+                          spacing: 4,
+                          label: 'Bookings',
+                          index: 3,
+                        ),
+                      if (!widget.hiddenIndices.contains(4))
+                        _buildNavItem(
+                          theme: Theme.of(context),
+                          icon: Assets.svgMore,
+                          height: 5,
+                          spacing: 15,
+                          label: 'More',
+                          index: 4,
+                        ),
                     ],
                   ),
                 ),
@@ -130,7 +144,7 @@ class _NavigationMenuState extends State<NavigationMenu> {
             colorFilter:
                 isSelected
                     ? ColorFilter.mode(theme.primaryColor, BlendMode.srcIn)
-                    : ColorFilter.mode(Colors.black54, BlendMode.srcIn),
+                    : null,
           ),
           SizedBox(height: spacing),
           Text(
@@ -166,7 +180,10 @@ class NavigationController extends GetxController {
 
 // Static methods for use outside NavigationMenu
 class NavigationHelper {
-  static Widget buildBottomNav() {
+  static Widget buildBottomNav({
+    Set<int> hiddenIndices = const {},
+    bool hideFAB = false,
+  }) {
     return ClipRRect(
       borderRadius: const BorderRadius.only(
         topLeft: Radius.circular(20),
@@ -182,36 +199,39 @@ class NavigationHelper {
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceAround,
             children: [
-              _buildNavItem(
-                icon: Assets.svgHome,
-                label: 'Home',
-                index: 0,
-                height: 15,
-                spacing: 4,
-              ),
-              _buildNavItem(
-                icon: Assets.svgShop,
-                label: 'Shop',
-                index: 1,
-                height: 15,
-                spacing: 4,
-              ),
-              const SizedBox(width: 25), // Space for FAB
-              _buildNavItem(
-                icon: Assets.svgBooking,
-                label: 'Bookings',
-                index: 3,
-                height: 15,
-                spacing: 4,
-              ),
-
-              _buildNavItem(
-                icon: Assets.svgMore,
-                label: 'More',
-                index: 4,
-                height: 5,
-                spacing: 15,
-              ),
+              if (!hiddenIndices.contains(0))
+                _buildNavItem(
+                  icon: Assets.svgHome,
+                  label: 'Home',
+                  index: 0,
+                  height: 15,
+                  spacing: 4,
+                ),
+              if (!hiddenIndices.contains(1))
+                _buildNavItem(
+                  icon: Assets.svgShop,
+                  label: 'Shop',
+                  index: 1,
+                  height: 15,
+                  spacing: 4,
+                ),
+              if (!hideFAB) const SizedBox(width: 25), // FAB space
+              if (!hiddenIndices.contains(3))
+                _buildNavItem(
+                  icon: Assets.svgBooking,
+                  label: 'Bookings',
+                  index: 3,
+                  height: 15,
+                  spacing: 4,
+                ),
+              if (!hiddenIndices.contains(4))
+                _buildNavItem(
+                  icon: Assets.svgMore,
+                  label: 'More',
+                  index: 4,
+                  height: 5,
+                  spacing: 15,
+                ),
             ],
           ),
         ),
@@ -262,7 +282,6 @@ class NavigationHelper {
         shape: const CircleBorder(),
         backgroundColor: Colors.white,
         elevation: 3,
-
         onPressed: () {
           try {
             Get.find<NavigationController>().setIndex(2);

@@ -1,4 +1,3 @@
-// Your import statements remain unchanged
 import 'package:dotted_border/dotted_border.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
@@ -61,6 +60,7 @@ class _PackageFormCardState extends State<PackageFormCard> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     TextEditingController studioAddController = TextEditingController(text: widget.package['address'] ?? '305/A, Navneet Building, Saivihar Road, Bhandup (W), Mumbai 400078.');
     final controller = Get.find<BookingController>();
     final packageTitle = widget.package['title'] as String;
@@ -84,7 +84,7 @@ class _PackageFormCardState extends State<PackageFormCard> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text("$packageTitle Booking Schedule", style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w600, color: Colors.black87)),
+            Text("$packageTitle Booking Schedule", style: theme.textTheme.titleMedium?.copyWith(fontSize: 18, fontWeight: FontWeight.w600)),
             const SizedBox(height: 20),
             CustomTextField(labelText: 'Studio Address *', controller: studioAddController, readOnly: true),
             const SizedBox(height: 16),
@@ -167,7 +167,7 @@ class _PackageFormCardState extends State<PackageFormCard> {
                 },
               ),
             const SizedBox(height: 16),
-            const Text("Questions", style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600, color: Colors.black87)),
+            Text("Questions", style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w600)),
             const SizedBox(height: 16),
             ..._buildExtraQuestions(controller),
             const SizedBox(height: 32),
@@ -183,28 +183,60 @@ class _PackageFormCardState extends State<PackageFormCard> {
             ),
             if (form['freeAddOn'] != null) ...[
               const SizedBox(height: 12),
-              Container(
-                decoration: BoxDecoration(color: const Color(0xffF9F9F9), border: Border.all(color: Colors.grey.shade300), borderRadius: BorderRadius.circular(10)),
-                padding: const EdgeInsets.all(12),
-                child: Row(
-                  children: [
-                    ClipRRect(borderRadius: BorderRadius.circular(8), child: Image.asset(form['freeAddOn']['image'], height: 50, width: 50, fit: BoxFit.cover)),
-                    const SizedBox(width: 12),
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text('Selected Add-Ons', style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold)),
+                      Row(
                         children: [
-                          Text(form['freeAddOn']['title'], style: const TextStyle(fontWeight: FontWeight.bold)),
-                          const SizedBox(height: 2),
-                          Text(form['freeAddOn']['description'], style: TextStyle(color: Colors.grey.shade600)),
-                          const SizedBox(height: 2),
-                          const Text('Shoot Duration : 1', style: TextStyle(color: Colors.grey)),
+                          IconButton(
+                            icon: Icon(Icons.edit, color: const Color(0xff2864A6)),
+                            onPressed: () async {
+                              final result = await Navigator.push(context, getCustomRoute(child: FreeItemsPage()));
+                              if (result != null) {
+                                controller.updatePackageForm(widget.index, 'freeAddOn', result);
+                              }
+                            },
+                          ),
+                          IconButton(
+                            icon: Icon(Icons.close, color: theme.colorScheme.error),
+                            onPressed: () {
+                              controller.updatePackageForm(widget.index, 'freeAddOn', null);
+                            },
+                          ),
                         ],
                       ),
+                    ],
+                  ),
+                  const SizedBox(height: 4),
+                  Text('Toddler Live Setup', style: theme.textTheme.bodyLarge?.copyWith(fontWeight: FontWeight.w600)),
+                  const SizedBox(height: 8),
+                  Container(
+                    decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(12), border: Border.all(color: Colors.grey.shade300)),
+                    padding: const EdgeInsets.all(10),
+                    child: Row(
+                      children: [
+                        ClipRRect(borderRadius: BorderRadius.circular(8), child: Image.asset(form['freeAddOn']['image'], height: 50, width: 50, fit: BoxFit.cover)),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(form['freeAddOn']['title'], style: theme.textTheme.bodyLarge?.copyWith(fontWeight: FontWeight.bold)),
+                              const SizedBox(height: 2),
+                              Text(form['freeAddOn']['description'], style: theme.textTheme.bodySmall?.copyWith(color: Colors.grey)),
+                              const SizedBox(height: 2),
+                              const Text('Shoot Duration : 1', style: TextStyle(fontSize: 12, color: Colors.grey)),
+                            ],
+                          ),
+                        ),
+                      ],
                     ),
-                    IconButton(icon: const Icon(Icons.close, color: Colors.red), onPressed: () => controller.updatePackageForm(widget.index, 'freeAddOn', null)),
-                  ],
-                ),
+                  ),
+                ],
               ),
             ],
             const SizedBox(height: 16),
@@ -218,39 +250,72 @@ class _PackageFormCardState extends State<PackageFormCard> {
                 }
               },
             ),
-            if (form['extraAddOn'] is List) ...[
+            if (form['extraAddOn'] is List && (form['extraAddOn'] as List).isNotEmpty) ...[
               const SizedBox(height: 12),
-              ...(form['extraAddOn'] as List).map<Widget>((item) {
-                return Container(
-                  margin: const EdgeInsets.only(bottom: 10),
-                  decoration: BoxDecoration(color: const Color(0xffF9F9F9), border: Border.all(color: Colors.grey.shade300), borderRadius: BorderRadius.circular(10)),
-                  padding: const EdgeInsets.all(12),
-                  child: Row(
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      Container(height: 50, width: 50, color: Colors.grey.shade200, child: const Icon(Icons.image, color: Colors.grey)),
-                      const SizedBox(width: 12),
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(item['title'], style: const TextStyle(fontWeight: FontWeight.bold)),
-                            Text(item['description'], style: const TextStyle(color: Colors.grey, fontSize: 12)),
-                            Text('Shoot Duration : ${item['duration']}', style: const TextStyle(color: Colors.grey, fontSize: 12)),
-                          ],
-                        ),
-                      ),
-                      IconButton(
-                        icon: const Icon(Icons.close, color: Colors.red),
-                        onPressed: () {
-                          final updated = List.from(form['extraAddOn']);
-                          updated.remove(item);
-                          controller.updatePackageForm(widget.index, 'extraAddOn', updated);
-                        },
+                      Text('Selected Add-Ons', style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold)),
+                      Row(
+                        children: [
+                          IconButton(
+                            icon: Icon(Icons.edit, color: const Color(0xff2864A6)),
+                            onPressed: () async {
+                              final result = await Navigator.push(context, getCustomRoute(child: ExtraAddOnsPage()));
+                              if (result != null && result is List) {
+                                controller.updatePackageForm(widget.index, 'extraAddOn', result);
+                              }
+                            },
+                          ),
+                          IconButton(
+                            icon: Icon(Icons.close, color: theme.colorScheme.error),
+                            onPressed: () {
+                              controller.updatePackageForm(widget.index, 'extraAddOn', []);
+                            },
+                          ),
+                        ],
                       ),
                     ],
                   ),
-                );
-              }).toList(),
+                  const SizedBox(height: 4),
+                  Text('Toddler Live Setup', style: theme.textTheme.bodyLarge?.copyWith(fontWeight: FontWeight.w600)),
+                  const SizedBox(height: 8),
+                  ...form['extraAddOn'].map<Widget>((item) {
+                    return Container(
+                      margin: const EdgeInsets.only(bottom: 10),
+                      decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(12), border: Border.all(color: Colors.grey.shade300)),
+                      padding: const EdgeInsets.all(10),
+                      child: Row(
+                        children: [
+                          ClipRRect(
+                            borderRadius: BorderRadius.circular(8),
+                            child:
+                                item['image'] != null
+                                    ? Image.asset(item['image'], height: 50, width: 50, fit: BoxFit.cover)
+                                    : Container(height: 50, width: 50, color: theme.colorScheme.surface, child: const Icon(Icons.image, color: Colors.grey)),
+                          ),
+                          const SizedBox(width: 12),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(item['title'], style: theme.textTheme.bodyLarge?.copyWith(fontWeight: FontWeight.bold)),
+                                const SizedBox(height: 2),
+                                Text(item['description'], style: theme.textTheme.bodySmall?.copyWith(color: Colors.grey)),
+                                const SizedBox(height: 2),
+                                Text('Shoot Duration : ${item['duration']}', style: const TextStyle(fontSize: 12, color: Colors.grey)),
+                              ],
+                            ),
+                          ),
+                        ],
+                      ),
+                    );
+                  }).toList(),
+                ],
+              ),
             ],
             const SizedBox(height: 32),
             Row(
@@ -262,23 +327,23 @@ class _PackageFormCardState extends State<PackageFormCard> {
                     width: 20,
                     height: 20,
                     decoration: BoxDecoration(
-                      color: form['termsAccepted'] == true ? const Color(0xFF4A6CF7) : Colors.white,
-                      border: Border.all(color: form['termsAccepted'] == true ? const Color(0xFF4A6CF7) : Colors.grey.shade400),
+                      color: form['termsAccepted'] == true ? theme.colorScheme.primary : Colors.white,
+                      border: Border.all(color: form['termsAccepted'] == true ? theme.colorScheme.primary : theme.dividerColor),
                       borderRadius: BorderRadius.circular(4),
                     ),
-                    child: form['termsAccepted'] == true ? const Icon(Icons.check, color: Colors.white, size: 14) : null,
+                    child: form['termsAccepted'] == true ? Icon(Icons.check, color: Colors.white, size: 14) : null,
                   ),
                 ),
                 const SizedBox(width: 12),
                 Expanded(
                   child: RichText(
                     text: TextSpan(
-                      style: const TextStyle(fontSize: 14, color: Colors.black87),
+                      style: theme.textTheme.bodyMedium,
                       children: [
                         const TextSpan(text: 'I accept the '),
                         TextSpan(
                           text: 'Terms and Conditions',
-                          style: const TextStyle(color: Color(0xFF4A6CF7), decoration: TextDecoration.underline),
+                          style: TextStyle(color: theme.colorScheme.primary, decoration: TextDecoration.underline),
                           recognizer:
                               TapGestureRecognizer()
                                 ..onTap = () {
@@ -289,7 +354,7 @@ class _PackageFormCardState extends State<PackageFormCard> {
                                 },
                         ),
                         const TextSpan(text: ' and agree to the '),
-                        const TextSpan(text: 'Privacy Policy', style: TextStyle(color: Color(0xFF4A6CF7), decoration: TextDecoration.underline)),
+                        TextSpan(text: 'Privacy Policy', style: TextStyle(color: theme.colorScheme.primary, decoration: TextDecoration.underline)),
                       ],
                     ),
                   ),
@@ -370,6 +435,7 @@ class _PackageFormCardState extends State<PackageFormCard> {
   }
 
   Widget _buildExpandableSection({required String title, required bool isSelected, required VoidCallback onTap}) {
+    final theme = Theme.of(context);
     return GestureDetector(
       onTap: onTap,
       child: DottedBorder(
@@ -379,8 +445,8 @@ class _PackageFormCardState extends State<PackageFormCard> {
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Text(title, style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500, color: isSelected ? const Color(0xFF4A6CF7) : Colors.black87)),
-              Icon(isSelected ? Icons.remove : Icons.add, color: isSelected ? const Color(0xFF4A6CF7) : Colors.grey.shade600),
+              Text(title, style: theme.textTheme.bodyLarge?.copyWith(color: isSelected ? theme.colorScheme.primary : theme.colorScheme.onSurface)),
+              Icon(isSelected ? Icons.remove : Icons.add, color: isSelected ? theme.colorScheme.primary : theme.iconTheme.color),
             ],
           ),
         ),

@@ -36,6 +36,7 @@ class BookingPage extends StatelessWidget {
           elevation: 0,
           centerTitle: true,
         ),
+        backgroundColor: Colors.transparent,
         body: Obx(
           () => Column(
             children: [
@@ -127,7 +128,7 @@ class BookingPage extends StatelessWidget {
               Container(
                 padding: const EdgeInsets.all(20),
                 decoration: BoxDecoration(
-                  color: Colors.white,
+                  color: Colors.transparent,
                   boxShadow: [
                     BoxShadow(
                       color: Colors.grey.shade200,
