@@ -41,8 +41,8 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   List<CategoryItem> convertToCategoryItems(List<CategoryModel> models) {
-    // final String baseUrl = 'https://admin.streammly.com/';
-    final String baseUrl = 'http://192.168.1.113:8000/';
+    final String baseUrl = 'https://admin.streammly.com/';
+    // final String baseUrl = 'http://192.168.1.113:8000/';
 
     return models.map((model) {
       String? fullImageUrl;

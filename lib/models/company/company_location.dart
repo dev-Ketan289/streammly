@@ -31,8 +31,8 @@ class CompanyLocation {
   factory CompanyLocation.fromJson(Map<String, dynamic> json) {
     String _fullUrl(String? path) {
       if (path == null || path.isEmpty) return '';
-      // return 'https://admin.streammly.com/${path.replaceFirst(RegExp(r'^/+'), '')}';
-      return 'http://192.168.1.113/${path.replaceFirst(RegExp(r'^/+'), '')}';
+      return 'https://admin.streammly.com/${path.replaceFirst(RegExp(r'^/+'), '')}';
+      // return 'http://192.168.1.113/${path.replaceFirst(RegExp(r'^/+'), '')}';
     }
 
     return CompanyLocation(
