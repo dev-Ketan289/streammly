@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:streammly/controllers/wishlist_controller.dart';
 import 'package:streammly/services/constants.dart';
 import 'package:streammly/services/theme.dart';
 import 'package:streammly/views/widgets/custom_doodle.dart';
@@ -24,7 +25,7 @@ class _CategoryListScreenState extends State<CategoryListScreen> {
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      wishlistcontroller.loadBookmarks();
+      Get.find<WishlistController>().loadBookmarks();
     });
   }
 
