@@ -26,7 +26,6 @@ class _CategoryListScreenState extends State<CategoryListScreen> {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
       wishlistcontroller.loadBookmarks();
-      // wishlistController.loadBookmarks();
     });
   }
 
@@ -36,12 +35,8 @@ class _CategoryListScreenState extends State<CategoryListScreen> {
     return CustomBackground(
       child: Scaffold(
         backgroundColor: Colors.transparent,
-        bottomNavigationBar: NavigationHelper.buildBottomNav(),
-        floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
-        floatingActionButton: NavigationHelper.buildFloatingButton(),
         appBar: AppBar(
           surfaceTintColor: Colors.transparent,
-          
           elevation: 0,
           backgroundColor: Colors.transparent,
           title: Text("Categorie's", style: theme.textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold, color: primaryColor)),
@@ -60,13 +55,13 @@ class _CategoryListScreenState extends State<CategoryListScreen> {
             } else if (controller.categories.isEmpty) {
               return Center(child: Text("No categories found.", style: theme.textTheme.bodyMedium));
             }
-      
+
             return ListView.builder(
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
               itemCount: controller.categories.length,
               itemBuilder: (context, index) {
                 final cat = controller.categories[index];
-      
+
                 return GestureDetector(
                   onTap: () {
                     Get.to(() => CompanyLocatorMapScreen(categoryId: cat.id));
@@ -108,16 +103,15 @@ class _CategoryListScreenState extends State<CategoryListScreen> {
                                           wishlistController.loadBookmarks();
                                         }
                                       });
-      
-                                      // if (isToggled) {
-                                      //   isToggled = !isToggled;
-      
-                                      // }
                                     },
-      
                                     child: Padding(
                                       padding: const EdgeInsets.fromLTRB(10, 5, 10, 10),
-                                      child: Container(height: 30, width: 30, decoration: BoxDecoration(color: backgroundLight.withAlpha(70), borderRadius: BorderRadius.circular(10)), child: Icon(Icons.bookmark_rounded, size: 25, color: cat.isBookMarked ? Colors.red : Colors.white)),
+                                      child: Container(
+                                        height: 30,
+                                        width: 30,
+                                        decoration: BoxDecoration(color: backgroundLight.withAlpha(70), borderRadius: BorderRadius.circular(10)),
+                                        child: Icon(Icons.bookmark_rounded, size: 25, color: cat.isBookMarked ? Colors.red : Colors.white),
+                                      ),
                                     ),
                                   );
                                 },
@@ -130,7 +124,7 @@ class _CategoryListScreenState extends State<CategoryListScreen> {
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              Text(cat.title, style: theme.textTheme.labelMedium?.copyWith(fontWeight: FontWeight.bold,fontSize: 14)),
+                              Text(cat.title, style: theme.textTheme.labelMedium?.copyWith(fontWeight: FontWeight.bold, fontSize: 14)),
                               const SizedBox(height: 4),
                               Text(cat.shortDescription ?? "No description available", style: theme.textTheme.bodySmall?.copyWith(color: Colors.grey)),
                             ],
@@ -144,6 +138,11 @@ class _CategoryListScreenState extends State<CategoryListScreen> {
             );
           },
         ),
+        bottomNavigationBar: NavigationHelper.buildBottomNav(),
+        floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
+        floatingActionButton: NavigationHelper.buildFloatingButton(),
+        // Optionally: hide tabs with `hiddenIndices`, e.g.
+        // bottomNavigationBar: NavigationHelper.buildBottomNav(hiddenIndices: {1}),
       ),
     );
   }

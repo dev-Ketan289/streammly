@@ -29,8 +29,6 @@ class AppConstants {
   // static String baseUrl = 'https://admin.streammly.com/';
   static String baseUrl = 'http://192.168.1.113:8000/';
 
-  ///USE FOR Second Local in case first not working
-  //TODO: Change Base Url
   static String appName = 'App Name';
 
   static const String agoraAppId = 'c87b710048c049f59570bd1895b7e561';
