@@ -1,15 +1,16 @@
 import 'dart:developer';
 
 import 'package:get/get.dart';
-import 'package:streammly/data/repository/category_repo.dart';
-import 'package:streammly/models/category/category_model.dart';
+import 'package:streammly/controllers/company_controller.dart';
+import 'package:streammly/data/repository/wishlist_repo.dart';
 import 'package:streammly/models/response/response_model.dart';
+import 'package:streammly/models/vendors/recommanded_vendors.dart';
 
 class WishlistController extends GetxController implements GetxService {
-  final CategoryRepo categoryRepo;
-  WishlistController({required this.categoryRepo});
+  final CompanyController companyController;
+  WishlistController({required this.companyController});
 
-  List<Bookmark> bookmarks = [];
+  List<RecommendedVendors> bookmarks = [];
   bool isLoading = true;
 
   Future<ResponseModel> loadBookmarks() async {
@@ -17,10 +18,13 @@ class WishlistController extends GetxController implements GetxService {
     update();
     ResponseModel responseModel;
     try {
-      Response response = await categoryRepo.getBookMark();
+      Response response = await Get.find<WishlistRepo>().getBookMark();
       log('${response.bodyString}', name: 'ljkdfs');
       if (response.statusCode == 200) {
-        bookmarks = (response.body['data'] as List<dynamic>).map((item) => Bookmark.fromJson(item)).toList();
+        bookmarks =
+            (response.body['data'] as List<dynamic>)
+                .map((item) => RecommendedVendors.fromJson(item))
+                .toList();
         responseModel = ResponseModel(true, "Got Bookmarks");
       } else {
         bookmarks = [];
@@ -41,7 +45,10 @@ class WishlistController extends GetxController implements GetxService {
     update();
     ResponseModel responseModel;
     try {
-      Response response = await categoryRepo.postBookmark(typeId, type);
+      Response response = await Get.find<WishlistRepo>().postBookmark(
+        typeId,
+        type,
+      );
       if (response.statusCode == 200) {
         responseModel = ResponseModel(true, "Bookmark added");
         await loadBookmarks(); // Refresh bookmarks after adding/removing

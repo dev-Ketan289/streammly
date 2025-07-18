@@ -53,8 +53,8 @@ class QuoteController extends GetxController {
       "favorable_end_time": favorableEndTime,
     };
     
-    final url = Uri.parse("https://admin.streammly.com/api/v1/quotation/addquotation");
-    // final url = Uri.parse("http://192.168.1.113:8000/api/v1/quotation/addquotation");
+    // final url = Uri.parse("https://admin.streammly.com/api/v1/quotation/addquotation");
+    final url = Uri.parse("http://192.168.1.113:8000/api/v1/quotation/addquotation");
 
 
     print("POST URL: $url");
