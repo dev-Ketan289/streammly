@@ -29,10 +29,9 @@ class CompanyLocation {
   });
 
   factory CompanyLocation.fromJson(Map<String, dynamic> json) {
-    String _fullUrl(String? path) {
+    String fullUrl(String? path) {
       if (path == null || path.isEmpty) return '';
-      return 'https://admin.streammly.com/${path.replaceFirst(RegExp(r'^/+'), '')}';
-      // return 'http://192.168.1.113/${path.replaceFirst(RegExp(r'^/+'), '')}';
+      return path.replaceFirst(RegExp(r'^/+'), '');
     }
 
     return CompanyLocation(
@@ -40,8 +39,8 @@ class CompanyLocation {
       companyName: json['company_name'] ?? 'Unknown',
       latitude: json['latitude'] != null ? double.tryParse(json['latitude'].toString()) : null,
       longitude: json['longitude'] != null ? double.tryParse(json['longitude'].toString()) : null,
-      bannerImage: _fullUrl(json['banner_image']),
-      logo: _fullUrl(json['logo']),
+      bannerImage: fullUrl(json['banner_image']),
+      logo: fullUrl(json['logo']),
       description: json['description'],
       categoryName: json['category_name'],
       rating: json['rating'] != null ? double.tryParse(json['rating'].toString()) ?? 3.9 : 3.9,
