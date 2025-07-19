@@ -38,9 +38,6 @@ class _RecommendedListState extends State<RecommendedList> {
     final itemWidth = (screenWidth * 0.45).clamp(140.0, 180.0);
     final itemHeight = itemWidth * 1.7;
 
-    const baseUrl = "https://admin.streammly.com/";
-    // const baseUrl = "http://192.168.1.113/";
-
     return SizedBox(
       height: itemHeight + 16,
       child: ListView.separated(
@@ -55,8 +52,8 @@ class _RecommendedListState extends State<RecommendedList> {
           final vendor = widget.recommendedVendors[index];
 
           final imageUrl =
-              vendor.bannerImage != null
-                  ? baseUrl + (vendor.bannerImage ?? '')
+              vendor.logo != null
+                  ? (vendor.logo ?? '')
                   : "assets/images/placeholder.jpg";
 
           final rating = vendor.rating?.toStringAsFixed(1) ?? "--";
@@ -65,12 +62,12 @@ class _RecommendedListState extends State<RecommendedList> {
               vendor.vendorcategory?.first.getCategory?.title ?? "Service";
 
           final distanceKm = vendor.id;
-          final distanceText =
-              distanceKm != null
-                  ? (distanceKm < 1
-                      ? "${(distanceKm * 1000).toStringAsFixed(0)} m"
-                      : "${distanceKm.toStringAsFixed(1)} km")
-                  : "--";
+          // final distanceText =
+          distanceKm != null
+              ? (distanceKm < 1
+                  ? "${(distanceKm * 1000).toStringAsFixed(0)} m"
+                  : "${distanceKm.toStringAsFixed(1)} km")
+              : "--";
           final time =
               distanceKm != null
                   ? "${(distanceKm * 7).round()} mins . ${distanceKm.toStringAsFixed(1)} km"
@@ -100,12 +97,9 @@ class _RecommendedListState extends State<RecommendedList> {
                         : null,
                 bannerImage:
                     vendor.bannerImage != null
-                        ? 'https://admin.streammly.com/${vendor.bannerImage}'
+                        ? vendor.bannerImage ?? ''
                         : null,
-                logo:
-                    vendor.logo != null
-                        ? 'https://admin.streammly.com/${vendor.logo}'
-                        : null,
+                logo: vendor.logo != null ? vendor.logo ?? '' : null,
                 description: vendor.description,
                 categoryName:
                     vendor.vendorcategory?.isNotEmpty == true

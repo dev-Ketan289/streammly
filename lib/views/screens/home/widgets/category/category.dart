@@ -106,8 +106,7 @@ class _CategoryListScreenState extends State<CategoryListScreen> {
                                   right: 15,
                                 ),
                                 child: TRoundedImage(
-                                  imageUrl:
-                                      "${AppConstants.baseUrl}${cat.image}",
+                                  imageUrl: cat.image ?? '',
                                   height: 100,
                                   width: 380,
                                   fit: BoxFit.cover,

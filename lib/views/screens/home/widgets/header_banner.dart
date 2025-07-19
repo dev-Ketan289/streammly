@@ -1,5 +1,4 @@
 import 'dart:async';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:get/get.dart';
@@ -8,7 +7,6 @@ import 'package:streammly/generated/assets.dart';
 import 'package:streammly/services/theme.dart';
 import 'package:streammly/views/screens/common/enter_location_manually.dart';
 import 'package:streammly/views/screens/profile/drawer.dart';
-
 import '../../../../controllers/location_controller.dart';
 import '../../../../models/banner/banner_item.dart';
 
@@ -153,11 +151,11 @@ class _HeaderBannerState extends State<HeaderBanner> {
                       MediaQuery.of(context).size.height * 0.25;
                   return currentSlide!.isSvg
                       ? SvgPicture.network(
-                        "https://admin.streammly.com/${currentSlide.vectorImage}",
+                        currentSlide.vectorImage,
                         height: vectorImageHeight,
                       )
                       : Image.network(
-                        "https://admin.streammly.com/${currentSlide.vectorImage}",
+                        currentSlide.vectorImage,
                         height: vectorImageHeight,
                       );
                 },

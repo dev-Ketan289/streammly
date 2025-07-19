@@ -12,11 +12,7 @@ class SubVertical {
     return SubVertical(
       id: json['id'],
       title: json['title'] ?? 'Untitled',
-      image:
-          cleanedPath.isNotEmpty
-              ? 'https://admin.streammly.com/$cleanedPath'
-              : null,
+      image: cleanedPath.isNotEmpty ? cleanedPath : null,
     );
-    // return SubVertical(id: json['id'], title: json['title'] ?? 'Untitled', image: cleanedPath.isNotEmpty ? 'http://192.168.1.113:8000/$cleanedPath' : null);
   }
 }

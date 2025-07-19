@@ -9,8 +9,18 @@ class CategoryModel {
   final String? companyName;
   final double? latitude;
   final double? longitude;
+  final String? icon;
 
-  CategoryModel({required this.id, required this.title, this.image, this.shortDescription, this.companyName, this.latitude, this.longitude});
+  CategoryModel({
+    required this.id,
+    required this.title,
+    this.image,
+    this.shortDescription,
+    this.companyName,
+    this.latitude,
+    this.longitude,
+    this.icon,
+  });
 
   factory CategoryModel.fromJson(Map<String, dynamic> json) {
     return CategoryModel(
@@ -21,10 +31,13 @@ class CategoryModel {
       companyName: json['company_name'],
       latitude: json['latitude'] != null ? double.tryParse(json['latitude'].toString()) : null,
       longitude: json['longitude'] != null ? double.tryParse(json['longitude'].toString()) : null,
+      icon: json['icon'],
     );
   }
+
   bool get isBookMarked {
-    return Get.find<WishlistController>().bookmarks.any((e) => id == e.id && (e.companyType?.contains("company") ?? false));
+    return Get.find<WishlistController>().bookmarks.any(
+          (e) => id == e.id && (e.companyType?.contains("company") ?? false),
+    );
   }
 }
-

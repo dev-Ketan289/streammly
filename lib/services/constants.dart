@@ -48,7 +48,6 @@ class AppConstants {
   static const String extras = 'api/v1/extra';
 
   // Category
-  // Category
   static const String categoriesUrl = 'api/v1/basic/categories';
 
   // Home
