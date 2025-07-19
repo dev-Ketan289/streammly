@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:streammly/controllers/wishlist_controller.dart';
 import 'package:streammly/views/screens/home/widgets/category/widgets/recommended_vendor_card.dart';
+import 'package:streammly/models/vendors/recommanded_vendors.dart';
 
 class WishlistPage extends StatefulWidget {
   const WishlistPage({super.key});
@@ -69,7 +70,25 @@ class _WishlistPageState extends State<WishlistPage> {
                     wishlistController: wishlistController,
                     onTap: () {
                       Get.bottomSheet(
-                        WishlistBottomSheet(),
+                        WishlistBottomSheet(
+                          vendor: controller.bookmarks[index],
+                          onRemove: () async {
+                            final result = await wishlistController.addBookmark(
+                              controller
+                                  .bookmarks[index]
+                                  .id, // or the correct ID field
+                              "vendor", // or the correct type
+                            );
+                            if (result.isSuccess) {
+                              Get.snackbar(
+                                'Removed',
+                                'Item removed from wishlist',
+                              );
+                            } else {
+                              Get.snackbar('Error', result.message);
+                            }
+                          },
+                        ),
                       );
                     },
                     vendor: controller.bookmarks[index],
@@ -78,7 +97,6 @@ class _WishlistPageState extends State<WishlistPage> {
                     companyName: controller.bookmarks[index].companyName ?? '',
                     category: controller.bookmarks[index].companyType ?? '',
                     time: controller.bookmarks[index].longitude ?? '',
-                
                   ),
                 );
               },
@@ -90,8 +108,22 @@ class _WishlistPageState extends State<WishlistPage> {
   }
 }
 
-class WishlistBottomSheet extends StatelessWidget {
-  const WishlistBottomSheet({super.key});
+class WishlistBottomSheet extends StatefulWidget {
+  final RecommendedVendors vendor;
+  final Future<void> Function() onRemove;
+
+  const WishlistBottomSheet({
+    Key? key,
+    required this.vendor,
+    required this.onRemove,
+  }) : super(key: key);
+
+  @override
+  State<WishlistBottomSheet> createState() => _WishlistBottomSheetState();
+}
+
+class _WishlistBottomSheetState extends State<WishlistBottomSheet> {
+  bool _isLoading = false;
 
   @override
   Widget build(BuildContext context) {
@@ -137,13 +169,22 @@ class WishlistBottomSheet extends StatelessWidget {
                     side: BorderSide(color: Colors.blue.shade700),
                   ),
                 ),
-                onPressed: () {
-                  Get.back();
-                },
-                child: Text(
-                  'Yes, Remove',
-                  style: TextStyle(color: Colors.blue[700]),
-                ),
+                onPressed:
+                    _isLoading
+                        ? null
+                        : () async {
+                          setState(() => _isLoading = true);
+                          await widget.onRemove();
+                          setState(() => _isLoading = false);
+                          Get.back();
+                        },
+                child:
+                    _isLoading
+                        ? CircularProgressIndicator()
+                        : Text(
+                          'Yes, Remove',
+                          style: TextStyle(color: Colors.blue[700]),
+                        ),
               ),
             ),
             SizedBox(height: 10),
@@ -159,9 +200,7 @@ class WishlistBottomSheet extends StatelessWidget {
                     side: BorderSide(color: Theme.of(context).primaryColor),
                   ),
                 ),
-                onPressed: () {
-                  Get.back();
-                },
+                onPressed: _isLoading ? null : () => Get.back(),
                 child: Text(
                   'Keep Wishlist',
                   style: TextStyle(color: Colors.white),
