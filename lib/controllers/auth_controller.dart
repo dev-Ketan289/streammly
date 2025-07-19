@@ -81,6 +81,7 @@ class AuthController extends GetxController implements GetxService {
     return responseModel;
   }
 
+  // Otp Login
   Future<ResponseModel> sendOtp() async {
     isLoading = true;
     update();
@@ -102,6 +103,7 @@ class AuthController extends GetxController implements GetxService {
     return responseModel;
   }
 
+  // Google Login
   Future<ResponseModel?> signInWithGoogle() async {
     isLoading = true;
     update();
