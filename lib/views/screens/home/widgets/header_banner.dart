@@ -19,7 +19,6 @@ class HeaderBanner extends StatefulWidget {
   final String? overrideSubtitle;
   final bool showContent;
 
-  /// Specialities
   final List<String>? specialities;
 
   const HeaderBanner({
@@ -86,35 +85,34 @@ class _HeaderBannerState extends State<HeaderBanner> {
       height: widget.height,
       width: double.infinity,
       child: Stack(
-        
         children: [
-          // --- Background image ---
+          // Background
           widget.backgroundImage.startsWith("http")
               ? Image.network(
-                widget.backgroundImage,
+            widget.backgroundImage,
+            fit: BoxFit.cover,
+            width: double.infinity,
+            height: double.infinity,
+            errorBuilder: (context, error, stackTrace) {
+              return Image.asset(
+                'assets/images/recommended_banner/FocusPointVendor.png',
                 fit: BoxFit.cover,
                 width: double.infinity,
                 height: double.infinity,
-                errorBuilder: (context, error, stackTrace) {
-                  return Image.asset(
-                    'assets/images/recommended_banner/FocusPointVendor.png',
-                    fit: BoxFit.cover,
-                    width: double.infinity,
-                    height: double.infinity,
-                  );
-                },
-              )
+              );
+            },
+          )
               : Image.asset(
-                widget.backgroundImage,
-                fit: BoxFit.fill,
-                width: double.infinity,
-                height: double.infinity,
-              ),
+            widget.backgroundImage,
+            fit: BoxFit.fill,
+            width: double.infinity,
+            height: double.infinity,
+          ),
 
-          // --- Overlay ---
+          // Overlay
           Container(color: widget.overlayColor),
 
-          // --- Carousel effect ---
+          // Carousel
           if (hasSlides)
             PageView.builder(
               controller: pageController,
@@ -140,7 +138,7 @@ class _HeaderBannerState extends State<HeaderBanner> {
               },
             ),
 
-          // --- Vector image ---
+          // Vector image
           if (currentSlide?.vectorImage != null)
             Positioned(
               right: 20,
@@ -151,26 +149,27 @@ class _HeaderBannerState extends State<HeaderBanner> {
                       MediaQuery.of(context).size.height * 0.25;
                   return currentSlide!.isSvg
                       ? SvgPicture.network(
-                        currentSlide.vectorImage,
-                        height: vectorImageHeight,
-                      )
+                    currentSlide.vectorImage,
+                    height: vectorImageHeight,
+                  )
                       : Image.network(
-                        currentSlide.vectorImage,
-                        height: vectorImageHeight,
-                      );
+                    currentSlide.vectorImage,
+                    height: vectorImageHeight,
+                  );
                 },
               ),
             ),
 
-          // --- Top Content (location, search, title, subtitle, specialities) ---
+          // Content
           if (widget.showContent)
             Padding(
               padding: const EdgeInsets.fromLTRB(16, 20, 16, 0),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
+                  // Location Row
                   Obx(
-                    () => GestureDetector(
+                        () => GestureDetector(
                       onTap: () {
                         Navigator.push(
                           context,
@@ -181,12 +180,9 @@ class _HeaderBannerState extends State<HeaderBanner> {
                       },
                       child: Row(
                         children: [
-                          SizedBox(width: 50),
-                          Icon(
-                            Icons.location_on,
-                            color: theme.colorScheme.onPrimary,
-                            size: 20,
-                          ),
+                          const SizedBox(width: 50),
+                          Icon(Icons.location_on,
+                              color: theme.colorScheme.onPrimary, size: 20),
                           const SizedBox(width: 8),
                           Flexible(
                             child: Column(
@@ -201,10 +197,7 @@ class _HeaderBannerState extends State<HeaderBanner> {
                                   ),
                                 ),
                                 Text(
-                                  locationController
-                                          .selectedAddress
-                                          .value
-                                          .isNotEmpty
+                                  locationController.selectedAddress.value.isNotEmpty
                                       ? locationController.selectedAddress.value
                                       : "Fetching...",
                                   style: theme.textTheme.bodySmall?.copyWith(
@@ -228,7 +221,7 @@ class _HeaderBannerState extends State<HeaderBanner> {
                         icon: SvgPicture.asset(Assets.svgMenu),
                         onPressed: () {
                           Get.to(
-                            () => const ProfilePage(),
+                                () => const ProfilePage(),
                             transition: Transition.leftToRight,
                             duration: const Duration(milliseconds: 800),
                           );
@@ -238,11 +231,8 @@ class _HeaderBannerState extends State<HeaderBanner> {
                       Expanded(
                         child: Container(
                           padding: const EdgeInsets.symmetric(
-                            horizontal: 10,
-                            vertical: 5,
-                          ),
+                              horizontal: 10, vertical: 5),
                           height: 37,
-                          width: 302,
                           decoration: BoxDecoration(
                             color: Colors.transparent,
                             borderRadius: BorderRadius.circular(30),
@@ -252,11 +242,9 @@ class _HeaderBannerState extends State<HeaderBanner> {
                             ),
                           ),
                           child: TextField(
-                            style: const TextStyle(
-                              color: Colors.white,
-                            ), // Set typed text to white
+                            style: const TextStyle(color: Colors.white),
                             decoration: InputDecoration(
-                              hintText: "Searching...",
+                              hintText: "Search",
                               hintStyle: GoogleFonts.openSans(
                                 color: theme.colorScheme.onPrimary,
                                 fontSize: 12,
@@ -269,9 +257,7 @@ class _HeaderBannerState extends State<HeaderBanner> {
                               border: InputBorder.none,
                               isDense: true,
                               contentPadding: const EdgeInsets.symmetric(
-                                horizontal: 16,
-                                vertical: 8,
-                              ),
+                                  horizontal: 16, vertical: 8),
                             ),
                           ),
                         ),
@@ -284,118 +270,123 @@ class _HeaderBannerState extends State<HeaderBanner> {
                       ),
                     ],
                   ),
+
+                  // Scrollable Content
                   const SizedBox(height: 5),
-                  // Title & Subtitle
-                  if (title.isNotEmpty || subtitle.isNotEmpty)
-                    Container(
-                      width: double.infinity,
-                      alignment: Alignment.centerLeft,
-                      padding: const EdgeInsets.symmetric(horizontal: 40),
+                  Flexible(
+                    child: SingleChildScrollView(
+                      physics: const BouncingScrollPhysics(),
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          if (title.isNotEmpty)
-                            Text(
-                              title,
-                              style: GoogleFonts.dmSerifDisplay(
-                                fontSize: 29,
-                                fontWeight: FontWeight.w700,
-                                color: theme.colorScheme.onPrimary,
+                          // Title & Subtitle
+                          if (title.isNotEmpty || subtitle.isNotEmpty)
+                            Padding(
+                              padding: const EdgeInsets.symmetric(horizontal: 24),
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  if (title.isNotEmpty)
+                                    Text(
+                                      title,
+                                      style: GoogleFonts.dmSerifDisplay(
+                                        fontSize: 29,
+                                        fontWeight: FontWeight.w700,
+                                        color: theme.colorScheme.onPrimary,
+                                      ),
+                                    ),
+                                  if (subtitle.isNotEmpty) const SizedBox(height: 6),
+                                  if (subtitle.isNotEmpty)
+                                    SizedBox(
+                                      height: 45,
+                                      width: 168,
+                                      child: Text(
+                                        subtitle,
+                                        style: GoogleFonts.dmSerifDisplay(
+                                          color: theme.colorScheme.onPrimary,
+                                          fontSize: 12,
+                                        ),
+                                        overflow: TextOverflow.visible,
+                                        textAlign: TextAlign.left,
+                                      ),
+                                    ),
+                                ],
                               ),
                             ),
-                          if (subtitle.isNotEmpty) const SizedBox(height: 6),
-                          if (subtitle.isNotEmpty)
-                            Container(
-                              height: 90,
-                              width: 168,
-                              child: Text(
-                                subtitle,
-                                style: GoogleFonts.dmSerifDisplay(
-                                  color: theme.colorScheme.onPrimary,
-                                  fontSize: 12,
-                                ),
-                                overflow: TextOverflow.visible,
 
-                                textAlign: TextAlign.left,
+                          // Specialities Section
+                          if (widget.specialities != null &&
+                              widget.specialities!.isNotEmpty) ...[
+                            Padding(
+                              padding: const EdgeInsets.symmetric(horizontal: 16),
+                              child: Text(
+                                "Specialized in",
+                                style: theme.textTheme.bodyMedium?.copyWith(
+                                  color: theme.colorScheme.onPrimary,
+                                  fontWeight: FontWeight.w600,
+                                  fontSize: 14,
+                                ),
+                              ),
+
+                            ),
+                            const SizedBox(height: 10,),
+                            Padding(
+                              padding: const EdgeInsets.symmetric(horizontal: 16),
+                              child: Wrap(
+                                spacing: 6,
+                                runSpacing: 6,
+                                children: [
+                                  for (var i = 0;
+                                  i <
+                                      (widget.specialities!.length > 2
+                                          ? 2
+                                          : widget.specialities!.length);
+                                  i++)
+                                    Container(
+                                      padding: const EdgeInsets.symmetric(
+                                          horizontal: 10, vertical: 6),
+                                      decoration: BoxDecoration(
+                                        color: theme.colorScheme.surface,
+                                        borderRadius: BorderRadius.circular(8),
+                                        border: Border.all(
+                                          color: theme.colorScheme.surface.withAlpha(100),
+                                        ),
+                                      ),
+                                      child: Text(
+                                        widget.specialities![i],
+                                        style: theme.textTheme.bodySmall?.copyWith(
+                                          color: Colors.indigo,
+                                          fontSize: 12,
+                                        ),
+                                      ),
+                                    ),
+                                  if (widget.specialities!.length > 2)
+                                    Container(
+                                      padding: const EdgeInsets.symmetric(
+                                          horizontal: 10, vertical: 6),
+                                      decoration: BoxDecoration(
+                                        color: theme.colorScheme.surface,
+                                        borderRadius: BorderRadius.circular(8),
+                                        border: Border.all(
+                                          color: theme.colorScheme.surface.withAlpha(100),
+                                        ),
+                                      ),
+                                      child: Text(
+                                        "+${widget.specialities!.length - 2} more",
+                                        style: theme.textTheme.bodySmall?.copyWith(
+                                          color: Colors.indigo,
+                                          fontSize: 12,
+                                        ),
+                                      ),
+                                    ),
+                                ],
                               ),
                             ),
+                          ],
                         ],
                       ),
                     ),
-
-                  const SizedBox(height: 12),
-
-                  // Specialized In + Specialities Section
-                  if (widget.specialities != null &&
-                      widget.specialities!.isNotEmpty) ...[
-                    Text(
-                      "Specialized in",
-                      style: theme.textTheme.bodyMedium?.copyWith(
-                        color: theme.colorScheme.onPrimary,
-                        fontWeight: FontWeight.w600,
-                        fontSize: 14,
-                      ),
-                    ),
-                    const SizedBox(height: 6),
-                    Wrap(
-                      spacing: 8,
-                      children: [
-                        for (
-                          var i = 0;
-                          i <
-                              (widget.specialities!.length > 2
-                                  ? 2
-                                  : widget.specialities!.length);
-                          i++
-                        )
-                          Container(
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 10,
-                              vertical: 6,
-                            ),
-                            decoration: BoxDecoration(
-                              color: theme.colorScheme.surface,
-                              borderRadius: BorderRadius.circular(8),
-                              border: Border.all(
-                                color: theme.colorScheme.surface.withValues(
-                                  alpha: 0.4,
-                                ),
-                              ),
-                            ),
-                            child: Text(
-                              widget.specialities![i],
-                              style: theme.textTheme.bodySmall?.copyWith(
-                                color: Colors.indigo,
-                                fontSize: 12,
-                              ),
-                            ),
-                          ),
-                        if (widget.specialities!.length > 2)
-                          Container(
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 10,
-                              vertical: 6,
-                            ),
-                            decoration: BoxDecoration(
-                              color: theme.colorScheme.surface,
-                              borderRadius: BorderRadius.circular(8),
-                              border: Border.all(
-                                color: theme.colorScheme.surface.withValues(
-                                  alpha: 0.4,
-                                ),
-                              ),
-                            ),
-                            child: Text(
-                              "+${widget.specialities!.length - 2} more",
-                              style: theme.textTheme.bodySmall?.copyWith(
-                                color: Colors.indigo,
-                                fontSize: 12,
-                              ),
-                            ),
-                          ),
-                      ],
-                    ),
-                  ],
+                  ),
                 ],
               ),
             ),
@@ -404,4 +395,3 @@ class _HeaderBannerState extends State<HeaderBanner> {
     );
   }
 }
-

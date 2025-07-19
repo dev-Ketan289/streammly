@@ -3,10 +3,8 @@ import 'package:get/get.dart';
 import 'package:streammly/controllers/company_controller.dart';
 import 'package:streammly/services/theme.dart';
 import 'package:streammly/views/widgets/custom_doodle.dart';
-
 import '../../../models/category/category_item.dart';
 import '../../../models/company/company_location.dart';
-import '../../../navigation_menu.dart';
 import '../home/widgets/category/review_card.dart';
 import '../home/widgets/category/widgets/category_scroller.dart';
 import '../home/widgets/header_banner.dart';
@@ -46,9 +44,6 @@ class _VendorDetailScreenState extends State<VendorDetailScreen> {
         screenWidth * 0.04; // 4% padding for better scaling
 
     return Scaffold(
-      bottomNavigationBar: NavigationHelper.buildBottomNav(),
-      floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
-      floatingActionButton: NavigationHelper.buildFloatingButton(),
       body: CustomBackground(
         child: SafeArea(
           child: SingleChildScrollView(
@@ -57,7 +52,7 @@ class _VendorDetailScreenState extends State<VendorDetailScreen> {
               children: [
                 /// ---- Header Banner ----
                 HeaderBanner(
-                  height: 280,
+                  height: screenWidth * 0.7,
                   backgroundImage:
                       (widget.company.bannerImage != null &&
                               widget.company.bannerImage!.isNotEmpty)

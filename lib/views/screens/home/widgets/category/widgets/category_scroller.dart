@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:streammly/services/theme.dart';
+
 import '../../../../../../models/category/category_item.dart';
 
 class CategoryScroller extends StatelessWidget {
