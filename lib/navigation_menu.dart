@@ -4,6 +4,7 @@ import 'package:get/get.dart';
 import 'package:streammly/generated/assets.dart';
 import 'package:streammly/views/screens/home/home_screen.dart';
 import 'package:streammly/views/screens/home/widgets/category/category.dart';
+import 'package:streammly/views/screens/package/booking/bookings.dart';
 
 class NavigationMenu extends StatefulWidget {
   final Set<int> hiddenIndices;
@@ -34,40 +35,46 @@ class _NavigationMenuState extends State<NavigationMenu> {
       },
       child: Scaffold(
         body: GetBuilder<NavigationController>(
-          builder: (_) => IndexedStack(
-            index: controller.selectedIndex,
-            children: controller.screens.map((screenBuilder) => screenBuilder()).toList(),
-          ),
+          builder:
+              (_) => IndexedStack(
+                index: controller.selectedIndex,
+                children:
+                    controller.screens
+                        .map((screenBuilder) => screenBuilder())
+                        .toList(),
+              ),
         ),
         floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
-        floatingActionButton: widget.hideFAB
-            ? null
-            : GetBuilder<NavigationController>(
-          builder: (_) => CircleAvatar(
-            radius: 25,
-            backgroundColor: Colors.white,
-            child: FloatingActionButton(
-              shape: const CircleBorder(),
-              backgroundColor: Colors.white,
-              elevation: 3,
-              onPressed: () {
-                controller.setIndex(2);
-              },
-              child: Container(
-                height: 40,
-                width: 40,
-                decoration: const BoxDecoration(
-                  color: Color(0xffD9D9D9),
-                  shape: BoxShape.circle,
+        floatingActionButton:
+            widget.hideFAB
+                ? null
+                : GetBuilder<NavigationController>(
+                  builder:
+                      (_) => CircleAvatar(
+                        radius: 25,
+                        backgroundColor: Colors.white,
+                        child: FloatingActionButton(
+                          shape: const CircleBorder(),
+                          backgroundColor: Colors.white,
+                          elevation: 3,
+                          onPressed: () {
+                            controller.setIndex(2);
+                          },
+                          child: Container(
+                            height: 40,
+                            width: 40,
+                            decoration: const BoxDecoration(
+                              color: Color(0xffD9D9D9),
+                              shape: BoxShape.circle,
+                            ),
+                            child: SvgPicture.asset(
+                              Assets.svgCarttt,
+                              fit: BoxFit.scaleDown,
+                            ),
+                          ),
+                        ),
+                      ),
                 ),
-                child: SvgPicture.asset(
-                  Assets.svgCarttt,
-                  fit: BoxFit.scaleDown,
-                ),
-              ),
-            ),
-          ),
-        ),
         bottomNavigationBar: GetBuilder<NavigationController>(
           builder: (_) {
             return ClipRRect(
@@ -149,9 +156,10 @@ class _NavigationMenuState extends State<NavigationMenu> {
           SvgPicture.asset(
             icon,
             height: height,
-            colorFilter: isSelected
-                ? ColorFilter.mode(theme.primaryColor, BlendMode.srcIn)
-                : null,
+            colorFilter:
+                isSelected
+                    ? ColorFilter.mode(theme.primaryColor, BlendMode.srcIn)
+                    : null,
           ),
           SizedBox(height: spacing),
           Text(
@@ -172,12 +180,12 @@ class NavigationController extends GetxController {
   int selectedIndex = 0;
 
   final List<Widget Function()> screens = [
-        () => const HomeScreen(),
-        () => const Center(child: Text('Shop Screen Coming Soon')),
-        () => const Center(child: Text('Cart Screen Coming Soon')),
-        () => const Center(child: Text('Booking Screen Coming Soon')),
-        () => const Center(child: Text('More Screen Coming Soon')),
-        () => const CategoryListScreen(),
+    () => const HomeScreen(),
+    () => const Center(child: Text('Shop Screen Coming Soon')),
+    () => const Center(child: Text('Cart Screen Coming Soon')),
+    () => const Bookings(),
+    () => const Center(child: Text('More Screen Coming Soon')),
+    () => const CategoryListScreen(),
   ];
 
   void setIndex(int index) {
