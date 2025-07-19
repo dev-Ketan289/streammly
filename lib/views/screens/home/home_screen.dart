@@ -10,6 +10,7 @@ import '../../../controllers/home_screen_controller.dart';
 import '../../../controllers/location_controller.dart';
 import '../../../models/category/category_item.dart';
 import '../../../models/category/category_model.dart';
+import '../../../navigation_menu.dart';
 import '../../../services/constants.dart';
 import '../home/widgets/category/category.dart';
 import '../home/widgets/category/explore_us.dart';
@@ -86,7 +87,7 @@ class _HomeScreenState extends State<HomeScreen> {
                         ? const CircularProgressIndicator()
                         : CategoryScroller(
                           title: "Categories",
-                          onSeeAll: () => Get.to(() => CategoryListScreen()),
+                          onSeeAll: () => Get.find<NavigationController>().setIndex(5),
                           categories: convertToCategoryItems(categoryModels),
                         ),
                     const SizedBox(height: 24),

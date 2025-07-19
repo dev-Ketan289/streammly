@@ -2,9 +2,7 @@ import 'package:carousel_slider/carousel_slider.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:shimmer/shimmer.dart';
-
 import '../../../../controllers/promo_slider_controller.dart';
-import '../../../../services/constants.dart';
 import '../../common/container/circular_container.dart';
 
 class PromoSlider extends StatefulWidget {
@@ -43,7 +41,7 @@ class _PromoSliderState extends State<PromoSlider> {
             CarouselSlider(
               items:
                   validSliders.map((item) {
-                    final imageUrl = item.media != null ? AppConstants.baseUrl + item.media! : '';
+                    // final imageUrl = item.media != null ? AppConstants.baseUrl + item.media! : '';
                     return GestureDetector(
                       onTap: () {
                         // navigation logic here

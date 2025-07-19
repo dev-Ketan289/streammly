@@ -229,7 +229,14 @@ class _BundleCategoriesState extends State<BundleCategories> {
   }
 }
 
-class VendorCard extends StatelessWidget {
+class
+
+
+
+
+
+
+VendorCard extends StatelessWidget {
   final String companyName;
   final String rating;
   final String timeDistance;

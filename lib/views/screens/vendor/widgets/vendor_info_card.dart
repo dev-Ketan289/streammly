@@ -59,7 +59,7 @@ class _VendorInfoCardState extends State<VendorInfoCard> {
 
     return Container(
       margin: EdgeInsets.all(cardMargin),
-      constraints: BoxConstraints(maxWidth: screenWidth - (cardMargin * 2)),
+      constraints: BoxConstraints(maxWidth: screenWidth - (cardMargin * 2),maxHeight: screenHeight * 0.5),
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(20),
@@ -97,7 +97,7 @@ class _VendorInfoCardState extends State<VendorInfoCard> {
 
     return IntrinsicHeight(
       child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
+        crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           // Left side: Logo Image
           Flexible(
