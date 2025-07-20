@@ -63,11 +63,11 @@ class _RecommendedListState extends State<RecommendedList> {
 
           final distanceKm = vendor.id;
           // final distanceText =
-              distanceKm != null
-                  ? (distanceKm < 1
-                      ? "${(distanceKm * 1000).toStringAsFixed(0)} m"
-                      : "${distanceKm.toStringAsFixed(1)} km")
-                  : "--";
+          distanceKm != null
+              ? (distanceKm < 1
+                  ? "${(distanceKm * 1000).toStringAsFixed(0)} m"
+                  : "${distanceKm.toStringAsFixed(1)} km")
+              : "--";
           final time =
               distanceKm != null
                   ? "${(distanceKm * 7).round()} mins . ${distanceKm.toStringAsFixed(1)} km"
@@ -97,10 +97,9 @@ class _RecommendedListState extends State<RecommendedList> {
                         : null,
                 bannerImage:
                     vendor.bannerImage != null
-                        ?vendor.bannerImage ?? '': null,
-                logo:
-                    vendor.logo != null
-                        ? vendor.logo ?? '' : null,
+                        ? vendor.bannerImage ?? ''
+                        : null,
+                logo: vendor.logo != null ? vendor.logo ?? '' : null,
                 description: vendor.description,
                 categoryName:
                     vendor.vendorcategory?.isNotEmpty == true

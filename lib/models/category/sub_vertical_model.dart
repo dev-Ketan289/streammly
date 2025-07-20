@@ -9,6 +9,10 @@ class SubVertical {
     final rawPath = json['image'] ?? '';
     final cleanedPath = rawPath.toString().replaceFirst(RegExp(r'^/+'), '');
 
-    return SubVertical(id: json['id'], title: json['title'] ?? 'Untitled', image: cleanedPath.isNotEmpty ? cleanedPath : null);
+    return SubVertical(
+      id: json['id'],
+      title: json['title'] ?? 'Untitled',
+      image: cleanedPath.isNotEmpty ? cleanedPath : null,
+    );
   }
 }

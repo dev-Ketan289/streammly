@@ -152,11 +152,7 @@ class CompanyController extends GetxController {
         data.map<Map<String, String>>((item) {
           final rawPath = item["image"]?.toString() ?? "";
           final cleanedPath = rawPath.replaceFirst(RegExp(r'^/+'), '');
-          final imageUrl =
-              cleanedPath.isNotEmpty
-                  ? cleanedPath
-
-                  : "";
+          final imageUrl = cleanedPath.isNotEmpty ? cleanedPath : "";
 
           return {
             "id": item["id"].toString(),

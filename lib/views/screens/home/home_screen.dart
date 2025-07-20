@@ -53,6 +53,7 @@ class _HomeScreenState extends State<HomeScreen> {
       );
     }).toList();
   }
+
   @override
   Widget build(BuildContext context) {
     return CustomBackground(
@@ -70,7 +71,6 @@ class _HomeScreenState extends State<HomeScreen> {
             }
 
             return SafeArea(
-            
               child: SingleChildScrollView(
                 child: Column(
                   children: [

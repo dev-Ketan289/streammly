@@ -32,8 +32,7 @@ class _VendorDetailScreenState extends State<VendorDetailScreen> {
   /// Helper function to handle full URL or relative path for images
   String resolveImageUrl(String? url) {
     if (url == null || url.isEmpty) return '';
-    return url.startsWith('http') ? url :url.replaceFirst(RegExp(r'^/'), '');
-
+    return url.startsWith('http') ? url : url.replaceFirst(RegExp(r'^/'), '');
   }
 
   @override
