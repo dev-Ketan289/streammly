@@ -7,6 +7,7 @@ import 'package:get/get.dart';
 import 'package:http/http.dart' as http;
 
 import '../../../controllers/auth_controller.dart';
+import '../../../services/constants.dart';
 
 class SupportTicketFormPage extends StatefulWidget {
   const SupportTicketFormPage({super.key});
@@ -60,10 +61,9 @@ class _SupportTicketFormPageState extends State<SupportTicketFormPage> {
       return;
     }
 
-    final uri = Uri.parse(
-      'https://admin.streammly.com/api/v1/support-ticket/addsupportticket',
-    );
-    // final uri = Uri.parse('http://192.168.1.113:8000/api/v1/support-ticket/addsupportticket');
+    final uri = Uri.parse('${AppConstants.baseUrl}${AppConstants.addSupportTicket}');
+
+
 
     final request =
         http.MultipartRequest('POST', uri)

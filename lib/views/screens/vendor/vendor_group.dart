@@ -68,7 +68,7 @@ class _VendorGroupState extends State<VendorGroup> {
             children: [
               /// Header Banner
               HeaderBanner(
-                height: screenWidth * 0.7,
+                height: screenWidth * 0.65,
                 backgroundImage:
                     (widget.company.bannerImage?.isNotEmpty == true)
                         ? resolveImageUrl(widget.company.bannerImage)
@@ -342,14 +342,22 @@ class _VendorGroupState extends State<VendorGroup> {
                 label: "Get Quote",
                 onTap: () {
                   Navigator.pop(context);
+                  final selectedSubCategory = controller.subCategories.firstWhereOrNull(
+                        (element) => element.id == subCategoryId,
+                  );
+                  final subCategoryTitle = selectedSubCategory?.title ?? '';
+
                   Get.to(
-                    () => const GetQuoteScreen(),
+                        () => const GetQuoteScreen(),
                     arguments: {
                       "companyId": companyId,
                       "subCategoryId": subCategoryId,
                       "subVerticalId": subVerticalId,
+                      "subCategoryTitle": subCategoryTitle,
+                      "subVerticalTitle": shootTitle, // shootTitle already comes from subVertical
                     },
                   );
+
                 },
               ),
               const SizedBox(height: 12),
