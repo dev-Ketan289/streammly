@@ -4,6 +4,8 @@ import 'package:get/get.dart';
 import 'package:streammly/generated/assets.dart';
 import 'package:streammly/views/screens/home/home_screen.dart';
 import 'package:streammly/views/screens/home/widgets/category/category.dart';
+import 'package:streammly/views/screens/package/booking/booking_page.dart';
+import 'package:streammly/views/screens/package/booking/bookings.dart';
 
 class NavigationMenu extends StatefulWidget {
   final Set<int> hiddenIndices;
@@ -175,7 +177,7 @@ class NavigationController extends GetxController {
         () => const HomeScreen(),
         () => const Center(child: Text('Shop Screen Coming Soon')),
         () => const Center(child: Text('Cart Screen Coming Soon')),
-        () => const Center(child: Text('Booking Screen Coming Soon')),
+        () =>  Bookings(),
         () => const Center(child: Text('More Screen Coming Soon')),
         () => const CategoryListScreen(),
   ];
