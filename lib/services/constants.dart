@@ -72,8 +72,19 @@ class AppConstants {
 
   // Package
   static const String getPackagesUrl = "api/v1/package/getpackages";
+
   // Business Setting
   static const String businessSettingUri = "api/v1/basic/getbusinesssettings";
+
+  //Quote
+  static const String submitQuoteUrl = "api/v1/quotation/addquotation";
+
+
+  //Support Ticket
+  static const String addSupportTicket = 'api/v1/support-ticket/addsupportticket';
+
+
+
   //
   static const double horizontalPadding = 16;
   static const double verticalPadding = 20;

@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
+import 'package:streammly/data/api/api_client.dart';
+import 'package:streammly/data/repository/quote_repo.dart';
+import 'package:streammly/services/constants.dart';
 import 'package:streammly/views/widgets/custom_doodle.dart';
 
 import '../../../controllers/auth_controller.dart';
@@ -16,7 +19,7 @@ class GetQuoteScreen extends StatefulWidget {
 }
 
 class _GetQuoteScreenState extends State<GetQuoteScreen> {
-  final QuoteController quoteController = Get.put(QuoteController());
+  final QuoteController quoteController = Get.put(QuoteController(quoteRepo: QuoteRepo(apiClient: ApiClient(appBaseUrl: AppConstants.baseUrl, sharedPreferences: Get.find()))));
   final AuthController authController = Get.find<AuthController>();
 
   final TextEditingController nameController = TextEditingController();
@@ -136,7 +139,7 @@ class _GetQuoteScreenState extends State<GetQuoteScreen> {
 
       if (shouldLogin == true) {
         Get.to(
-          () => const LoginScreen(),
+              () => const LoginScreen(),
           arguments: {
             'redirectTo': 'GetQuoteScreen',
             'formData': {
@@ -203,182 +206,179 @@ class _GetQuoteScreenState extends State<GetQuoteScreen> {
         ),
         body: SingleChildScrollView(
           padding: const EdgeInsets.all(16),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                "$subCategoryTitle / $subVerticalTitle",
-                style: const TextStyle(
-                  fontSize: 20,
-                  fontWeight: FontWeight.bold,
-                  color: Color(0xFF2864A6),
-                ),
-              ),
-              const SizedBox(height: 5),
-              TextField(
-                controller: nameController,
-                decoration: _buildDecoration('Name *', 'Enter name'),
-              ),
-              const SizedBox(height: 16),
-              TextField(
-                controller: mobileController,
-                decoration: _buildDecoration(
-                  'Mobile No. *',
-                  'Enter mobile number',
-                ),
-                keyboardType: TextInputType.phone,
-              ),
-              const SizedBox(height: 16),
-              TextField(
-                controller: emailController,
-                decoration: _buildDecoration('Email *', 'Enter email'),
-                keyboardType: TextInputType.emailAddress,
-              ),
-              const SizedBox(height: 16),
-              _buildTextField(
-                'Date of Shoot *',
-                dateController,
-                readOnly: true,
-                onTap: _pickDate,
-                suffixIcon: Icons.calendar_today,
-              ),
-              const SizedBox(height: 16),
-              Row(
+          child: GetBuilder<QuoteController>(
+            builder: (controller) {
+              return Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Expanded(
-                    child: _buildTextField(
-                      'Start Time *',
-                      TextEditingController(text: startTime),
-                      readOnly: true,
-                      onTap: () {
-                        isStartTime = true;
-                        showTimePicker = true;
-                        setState(() {});
-                      },
+                  Text(
+                    "$subCategoryTitle / $subVerticalTitle",
+                    style: Theme.of(context).textTheme.labelLarge?.copyWith(
+                      color: const Color(0xFF2864A6),
+                      fontWeight: FontWeight.bold,
+                      fontSize: 20
                     ),
                   ),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: _buildTextField(
-                      'End Time *',
-                      TextEditingController(text: endTime),
-                      readOnly: true,
-                      onTap: () {
-                        isStartTime = false;
-                        showTimePicker = true;
-                        setState(() {});
-                      },
-                    ),
+                  const SizedBox(height: 15),
+                  TextField(
+                    controller: nameController,
+                    decoration: _buildDecoration('Name *', 'Enter name'),
                   ),
-                ],
-              ),
-              if (showTimePicker)
-                CustomTimePicker(
-                  isStart: isStartTime,
-                  onCancel: () => setState(() => showTimePicker = false),
-                  onTimeSelected: _onTimeSelected,
-                ),
-              const SizedBox(height: 16),
-              TextField(
-                controller: requirementsController,
-                decoration: _buildDecoration(
-                  'Describe your Requirements *',
-                  'Enter requirements',
-                ),
-                maxLines: 3,
-              ),
-              const SizedBox(height: 16),
-              Row(
-                children: [
-                  Expanded(
-                    child: _buildTextField(
-                      'Fav Time *',
-                      TextEditingController(text: favStartTime),
-                      readOnly: true,
-                      onTap: () {
-                        isFavTime = true;
-                        showFavTimePicker = true;
-                        setState(() {});
-                      },
+                  const SizedBox(height: 16),
+                  TextField(
+                    controller: mobileController,
+                    decoration: _buildDecoration(
+                      'Mobile No. *',
+                      'Enter mobile number',
                     ),
+                    keyboardType: TextInputType.phone,
                   ),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: _buildTextField(
-                      'Fav Time *',
-                      TextEditingController(text: favEndTime),
-                      readOnly: true,
-                      onTap: () {
-                        isFavTime = false;
-                        showFavTimePicker = true;
-                        setState(() {});
-                      },
-                    ),
+                  const SizedBox(height: 16),
+                  TextField(
+                    controller: emailController,
+                    decoration: _buildDecoration('Email *', 'Enter email'),
+                    keyboardType: TextInputType.emailAddress,
                   ),
-                ],
-              ),
-              if (showFavTimePicker)
-                CustomTimePicker(
-                  isStart: isFavTime,
-                  onCancel: () => setState(() => showFavTimePicker = false),
-                  onTimeSelected: _onFavTimeSelected,
-                ),
-              const SizedBox(height: 16),
-              Text.rich(
-                TextSpan(
-                  children: [
-                    TextSpan(
-                      text: 'Note: ',
-                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                        color: Colors.red,
-                        fontSize: 13,
-                        fontWeight: FontWeight.w500,
+                  const SizedBox(height: 16),
+                  _buildTextField(
+                    'Date of Shoot *',
+                    dateController,
+                    readOnly: true,
+                    onTap: _pickDate,
+                    suffixIcon: Icons.calendar_today,
+                  ),
+                  const SizedBox(height: 16),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: _buildTextField(
+                          'Start Time *',
+                          TextEditingController(text: startTime),
+                          readOnly: true,
+                          onTap: () {
+                            isStartTime = true;
+                            showTimePicker = true;
+                            setState(() {});
+                          },
+                        ),
                       ),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: _buildTextField(
+                          'End Time *',
+                          TextEditingController(text: endTime),
+                          readOnly: true,
+                          onTap: () {
+                            isStartTime = false;
+                            showTimePicker = true;
+                            setState(() {});
+                          },
+                        ),
+                      ),
+                    ],
+                  ),
+                  if (showTimePicker)
+                    CustomTimePicker(
+                      isStart: isStartTime,
+                      onCancel: () => setState(() => showTimePicker = false),
+                      onTimeSelected: _onTimeSelected,
                     ),
+                  const SizedBox(height: 16),
+                  TextField(
+                    controller: requirementsController,
+                    decoration: _buildDecoration(
+                      'Describe your Requirements *',
+                      'Enter requirements',
+                    ),
+                    maxLines: 3,
+                  ),
+                  const SizedBox(height: 16),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: _buildTextField(
+                          'Fav Time *',
+                          TextEditingController(text: favStartTime),
+                          readOnly: true,
+                          onTap: () {
+                            isFavTime = true;
+                            showFavTimePicker = true;
+                            setState(() {});
+                          },
+                        ),
+                      ),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: _buildTextField(
+                          'Fav Time *',
+                          TextEditingController(text: favEndTime),
+                          readOnly: true,
+                          onTap: () {
+                            isFavTime = false;
+                            showFavTimePicker = true;
+                            setState(() {});
+                          },
+                        ),
+                      ),
+                    ],
+                  ),
+                  if (showFavTimePicker)
+                    CustomTimePicker(
+                      isStart: isFavTime,
+                      onCancel: () => setState(() => showFavTimePicker = false),
+                      onTimeSelected: _onFavTimeSelected,
+                    ),
+                  const SizedBox(height: 16),
+                  Text.rich(
                     TextSpan(
-                      text:
+                      children: [
+                        TextSpan(
+                          text: 'Note: ',
+                          style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                            color: Colors.red,
+                            fontSize: 13,
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
+                        TextSpan(
+                          text:
                           'Vendor team will contact you within the favorable Date & Favorable time only',
-                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                        color: Colors.grey,
-                        fontSize: 13,
-                      ),
+                          style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                            color: Colors.grey,
+                            fontSize: 13,
+                          ),
+                        ),
+                      ],
                     ),
-                  ],
-                ),
-              ),
-              const SizedBox(height: 16),
-              Obx(() {
-                return SizedBox(
-                  width: double.infinity,
-                  height: 48,
-                  child: ElevatedButton(
-                    onPressed:
-                        quoteController.isSubmitting.value
-                            ? null
-                            : _submitQuote,
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: const Color(0xFF2E5CDA),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                    ),
-                    child:
-                        quoteController.isSubmitting.value
-                            ? const CircularProgressIndicator(
-                              color: Colors.white,
-                            )
-                            : const Text(
-                              "Continue",
-                              style: TextStyle(
-                                fontSize: 16,
-                                fontWeight: FontWeight.bold,
-                                color: Colors.white,
-                              ),
-                            ),
                   ),
-                );
-              }),
-            ],
+                  const SizedBox(height: 16),
+                  SizedBox(
+                    width: double.infinity,
+                    height: 48,
+                    child: ElevatedButton(
+                      onPressed:
+                      controller.isSubmitting ? null : _submitQuote,
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: const Color(0xFF2E5CDA),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                      ),
+                      child: controller.isSubmitting
+                          ? const CircularProgressIndicator(color: Colors.white)
+                          : const Text(
+                        "Continue",
+                        style: TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.white,
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              );
+            },
           ),
         ),
       ),
@@ -389,33 +389,29 @@ class _GetQuoteScreenState extends State<GetQuoteScreen> {
     return InputDecoration(
       enabledBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(10),
-        borderSide: BorderSide(color: const Color(0xFFE6DFDF)),
+        borderSide: const BorderSide(color: Color(0xFFE6DFDF)),
       ),
       focusedBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(10),
-        borderSide: BorderSide(color: const Color(0xFFE6DFDF)),
+        borderSide: const BorderSide(color: Color(0xFFE6DFDF)),
       ),
       fillColor: Colors.white,
       filled: true,
       labelText: label,
-      labelStyle: Theme.of(
-        context,
-      ).textTheme.bodySmall?.copyWith(color: Colors.grey, fontSize: 15),
+      labelStyle: Theme.of(context).textTheme.bodySmall?.copyWith(color: Colors.grey, fontSize: 15),
       hintText: hint,
-      hintStyle: Theme.of(
-        context,
-      ).textTheme.bodySmall?.copyWith(color: Colors.grey, fontSize: 15),  
+      hintStyle: Theme.of(context).textTheme.bodySmall?.copyWith(color: Colors.grey, fontSize: 15),
       border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
     );
   }
 
   Widget _buildTextField(
-    String label,
-    TextEditingController controller, {
-    bool readOnly = false,
-    VoidCallback? onTap,
-    IconData? suffixIcon,
-  }) {
+      String label,
+      TextEditingController controller, {
+        bool readOnly = false,
+        VoidCallback? onTap,
+        IconData? suffixIcon,
+      }) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 8),
       child: TextField(
@@ -425,18 +421,16 @@ class _GetQuoteScreenState extends State<GetQuoteScreen> {
         decoration: InputDecoration(
           enabledBorder: OutlineInputBorder(
             borderRadius: BorderRadius.circular(10),
-            borderSide: BorderSide(color: const Color(0xFFE6DFDF)),
+            borderSide: const BorderSide(color: Color(0xFFE6DFDF)),
           ),
           focusedBorder: OutlineInputBorder(
             borderRadius: BorderRadius.circular(10),
-            borderSide: BorderSide(color: const Color(0xFFE6DFDF)),
+            borderSide: const BorderSide(color: Color(0xFFE6DFDF)),
           ),
           fillColor: Colors.white,
           filled: true,
           labelText: label,
-          labelStyle: Theme.of(
-            context,
-          ).textTheme.bodySmall?.copyWith(color: Colors.grey, fontSize: 15),
+          labelStyle: Theme.of(context).textTheme.bodySmall?.copyWith(color: Colors.grey, fontSize: 15),
           suffixIcon: suffixIcon != null ? Icon(suffixIcon, size: 18) : null,
           border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
         ),

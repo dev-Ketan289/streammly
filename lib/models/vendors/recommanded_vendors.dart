@@ -122,9 +122,14 @@ class RecommendedVendors {
             ? []
             : List<Vendorcategory>.from(json["vendorcategory"]!
             .map((x) => Vendorcategory.fromJson(x))),
-        specialities: json["specialitise"] != null
-            ? List<String>.from(json["specialitise"])
+        specialities: json["vendorsubcategory"] != null
+            ? (json["vendorsubcategory"] as List)
+            .expand((subCat) => (subCat["subcategory"]?["specialities"] ?? []) as List)
+            .map<String>((spec) => spec["title"]?.toString() ?? "")
+            .toSet() // optional: to remove duplicates
+            .toList()
             : [],
+
       );
 
   bool get isChecked {
