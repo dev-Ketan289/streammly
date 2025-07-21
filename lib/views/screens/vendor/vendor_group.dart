@@ -49,7 +49,7 @@ class _VendorGroupState extends State<VendorGroup> {
   /// Helper function to resolve image URL
   String resolveImageUrl(String? url) {
     if (url == null || url.isEmpty) return '';
-    return url.startsWith('http') ? url :url.replaceFirst(RegExp(r'^/'), '');
+    return url.startsWith('http') ? url : url.replaceFirst(RegExp(r'^/'), '');
   }
 
   @override
@@ -338,32 +338,33 @@ class _VendorGroupState extends State<VendorGroup> {
               const SizedBox(height: 10),
               _buildOptionTile(
                 theme: theme,
-                icon: Assets.svgQuotation,
+                icon: Assets.svgQuoteRequest,
                 label: "Get Quote",
                 onTap: () {
                   Navigator.pop(context);
-                  final selectedSubCategory = controller.subCategories.firstWhereOrNull(
+                  final selectedSubCategory = controller.subCategories
+                      .firstWhereOrNull(
                         (element) => element.id == subCategoryId,
-                  );
+                      );
                   final subCategoryTitle = selectedSubCategory?.title ?? '';
 
                   Get.to(
-                        () => const GetQuoteScreen(),
+                    () => const GetQuoteScreen(),
                     arguments: {
                       "companyId": companyId,
                       "subCategoryId": subCategoryId,
                       "subVerticalId": subVerticalId,
                       "subCategoryTitle": subCategoryTitle,
-                      "subVerticalTitle": shootTitle, // shootTitle already comes from subVertical
+                      "subVerticalTitle":
+                          shootTitle, // shootTitle already comes from subVertical
                     },
                   );
-
                 },
               ),
               const SizedBox(height: 12),
               _buildOptionTile(
                 theme: theme,
-                icon: Assets.svgWallet,
+                icon: Assets.svgPackages,
                 label: "Packages",
                 iconColor: Colors.amber,
                 onTap: () {
@@ -424,8 +425,7 @@ class _VendorGroupState extends State<VendorGroup> {
                 width: double.infinity,
                 child: ElevatedButton(
                   style: ElevatedButton.styleFrom(
-                    backgroundColor:
-                        Colors.blue[800], // You can match the theme
+                    backgroundColor: primaryColor, // You can match the theme
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(8),
                     ),

@@ -273,8 +273,8 @@ class PackagesController extends GetxController {
 
   Future<void> fetchPopularPackages() async {
     try {
-      final response = await http.get(Uri.parse("https://admin.streammly.com/api/v1/package/getpopularpackages"), headers: {"Content-Type": "application/json"});
-      // final response = await http.get(Uri.parse("http://192.168.1.113/api/v1/package/getpopularpackages"), headers: {"Content-Type": "application/json"});
+      // final response = await http.get(Uri.parse("https://admin.streammly.com/api/v1/package/getpopularpackages"), headers: {"Content-Type": "application/json"});
+      final response = await http.get(Uri.parse("http://192.168.1.113/api/v1/package/getpopularpackages"), headers: {"Content-Type": "application/json"});
 
       if (response.statusCode == 200) {
         final jsonBody = json.decode(response.body);

@@ -15,7 +15,7 @@ class UpcomingOfferCard extends StatelessWidget {
           children: [
             Container(
               width: double.infinity,
-              color: theme.colorScheme.surface, // Adapt background to theme
+              color: Color(0xFFE2EDF9), // Adapt background to theme
               padding: const EdgeInsets.all(16),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,

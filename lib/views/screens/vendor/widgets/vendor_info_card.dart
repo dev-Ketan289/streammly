@@ -3,6 +3,7 @@ import 'package:get/get.dart';
 import 'package:streammly/controllers/wishlist_controller.dart';
 import 'package:streammly/models/category/category_model.dart';
 import 'package:streammly/models/vendors/recommanded_vendors.dart';
+import 'package:streammly/services/custom_image.dart';
 import 'package:streammly/services/theme.dart';
 
 class VendorInfoCard extends StatefulWidget {
@@ -59,7 +60,10 @@ class _VendorInfoCardState extends State<VendorInfoCard> {
 
     return Container(
       margin: EdgeInsets.all(cardMargin),
-      constraints: BoxConstraints(maxWidth: screenWidth - (cardMargin * 2),maxHeight: screenHeight * 0.5),
+      constraints: BoxConstraints(
+        maxWidth: screenWidth - (cardMargin * 2),
+        maxHeight: screenHeight * 0.5,
+      ),
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(20),
@@ -108,16 +112,17 @@ class _VendorInfoCardState extends State<VendorInfoCard> {
               margin: EdgeInsets.all(imageMargin),
               child: ClipRRect(
                 borderRadius: BorderRadius.circular(16),
-                child: Image.network(
-                  widget.logoImage,
-                  fit: BoxFit.cover,
-                  errorBuilder: (context, error, stackTrace) {
-                    return Image.asset(
-                      'assets/images/default_logo.png',
-                      fit: BoxFit.cover,
-                    );
-                  },
-                ),
+                child: CustomImage(path: widget.logoImage, fit: BoxFit.cover),
+                // child: Image.network(
+                //   widget.logoImage,
+                //   fit: BoxFit.cover,
+                //   errorBuilder: (context, error, stackTrace) {
+                //     return Image.asset(
+                //       'assets/images/default_logo.png',
+                //       fit: BoxFit.cover,
+                //     );
+                //   },
+                // ),
               ),
             ),
           ),
@@ -175,16 +180,17 @@ class _VendorInfoCardState extends State<VendorInfoCard> {
                 margin: EdgeInsets.all(imageMargin),
                 child: ClipRRect(
                   borderRadius: BorderRadius.circular(16),
-                  child: Image.network(
-                    widget.logoImage,
-                    fit: BoxFit.fill,
-                    errorBuilder: (context, error, stackTrace) {
-                      return Image.asset(
-                        'assets/images/default_logo.png',
-                        fit: BoxFit.cover,
-                      );
-                    },
-                  ),
+                  child: CustomImage(path: widget.logoImage, fit: BoxFit.fill),
+                  // child: Image.network(
+                  //   widget.logoImage,
+                  //   fit: BoxFit.fill,
+                  //   errorBuilder: (context, error, stackTrace) {
+                  //     return Image.asset(
+                  //       'assets/images/default_logo.png',
+                  //       fit: BoxFit.cover,
+                  //     );
+                  //   },
+                  // ),
                 ),
               ),
             ),
@@ -281,15 +287,21 @@ class _VendorInfoCardState extends State<VendorInfoCard> {
                           wishlistController.loadBookmarks("company");
                         }
                       });
+                  wishlistController
+                      .addBookmark(widget.vendorId!, "company")
+                      .then((value) {
+                        if (value.isSuccess) {
+                          wishlistController.loadBookmarks("company");
+                        }
+                      });
                 }
               },
               child: Icon(
                 Icons.bookmark_rounded,
                 color:
-                    widget.vendorId != null &&
-                            wishlistController.bookmarks.any(
-                              (bookmark) => bookmark.id == widget.vendorId,
-                            )
+                    wishlistController.bookmarks.any(
+                          (element) => element.id == widget.vendorId,
+                        )
                         ? Colors.redAccent
                         : Colors.grey,
                 size: isSmallScreen ? 20 : 25,

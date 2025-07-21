@@ -11,8 +11,6 @@ import '../../../controllers/location_controller.dart';
 import '../../../models/category/category_item.dart';
 import '../../../models/category/category_model.dart';
 import '../../../navigation_menu.dart';
-import '../../../services/constants.dart';
-import '../home/widgets/category/category.dart';
 import '../home/widgets/category/explore_us.dart';
 import '../home/widgets/category/recommended_list.dart';
 import '../home/widgets/category/widgets/category_scroller.dart';

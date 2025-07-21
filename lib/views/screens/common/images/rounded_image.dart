@@ -1,5 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:streammly/services/custom_image.dart';
 
 class TRoundedImage extends StatelessWidget {
   const TRoundedImage({
@@ -32,31 +33,47 @@ class TRoundedImage extends StatelessWidget {
   Widget build(BuildContext context) {
     final radius = BorderRadius.circular(borderRadius);
 
-    Widget imageWidget;
+    // Widget imageWidget;
 
-    if (imageUrl.isEmpty) {
-      // Show placeholder when imageUrl is empty
-      imageWidget = _buildPlaceholder();
-    } else if (isNetworkImage) {
-      imageWidget = Image.network(
-        imageUrl,
-        fit: fit,
-        width: width,
-        height: height,
-        errorBuilder: (context, error, stackTrace) => _buildPlaceholder(),
-        loadingBuilder: (context, child, loadingProgress) {
-          if (loadingProgress == null) return child;
-          return Center(child: CupertinoActivityIndicator());
-        },
-      );
-    } else {
-      imageWidget = Image.asset(
-        imageUrl,
-        fit: fit,
-        width: width,
-        height: height,
-      );
-    }
+    // if (imageUrl.isEmpty) {
+    //   imageWidget = CustomImage(path: imageUrl);
+    // }
+
+    // if (imageUrl.isEmpty) {
+    //   // Show placeholder when imageUrl is empty
+    //   imageWidget = _buildPlaceholder();
+    // } else if (isNetworkImage) {
+    //   imageWidget = CustomImage(
+    //     path: imageUrl,
+    //     fit: fit,
+    //     width: width,
+    //     height: height,
+    //   );
+    //   // imageWidget = Image.network(
+    //   //   imageUrl,
+    //   //   fit: fit,
+    //   //   width: width,
+    //   //   height: height,
+    //   //   errorBuilder: (context, error, stackTrace) => _buildPlaceholder(),
+    //   //   loadingBuilder: (context, child, loadingProgress) {
+    //   //     if (loadingProgress == null) return child;
+    //   //     return Center(child: CupertinoActivityIndicator());
+    //   //   },
+    //   // );
+    // } else {
+    //   imageWidget = CustomImage(
+    //     path: imageUrl,
+    //     fit: fit,
+    //     width: width,
+    //     height: height,
+    //   );
+    //   // imageWidget = Image.asset(
+    //   //   imageUrl,
+    //   //   fit: fit,
+    //   //   width: width,
+    //   //   height: height,
+    //   // );
+    // }
 
     return GestureDetector(
       onTap: onPressed,
@@ -71,18 +88,23 @@ class TRoundedImage extends StatelessWidget {
         ),
         child: ClipRRect(
           borderRadius: applyImageRadius ? radius : BorderRadius.zero,
-          child: imageWidget,
+          child: CustomImage(
+            path: imageUrl,
+            height: height,
+            width: width,
+            fit: fit,
+          ),
         ),
       ),
     );
   }
 
-  Widget _buildPlaceholder() {
-    return Container(
-      width: width,
-      height: height,
-      color: Colors.grey.shade200,
-      child: const Icon(Icons.image_not_supported, color: Colors.grey),
-    );
-  }
+  // Widget _buildPlaceholder() {
+  //   return Container(
+  //     width: width,
+  //     height: height,
+  //     color: Colors.grey.shade200,
+  //     child: const Icon(Icons.image_not_supported, color: Colors.grey),
+  //   );
+  // }
 }
