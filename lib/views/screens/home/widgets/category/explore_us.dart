@@ -5,6 +5,7 @@ import 'package:shimmer/shimmer.dart';
 import 'package:streammly/controllers/company_controller.dart';
 import 'package:streammly/generated/assets.dart';
 import 'package:streammly/services/theme.dart';
+
 import '../../../vendor/vendoer_detail.dart';
 import '../../vendor_locator.dart';
 

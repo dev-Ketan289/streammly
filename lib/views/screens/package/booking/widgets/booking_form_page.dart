@@ -41,9 +41,10 @@ class _PackageFormCardState extends State<PackageFormCard> {
 
     final extraQuestions = widget.package['extraQuestions'] ?? widget.package['packageextra_questions'] ?? [];
     for (var question in extraQuestions) {
-      final id = "${widget.index}_${question['id']}";
-      final answer = form['extraAnswers']?[question['id'].toString()] ?? '';
-      _extraQuestionControllers[id] = TextEditingController(text: answer);
+      final qid = question['id'].toString();
+      final uniqueKey = "${widget.index}_$qid";
+      final answer = form['extraAnswers']?[uniqueKey] ?? '';
+      _extraQuestionControllers[uniqueKey] = TextEditingController(text: answer);
     }
   }
 
@@ -369,28 +370,37 @@ class _PackageFormCardState extends State<PackageFormCard> {
 
   List<Widget> _buildExtraQuestions(BookingController controller) {
     final extraQuestions = widget.package['extraQuestions'] ?? widget.package['packageextra_questions'] ?? [];
+    final form = controller.packageFormsData[widget.index] ?? {};
     List<Widget> fields = [];
 
     for (var question in extraQuestions) {
-      final id = "${widget.index}_${question['id']}";
       final qid = question['id'].toString();
+      final uniqueKey = "${widget.index}_$qid";
       final label = question['question'] ?? 'Question';
       final type = question['question_type'] ?? 'Text';
+      final answer = form['extraAnswers']?[uniqueKey] ?? '';
+
+      // >>> SAFELY GET (or create) THE CONTROLLER <<<
+      final ctrl = _extraQuestionControllers.putIfAbsent(uniqueKey, () => TextEditingController());
+
+      // keep in sync
+      if (ctrl.text != answer) {
+        ctrl.text = answer;
+      }
 
       fields.add(const SizedBox(height: 16));
-
       if (type == 'Date Picker') {
         fields.add(
           CustomTextField(
             labelText: label,
-            controller: _extraQuestionControllers[id],
+            controller: ctrl,
             readOnly: true,
             prefixIcon: Icons.calendar_today,
             onTap: () async {
               final picked = await showDatePicker(context: context, initialDate: DateTime.now(), firstDate: DateTime(2000), lastDate: DateTime(2100));
               if (picked != null) {
                 final formatted = "${picked.day}-${picked.month}-${picked.year}";
-                _extraQuestionControllers[id]?.text = formatted;
+                ctrl.text = formatted;
                 controller.updateExtraAnswer(widget.index, qid, formatted);
               }
             },
@@ -404,19 +414,13 @@ class _PackageFormCardState extends State<PackageFormCard> {
               return Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  CustomTextField(
-                    labelText: label,
-                    controller: _extraQuestionControllers[id],
-                    readOnly: true,
-                    prefixIcon: Icons.access_time,
-                    onTap: () => setState(() => showTime = true),
-                  ),
+                  CustomTextField(labelText: label, controller: ctrl, readOnly: true, prefixIcon: Icons.access_time, onTap: () => setState(() => showTime = true)),
                   if (showTime)
                     CustomTimePicker(
                       isStart: true,
                       onCancel: () => setState(() => showTime = false),
                       onTimeSelected: (time) {
-                        _extraQuestionControllers[id]?.text = time;
+                        ctrl.text = time;
                         controller.updateExtraAnswer(widget.index, qid, time);
                         setState(() => showTime = false);
                       },
@@ -427,10 +431,9 @@ class _PackageFormCardState extends State<PackageFormCard> {
           ),
         );
       } else {
-        fields.add(CustomTextField(labelText: label, controller: _extraQuestionControllers[id], onChanged: (val) => controller.updateExtraAnswer(widget.index, qid, val)));
+        fields.add(CustomTextField(labelText: label, controller: ctrl, onChanged: (val) => controller.updateExtraAnswer(widget.index, qid, val)));
       }
     }
-
     return fields;
   }
 
