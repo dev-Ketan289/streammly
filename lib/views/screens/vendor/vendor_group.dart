@@ -3,6 +3,7 @@ import 'package:flutter_svg/flutter_svg.dart'; // Use flutter_svg for SVG images
 import 'package:get/get.dart';
 import 'package:streammly/controllers/company_controller.dart';
 import 'package:streammly/generated/assets.dart';
+import 'package:streammly/navigation_menu.dart';
 import 'package:streammly/services/theme.dart';
 import 'package:streammly/views/widgets/custom_doodle.dart';
 
@@ -59,6 +60,7 @@ class _VendorGroupState extends State<VendorGroup> {
     final screenWidth = MediaQuery.of(context).size.width;
 
     return Scaffold(
+
       backgroundColor: theme.scaffoldBackgroundColor,
       body: CustomBackground(
         child: SafeArea(
