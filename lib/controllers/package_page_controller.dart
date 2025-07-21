@@ -46,8 +46,8 @@ class PackagesController extends GetxController {
     packages.clear();
     try {
       final response = await http.post(
-        Uri.parse("https://admin.streammly.com/api/v1/package/getpackages"),
-        // Uri.parse("http://192.168.1.113/api/v1/package/getpackages"),
+        // Uri.parse("https://admin.streammly.com/api/v1/package/getpackages"),
+        Uri.parse("http://192.168.1.113/api/v1/package/getpackages"),
         headers: {"Content-Type": "application/json"},
         body: jsonEncode({"company_id": companyId, "sub_category_id": subCategoryId, "sub_vertical_id": subVerticalId}),
       );
@@ -103,8 +103,8 @@ class PackagesController extends GetxController {
     productsInPackageList.clear();
     try {
       final response = await http.get(
-        Uri.parse('https://admin.streammly.com/api/v1/package/getproductinpackage?company_id=$companyId&package_id=$packageId'),
-        // Uri.parse('http://192.168.1.113/api/v1/package/getproductinpackage?company_id=$companyId&package_id=$packageId'),
+        // Uri.parse('https://admin.streammly.com/api/v1/package/getproductinpackage?company_id=$companyId&package_id=$packageId'),
+        Uri.parse('http://192.168.1.113/api/v1/package/getproductinpackage?company_id=$companyId&package_id=$packageId'),
         headers: {'Content-Type': 'application/json'},
       );
 
@@ -123,8 +123,8 @@ class PackagesController extends GetxController {
                         "id": product["id"],
                         "title": prod["title"] ?? "",
                         "description": prod["decription"] ?? "",
-                        "image": 'https://admin.streammly.com/${prod["cover_image"]}',
-                        // "image": 'http://192.168.1.113/${prod["cover_image"]}',
+                        // "image": 'https://admin.streammly.com/${prod["cover_image"]}',
+                        "image": 'http://192.168.1.113/${prod["cover_image"]}',
                         "quantity": product["quantity"] ?? 1,
                         "dataRequestStage": product["data_request_stage"] ?? "",
                       };
@@ -294,8 +294,8 @@ class PackagesController extends GetxController {
               "packageIndex": data.indexOf(pkg),
               "image":
                   (pkg["image_upload"] != null && pkg["image_upload"].isNotEmpty)
-                      ? 'https://admin.streammly.com/${pkg["image_upload"]}'
-                      // ? 'http://192.168.1.113/${pkg["image_upload"]}'
+                      // ? 'https://admin.streammly.com/${pkg["image_upload"]}'
+                      ? 'http://192.168.1.113/${pkg["image_upload"]}'
                       : 'assets/images/category/vendor_category/Baby.jpg',
             };
           }).toList(),

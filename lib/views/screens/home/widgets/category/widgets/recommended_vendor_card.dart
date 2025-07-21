@@ -85,7 +85,7 @@ class RecommendedVendorCard extends StatelessWidget {
                               .addBookmark(vendor.id, "company")
                               .then((value) {
                                 if (value.isSuccess) {
-                                  wishlistController.loadBookmarks();
+                                  wishlistController.loadBookmarks("company");
                                 }
                               });
                         },

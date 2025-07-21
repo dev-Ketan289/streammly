@@ -18,12 +18,15 @@ class _WishlistPageState extends State<WishlistPage> {
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      wishlistController.loadBookmarks();
+      wishlistController.loadBookmarks("company");
     });
   }
 
   @override
   Widget build(BuildContext context) {
+    final screenWidth = MediaQuery.of(context).size.width;
+    final itemWidth = (screenWidth * 0.45).clamp(140.0, 180.0);
+
     return Scaffold(
       backgroundColor: Colors.grey[100],
       appBar: AppBar(
@@ -58,48 +61,91 @@ class _WishlistPageState extends State<WishlistPage> {
                 ),
               );
             }
-            return ListView.builder(
+
+            // Group bookmarks by type (companyType)
+            final Map<String, List<RecommendedVendors>> grouped = {};
+            for (var vendor in controller.bookmarks) {
+              final type =
+                  vendor.vendorcategory?.first.getCategory?.title ?? 'Other';
+              if (!grouped.containsKey(type)) grouped[type] = [];
+              grouped[type]!.add(vendor);
+            }
+
+            return ListView(
               padding: const EdgeInsets.all(16),
-              itemCount: controller.bookmarks.length,
-              itemBuilder: (context, index) {
-                return Padding(
-                  padding: const EdgeInsets.only(bottom: 16.0),
-                  child: RecommendedVendorCard(
-                    itemWidth: 100,
-                    theme: Theme.of(context),
-                    wishlistController: wishlistController,
-                    onTap: () {
-                      Get.bottomSheet(
-                        WishlistBottomSheet(
-                          vendor: controller.bookmarks[index],
-                          onRemove: () async {
-                            final result = await wishlistController.addBookmark(
-                              controller
-                                  .bookmarks[index]
-                                  .id, // or the correct ID field
-                              "vendor", // or the correct type
-                            );
-                            if (result.isSuccess) {
-                              Get.snackbar(
-                                'Removed',
-                                'Item removed from wishlist',
-                              );
-                            } else {
-                              Get.snackbar('Error', result.message);
-                            }
-                          },
+              children:
+                  grouped.entries.map((entry) {
+                    final type = entry.key;
+                    final vendors = entry.value;
+                    return Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Padding(
+                          padding: const EdgeInsets.symmetric(vertical: 8.0),
+                          child: Text(
+                            type,
+                            style: const TextStyle(
+                              fontSize: 18,
+                              fontWeight: FontWeight.bold,
+                              color: Color(0xFF2864A6),
+                            ),
+                          ),
                         ),
-                      );
-                    },
-                    vendor: controller.bookmarks[index],
-                    imageUrl: controller.bookmarks[index].bannerImage ?? '',
-                    rating: controller.bookmarks[index].rating.toString(),
-                    companyName: controller.bookmarks[index].companyName ?? '',
-                    category: controller.bookmarks[index].companyType ?? '',
-                    time: controller.bookmarks[index].longitude ?? '',
-                  ),
-                );
-              },
+                        SizedBox(
+                          height: itemWidth * 1.7,
+                          child: ListView.separated(
+                            scrollDirection: Axis.horizontal,
+                            itemCount: vendors.length,
+                            separatorBuilder:
+                                (_, __) => const SizedBox(width: 16),
+                            itemBuilder: (context, index) {
+                              final vendor = vendors[index];
+                              return RecommendedVendorCard(
+                                itemWidth: itemWidth,
+                                theme: Theme.of(context),
+                                wishlistController: wishlistController,
+                                onTap: () {
+                                  Get.bottomSheet(
+                                    WishlistBottomSheet(
+                                      vendor: vendor,
+                                      onRemove: () async {
+                                        final result = await wishlistController
+                                            .addBookmark(vendor.id, "company");
+                                        if (result.isSuccess) {
+                                          Get.snackbar(
+                                            'Removed',
+                                            'Item removed from wishlist',
+                                          );
+                                        } else {
+                                          Get.snackbar('Error', result.message);
+                                        }
+                                      },
+                                    ),
+                                  );
+                                },
+                                vendor: vendor,
+                                imageUrl: vendor.logo ?? '',
+                                rating:
+                                    vendor.rating?.toStringAsFixed(1) ?? '--',
+                                companyName: vendor.companyName ?? 'Unknown',
+                                category:
+                                    vendor
+                                        .vendorcategory
+                                        ?.first
+                                        .getCategory
+                                        ?.title ??
+                                    'Service',
+                                time:
+                                    vendor.id != null
+                                        ? "${(vendor.id! * 7).round()} mins . ${vendor.id!.toStringAsFixed(1)} km"
+                                        : '--',
+                              );
+                            },
+                          ),
+                        ),
+                      ],
+                    );
+                  }).toList(),
             );
           },
         ),

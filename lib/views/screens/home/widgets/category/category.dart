@@ -25,7 +25,7 @@ class _CategoryListScreenState extends State<CategoryListScreen> {
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      Get.find<WishlistController>().loadBookmarks();
+      Get.find<WishlistController>().loadBookmarks("category");
     });
   }
 
@@ -132,7 +132,7 @@ class _CategoryListScreenState extends State<CategoryListScreen> {
                                           .then((value) {
                                             if (value.isSuccess) {
                                               wishlistController
-                                                  .loadBookmarks();
+                                                  .loadBookmarks("category");
                                             }
                                           });
                                     },

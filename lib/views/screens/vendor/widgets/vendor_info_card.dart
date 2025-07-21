@@ -40,7 +40,7 @@ class _VendorInfoCardState extends State<VendorInfoCard> {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
       final wishlistController = Get.find<WishlistController>();
-      wishlistController.loadBookmarks();
+      wishlistController.loadBookmarks("company");
     });
   }
 
@@ -278,7 +278,7 @@ class _VendorInfoCardState extends State<VendorInfoCard> {
                       .addBookmark(widget.vendorId!, "company")
                       .then((value) {
                         if (value.isSuccess) {
-                          wishlistController.loadBookmarks();
+                          wishlistController.loadBookmarks("company");
                         }
                       });
                 }

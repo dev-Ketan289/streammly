@@ -26,8 +26,8 @@ class AppConstants {
   set setBaseUrl(String url) => baseUrl = url;
 
   //TODO: Change Base Url
-  static String baseUrl = 'https://admin.streammly.com/';
-  // static String baseUrl = 'http://192.168.1.113:8000/';
+  // static String baseUrl = 'https://admin.streammly.com/';
+  static String baseUrl = 'http://192.168.1.113:8000/';
 
   static String appName = 'App Name';
 
@@ -79,11 +79,9 @@ class AppConstants {
   //Quote
   static const String submitQuoteUrl = "api/v1/quotation/addquotation";
 
-
   //Support Ticket
-  static const String addSupportTicket = 'api/v1/support-ticket/addsupportticket';
-
-
+  static const String addSupportTicket =
+      'api/v1/support-ticket/addsupportticket';
 
   //
   static const double horizontalPadding = 16;

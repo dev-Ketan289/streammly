@@ -17,6 +17,8 @@ class CategoryScroller extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
       child: Column(
@@ -28,9 +30,10 @@ class CategoryScroller extends StatelessWidget {
               children: [
                 Text(
                   title!,
-                  style: Theme.of(
-                    context,
-                  ).textTheme.bodyLarge?.copyWith(fontWeight: FontWeight.bold),
+                  style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                    fontWeight: FontWeight.bold,
+                    color: backgroundDark,
+                  ),
                 ),
                 if (onSeeAll != null)
                   InkWell(
