@@ -3,6 +3,8 @@ import 'package:flutter_svg/svg.dart';
 import 'package:get/get.dart';
 import 'package:streammly/generated/assets.dart';
 import 'package:streammly/views/screens/home/home_screen.dart';
+import 'package:streammly/views/screens/home/widgets/category/category.dart';
+import 'package:streammly/views/screens/package/booking/bookings.dart';
 
 class NavigationMenu extends StatefulWidget {
   final Set<int> hiddenIndices;
@@ -24,9 +26,23 @@ class _NavigationMenuState extends State<NavigationMenu> {
   Widget build(BuildContext context) {
     return PopScope(
       canPop: false,
+      onPopInvoked: (didPop) async {
+        if (!didPop && controller.selectedIndex != 0) {
+          controller.setIndex(0);
+        } else if (!didPop) {
+          Navigator.of(context).maybePop();
+        }
+      },
       child: Scaffold(
         body: GetBuilder<NavigationController>(
-          builder: (_) => controller.screens[controller.selectedIndex](),
+          builder:
+              (_) => IndexedStack(
+                index: controller.selectedIndex,
+                children:
+                    controller.screens
+                        .map((screenBuilder) => screenBuilder())
+                        .toList(),
+              ),
         ),
         floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
         floatingActionButton:
@@ -47,8 +63,8 @@ class _NavigationMenuState extends State<NavigationMenu> {
                           child: Container(
                             height: 40,
                             width: 40,
-                            decoration: BoxDecoration(
-                              color: const Color(0xffD9D9D9),
+                            decoration: const BoxDecoration(
+                              color: Color(0xffD9D9D9),
                               shape: BoxShape.circle,
                             ),
                             child: SvgPicture.asset(
@@ -92,8 +108,7 @@ class _NavigationMenuState extends State<NavigationMenu> {
                           label: 'Shop',
                           index: 1,
                         ),
-                      if (!widget.hideFAB)
-                        const SizedBox(width: 25), // FAB Space
+                      if (!widget.hideFAB) const SizedBox(width: 25),
                       if (!widget.hiddenIndices.contains(3))
                         _buildNavItem(
                           theme: Theme.of(context),
@@ -166,10 +181,11 @@ class NavigationController extends GetxController {
 
   final List<Widget Function()> screens = [
     () => const HomeScreen(),
-    () => const Placeholder(),
-    () => const Placeholder(),
-    () => const Placeholder(),
-    () => const Placeholder(),
+    () => const Center(child: Text('Shop Screen Coming Soon')),
+    () => const Center(child: Text('Cart Screen Coming Soon')),
+    () => const Bookings(),
+    () => const Center(child: Text('More Screen Coming Soon')),
+    () => const CategoryListScreen(),
   ];
 
   void setIndex(int index) {
@@ -178,7 +194,6 @@ class NavigationController extends GetxController {
   }
 }
 
-// Static methods for use outside NavigationMenu
 class NavigationHelper {
   static Widget buildBottomNav({
     Set<int> hiddenIndices = const {},
@@ -215,7 +230,7 @@ class NavigationHelper {
                   height: 15,
                   spacing: 4,
                 ),
-              if (!hideFAB) const SizedBox(width: 25), // FAB space
+              if (!hideFAB) const SizedBox(width: 25),
               if (!hiddenIndices.contains(3))
                 _buildNavItem(
                   icon: Assets.svgBooking,
@@ -293,8 +308,8 @@ class NavigationHelper {
         child: Container(
           height: 40,
           width: 40,
-          decoration: BoxDecoration(
-            color: const Color(0xffD9D9D9),
+          decoration: const BoxDecoration(
+            color: Color(0xffD9D9D9),
             shape: BoxShape.circle,
           ),
           child: SvgPicture.asset(Assets.svgCarttt, fit: BoxFit.scaleDown),

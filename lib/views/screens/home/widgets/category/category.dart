@@ -47,15 +47,20 @@ class _CategoryListScreenState extends State<CategoryListScreen> {
             ),
           ),
           centerTitle: true,
-          leading: IconButton(
-            icon: const Icon(
-              Icons.arrow_back_ios_new,
-              color: Color(0xff666666),
-            ),
-            onPressed: () {
-              Get.back();
-            },
-          ),
+          // leading: IconButton(
+          //   icon: const Icon(
+          //     Icons.arrow_back_ios_new,
+          //     color: Color(0xff666666),
+          //   ),
+          //   onPressed: () {
+          //     if (Navigator.canPop(context)) {
+          //       Get.back();
+          //     } else {
+          //       // Optional: navigate to home or dashboard
+          //       Get.offAll(() => const NavigationMenu());
+          //     }
+          //   },
+          // ),
         ),
         body: GetBuilder<CategoryController>(
           builder: (controller) {
@@ -106,11 +111,10 @@ class _CategoryListScreenState extends State<CategoryListScreen> {
                                   right: 15,
                                 ),
                                 child: TRoundedImage(
-                                  imageUrl:
-                                      "${AppConstants.baseUrl}${cat.image}",
+                                  imageUrl: cat.image ?? '',
                                   height: 100,
                                   width: 380,
-                                  fit: BoxFit.cover,
+                                  fit: BoxFit.fill,
                                   borderRadius: 16,
                                   isNetworkImage: true,
                                 ),
@@ -198,11 +202,6 @@ class _CategoryListScreenState extends State<CategoryListScreen> {
             );
           },
         ),
-        bottomNavigationBar: NavigationHelper.buildBottomNav(),
-        floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
-        floatingActionButton: NavigationHelper.buildFloatingButton(),
-        // Optionally: hide tabs with `hiddenIndices`, e.g.
-        // bottomNavigationBar: NavigationHelper.buildBottomNav(hiddenIndices: {1}),
       ),
     );
   }

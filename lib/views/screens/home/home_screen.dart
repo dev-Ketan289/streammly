@@ -10,6 +10,8 @@ import '../../../controllers/home_screen_controller.dart';
 import '../../../controllers/location_controller.dart';
 import '../../../models/category/category_item.dart';
 import '../../../models/category/category_model.dart';
+import '../../../navigation_menu.dart';
+import '../../../services/constants.dart';
 import '../home/widgets/category/category.dart';
 import '../home/widgets/category/explore_us.dart';
 import '../home/widgets/category/recommended_list.dart';
@@ -41,20 +43,10 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   List<CategoryItem> convertToCategoryItems(List<CategoryModel> models) {
-    final String baseUrl = 'https://admin.streammly.com/';
-    // final String baseUrl = 'http://192.168.1.113:8000/';
-
     return models.map((model) {
-      String? fullImageUrl;
-      if (model.image != null && model.image!.isNotEmpty) {
-        final path =
-            model.image!.startsWith('/') ? model.image! : '/${model.image!}';
-        fullImageUrl = '$baseUrl$path';
-      }
-
       return CategoryItem(
         label: model.title,
-        imagePath: fullImageUrl,
+        imagePath: model.icon,
         onTap: () {
           Get.to(() => CompanyLocatorMapScreen(categoryId: model.id));
         },
@@ -79,7 +71,6 @@ class _HomeScreenState extends State<HomeScreen> {
             }
 
             return SafeArea(
-            
               child: SingleChildScrollView(
                 child: Column(
                   children: [
@@ -96,7 +87,9 @@ class _HomeScreenState extends State<HomeScreen> {
                         ? const CircularProgressIndicator()
                         : CategoryScroller(
                           title: "Categories",
-                          onSeeAll: () => Get.to(() => CategoryListScreen()),
+                          onSeeAll:
+                              () =>
+                                  Get.find<NavigationController>().setIndex(5),
                           categories: convertToCategoryItems(categoryModels),
                         ),
                     const SizedBox(height: 24),

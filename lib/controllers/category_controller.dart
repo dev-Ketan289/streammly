@@ -1,6 +1,5 @@
 import 'package:get/get.dart';
 import 'package:streammly/data/repository/category_repo.dart';
-import 'package:streammly/services/constants.dart';
 
 import '../models/category/category_model.dart';
 
@@ -37,10 +36,7 @@ class CategoryController extends GetxController implements GetxService {
     }
       isLoading = false;
       update(); // notify done loading
-    
 
-    
   }
-  
 
 }

@@ -49,12 +49,7 @@ class _VendorGroupState extends State<VendorGroup> {
   /// Helper function to resolve image URL
   String resolveImageUrl(String? url) {
     if (url == null || url.isEmpty) return '';
-    return url.startsWith('http')
-        ? url
-        : 'https://admin.streammly.com/${url.replaceFirst(RegExp(r'^/'), '')}';
-    // return url.startsWith('http')
-    //     ? url
-    //     : 'http://192.168.1.113/${url.replaceFirst(RegExp(r'^/'), '')}';
+    return url.startsWith('http') ? url :url.replaceFirst(RegExp(r'^/'), '');
   }
 
   @override
@@ -64,9 +59,9 @@ class _VendorGroupState extends State<VendorGroup> {
 
     return Scaffold(
       backgroundColor: theme.scaffoldBackgroundColor,
-      bottomNavigationBar: NavigationHelper.buildBottomNav(),
-      floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
-      floatingActionButton: NavigationHelper.buildFloatingButton(),
+      // bottomNavigationBar: NavigationHelper.buildBottomNav(),
+      // floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
+      // floatingActionButton: NavigationHelper.buildFloatingButton(),
       body: CustomBackground(
         child: SafeArea(
           child: Column(
@@ -267,7 +262,7 @@ class _VendorGroupState extends State<VendorGroup> {
                                             errorBuilder: (_, __, ___) {
                                               return Image.asset(
                                                 "assets/images/category/vendor_category/img.png",
-                                                fit: BoxFit.contain,
+                                                fit: BoxFit.fill,
                                               );
                                             },
                                           )

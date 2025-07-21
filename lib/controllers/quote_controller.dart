@@ -52,17 +52,27 @@ class QuoteController extends GetxController {
       "favorable_start_time": favorableStartTime,
       "favorable_end_time": favorableEndTime,
     };
-    
-    final url = Uri.parse("https://admin.streammly.com/api/v1/quotation/addquotation");
-    // final url = Uri.parse("http://192.168.1.113:8000/api/v1/quotation/addquotation");
 
+    final url = Uri.parse(
+      "https://admin.streammly.com/api/v1/quotation/addquotation",
+    );
+    // final url = Uri.parse("http://192.168.1.113:8000/api/v1/quotation/addquotation");
 
     print("POST URL: $url");
     print("POST BODY: $body");
-    print("HEADERS: ${{"Content-Type": "application/json", "Authorization": "Bearer $token"}}");
+    print(
+      "HEADERS: ${{"Content-Type": "application/json", "Authorization": "Bearer $token"}}",
+    );
 
     try {
-      final response = await http.post(url, headers: {"Content-Type": "application/json", "Authorization": "Bearer $token"}, body: jsonEncode(body));
+      final response = await http.post(
+        url,
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": "Bearer $token",
+        },
+        body: jsonEncode(body),
+      );
 
       print("STATUS CODE: ${response.statusCode}");
       print("RESPONSE: ${response.body}");
@@ -72,7 +82,12 @@ class QuoteController extends GetxController {
         final formattedDateTime = "$dateOfShoot, $startTime";
 
         // Navigate to confirmation screen
-        Get.off(() => QuoteSubmittedScreen(shootType: shootType, submittedDateTime: formattedDateTime));
+        Get.off(
+          () => QuoteSubmittedScreen(
+            shootType: shootType,
+            submittedDateTime: formattedDateTime,
+          ),
+        );
 
         Get.snackbar("Success", "Quote request submitted!");
       } else {

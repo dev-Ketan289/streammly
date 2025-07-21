@@ -2,9 +2,7 @@ import 'package:carousel_slider/carousel_slider.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:shimmer/shimmer.dart';
-
 import '../../../../controllers/promo_slider_controller.dart';
-import '../../../../services/constants.dart';
 import '../../common/container/circular_container.dart';
 
 class PromoSlider extends StatefulWidget {
@@ -43,7 +41,7 @@ class _PromoSliderState extends State<PromoSlider> {
             CarouselSlider(
               items:
                   validSliders.map((item) {
-                    final imageUrl = item.media != null ? AppConstants.baseUrl + item.media! : '';
+                    // final imageUrl = item.media != null ? AppConstants.baseUrl + item.media! : '';
                     return GestureDetector(
                       onTap: () {
                         // navigation logic here
@@ -57,15 +55,26 @@ class _PromoSliderState extends State<PromoSlider> {
                         ),
                         child: ClipRRect(
                           borderRadius: BorderRadius.circular(18),
-                          child: Image.network(
-                            imageUrl,
-                            fit: BoxFit.cover,
-                            width: double.infinity,
-                            height: 150,
-                            errorBuilder: (_, __, ___) => Icon(Icons.error, color: theme.colorScheme.error),
-                          ),
-                        ),
+                      child: Image.network(
+                        item.media!,
+                        fit: BoxFit.cover,
+                        width: double.infinity,
+                        height: 150,
+                        errorBuilder: (_, __, ___) => Icon(Icons.image_not_supported, color: theme.colorScheme.error),
+                        loadingBuilder: (context, child, loadingProgress) {
+                          if (loadingProgress == null) return child;
+                          return Center(
+                            child: CircularProgressIndicator(
+                              value: loadingProgress.expectedTotalBytes != null
+                                  ? loadingProgress.cumulativeBytesLoaded / loadingProgress.expectedTotalBytes!
+                                  : null,
+                            ),
+                          );
+                        },
                       ),
+                    ),
+
+                    ),
                     );
                   }).toList(),
               options: CarouselOptions(height: 180, autoPlay: true, enlargeCenterPage: true, viewportFraction: 0.9, onPageChanged: (index, _) => controller.setCurrentIndex(index),),

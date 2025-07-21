@@ -23,14 +23,14 @@ class VendorDescription extends StatelessWidget {
           }
 
           Widget bannerWidget;
-          final bannerUrl = company.bannerImage;
+          final bannerUrl = company.descriptionBackgroundImage;
+
           if (bannerUrl != null &&
               bannerUrl.isNotEmpty &&
               (Uri.tryParse(bannerUrl)?.hasAbsolutePath ?? false)) {
             bannerWidget = Image.network(
               bannerUrl,
               fit: BoxFit.cover,
-
               errorBuilder: (context, error, stackTrace) {
                 return Image.asset(
                   'assets/images/newBorn.jpg',
@@ -44,6 +44,7 @@ class VendorDescription extends StatelessWidget {
               fit: BoxFit.cover,
             );
           }
+
 
           String distanceText =
               company.distanceKm != null
