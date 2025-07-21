@@ -257,11 +257,12 @@ class _VendorInfoCardState extends State<VendorInfoCard> {
               ),
             ),
           ),
+        const SizedBox(width: 10),
         if (widget.estimatedTime != null && widget.distanceKm != null)
           Text(
             "${widget.estimatedTime} • ${widget.distanceKm}",
             style: TextStyle(
-              fontSize: isSmallScreen ? 7 : 11,
+              fontSize: isSmallScreen ? 7 : 7,
               color: Colors.black,
             ),
             overflow: TextOverflow.visible,
