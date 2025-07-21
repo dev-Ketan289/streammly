@@ -1,3 +1,5 @@
+import 'package:streammly/services/constants.dart';
+
 class CompanyLocation {
   final int? id;
   final String companyName;
@@ -12,8 +14,10 @@ class CompanyLocation {
   final String? categoryName;
   final double? rating;
   final List<String> specialities;
-
   final String? descriptionBackgroundImage;
+
+  // Internal map to link speciality titles with their image URLs
+  final Map<String, String> _specialityTitleToImage;
 
   CompanyLocation({
     this.id,
@@ -29,53 +33,57 @@ class CompanyLocation {
     this.rating,
     this.specialities = const [],
     this.descriptionBackgroundImage,
-  });
+    Map<String, String>? specialityTitleToImage,
+  }) : _specialityTitleToImage = specialityTitleToImage ?? {};
+
+  /// Get image URL for a given speciality title
+  String? getSpecialityImage(String title) {
+    return _specialityTitleToImage[title];
+  }
 
   factory CompanyLocation.fromJson(Map<String, dynamic> json) {
     String fullUrl(String? path) {
       if (path == null || path.isEmpty) return '';
       if (path.startsWith('http')) return path;
-      return 'https://appdid.blr1.digitaloceanspaces.com/$path';
+      return AppConstants.baseUrl + path;
     }
 
-    List<String> extractSpecialities(dynamic vendorsubcategory) {
-      final Set<String> result = {};
+    Map<String, String> extractSpecialityMap(dynamic vendorsubcategory) {
+      final Map<String, String> result = {};
 
       if (vendorsubcategory is List) {
         for (var item in vendorsubcategory) {
           final subcategory = item['subcategory'];
           if (subcategory != null && subcategory['specialities'] != null) {
             for (var speciality in subcategory['specialities']) {
-              if (speciality['title'] != null) {
-                result.add(speciality['title']);
+              final title = speciality['title'];
+              final image = speciality['image'];
+              if (title != null) {
+                result[title] = fullUrl(image);
               }
             }
           }
         }
       }
 
-      return result.toList();
+      return result;
     }
+
+    final specialityMap = extractSpecialityMap(json['vendorsubcategory']);
 
     return CompanyLocation(
       id: json['id'],
       companyName: json['company_name'] ?? 'Unknown',
-      latitude: json['latitude'] != null
-          ? double.tryParse(json['latitude'].toString())
-          : null,
-      longitude: json['longitude'] != null
-          ? double.tryParse(json['longitude'].toString())
-          : null,
+      latitude: json['latitude'] != null ? double.tryParse(json['latitude'].toString()) : null,
+      longitude: json['longitude'] != null ? double.tryParse(json['longitude'].toString()) : null,
       bannerImage: fullUrl(json['banner_image']),
       logo: fullUrl(json['logo']),
       description: json['description'],
       categoryName: json['category_name'],
-      rating: json['rating'] != null
-          ? double.tryParse(json['rating'].toString()) ?? 3.9
-          : 3.9,
-      specialities: extractSpecialities(json['vendorsubcategory']),
-      descriptionBackgroundImage:
-      fullUrl(json['description_background_image']),
+      rating: json['rating'] != null ? double.tryParse(json['rating'].toString()) ?? 3.9 : 3.9,
+      specialities: specialityMap.keys.toList(),
+      descriptionBackgroundImage: fullUrl(json['description_background_image']),
+      specialityTitleToImage: specialityMap,
     );
   }
 }
