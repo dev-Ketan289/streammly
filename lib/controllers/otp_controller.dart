@@ -135,10 +135,10 @@ class OtpController extends GetxController implements GetxService {
     }
 
     try {
-      final url = Uri.parse("https://admin.streammly.com/api/v1/user/auth/generateOtp");
-      // final url = Uri.parse(
-      //   "http://192.168.1.113:8000/api/v1/user/auth/generateOtp",
-      // );
+      // final url = Uri.parse("https://admin.streammly.com/api/v1/user/auth/generateOtp");
+      final url = Uri.parse(
+        "http://192.168.1.113:8000/api/v1/user/auth/generateOtp",
+      );
       final response = await http.post(
         url,
         headers: {'Content-Type': 'application/json'},

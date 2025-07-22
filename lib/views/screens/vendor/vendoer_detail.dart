@@ -10,6 +10,7 @@ import '../home/widgets/category/widgets/category_scroller.dart';
 import '../home/widgets/header_banner.dart';
 import '../home/widgets/horizontal_card.dart';
 import 'vendor_group.dart';
+import '../../../navigation_menu.dart';
 
 class VendorDetailScreen extends StatefulWidget {
   final CompanyLocation company;
@@ -252,6 +253,9 @@ class _VendorDetailScreenState extends State<VendorDetailScreen> {
           ),
         ),
       ),
+      bottomNavigationBar: NavigationHelper.buildBottomNav(),
+      floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
+      floatingActionButton: NavigationHelper.buildFloatingButton(),
     );
   }
 }

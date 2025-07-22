@@ -21,6 +21,20 @@ class NavigationMenu extends StatefulWidget {
 
 class _NavigationMenuState extends State<NavigationMenu> {
   final controller = Get.put(NavigationController());
+  final List<GlobalKey<NavigatorState>> _navigatorKeys = List.generate(
+    5,
+    (index) => GlobalKey<NavigatorState>(),
+  );
+
+  void _onTabTapped(int index){
+    if(controller.selectedIndex==index){
+      _navigatorKeys[index].currentState?.popUntil((route)=>route.isFirst);
+    }else{
+      setState(() {
+        controller.selectedIndex = index;
+      });
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -318,3 +332,10 @@ class NavigationHelper {
     );
   }
 }
+
+
+// Widget _buildTabNavigator(int index ,Widget child){
+//   return Offstage(
+//     offstage: controllrt,
+//   )
+// }
