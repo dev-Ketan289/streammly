@@ -15,9 +15,7 @@ class UpcomingOfferCard extends StatelessWidget {
           children: [
             Container(
               width: double.infinity,
-              color: const Color(
-                0xFFE2EDF9,
-              ), // Keep original background color as per your design
+              color: Color(0xFFE2EDF9), // Adapt background to theme
               padding: const EdgeInsets.all(16),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -32,7 +30,7 @@ class UpcomingOfferCard extends StatelessWidget {
                           textStyle: theme.textTheme.bodyMedium?.copyWith(
                             fontWeight: FontWeight.bold,
                             fontSize: 14,
-                            color: Color(0xff1E2742),
+                            color: theme.colorScheme.primary, // Adapt to theme
                           ),
                         ),
                       ),
@@ -41,7 +39,7 @@ class UpcomingOfferCard extends StatelessWidget {
                         style: GoogleFonts.poppins(
                           textStyle: theme.textTheme.bodySmall?.copyWith(
                             fontSize: 12,
-                            color: Color(0xff1E2742),
+                            color: theme.colorScheme.primary, // Adapt to theme
                             fontWeight: FontWeight.bold,
                           ),
                         ),
@@ -57,7 +55,7 @@ class UpcomingOfferCard extends StatelessWidget {
                       textStyle: theme.textTheme.titleLarge?.copyWith(
                         fontSize: 20,
                         fontWeight: FontWeight.w700,
-                        color: Color(0xff1E2742),
+                        color: theme.colorScheme.primary, // Adapt to theme
                       ),
                     ),
                   ),
@@ -77,14 +75,19 @@ class UpcomingOfferCard extends StatelessWidget {
                               Icon(
                                 Icons.calendar_today,
                                 size: 16,
-                                color: theme.iconTheme.color,
+                                color:
+                                    theme.iconTheme.color ??
+                                    theme.colorScheme.primary,
                               ),
                               const SizedBox(width: 6),
                               Text(
                                 "15 June, Saturday",
                                 style: theme.textTheme.bodySmall?.copyWith(
                                   fontSize: 12,
-                                  color: Color(0xff1E2742),
+                                  color:
+                                      theme
+                                          .colorScheme
+                                          .onSurface, // Adapt to theme
                                 ),
                                 overflow: TextOverflow.ellipsis,
                               ),
@@ -96,14 +99,19 @@ class UpcomingOfferCard extends StatelessWidget {
                               Icon(
                                 Icons.access_time,
                                 size: 16,
-                                color: theme.iconTheme.color,
+                                color:
+                                    theme.iconTheme.color ??
+                                    theme.colorScheme.primary,
                               ),
                               const SizedBox(width: 6),
                               Text(
                                 "12:30 pm",
                                 style: theme.textTheme.bodySmall?.copyWith(
                                   fontSize: 12,
-                                  color: Color(0xff1E2742),
+                                  color:
+                                      theme
+                                          .colorScheme
+                                          .onSurface, // Adapt to theme
                                 ),
                               ),
                               const SizedBox(width: 30),
@@ -119,7 +127,8 @@ class UpcomingOfferCard extends StatelessWidget {
                             "3 Photographers",
                             style: theme.textTheme.bodySmall?.copyWith(
                               fontSize: 12,
-                              color: Color(0xff1E2742),
+                              color:
+                                  theme.colorScheme.onSurface, // Adapt to theme
                             ),
                           ),
                         ),

@@ -23,7 +23,7 @@ class _RecommendedListState extends State<RecommendedList> {
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      widget.wishlistController.loadBookmarks();
+      widget.wishlistController.loadBookmarks("company");
     });
   }
 

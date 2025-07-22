@@ -1,14 +1,14 @@
 import 'dart:convert';
 
-List<RecommendedVendors> recommendedVendorsFromJson(String str) =>
-    List<RecommendedVendors>.from(
-      json.decode(str).map((x) => RecommendedVendors.fromJson(x)),
+List<BookMarkModel> bookMarkModelFromJson(String str) =>
+    List<BookMarkModel>.from(
+      json.decode(str).map((x) => BookMarkModel.fromJson(x)),
     );
 
-String recommendedVendorsToJson(List<RecommendedVendors> data) =>
+String bookMarkModelToJson(List<BookMarkModel> data) =>
     json.encode(List<dynamic>.from(data.map((x) => x.toJson())));
 
-class RecommendedVendors {
+class BookMarkModel {
   int? id;
   String? uniqueId;
   dynamic vendorId;
@@ -39,7 +39,7 @@ class RecommendedVendors {
   int? subVerticalId;
   String? markPopular;
 
-  RecommendedVendors({
+  BookMarkModel({
     this.id,
     this.uniqueId,
     this.vendorId,
@@ -71,9 +71,9 @@ class RecommendedVendors {
     this.markPopular,
   });
 
-  factory RecommendedVendors.fromJson(
+  factory BookMarkModel.fromJson(
     Map<String, dynamic> json,
-  ) => RecommendedVendors(
+  ) => BookMarkModel(
     id: json["id"],
     uniqueId: json["unique_id"],
     vendorId: json["vendor_id"],

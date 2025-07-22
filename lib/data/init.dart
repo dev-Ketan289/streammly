@@ -59,7 +59,7 @@ class Init {
 
       //Wishlist
       Get.lazyPut(() => WishlistRepo(apiClient: Get.find()));
-      Get.lazyPut(() => WishlistController(companyController: Get.find()));
+      Get.lazyPut(() => WishlistController(wishlistRepo: Get.find()));
       // Package
       // Get.lazyPut(() => PackageRepo(apiClient: Get.find()));
       // Get.lazyPut(() => PackagesController(packageRepo: Get.find()));

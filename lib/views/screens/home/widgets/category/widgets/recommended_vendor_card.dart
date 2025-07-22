@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:streammly/controllers/wishlist_controller.dart';
 import 'package:streammly/models/vendors/recommanded_vendors.dart';
+import 'package:streammly/services/custom_image.dart';
 import 'package:streammly/services/theme.dart';
 
 class RecommendedVendorCard extends StatelessWidget {
@@ -59,20 +60,27 @@ class RecommendedVendorCard extends StatelessWidget {
                     top: Radius.circular(16),
                     bottom: Radius.circular(16),
                   ),
-                  child: Image.network(
-                    imageUrl,
+                  child: CustomImage(
+                    path: imageUrl,
                     height: itemWidth * 1.0,
                     width: double.infinity,
                     fit: BoxFit.cover,
-                    errorBuilder: (_, __, ___) {
-                      return Image.asset(
-                        'assets/images/placeholder.jpg',
-                        height: itemWidth * 1.0,
-                        width: double.infinity,
-                        fit: BoxFit.cover,
-                      );
-                    },
                   ),
+                  //  Image.network(
+                  //   imageUrl,
+                  //   height: itemWidth * 1.0,
+                  //   width: double.infinity,
+                  //   fit: BoxFit.cover,
+                  //   errorBuilder: (_, __, ___) {
+                  //     return
+                  //      Image.asset(
+                  //       'assets/images/placeholder.jpg',
+                  //       height: itemWidth * 1.0,
+                  //       width: double.infinity,
+                  //       fit: BoxFit.cover,
+                  //     );
+                  //   },
+                  // ),
                 ),
                 Positioned(
                   top: 8,
@@ -85,17 +93,24 @@ class RecommendedVendorCard extends StatelessWidget {
                               .addBookmark(vendor.id, "company")
                               .then((value) {
                                 if (value.isSuccess) {
-                                  wishlistController.loadBookmarks();
+                                  wishlistController.loadBookmarks("company");
                                 }
                               });
                         },
-                        child: Icon(
-                          Icons.favorite,
-                          size: 25,
-                          color:
-                              vendor.isChecked == true
-                                  ? Colors.red
-                                  : Colors.white,
+                        child: Container(
+                          height: 30,
+                          width: 30,
+                          decoration: BoxDecoration(color: Colors.transparent),
+                          child: Icon(
+                            Icons.favorite,
+                            size: 25,
+                            color:
+                                wishlistController.bookmarks.any(
+                                      (element) => element.id == vendor.id,
+                                    )
+                                    ? Colors.red
+                                    : Colors.grey,
+                          ),
                         ),
                       );
                     },

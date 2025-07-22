@@ -1,24 +1,25 @@
 import 'dart:developer';
 
 import 'package:get/get.dart';
-import 'package:streammly/controllers/company_controller.dart';
 import 'package:streammly/data/repository/wishlist_repo.dart';
 import 'package:streammly/models/response/response_model.dart';
 import 'package:streammly/models/vendors/recommanded_vendors.dart';
 
 class WishlistController extends GetxController implements GetxService {
-  final CompanyController companyController;
-  WishlistController({required this.companyController});
+  final WishlistRepo wishlistRepo;
+  WishlistController({required this.wishlistRepo});
 
   List<RecommendedVendors> bookmarks = [];
   bool isLoading = true;
 
-  Future<ResponseModel> loadBookmarks() async {
+  Future<ResponseModel> loadBookmarks(String type) async {
     isLoading = true;
     update();
     ResponseModel responseModel;
     try {
-      Response response = await Get.find<WishlistRepo>().getBookMark();
+      Response response = await Get.find<WishlistRepo>().getBookMark(
+        type,
+      );
       log('${response.bodyString}', name: 'ljkdfs');
       if (response.statusCode == 200) {
         bookmarks =
@@ -51,7 +52,7 @@ class WishlistController extends GetxController implements GetxService {
       );
       if (response.statusCode == 200) {
         responseModel = ResponseModel(true, "Bookmark added");
-        await loadBookmarks(); // Refresh bookmarks after adding/removing
+        await loadBookmarks(type); // Refresh bookmarks after adding/removing
       } else {
         responseModel = ResponseModel(false, "Failed to add bookmark");
       }
