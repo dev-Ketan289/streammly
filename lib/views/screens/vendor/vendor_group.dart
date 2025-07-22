@@ -60,7 +60,6 @@ class _VendorGroupState extends State<VendorGroup> {
     final screenWidth = MediaQuery.of(context).size.width;
 
     return Scaffold(
-
       backgroundColor: theme.scaffoldBackgroundColor,
       body: CustomBackground(
         child: SafeArea(

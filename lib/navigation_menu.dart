@@ -3,8 +3,8 @@ import 'package:flutter_svg/svg.dart';
 import 'package:get/get.dart';
 import 'package:streammly/generated/assets.dart';
 import 'package:streammly/views/screens/home/home_screen.dart';
-import 'package:streammly/views/screens/home/widgets/category/category.dart';
 import 'package:streammly/views/screens/package/booking/bookings.dart';
+import 'package:flutter/services.dart';
 
 class NavigationMenu extends StatefulWidget {
   final Set<int> hiddenIndices;
@@ -21,41 +21,62 @@ class NavigationMenu extends StatefulWidget {
 
 class _NavigationMenuState extends State<NavigationMenu> {
   final controller = Get.put(NavigationController());
-  final List<GlobalKey<NavigatorState>> _navigatorKeys = List.generate(
-    5,
-    (index) => GlobalKey<NavigatorState>(),
-  );
+  // final List<GlobalKey<NavigatorState>> _navigatorKeys = List.generate(
+  //   5,
+  //   (index) => GlobalKey<NavigatorState>(),
+  // );
 
-  void _onTabTapped(int index){
-    if(controller.selectedIndex==index){
-      _navigatorKeys[index].currentState?.popUntil((route)=>route.isFirst);
-    }else{
-      setState(() {
-        controller.selectedIndex = index;
-      });
-    }
-  }
+  // void _onTabTapped(int index){
+  //   if(controller.selectedIndex==index){
+  //     _navigatorKeys[index].currentState?.popUntil((route)=>route.isFirst);
+  //   }else{
+  //     setState(() {
+  //       controller.selectedIndex = index;
+  //     });
+  //   }
+  // }
 
   @override
   Widget build(BuildContext context) {
     return PopScope(
       canPop: false,
       onPopInvoked: (didPop) async {
-        if (!didPop && controller.selectedIndex != 0) {
+        final currentNav =
+            controller.navigatorKeys[controller.selectedIndex].currentState;
+        if (!didPop && currentNav != null && currentNav.canPop()) {
+          currentNav.pop();
+        } else if (!didPop && controller.selectedIndex != 0) {
           controller.setIndex(0);
         } else if (!didPop) {
-          Navigator.of(context).maybePop();
+          
+          // Exit the app if on Home tab root
+          // For Android:
+          SystemNavigator.pop();
+          // For iOS, you might want to do nothing or handle differently
         }
       },
+      // onPopInvoked: (didPop) async {
+      //   if (!didPop && controller.selectedIndex != 0) {
+      //     controller.setIndex(0);
+      //   } else if (!didPop) {
+      //     Navigator.of(context).maybePop();
+      //   }
+      // },
       child: Scaffold(
         body: GetBuilder<NavigationController>(
           builder:
               (_) => IndexedStack(
                 index: controller.selectedIndex,
-                children:
-                    controller.screens
-                        .map((screenBuilder) => screenBuilder())
-                        .toList(),
+                children: List.generate(
+                  controller.screens.length,
+                  (index) => Navigator(
+                    key: controller.navigatorKeys[index],
+                    onGenerateRoute:
+                        (settings) => MaterialPageRoute(
+                          builder: (_) => controller.screens[index](),
+                        ),
+                  ),
+                ),
               ),
         ),
         floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
@@ -163,7 +184,15 @@ class _NavigationMenuState extends State<NavigationMenu> {
     final isSelected = controller.selectedIndex == index;
 
     return GestureDetector(
-      onTap: () => controller.setIndex(index),
+      onTap: () {
+        if (controller.selectedIndex == index) {
+          controller.navigatorKeys[index].currentState?.popUntil(
+            (r) => r.isFirst,
+          );
+        } else {
+          controller.setIndex(index);
+        }
+      },
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
@@ -192,6 +221,10 @@ class _NavigationMenuState extends State<NavigationMenu> {
 
 class NavigationController extends GetxController {
   int selectedIndex = 0;
+  final List<GlobalKey<NavigatorState>> navigatorKeys = List.generate(
+    5,
+    (index) => GlobalKey<NavigatorState>(),
+  );
 
   final List<Widget Function()> screens = [
     () => const HomeScreen(),
@@ -199,7 +232,7 @@ class NavigationController extends GetxController {
     () => const Center(child: Text('Cart Screen Coming Soon')),
     () => const Bookings(),
     () => const Center(child: Text('More Screen Coming Soon')),
-    () => const CategoryListScreen(),
+    // () => const CategoryListScreen(),
   ];
 
   void setIndex(int index) {

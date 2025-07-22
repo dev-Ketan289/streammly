@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:streammly/controllers/company_controller.dart';
+import 'package:streammly/navigation_menu.dart';
 import 'package:streammly/services/theme.dart';
 import 'package:streammly/views/widgets/custom_doodle.dart';
 import '../../../models/category/category_item.dart';
@@ -10,7 +11,6 @@ import '../home/widgets/category/widgets/category_scroller.dart';
 import '../home/widgets/header_banner.dart';
 import '../home/widgets/horizontal_card.dart';
 import 'vendor_group.dart';
-import '../../../navigation_menu.dart';
 
 class VendorDetailScreen extends StatefulWidget {
   final CompanyLocation company;
@@ -34,6 +34,13 @@ class _VendorDetailScreenState extends State<VendorDetailScreen> {
   String resolveImageUrl(String? url) {
     if (url == null || url.isEmpty) return '';
     return url.startsWith('http') ? url : url.replaceFirst(RegExp(r'^/'), '');
+  }
+
+  void pushToCurrentTab(Widget page) {
+    final navKey =
+        Get.find<NavigationController>()
+            .navigatorKeys[Get.find<NavigationController>().selectedIndex];
+    navKey.currentState?.push(MaterialPageRoute(builder: (_) => page));
   }
 
   @override
@@ -80,8 +87,8 @@ class _VendorDetailScreenState extends State<VendorDetailScreen> {
                             imagePath:
                                 'assets/images/category/vendor_category/img.png',
                             onTap:
-                                () => Get.to(
-                                  () => VendorGroup(
+                                () => pushToCurrentTab(
+                                  VendorGroup(
                                     company: widget.company,
                                     subCategoryId: 2,
                                   ),
@@ -122,8 +129,8 @@ class _VendorDetailScreenState extends State<VendorDetailScreen> {
                               label: sub.title,
                               imagePath: resolveImageUrl(sub.image),
                               onTap:
-                                  () => Get.to(
-                                    () => VendorGroup(
+                                  () => pushToCurrentTab(
+                                    VendorGroup(
                                       company: widget.company,
                                       subCategoryId: sub.id,
                                     ),
@@ -253,9 +260,6 @@ class _VendorDetailScreenState extends State<VendorDetailScreen> {
           ),
         ),
       ),
-      bottomNavigationBar: NavigationHelper.buildBottomNav(),
-      floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
-      floatingActionButton: NavigationHelper.buildFloatingButton(),
     );
   }
 }

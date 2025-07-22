@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:streammly/controllers/wishlist_controller.dart';
 import 'package:streammly/models/vendors/recommanded_vendors.dart';
+import 'package:streammly/navigation_menu.dart';
 import 'package:streammly/views/screens/home/widgets/category/widgets/recommended_vendor_card.dart';
 
 import '../../../../../models/company/company_location.dart';
@@ -12,7 +13,11 @@ class RecommendedList extends StatefulWidget {
   final List<RecommendedVendors> recommendedVendors;
   final WishlistController wishlistController = Get.find<WishlistController>();
 
-  RecommendedList({super.key, required this.context, required this.recommendedVendors});
+  RecommendedList({
+    super.key,
+    required this.context,
+    required this.recommendedVendors,
+  });
 
   @override
   State<RecommendedList> createState() => _RecommendedListState();
@@ -37,23 +42,37 @@ class _RecommendedListState extends State<RecommendedList> {
     return SizedBox(
       height: itemHeight + 16,
       child: ListView.separated(
-        padding: EdgeInsets.symmetric(horizontal: screenWidth * 0.04, vertical: 8),
+        padding: EdgeInsets.symmetric(
+          horizontal: screenWidth * 0.04,
+          vertical: 8,
+        ),
         scrollDirection: Axis.horizontal,
         itemCount: widget.recommendedVendors.length,
         separatorBuilder: (_, __) => SizedBox(width: screenWidth * 0.03),
         itemBuilder: (_, index) {
           final vendor = widget.recommendedVendors[index];
 
-          final imageUrl = vendor.logo != null ? (vendor.logo ?? '') : "assets/images/placeholder.jpg";
+          final imageUrl =
+              vendor.logo != null
+                  ? (vendor.logo ?? '')
+                  : "assets/images/placeholder.jpg";
 
           final rating = vendor.rating?.toStringAsFixed(1) ?? "--";
           final companyName = vendor.companyName ?? "Unknown";
-          final category = vendor.vendorcategory?.first.getCategory?.title ?? "Service";
+          final category =
+              vendor.vendorcategory?.first.getCategory?.title ?? "Service";
 
           final distanceKm = vendor.id;
           // final distanceText =
-          distanceKm != null ? (distanceKm < 1 ? "${(distanceKm * 1000).toStringAsFixed(0)} m" : "${distanceKm.toStringAsFixed(1)} km") : "--";
-          final time = distanceKm != null ? "${(distanceKm * 7).round()} mins . ${distanceKm.toStringAsFixed(1)} km" : "--";
+          distanceKm != null
+              ? (distanceKm < 1
+                  ? "${(distanceKm * 1000).toStringAsFixed(0)} m"
+                  : "${distanceKm.toStringAsFixed(1)} km")
+              : "--";
+          final time =
+              distanceKm != null
+                  ? "${(distanceKm * 7).round()} mins . ${distanceKm.toStringAsFixed(1)} km"
+                  : "--";
 
           return RecommendedVendorCard(
             vendor: vendor,
@@ -69,17 +88,35 @@ class _RecommendedListState extends State<RecommendedList> {
               final company = CompanyLocation(
                 id: vendor.id,
                 companyName: vendor.companyName ?? "Unknown",
-                latitude: vendor.latitude != null ? double.tryParse(vendor.latitude.toString()) : null,
-                longitude: vendor.longitude != null ? double.tryParse(vendor.longitude.toString()) : null,
-                bannerImage: vendor.bannerImage != null ? vendor.bannerImage ?? '' : null,
+                latitude:
+                    vendor.latitude != null
+                        ? double.tryParse(vendor.latitude.toString())
+                        : null,
+                longitude:
+                    vendor.longitude != null
+                        ? double.tryParse(vendor.longitude.toString())
+                        : null,
+                bannerImage:
+                    vendor.bannerImage != null
+                        ? vendor.bannerImage ?? ''
+                        : null,
                 logo: vendor.logo != null ? vendor.logo ?? '' : null,
                 description: vendor.description,
-                categoryName: vendor.vendorcategory?.isNotEmpty == true ? vendor.vendorcategory!.first.getCategory?.title : "Service",
+                categoryName:
+                    vendor.vendorcategory?.isNotEmpty == true
+                        ? vendor.vendorcategory!.first.getCategory?.title
+                        : "Service",
                 rating: vendor.rating?.toDouble(),
                 specialities: vendor.specialities ?? [],
               );
 
-              Navigator.push(context, MaterialPageRoute(builder: (_) => VendorDetailScreen(company: company)));
+              // Navigator.push(context, MaterialPageRoute(builder: (_) => VendorDetailScreen(company: company)));
+              final navKey = Get.find<NavigationController>().navigatorKeys[0];
+              navKey.currentState?.push(
+                MaterialPageRoute(
+                  builder: (_) => VendorDetailScreen(company: company),
+                ),
+              );
             },
           );
         },

@@ -45,7 +45,6 @@ class VendorDescription extends StatelessWidget {
             );
           }
 
-
           String distanceText =
               company.distanceKm != null
                   ? (company.distanceKm! < 1
