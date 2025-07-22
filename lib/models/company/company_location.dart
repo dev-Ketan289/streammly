@@ -2,6 +2,8 @@ import 'package:streammly/services/constants.dart';
 
 class CompanyLocation {
   final int? id;
+  final int? companyId; // ✅ Added to identify parent company
+
   final String companyName;
   final double? latitude;
   final double? longitude;
@@ -16,11 +18,11 @@ class CompanyLocation {
   final List<String> specialities;
   final String? descriptionBackgroundImage;
 
-  // Internal map to link speciality titles with their image URLs
   final Map<String, String> _specialityTitleToImage;
 
   CompanyLocation({
     this.id,
+    this.companyId, // ✅ included in constructor
     required this.companyName,
     required this.latitude,
     required this.longitude,
@@ -36,7 +38,6 @@ class CompanyLocation {
     Map<String, String>? specialityTitleToImage,
   }) : _specialityTitleToImage = specialityTitleToImage ?? {};
 
-  /// Get image URL for a given speciality title
   String? getSpecialityImage(String title) {
     return _specialityTitleToImage[title];
   }
@@ -50,7 +51,6 @@ class CompanyLocation {
 
     Map<String, String> extractSpecialityMap(dynamic vendorsubcategory) {
       final Map<String, String> result = {};
-
       if (vendorsubcategory is List) {
         for (var item in vendorsubcategory) {
           final subcategory = item['subcategory'];
@@ -65,7 +65,6 @@ class CompanyLocation {
           }
         }
       }
-
       return result;
     }
 
@@ -73,6 +72,7 @@ class CompanyLocation {
 
     return CompanyLocation(
       id: json['id'],
+      companyId: json['company_id'], // ✅ fetched from API
       companyName: json['company_name'] ?? 'Unknown',
       latitude: json['latitude'] != null ? double.tryParse(json['latitude'].toString()) : null,
       longitude: json['longitude'] != null ? double.tryParse(json['longitude'].toString()) : null,

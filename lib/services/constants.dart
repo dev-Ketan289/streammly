@@ -26,8 +26,8 @@ class AppConstants {
   set setBaseUrl(String url) => baseUrl = url;
 
   //TODO: Change Base Url
-  static String baseUrl = 'https://admin.streammly.com/';
-  // static String baseUrl = 'http://192.168.1.113:8000/';
+  // static String baseUrl = 'https://admin.streammly.com/';
+  static String baseUrl = 'http://192.168.1.113:8000/';
 
   static String appName = 'App Name';
 
@@ -52,18 +52,15 @@ class AppConstants {
 
   // Home
   static const String headerSliderUrl = 'api/v1/basic/header-sliders';
-  static const String recommendedCompaniesUrl =
-      'api/v1/company/getratingbasedrecomendedcompanies';
+  static const String recommendedCompaniesUrl = 'api/v1/company/getratingbasedrecomendedcompanies';
 
   // Promo Slider
   static const String slidersUrl = 'api/v1/basic/sliders';
 
   // Company
-  static const String getCompanyLocations =
-      'api/v1/company/getcompanyslocations/';
+  static const String getCompanyLocations = 'api/v1/company/getcompanyslocations/';
   static const String getCompanyProfile = 'api/v1/company/getcompanysprofile/';
-  static const String getCompanySubCategories =
-      'api/v1/company/getcompanysubcategories/';
+  static const String getCompanySubCategories = 'api/v1/company/getcompanysubcategories/';
   static const String getSubVerticals = 'api/v1/company/getsubvertical';
 
   // Bookmark
@@ -79,19 +76,13 @@ class AppConstants {
   //Quote
   static const String submitQuoteUrl = "api/v1/quotation/addquotation";
 
-
   //Support Ticket
   static const String addSupportTicket = 'api/v1/support-ticket/addsupportticket';
-
-
 
   //
   static const double horizontalPadding = 16;
   static const double verticalPadding = 20;
-  static const EdgeInsets screenPadding = EdgeInsets.symmetric(
-    horizontal: AppConstants.horizontalPadding,
-    vertical: AppConstants.verticalPadding,
-  );
+  static const EdgeInsets screenPadding = EdgeInsets.symmetric(horizontal: AppConstants.horizontalPadding, vertical: AppConstants.verticalPadding);
 
   // Shared Key
   static const String token = 'user_app_token';
