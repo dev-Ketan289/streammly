@@ -81,9 +81,11 @@ class _VendorDetailScreenState extends State<VendorDetailScreen> {
                             imagePath:
                                 'assets/images/category/vendor_category/img.png',
                             onTap:
-                                () => VendorGroup(
-                                  company: widget.company,
-                                  subCategoryId: 2,
+                                () => Get.to(
+                                  VendorGroup(
+                                    company: widget.company,
+                                    subCategoryId: 2,
+                                  ),
                                 ),
                           ),
                           CategoryItem(
@@ -121,9 +123,11 @@ class _VendorDetailScreenState extends State<VendorDetailScreen> {
                               label: sub.title,
                               imagePath: resolveImageUrl(sub.image),
                               onTap:
-                                  () => VendorGroup(
-                                    company: widget.company,
-                                    subCategoryId: sub.id,
+                                  () => Get.to(
+                                    VendorGroup(
+                                      company: widget.company,
+                                      subCategoryId: sub.id,
+                                    ),
                                   ),
                             );
                           }).toList(),
