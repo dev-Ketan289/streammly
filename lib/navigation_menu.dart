@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:get/get.dart';
 import 'package:streammly/generated/assets.dart';
+import 'package:streammly/services/custom_exit_dailogue.dart';
 import 'package:streammly/views/screens/home/home_screen.dart';
 import 'package:streammly/views/screens/package/booking/bookings.dart';
 import 'package:flutter/services.dart';
@@ -48,10 +49,16 @@ class _NavigationMenuState extends State<NavigationMenu> {
         } else if (!didPop && controller.selectedIndex != 0) {
           controller.setIndex(0);
         } else if (!didPop) {
-          
+          final shouldExit = await showDialog<bool>(
+            context: context,
+            builder: (context) => const CustomExitDialog(),
+          );
+
+          if (shouldExit == true) {
+            SystemNavigator.pop();
+          }
           // Exit the app if on Home tab root
           // For Android:
-          SystemNavigator.pop();
           // For iOS, you might want to do nothing or handle differently
         }
       },
