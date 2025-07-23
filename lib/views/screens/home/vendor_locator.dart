@@ -9,7 +9,6 @@ import 'package:flutter/rendering.dart';
 import 'package:get/get.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:permission_handler/permission_handler.dart';
-import 'package:streammly/services/route_helper.dart';
 import 'package:streammly/services/theme.dart';
 
 import '../../../controllers/category_controller.dart';
@@ -139,7 +138,7 @@ class _CompanyLocatorMapScreenState extends State<CompanyLocatorMapScreen> {
   void _onMarkerTapped(int index) {
     if (index < controller.companies.length) {
       final company = controller.companies[index];
-      controller.fetchCompanyById(company.id!);
+      controller.fetchCompanyById(company.id);
 
       // Animate to the corresponding page in the slider
       if (_showSlider && _pageController.hasClients) {
@@ -156,7 +155,7 @@ class _CompanyLocatorMapScreenState extends State<CompanyLocatorMapScreen> {
     // Select the company and animate map to marker
     if (pageIndex < controller.companies.length) {
       final company = controller.companies[pageIndex];
-      controller.fetchCompanyById(company.id!);
+      controller.fetchCompanyById(company.companyId);
 
       // Animate map to the selected marker
       if (company.latitude != null && company.longitude != null) {
@@ -409,8 +408,8 @@ class _CompanyLocatorMapScreenState extends State<CompanyLocatorMapScreen> {
                                   return Container(
                                     child: GestureDetector(
                                       onTap: () async {
-                                        await controller.fetchCompanyById(company.id!);
-                                        Navigator.push(context, getCustomRoute(child: VendorDescription()));
+                                        await controller.fetchCompanyById(company.id);
+                                        Get.to(() => VendorDescription(company: company));
                                       },
                                       child: VendorInfoCard(
                                         logoImage: company.logo ?? '',

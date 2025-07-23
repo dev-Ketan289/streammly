@@ -49,20 +49,31 @@ class CompanyController extends GetxController {
     try {
       isLoading = true;
       update();
+
+      // Get user location
       userPosition = await _getCurrentLocation();
+      final lat = userPosition?.latitude;
+      final lng = userPosition?.longitude;
 
-      final data = await companyRepo.fetchCompaniesByCategory(categoryId, latitude: userPosition!.latitude, longitude: userPosition!.longitude);
+      if (lat == null || lng == null) {
+        throw "Location not available";
+      }
 
-      final enrichedCompanies =
-          data.map((company) {
-            if (company.latitude != null && company.longitude != null && userPosition != null) {
-              company.distanceKm = calculateDistance(userPosition!.latitude, userPosition!.longitude, company.latitude!, company.longitude!);
-              company.estimatedTime = _estimateTimeFromDistance(company.distanceKm!);
-            }
-            return company;
-          }).toList();
+      // Fetch company list from repo with user's coordinates
+      final data = await companyRepo.fetchCompaniesByCategory(categoryId, userLat: lat, userLng: lng);
 
-      companies.assignAll(enrichedCompanies);
+      // For each company, calculate distance and estimated time
+      for (var company in data) {
+        if (company.latitude != null && company.longitude != null) {
+          final distance = calculateDistance(lat, lng, company.latitude!, company.longitude!);
+
+          company.distanceKm = distance;
+          company.estimatedTime = _estimateTimeFromDistance(distance);
+        }
+      }
+
+      // Assign final list
+      companies.assignAll(data);
     } catch (e) {
       companies.clear();
       Get.snackbar("Error", "Something went wrong: $e");
@@ -75,12 +86,14 @@ class CompanyController extends GetxController {
   Future<void> fetchCompanyById(int companyId) async {
     try {
       userPosition ??= await _getCurrentLocation();
-      final company = await companyRepo.fetchCompanyById(companyId);
+      final lat = userPosition?.latitude;
+      final lng = userPosition?.longitude;
 
-      if (company?.latitude != null && company?.longitude != null && userPosition != null) {
-        company?.distanceKm = calculateDistance(userPosition!.latitude, userPosition!.longitude, company.latitude!, company.longitude!);
-        company?.estimatedTime = _estimateTimeFromDistance(company.distanceKm!);
+      if (lat == null || lng == null) {
+        throw "Location not available";
       }
+
+      final company = await companyRepo.fetchCompanyById(companyId, userLat: lat, userLng: lng);
 
       selectedCompany = company;
       update();
@@ -142,13 +155,16 @@ class CompanyController extends GetxController {
   Future<CompanyLocation?> fetchAndCacheCompanyById(int companyId) async {
     try {
       userPosition ??= await _getCurrentLocation();
-      final company = await companyRepo.fetchCompanyById(companyId);
+      final lat = userPosition?.latitude;
+      final lng = userPosition?.longitude;
 
-      if (company?.latitude != null && company?.longitude != null && userPosition != null) {
-        company?.distanceKm = calculateDistance(userPosition!.latitude, userPosition!.longitude, company.latitude!, company.longitude!);
-        company?.estimatedTime = _estimateTimeFromDistance(company.distanceKm!);
+      if (lat == null || lng == null) {
+        throw "Location not available";
       }
 
+      final company = await companyRepo.fetchCompanyById(companyId, userLat: lat, userLng: lng);
+
+      // Company already has .distance from backend now.
       if (company != null && !companies.any((c) => c.id == company.id)) {
         companies.add(company);
       }
