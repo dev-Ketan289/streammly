@@ -128,7 +128,7 @@ class CompanyLocation {
       bannerImage: fullUrl(json['banner_image']),
       descriptionBackgroundImage: fullUrl(json['description_background_image']),
       description: json['description'],
-      categoryName: json['category_name'],
+      categoryName: json['category_title'],
       rating: json['rating'] != null ? double.tryParse(json['rating'].toString()) : null,
       specialities: specialityMap.keys.toList(),
       specialityTitleToImage: specialityMap,
@@ -221,21 +221,26 @@ class CompanyDetails {
   final String companyName;
   final String? logo;
   final String? bannerImage;
+  final String? descriptionBackgroundImage;
+  final String? description;
+  final double? rating;
+  final String? categoryName;
 
-  CompanyDetails({required this.id, required this.companyName, this.logo, this.bannerImage});
+  CompanyDetails({required this.id, required this.companyName, this.logo, this.bannerImage, this.descriptionBackgroundImage, this.description, this.rating, this.categoryName});
 
   factory CompanyDetails.fromJson(Map<String, dynamic> json) {
-    String fullUrl(String? path) {
-      if (path == null || path.isEmpty) return '';
-      if (path.startsWith('http')) return path;
-      return AppConstants.baseUrl + path;
-    }
-
     return CompanyDetails(
-      id: (json['id'] is int) ? json['id'] : int.tryParse(json['id'].toString()) ?? 0,
+      id: json['id'],
       companyName: json['company_name'] ?? '',
-      logo: fullUrl(json['logo']),
-      bannerImage: fullUrl(json['banner_image']),
+      logo: json['logo'],
+      bannerImage: json['banner_image'],
+      descriptionBackgroundImage: json['description_background_image'],
+      description: json['description'],
+      rating: json['rating'] != null ? double.tryParse(json['rating'].toString()) : null,
+      categoryName: json['category_title'], // ← Direct from API
     );
   }
+
+  String? get fullLogoUrl => logo;
+  String? get fullBannerImageUrl => bannerImage;
 }
