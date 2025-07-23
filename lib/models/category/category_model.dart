@@ -30,3 +30,29 @@ class CategoryModel {
     return Get.find<WishlistController>().bookmarks.any((e) => id == e.id && (e.companyType?.contains("company") ?? false));
   }
 }
+
+class VendorCategory {
+  final int id;
+  final int companyId;
+  final int categoryId;
+  final int? subCategoryId;
+  final CategoryModel? getCategory; // <-- This is new!
+
+  VendorCategory({
+    required this.id,
+    required this.companyId,
+    required this.categoryId,
+    this.subCategoryId,
+    this.getCategory, // new
+  });
+
+  factory VendorCategory.fromJson(Map<String, dynamic> json) {
+    return VendorCategory(
+      id: (json['id'] is int) ? json['id'] : int.tryParse(json['id'].toString()) ?? 0,
+      companyId: (json['company_id'] is int) ? json['company_id'] : int.tryParse(json['company_id'].toString()) ?? 0,
+      categoryId: (json['category_id'] is int) ? json['category_id'] : int.tryParse(json['category_id'].toString()) ?? 0,
+      subCategoryId: json['sub_category_id'] != null ? int.tryParse(json['sub_category_id'].toString()) : null,
+      getCategory: json['get_category'] != null ? CategoryModel.fromJson(json['get_category']) : null, // new
+    );
+  }
+}

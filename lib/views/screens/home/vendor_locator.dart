@@ -127,7 +127,7 @@ class _CompanyLocatorMapScreenState extends State<CompanyLocatorMapScreen> {
       final distanceText =
           company.distanceKm != null ? (company.distanceKm! < 1 ? "${(company.distanceKm! * 1000).toStringAsFixed(0)} m" : "${company.distanceKm!.toStringAsFixed(1)} km") : "--";
 
-      final bytes = await _createCustomMarkerBitmap(context, company.companyName, distanceText, company.logo);
+      final bytes = await _createCustomMarkerBitmap(context, company.companyName, distanceText, company.company?.logo);
 
       _customMarkers.add(Marker(markerId: MarkerId("${company.companyName}-$i"), position: LatLng(lat, lng), icon: BitmapDescriptor.bytes(bytes), onTap: () => _onMarkerTapped(i)));
     }
@@ -412,11 +412,16 @@ class _CompanyLocatorMapScreenState extends State<CompanyLocatorMapScreen> {
                                         Get.to(() => VendorDescription(company: company));
                                       },
                                       child: VendorInfoCard(
-                                        logoImage: company.logo ?? '',
-                                        companyName: company.companyName,
+                                        logoImage: company.company?.logo ?? '',
+                                        companyName: company.company?.companyName ?? '',
                                         category: categoryController.categories.firstWhere((cat) => cat.id == controller.selectedCategoryId).title,
-                                        description: company.description ?? '',
-                                        rating: company.rating?.toStringAsFixed(1) ?? '3.9',
+                                        description: company.company?.description ?? '',
+                                        rating:
+                                            company.company?.rating != null
+                                                ? company.company!.rating!.toStringAsFixed(1)
+                                                : company.rating != null
+                                                ? company.rating!.toStringAsFixed(1)
+                                                : '3.9',
                                         estimatedTime: company.estimatedTime,
                                         distanceKm:
                                             company.distanceKm != null

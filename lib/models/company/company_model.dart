@@ -7,8 +7,10 @@ class Company {
   final String? bannerImage;
   final String? descriptionBackgroundImage;
   final double? rating;
+  final int? categoryId;
+  final String? categoryName;
 
-  Company({required this.id, required this.companyName, this.logo, this.bannerImage, this.descriptionBackgroundImage, this.rating});
+  Company({required this.id, required this.companyName, this.logo, this.bannerImage, this.descriptionBackgroundImage, this.rating, this.categoryId, this.categoryName});
 
   factory Company.fromJson(Map<String, dynamic> json) {
     String fullUrl(String? path) {
@@ -24,6 +26,8 @@ class Company {
       bannerImage: fullUrl(json['banner_image']),
       descriptionBackgroundImage: fullUrl(json['description_background_image']),
       rating: json['rating'] != null ? double.tryParse(json['rating'].toString()) : null,
+      categoryId: json['category_id'], // <-- NEW
+      categoryName: json['category_name'], // <-- NEW
     );
   }
 }

@@ -4,6 +4,7 @@ import 'package:streammly/controllers/company_controller.dart';
 import 'package:streammly/navigation_menu.dart';
 import 'package:streammly/services/theme.dart';
 import 'package:streammly/views/widgets/custom_doodle.dart';
+
 import '../../../models/category/category_item.dart';
 import '../../../models/company/company_location.dart';
 import '../home/widgets/category/review_card.dart';
@@ -27,7 +28,7 @@ class _VendorDetailScreenState extends State<VendorDetailScreen> {
   @override
   void initState() {
     super.initState();
-    companyController.fetchCompanySubCategories(widget.company.id ?? 0);
+    companyController.fetchCompanySubCategories(widget.company.id);
   }
 
   /// Helper function to handle full URL or relative path for images
@@ -54,12 +55,12 @@ class _VendorDetailScreenState extends State<VendorDetailScreen> {
                 HeaderBanner(
                   height: screenWidth * 0.7,
                   backgroundImage:
-                      (widget.company.bannerImage != null &&
+                      (widget.company.company?.bannerImage != null &&
                               widget.company.bannerImage!.isNotEmpty)
                           ? resolveImageUrl(widget.company.bannerImage)
                           : 'assets/images/recommended_banner/FocusPointVendor.png',
                   overlayColor: primaryColor.withValues(alpha: 0.6),
-                  overrideTitle: widget.company.companyName,
+                  overrideTitle: widget.company.company?.companyName,
                   overrideSubtitle: widget.company.categoryName,
 
                   specialities: widget.company.specialities,
