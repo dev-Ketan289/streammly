@@ -83,79 +83,91 @@ class _WishlistPageState extends State<WishlistPage> {
 
             return ListView(
               padding: const EdgeInsets.all(16),
-              children:
-                  grouped.entries.map((entry) {
-                    final type = entry.key;
-                    final vendors = entry.value;
-                    return Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Padding(
-                          padding: const EdgeInsets.symmetric(vertical: 8.0),
-                          child: Text(
-                            type,
-                            style: TextStyle(
-                              fontSize: 18,
-                              fontWeight: FontWeight.bold,
-                              color: primaryColor,
-                            ),
+              children: [
+                SingleChildScrollView(
+                  scrollDirection: Axis.horizontal,
+                  child: Row(
+                    children: [
+                      CustomButton(text: "All", onTap: () {}),
+                      CustomButton(text: "Categories", onTap: () {}),
+                      CustomButton(text: "Packages", onTap: () {}),
+                      CustomButton(text: "Products", onTap: () {}),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: 16),
+                ...grouped.entries.map((entry) {
+                  final type = entry.key;
+                  final vendors = entry.value;
+                  return Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Padding(
+                        padding: const EdgeInsets.symmetric(vertical: 8.0),
+                        child: Text(
+                          type,
+                          style: TextStyle(
+                            fontSize: 18,
+                            fontWeight: FontWeight.bold,
+                            color: primaryColor,
                           ),
                         ),
-                        SizedBox(
-                          height: itemWidth * 1.7,
-                          child: ListView.separated(
-                            scrollDirection: Axis.horizontal,
-                            itemCount: vendors.length,
-                            separatorBuilder:
-                                (_, __) => const SizedBox(width: 16),
-                            itemBuilder: (context, index) {
-                              final vendor = vendors[index];
-                              return RecommendedVendorCard(
-                                itemWidth: itemWidth,
-                                theme: Theme.of(context),
-                                wishlistController: wishlistController,
-                                onTap: () {
-                                  Get.bottomSheet(
-                                    WishlistBottomSheet(
-                                      vendor: vendor,
-                                      onRemove: () async {
-                                        final result = await wishlistController
-                                            .addBookmark(vendor.id, "company");
-                                        if (result.isSuccess) {
-                                          Get.snackbar(
-                                            'Removed',
-                                            'Item removed from wishlist',
-                                          );
-                                        } else {
-                                          Get.snackbar('Error', result.message);
-                                        }
-                                      },
-                                    ),
-                                  );
-                                },
-                                vendor: vendor,
-                                imageUrl: vendor.logo ?? '',
-                                rating:
-                                    vendor.rating?.toStringAsFixed(1) ?? '--',
-                                companyName: vendor.companyName ?? 'Unknown',
-                                category:
-                                    vendor
-                                        .vendorcategory
-                                        ?.first
-                                        .getCategory
-                                        ?.title ??
-                                    'Service',
-                                time:
-                                    vendor.id != null
-                                        ? "${(vendor.id! * 7).round()} mins . ${vendor.id!.toStringAsFixed(1)} km"
-                                        : '--',
-                              );
-                            },
-                          ),
+                      ),
+                      SizedBox(
+                        height: itemWidth * 1.7,
+                        child: ListView.separated(
+                          scrollDirection: Axis.horizontal,
+                          itemCount: vendors.length,
+                          separatorBuilder:
+                              (_, __) => const SizedBox(width: 16),
+                          itemBuilder: (context, index) {
+                            final vendor = vendors[index];
+                            return RecommendedVendorCard(
+                              itemWidth: itemWidth,
+                              theme: Theme.of(context),
+                              wishlistController: wishlistController,
+                              onTap: () {
+                                Get.bottomSheet(
+                                  WishlistBottomSheet(
+                                    vendor: vendor,
+                                    onRemove: () async {
+                                      final result = await wishlistController
+                                          .addBookmark(vendor.id, "company");
+                                      if (result.isSuccess) {
+                                        Get.snackbar(
+                                          'Removed',
+                                          'Item removed from wishlist',
+                                        );
+                                      } else {
+                                        Get.snackbar('Error', result.message);
+                                      }
+                                    },
+                                  ),
+                                );
+                              },
+                              vendor: vendor,
+                              imageUrl: vendor.logo ?? '',
+                              rating: vendor.rating?.toStringAsFixed(1) ?? '--',
+                              companyName: vendor.companyName ?? 'Unknown',
+                              category:
+                                  vendor
+                                      .vendorcategory
+                                      ?.first
+                                      .getCategory
+                                      ?.title ??
+                                  'Service',
+                              time:
+                                  vendor.id != null
+                                      ? "${(vendor.id! * 7).round()} mins . ${vendor.id!.toStringAsFixed(1)} km"
+                                      : '--',
+                            );
+                          },
                         ),
-                      ],
-                    );
-                  }).toList(),
+                      ),
+                    ],
+                  );
+                }).toList(),
+              ],
             );
           },
         ),
@@ -172,6 +184,7 @@ class CustomButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
+      margin: EdgeInsets.all(5               ),
       width: 92,
       height: 23,
       decoration: BoxDecoration(

@@ -20,6 +20,7 @@ import 'package:streammly/views/screens/profile/faq_page.dart';
 
 import 'package:streammly/views/screens/profile/invoice_screen.dart';
 import 'package:streammly/views/screens/profile/my_wallet.dart';
+import 'package:streammly/views/screens/wishlist/wishlistpage.dart';
 import 'notifications_page.dart';
 import 'package:streammly/views/screens/profile/rate_your_experience.dart';
 import 'package:streammly/views/screens/profile/refer_and_earn.dart';
@@ -227,7 +228,9 @@ class _ProfilePageState extends State<ProfilePage> {
           ProfileItemWidget(
             icon: SvgPicture.asset(Assets.svgSaved, height: 26, width: 26),
             title: "WishList",
-            onTap: () {},
+            onTap: () {
+              Navigator.push(context, getCustomRoute(child: WishlistPage()));
+            },
           ),
 
           SizedBox(height: screenHeight * 0.03),
