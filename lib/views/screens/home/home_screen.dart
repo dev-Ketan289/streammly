@@ -86,16 +86,7 @@ class _HomeScreenState extends State<HomeScreen> {
                         ? const CircularProgressIndicator()
                         : CategoryScroller(
                           title: "Categories",
-                          onSeeAll: () {
-                            final navKey =
-                                Get.find<NavigationController>()
-                                    .navigatorKeys[0];
-                            navKey.currentState?.push(
-                              MaterialPageRoute(
-                                builder: (_) => const CategoryListScreen(),
-                              ),
-                            );
-                          },
+                          onSeeAll: () => CategoryListScreen(),
                           categories: convertToCategoryItems(categoryModels),
                         ),
                     const SizedBox(height: 24),

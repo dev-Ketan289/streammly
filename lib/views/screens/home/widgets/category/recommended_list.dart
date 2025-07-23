@@ -117,13 +117,13 @@ class _RecommendedListState extends State<RecommendedList> {
                 // If your CompanyLocation now supports other fields, add them here with similar null/default handling
               );
 
-              // Navigator.push(context, MaterialPageRoute(builder: (_) => VendorDetailScreen(company: company)));
-              final navKey = Get.find<NavigationController>().navigatorKeys[0];
-              navKey.currentState?.push(
-                MaterialPageRoute(
-                  builder: (_) => VendorDetailScreen(company: company),
-                ),
-              );
+              Navigator.push(context, MaterialPageRoute(builder: (_) => VendorDetailScreen(company: company)));
+              // final navKey = Get.find<NavigationController>().navigatorKeys[0];
+              // navKey.currentState?.push(
+              //   MaterialPageRoute(
+              //     builder: (_) => VendorDetailScreen(company: company),
+              //   ),
+              // );
             },
           );
         },

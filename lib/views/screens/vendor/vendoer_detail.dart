@@ -36,13 +36,6 @@ class _VendorDetailScreenState extends State<VendorDetailScreen> {
     return url.startsWith('http') ? url : url.replaceFirst(RegExp(r'^/'), '');
   }
 
-  void pushToCurrentTab(Widget page) {
-    final navKey =
-        Get.find<NavigationController>()
-            .navigatorKeys[Get.find<NavigationController>().selectedIndex];
-    navKey.currentState?.push(MaterialPageRoute(builder: (_) => page));
-  }
-
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
@@ -87,11 +80,9 @@ class _VendorDetailScreenState extends State<VendorDetailScreen> {
                             imagePath:
                                 'assets/images/category/vendor_category/img.png',
                             onTap:
-                                () => pushToCurrentTab(
-                                  VendorGroup(
-                                    company: widget.company,
-                                    subCategoryId: 2,
-                                  ),
+                                () => VendorGroup(
+                                  company: widget.company,
+                                  subCategoryId: 2,
                                 ),
                           ),
                           CategoryItem(
@@ -129,11 +120,9 @@ class _VendorDetailScreenState extends State<VendorDetailScreen> {
                               label: sub.title,
                               imagePath: resolveImageUrl(sub.image),
                               onTap:
-                                  () => pushToCurrentTab(
-                                    VendorGroup(
-                                      company: widget.company,
-                                      subCategoryId: sub.id,
-                                    ),
+                                  () => VendorGroup(
+                                    company: widget.company,
+                                    subCategoryId: sub.id,
                                   ),
                             );
                           }).toList(),

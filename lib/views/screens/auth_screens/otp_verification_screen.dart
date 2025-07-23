@@ -120,7 +120,7 @@ class _OtpScreenState extends State<OtpScreen> {
                                       borderRadius: BorderRadius.circular(10),
                                       fieldHeight: 55,
                                       fieldWidth: 45,
-                                      inactiveColor: appTheme.dividerColor,
+                                      inactiveColor: appTheme.dividerColor,       
                                       selectedColor: theme.secondaryColor,
                                       activeColor: theme.primaryColor,
                                     ),
