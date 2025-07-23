@@ -85,22 +85,28 @@ class _RecommendedListState extends State<RecommendedList> {
             theme: theme,
             wishlistController: widget.wishlistController,
             onTap: () {
+              final double? lat =
+                  vendor.latitude != null
+                      ? double.tryParse(vendor.latitude.toString())
+                      : null;
+              final double? lng =
+                  vendor.longitude != null
+                      ? double.tryParse(vendor.longitude.toString())
+                      : null;
+
               final company = CompanyLocation(
-                id: vendor.id,
+                id: vendor.id ?? 0,
+                companyId: vendor.id ?? 0,
+                type: 'studio', // fallback/default (if you need type)
+                name: vendor.companyName ?? "Unknown", // fallback
                 companyName: vendor.companyName ?? "Unknown",
-                latitude:
-                    vendor.latitude != null
-                        ? double.tryParse(vendor.latitude.toString())
-                        : null,
-                longitude:
-                    vendor.longitude != null
-                        ? double.tryParse(vendor.longitude.toString())
-                        : null,
-                bannerImage:
-                    vendor.bannerImage != null
-                        ? vendor.bannerImage ?? ''
-                        : null,
-                logo: vendor.logo != null ? vendor.logo ?? '' : null,
+                latitude: lat,
+                longitude: lng,
+                distanceKm:
+                    null, // You can add a front-end calculation here if desired
+                estimatedTime: null, // Same
+                bannerImage: vendor.bannerImage,
+                logo: vendor.logo,
                 description: vendor.description,
                 categoryName:
                     vendor.vendorcategory?.isNotEmpty == true
@@ -108,6 +114,7 @@ class _RecommendedListState extends State<RecommendedList> {
                         : "Service",
                 rating: vendor.rating?.toDouble(),
                 specialities: vendor.specialities ?? [],
+                // If your CompanyLocation now supports other fields, add them here with similar null/default handling
               );
 
               // Navigator.push(context, MaterialPageRoute(builder: (_) => VendorDetailScreen(company: company)));

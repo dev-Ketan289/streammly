@@ -60,32 +60,14 @@ class _ExploreUsState extends State<ExploreUs> {
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Text(
-                "Explore Us !!!",
-                style: theme.textTheme.titleMedium?.copyWith(
-                  fontWeight: FontWeight.bold,
-                  fontSize: 13,
-                  color: Color(0xff1E2742),
-                ),
-              ),
+              Text("Explore Us !!!", style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold, fontSize: 13, color: Color(0xff1E2742))),
               InkWell(
                 onTap: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (_) => CompanyLocatorMapScreen(categoryId: 1),
-                    ),
-                  );
+                  Navigator.push(context, MaterialPageRoute(builder: (_) => CompanyLocatorMapScreen(categoryId: 1)));
                 },
                 child: Row(
                   children: [
-                    Text(
-                      "View Map",
-                      style: theme.textTheme.bodyMedium?.copyWith(
-                        color: primaryColor,
-                        fontWeight: FontWeight.w500,
-                      ),
-                    ),
+                    Text("View Map", style: theme.textTheme.bodyMedium?.copyWith(color: primaryColor, fontWeight: FontWeight.w500)),
                     const SizedBox(width: 4),
                     SvgPicture.asset(Assets.svgMap, height: 15, width: 15),
                   ],
@@ -102,18 +84,10 @@ class _ExploreUsState extends State<ExploreUs> {
             }
 
             final vendors = controller.companies;
-            final filtered =
-                widget.vendorIds != null && widget.vendorIds!.isNotEmpty
-                    ? vendors
-                        .where((v) => widget.vendorIds!.contains(v.id))
-                        .toList()
-                    : vendors;
+            final filtered = widget.vendorIds != null && widget.vendorIds!.isNotEmpty ? vendors.where((v) => widget.vendorIds!.contains(v.id)).toList() : vendors;
 
             if (filtered.isEmpty) {
-              return const Padding(
-                padding: EdgeInsets.all(16),
-                child: Center(child: Text("No matching vendors found")),
-              );
+              return const Padding(padding: EdgeInsets.all(16), child: Center(child: Text("No matching vendors found")));
             }
 
             return ListView.builder(
@@ -125,45 +99,22 @@ class _ExploreUsState extends State<ExploreUs> {
                 final vendor = filtered[index];
                 return InkWell(
                   onTap: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (_) => VendorDetailScreen(company: vendor),
-                      ),
-                    );
+                    Navigator.push(context, MaterialPageRoute(builder: (_) => VendorDetailScreen(company: vendor)));
                   },
                   child: Container(
                     padding: const EdgeInsets.all(10),
 
                     margin: const EdgeInsets.only(bottom: 10),
 
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(18),
-                      border: Border.all(color: Color(0xffE2EDF9), width: 2),
-                      color: theme.colorScheme.surface,
-                    ),
+                    decoration: BoxDecoration(borderRadius: BorderRadius.circular(18), border: Border.all(color: Color(0xffE2EDF9), width: 2), color: theme.colorScheme.surface),
                     child: Column(
                       children: [
                         ClipRRect(
-                          borderRadius: const BorderRadius.vertical(
-                            top: Radius.circular(18),
-                            bottom: Radius.circular(18),
-                          ),
+                          borderRadius: const BorderRadius.vertical(top: Radius.circular(18), bottom: Radius.circular(18)),
                           child:
-                              vendor.bannerImage != null &&
-                                      vendor.bannerImage!.isNotEmpty
-                                  ? Image.network(
-                                    vendor.bannerImage!,
-                                    height: 150,
-                                    width: double.infinity,
-                                    fit: BoxFit.fill,
-                                  )
-                                  : Image.asset(
-                                    'assets/images/recommended_banner/FocusPointVendor.png',
-                                    height: 150,
-                                    width: double.infinity,
-                                    fit: BoxFit.cover,
-                                  ),
+                              vendor.bannerImage != null && vendor.bannerImage!.isNotEmpty
+                                  ? Image.network(vendor.bannerImage!, height: 150, width: double.infinity, fit: BoxFit.fill)
+                                  : Image.asset('assets/images/recommended_banner/FocusPointVendor.png', height: 150, width: double.infinity, fit: BoxFit.cover),
                         ),
                         Padding(
                           padding: const EdgeInsets.all(12),
@@ -174,50 +125,20 @@ class _ExploreUsState extends State<ExploreUs> {
                                 child: Column(
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
-                                    Text(
-                                      vendor.companyName,
-                                      style: theme.textTheme.titleMedium
-                                          ?.copyWith(
-                                            fontWeight: FontWeight.bold,
-                                            fontSize: 20,
-                                          ),
-                                    ),
+                                    Text(vendor.companyName, style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold, fontSize: 20)),
                                     const SizedBox(height: 4),
-                                    Text(
-                                      vendor.categoryName ?? "Unknown",
-                                      style: theme.textTheme.bodySmall
-                                          ?.copyWith(
-                                            color: Colors.grey,
-                                            fontSize: 12,
-                                          ),
-                                    ),
+                                    Text(vendor.categoryName ?? "Unknown", style: theme.textTheme.bodySmall?.copyWith(color: Colors.grey, fontSize: 12)),
                                     const SizedBox(height: 6),
                                     Row(
                                       children: [
-                                        const Icon(
-                                          Icons.location_on,
-                                          size: 14,
-                                          color: Colors.grey,
-                                        ),
+                                        const Icon(Icons.location_on, size: 14, color: Colors.grey),
                                         const SizedBox(width: 4),
+                                        Text(vendor.estimatedTime ?? "N/A", style: theme.textTheme.bodySmall?.copyWith(color: Color(0xffB8B7C8), fontSize: 12)),
                                         Text(
-                                          vendor.estimatedTime ?? "N/A",
-                                          style: theme.textTheme.bodySmall
-                                              ?.copyWith(
-                                                color: Color(0xffB8B7C8),
-                                                fontSize: 12,
-                                              ),
-                                        ),
-                                        Text(
-                                          vendor.distanceKm != null &&
-                                                  vendor.distanceKm! > 1
+                                          vendor.distanceKm != null && vendor.distanceKm! > 1
                                               ? " . ${vendor.distanceKm!.toStringAsFixed(1)} km"
                                               : "${(vendor.distanceKm ?? 0) * 1000 ~/ 1} m",
-                                          style: theme.textTheme.bodySmall
-                                              ?.copyWith(
-                                                color: Color(0xffB8B7C8),
-                                                fontSize: 12,
-                                              ),
+                                          style: theme.textTheme.bodySmall?.copyWith(color: Color(0xffB8B7C8), fontSize: 12),
                                         ),
                                       ],
                                     ),
@@ -225,29 +146,12 @@ class _ExploreUsState extends State<ExploreUs> {
                                 ),
                               ),
                               Container(
-                                padding: const EdgeInsets.symmetric(
-                                  horizontal: 8,
-                                  vertical: 4,
-                                ),
-                                decoration: BoxDecoration(
-                                  color: ratingColor,
-                                  borderRadius: BorderRadius.circular(8),
-                                ),
+                                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                                decoration: BoxDecoration(color: ratingColor, borderRadius: BorderRadius.circular(8)),
                                 child: Row(
                                   children: [
-                                    Text(
-                                      "${vendor.rating?.toStringAsFixed(1) ?? "0.0"} ",
-                                      style: theme.textTheme.bodySmall
-                                          ?.copyWith(
-                                            color: Colors.white,
-                                            fontSize: 12,
-                                          ),
-                                    ),
-                                    Icon(
-                                      Icons.star,
-                                      color: Color(0xffF8DE1E),
-                                      size: 8,
-                                    ),
+                                    Text("${vendor.rating?.toStringAsFixed(1) ?? "0.0"} ", style: theme.textTheme.bodySmall?.copyWith(color: Colors.white, fontSize: 12)),
+                                    Icon(Icons.star, color: Color(0xffF8DE1E), size: 8),
                                   ],
                                 ),
                               ),
@@ -278,24 +182,14 @@ class _ExploreUsState extends State<ExploreUs> {
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(18),
             color: Colors.white,
-            boxShadow: [
-              BoxShadow(
-                blurRadius: 10,
-                color: Colors.black12,
-                offset: const Offset(0, 4),
-              ),
-            ],
+            boxShadow: [BoxShadow(blurRadius: 10, color: Colors.black12, offset: const Offset(0, 4))],
           ),
           child: Shimmer.fromColors(
             baseColor: Colors.grey.shade300,
             highlightColor: Colors.grey.shade100,
             child: Column(
               children: [
-                Container(
-                  height: 150,
-                  width: double.infinity,
-                  color: Colors.white,
-                ),
+                Container(height: 150, width: double.infinity, color: Colors.white),
                 Padding(
                   padding: const EdgeInsets.all(12),
                   child: Row(
@@ -304,23 +198,11 @@ class _ExploreUsState extends State<ExploreUs> {
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Container(
-                              height: 12,
-                              width: 100,
-                              color: Colors.white,
-                            ),
+                            Container(height: 12, width: 100, color: Colors.white),
                             const SizedBox(height: 8),
-                            Container(
-                              height: 10,
-                              width: 80,
-                              color: Colors.white,
-                            ),
+                            Container(height: 10, width: 80, color: Colors.white),
                             const SizedBox(height: 10),
-                            Container(
-                              height: 10,
-                              width: 120,
-                              color: Colors.white,
-                            ),
+                            Container(height: 10, width: 120, color: Colors.white),
                           ],
                         ),
                       ),

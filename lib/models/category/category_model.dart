@@ -11,20 +11,11 @@ class CategoryModel {
   final double? longitude;
   final String? icon;
 
-  CategoryModel({
-    required this.id,
-    required this.title,
-    this.image,
-    this.shortDescription,
-    this.companyName,
-    this.latitude,
-    this.longitude,
-    this.icon,
-  });
+  CategoryModel({required this.id, required this.title, this.image, this.shortDescription, this.companyName, this.latitude, this.longitude, this.icon});
 
   factory CategoryModel.fromJson(Map<String, dynamic> json) {
     return CategoryModel(
-      id: json['id'],
+      id: (json['id'] is int) ? json['id'] : int.tryParse(json['id'].toString()) ?? 0,
       title: json['title'],
       image: json['image'],
       shortDescription: json['short_description'],
@@ -36,8 +27,6 @@ class CategoryModel {
   }
 
   bool get isBookMarked {
-    return Get.find<WishlistController>().bookmarks.any(
-          (e) => id == e.id && (e.companyType?.contains("company") ?? false),
-    );
+    return Get.find<WishlistController>().bookmarks.any((e) => id == e.id && (e.companyType?.contains("company") ?? false));
   }
 }
