@@ -374,7 +374,7 @@ class _CompanyLocatorMapScreenState extends State<CompanyLocatorMapScreen> {
                     ),
                     child: Column(
                       children: [
-                        // Page indicator                   rop
+                        // Page indicator
                         Container(
                           child: Row(
                             mainAxisAlignment: MainAxisAlignment.center,

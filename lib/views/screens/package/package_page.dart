@@ -14,24 +14,16 @@ class PackagesPage extends StatelessWidget {
   final int companyId;
   final int subCategoryId;
   final int subVerticalId;
+  final int studioId;
 
-  const PackagesPage({
-    super.key,
-    required this.companyId,
-    required this.subCategoryId,
-    required this.subVerticalId,
-  });
+  const PackagesPage({super.key, required this.companyId, required this.subCategoryId, required this.subVerticalId, required this.studioId});
 
   @override
   Widget build(BuildContext context) {
     final controller = Get.find<PackagesController>();
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      controller.initialize(
-        companyId: companyId,
-        subCategoryId: subCategoryId,
-        subVerticalId: subVerticalId,
-      );
+      controller.initialize(companyId: companyId, subCategoryId: subCategoryId, subVerticalId: subVerticalId, studioId: studioId);
     });
 
     return CustomBackground(
@@ -40,29 +32,9 @@ class PackagesPage extends StatelessWidget {
         appBar: AppBar(
           backgroundColor: Colors.transparent,
           elevation: 0,
-          leading: IconButton(
-            icon: const Icon(Icons.arrow_back_ios, color: Colors.black54),
-            onPressed: () => Get.back(),
-          ),
-          title: Center(
-            child: Text(
-              "Packages",
-              style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                color: primaryColor,
-                fontWeight: FontWeight.w600,
-              ),
-            ),
-          ),
-          actions: [
-            IconButton(
-              icon: Icon(Icons.filter_alt, color: primaryColor),
-              onPressed:
-                  () => Get.bottomSheet(
-                    const FilterPage(),
-                    isScrollControlled: true,
-                  ),
-            ),
-          ],
+          leading: IconButton(icon: const Icon(Icons.arrow_back_ios, color: Colors.black54), onPressed: () => Get.back()),
+          title: Center(child: Text("Packages", style: Theme.of(context).textTheme.titleMedium?.copyWith(color: primaryColor, fontWeight: FontWeight.w600))),
+          actions: [IconButton(icon: Icon(Icons.filter_alt, color: primaryColor), onPressed: () => Get.bottomSheet(const FilterPage(), isScrollControlled: true))],
         ),
         body: Obx(() {
           if (controller.isLoading.value) {
@@ -71,12 +43,7 @@ class PackagesPage extends StatelessWidget {
           return Column(
             children: [
               PackagesHeader(controller: controller),
-              Expanded(
-                child:
-                    controller.isGridView.value
-                        ? PackagesGridView(controller: controller)
-                        : PackagesListView(controller: controller),
-              ),
+              Expanded(child: controller.isGridView.value ? PackagesGridView(controller: controller) : PackagesListView(controller: controller)),
             ],
           );
         }),

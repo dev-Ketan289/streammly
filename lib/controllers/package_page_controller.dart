@@ -25,11 +25,13 @@ class PackagesController extends GetxController {
   late int companyId;
   late int subCategoryId;
   late int subVerticalId;
+  late int studioId;
 
-  void initialize({required int companyId, required int subCategoryId, required int subVerticalId}) {
+  void initialize({required int companyId, required int subCategoryId, required int subVerticalId, required int studioId}) {
     this.companyId = companyId;
     this.subCategoryId = subCategoryId;
     this.subVerticalId = subVerticalId;
+    this.studioId = studioId;
     fetchPackages();
   }
 
@@ -44,17 +46,28 @@ class PackagesController extends GetxController {
   Future<void> fetchPackages() async {
     isLoading.value = true;
     packages.clear();
+
+    print("==> Starting package fetch...");
+    print("company_id: $companyId");
+    print("subcategory_id: $subCategoryId");
+    print("sub_vertical_id: $subVerticalId");
+    print("studioId: $studioId");
+
     try {
       final response = await http.post(
-        // Uri.parse("https://admin.streammly.com/api/v1/package/getpackages"),
-        Uri.parse("http://192.168.1.113/api/v1/package/getpackages"),
+        Uri.parse("http://192.168.1.113:8000/api/v1/package/getpackages"),
         headers: {"Content-Type": "application/json"},
-        body: jsonEncode({"company_id": companyId, "sub_category_id": subCategoryId, "sub_vertical_id": subVerticalId}),
+        body: jsonEncode({"company_id": companyId, "subcategory_id": subCategoryId, "sub_vertical_id": subVerticalId, 'studio_id': studioId}),
       );
+
+      print("==> Response status: ${response.statusCode}");
+      print("==> Response body: ${response.body}");
 
       if (response.statusCode == 200) {
         final jsonBody = json.decode(response.body);
         final List data = jsonBody["data"] ?? [];
+
+        print("==>Fetched ${data.length} packages");
 
         final filteredData = data.where((pkg) => pkg['sub_vertical_id'] == subVerticalId || subVerticalId == 0).toList();
 
@@ -94,9 +107,12 @@ class PackagesController extends GetxController {
         Get.snackbar("Error", "Failed to fetch packages");
       }
     } catch (e) {
+      print("==> Exception during fetch: $e");
       Get.snackbar("Exception", e.toString());
     }
+
     isLoading.value = false;
+    print("==> Package fetch completed. Total packages: ${packages.length}");
   }
 
   Future<void> fetchProductsInPackage(int packageId, int companyId) async {
@@ -104,7 +120,7 @@ class PackagesController extends GetxController {
     try {
       final response = await http.get(
         // Uri.parse('https://admin.streammly.com/api/v1/package/getproductinpackage?company_id=$companyId&package_id=$packageId'),
-        Uri.parse('http://192.168.1.113/api/v1/package/getproductinpackage?company_id=$companyId&package_id=$packageId'),
+        Uri.parse('http://192.168.1.113:8000/api/v1/package/getproductinpackage?company_id=$companyId&package_id=$packageId'),
         headers: {'Content-Type': 'application/json'},
       );
 

@@ -60,7 +60,9 @@ class _VendorGroupState extends State<VendorGroup> {
               HeaderBanner(
                 height: screenWidth * 0.7,
                 backgroundImage:
-                    (widget.company.bannerImage?.isNotEmpty == true) ? resolveImageUrl(widget.company.bannerImage) : 'assets/images/recommended_banner/FocusPointVendor.png',
+                    (widget.company.company?.bannerImage?.isNotEmpty == true)
+                        ? resolveImageUrl(widget.company.company?.bannerImage)
+                        : 'assets/images/recommended_banner/FocusPointVendor.png',
                 overlayColor: primaryColor.withValues(alpha: 0.6),
                 overrideTitle: widget.company.company?.companyName,
                 overrideSubtitle: widget.company.categoryName,
@@ -270,7 +272,7 @@ class _VendorGroupState extends State<VendorGroup> {
                   onTap: () {
                     Navigator.pop(context);
                     Get.to(
-                      () => PackagesPage(companyId: companyId, subCategoryId: subCategoryId, subVerticalId: subVerticalId),
+                      () => PackagesPage(companyId: companyId, subCategoryId: subCategoryId, subVerticalId: subVerticalId, studioId: widget.company.id),
                       binding: BindingsBuilder(() {
                         Get.put(PackagesController());
                       }),
