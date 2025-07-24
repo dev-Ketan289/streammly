@@ -11,6 +11,7 @@ class _FreeItemsPageState extends State<FreeItemsPage> {
   bool _showItems = false;
   int _selectedIndex = -1;
 
+  final mainTitle = 'Toddler Live Setup';
   final titles = ['The Old After Party', 'The Heist', 'The Pink Candy'];
   final descriptions = ['This Theme is available for Studio Only', 'This Theme is available for Studio Only', 'The Pink Candy - Only for studio'];
   final images = [
@@ -48,22 +49,24 @@ class _FreeItemsPageState extends State<FreeItemsPage> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              /// Dropdown toggle
+              // ===== Main Title Dropdown Toggle =====
               GestureDetector(
                 onTap: () => setState(() => _showItems = !_showItems),
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    Text('Toddler Live Setup', style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w600)),
+                    Text(mainTitle, style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w600)),
                     Icon(_showItems ? Icons.remove_circle_outline : Icons.add_circle_outline, color: const Color(0xff2864A6)),
                   ],
                 ),
               ),
               const SizedBox(height: 12),
 
+              // ===== Product List Items =====
               if (_showItems)
                 ...List.generate(titles.length, (index) {
                   final selected = _selectedIndex == index;
+
                   return Padding(
                     padding: const EdgeInsets.symmetric(vertical: 8),
                     child: Container(
@@ -73,6 +76,8 @@ class _FreeItemsPageState extends State<FreeItemsPage> {
                         children: [
                           ClipRRect(borderRadius: BorderRadius.circular(8), child: Image.asset(images[index], height: 50, width: 50, fit: BoxFit.cover)),
                           const SizedBox(width: 12),
+
+                          // ===== Product Info =====
                           Expanded(
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
@@ -86,10 +91,12 @@ class _FreeItemsPageState extends State<FreeItemsPage> {
                             ),
                           ),
                           const SizedBox(width: 8),
+
+                          // ===== Select Button =====
                           TextButton(
                             onPressed: () => setState(() => _selectedIndex = index),
                             style: TextButton.styleFrom(
-                              backgroundColor: selected ? theme.primaryColor.withValues(alpha: 0.1) : null,
+                              backgroundColor: selected ? theme.primaryColor.withAlpha(30) : null,
                               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(6)),
                             ),
                             child: Text(
@@ -104,6 +111,8 @@ class _FreeItemsPageState extends State<FreeItemsPage> {
                 }),
 
               const SizedBox(height: 12),
+
+              // ===== Add Button =====
               SizedBox(
                 width: double.infinity,
                 child: ElevatedButton(

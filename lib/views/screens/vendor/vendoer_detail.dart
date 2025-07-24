@@ -55,9 +55,8 @@ class _VendorDetailScreenState extends State<VendorDetailScreen> {
                 HeaderBanner(
                   height: screenWidth * 0.7,
                   backgroundImage:
-                      (widget.company.company?.bannerImage != null &&
-                              widget.company.bannerImage!.isNotEmpty)
-                          ? resolveImageUrl(widget.company.bannerImage)
+                      (widget.company.company?.bannerImage?.isNotEmpty == true)
+                          ? resolveImageUrl(widget.company.company?.bannerImage)
                           : 'assets/images/recommended_banner/FocusPointVendor.png',
                   overlayColor: primaryColor.withValues(alpha: 0.6),
                   overrideTitle: widget.company.company?.companyName,
