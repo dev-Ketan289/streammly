@@ -225,8 +225,19 @@ class CompanyDetails {
   final String? description;
   final double? rating;
   final String? categoryName;
+  final int? advanceDayBooking;
 
-  CompanyDetails({required this.id, required this.companyName, this.logo, this.bannerImage, this.descriptionBackgroundImage, this.description, this.rating, this.categoryName});
+  CompanyDetails({
+    required this.id,
+    required this.companyName,
+    this.logo,
+    this.bannerImage,
+    this.descriptionBackgroundImage,
+    this.advanceDayBooking,
+    this.description,
+    this.rating,
+    this.categoryName,
+  });
 
   factory CompanyDetails.fromJson(Map<String, dynamic> json) {
     return CompanyDetails(
@@ -237,7 +248,8 @@ class CompanyDetails {
       descriptionBackgroundImage: json['description_background_image'],
       description: json['description'],
       rating: json['rating'] != null ? double.tryParse(json['rating'].toString()) : null,
-      categoryName: json['category_title'], // ← Direct from API
+      categoryName: json['category_title'],
+      advanceDayBooking: int.tryParse(json['advance_day_booking'].toString()) ?? 0,
     );
   }
 

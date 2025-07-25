@@ -1,0 +1,36 @@
+class Slot {
+  final String startTime;
+  final String endTime;
+  final bool booked;
+  final bool breakTime;
+  final bool blockHome;
+  final bool blockIndoor;
+  final bool blockOutdoor;
+
+  Slot({
+    required this.startTime,
+    required this.endTime,
+    required this.booked,
+    required this.breakTime,
+    required this.blockHome,
+    required this.blockIndoor,
+    required this.blockOutdoor,
+  });
+
+  bool get isAvailable => !booked && !breakTime && !blockHome && !blockIndoor && !blockOutdoor;
+
+  factory Slot.fromJson(Map<String, dynamic> json) {
+    return Slot(
+      startTime: json['start_time'],
+      endTime: json['end_time'],
+      booked: json['booked'] ?? true,
+      breakTime: json['break'] ?? true,
+      blockHome: json['block_homeshoot_time'] ?? true,
+      blockIndoor: json['block_indoorshoot_time'] ?? true,
+      blockOutdoor: json['block_outdoorshoot_time'] ?? true,
+    );
+  }
+  bool get isSlotAvailable {
+    return !booked && !breakTime && !blockHome && !blockIndoor && !blockOutdoor;
+  }
+}

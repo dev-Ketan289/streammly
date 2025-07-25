@@ -9,7 +9,7 @@ import 'package:streammly/views/widgets/custom_doodle.dart';
 import '../../../controllers/auth_controller.dart';
 import '../../../controllers/quote_controller.dart';
 import '../auth_screens/login_screen.dart';
-import '../package/booking/widgets/time_picker.dart';
+import '../package/booking/widgets/custom_time_picker.dart';
 
 class GetQuoteScreen extends StatefulWidget {
   const GetQuoteScreen({super.key});
@@ -72,12 +72,7 @@ class _GetQuoteScreenState extends State<GetQuoteScreen> {
   }
 
   void _pickDate() async {
-    final picked = await showDatePicker(
-      context: context,
-      initialDate: selectedDate,
-      firstDate: DateTime.now(),
-      lastDate: DateTime(2100),
-    );
+    final picked = await showDatePicker(context: context, initialDate: selectedDate, firstDate: DateTime.now(), lastDate: DateTime(2100));
     if (picked != null) {
       setState(() {
         selectedDate = picked;
@@ -109,10 +104,7 @@ class _GetQuoteScreenState extends State<GetQuoteScreen> {
   }
 
   void _submitQuote() async {
-    if (nameController.text.isEmpty ||
-        mobileController.text.isEmpty ||
-        emailController.text.isEmpty ||
-        requirementsController.text.isEmpty) {
+    if (nameController.text.isEmpty || mobileController.text.isEmpty || emailController.text.isEmpty || requirementsController.text.isEmpty) {
       Get.snackbar("Validation", "Please fill all required fields");
       return;
     }
@@ -121,25 +113,17 @@ class _GetQuoteScreenState extends State<GetQuoteScreen> {
       final shouldLogin = await Get.dialog<bool>(
         AlertDialog(
           title: const Text("Login Required"),
-          content: const Text(
-            "You are not logged in. Do you want to login to submit this quote?",
-          ),
+          content: const Text("You are not logged in. Do you want to login to submit this quote?"),
           actions: [
-            TextButton(
-              onPressed: () => Get.back(result: false),
-              child: const Text("Continue as Guest"),
-            ),
-            ElevatedButton(
-              onPressed: () => Get.back(result: true),
-              child: const Text("Login"),
-            ),
+            TextButton(onPressed: () => Get.back(result: false), child: const Text("Continue as Guest")),
+            ElevatedButton(onPressed: () => Get.back(result: true), child: const Text("Login")),
           ],
         ),
       );
 
       if (shouldLogin == true) {
         Get.to(
-              () => const LoginScreen(),
+          () => const LoginScreen(),
           arguments: {
             'redirectTo': 'GetQuoteScreen',
             'formData': {
@@ -188,21 +172,12 @@ class _GetQuoteScreenState extends State<GetQuoteScreen> {
       child: Scaffold(
         backgroundColor: Colors.transparent,
         appBar: AppBar(
-          title: Text(
-            'Get Quote',
-            style: Theme.of(context).textTheme.titleLarge?.copyWith(
-              color: const Color(0xFF2864A6),
-              fontWeight: FontWeight.bold,
-            ),
-          ),
+          title: Text('Get Quote', style: Theme.of(context).textTheme.titleLarge?.copyWith(color: const Color(0xFF2864A6), fontWeight: FontWeight.bold)),
           centerTitle: true,
           backgroundColor: Colors.transparent,
           elevation: 0,
           foregroundColor: Colors.black,
-          leading: IconButton(
-            icon: Icon(Icons.arrow_back_ios, color: Colors.grey),
-            onPressed: () => Navigator.pop(context),
-          ),
+          leading: IconButton(icon: Icon(Icons.arrow_back_ios, color: Colors.grey), onPressed: () => Navigator.pop(context)),
         ),
         body: SingleChildScrollView(
           padding: const EdgeInsets.all(16),
@@ -213,40 +188,16 @@ class _GetQuoteScreenState extends State<GetQuoteScreen> {
                 children: [
                   Text(
                     "$subCategoryTitle / $subVerticalTitle",
-                    style: Theme.of(context).textTheme.labelLarge?.copyWith(
-                      color: const Color(0xFF2864A6),
-                      fontWeight: FontWeight.bold,
-                      fontSize: 20
-                    ),
+                    style: Theme.of(context).textTheme.labelLarge?.copyWith(color: const Color(0xFF2864A6), fontWeight: FontWeight.bold, fontSize: 20),
                   ),
                   const SizedBox(height: 15),
-                  TextField(
-                    controller: nameController,
-                    decoration: _buildDecoration('Name *', 'Enter name'),
-                  ),
+                  TextField(controller: nameController, decoration: _buildDecoration('Name *', 'Enter name')),
                   const SizedBox(height: 16),
-                  TextField(
-                    controller: mobileController,
-                    decoration: _buildDecoration(
-                      'Mobile No. *',
-                      'Enter mobile number',
-                    ),
-                    keyboardType: TextInputType.phone,
-                  ),
+                  TextField(controller: mobileController, decoration: _buildDecoration('Mobile No. *', 'Enter mobile number'), keyboardType: TextInputType.phone),
                   const SizedBox(height: 16),
-                  TextField(
-                    controller: emailController,
-                    decoration: _buildDecoration('Email *', 'Enter email'),
-                    keyboardType: TextInputType.emailAddress,
-                  ),
+                  TextField(controller: emailController, decoration: _buildDecoration('Email *', 'Enter email'), keyboardType: TextInputType.emailAddress),
                   const SizedBox(height: 16),
-                  _buildTextField(
-                    'Date of Shoot *',
-                    dateController,
-                    readOnly: true,
-                    onTap: _pickDate,
-                    suffixIcon: Icons.calendar_today,
-                  ),
+                  _buildTextField('Date of Shoot *', dateController, readOnly: true, onTap: _pickDate, suffixIcon: Icons.calendar_today),
                   const SizedBox(height: 16),
                   Row(
                     children: [
@@ -277,21 +228,9 @@ class _GetQuoteScreenState extends State<GetQuoteScreen> {
                       ),
                     ],
                   ),
-                  if (showTimePicker)
-                    CustomTimePicker(
-                      isStart: isStartTime,
-                      onCancel: () => setState(() => showTimePicker = false),
-                      onTimeSelected: _onTimeSelected,
-                    ),
+                  if (showTimePicker) CustomTimePicker(isStart: isStartTime, onCancel: () => setState(() => showTimePicker = false), onTimeSelected: _onTimeSelected),
                   const SizedBox(height: 16),
-                  TextField(
-                    controller: requirementsController,
-                    decoration: _buildDecoration(
-                      'Describe your Requirements *',
-                      'Enter requirements',
-                    ),
-                    maxLines: 3,
-                  ),
+                  TextField(controller: requirementsController, decoration: _buildDecoration('Describe your Requirements *', 'Enter requirements'), maxLines: 3),
                   const SizedBox(height: 16),
                   Row(
                     children: [
@@ -322,31 +261,15 @@ class _GetQuoteScreenState extends State<GetQuoteScreen> {
                       ),
                     ],
                   ),
-                  if (showFavTimePicker)
-                    CustomTimePicker(
-                      isStart: isFavTime,
-                      onCancel: () => setState(() => showFavTimePicker = false),
-                      onTimeSelected: _onFavTimeSelected,
-                    ),
+                  if (showFavTimePicker) CustomTimePicker(isStart: isFavTime, onCancel: () => setState(() => showFavTimePicker = false), onTimeSelected: _onFavTimeSelected),
                   const SizedBox(height: 16),
                   Text.rich(
                     TextSpan(
                       children: [
+                        TextSpan(text: 'Note: ', style: Theme.of(context).textTheme.bodySmall?.copyWith(color: Colors.red, fontSize: 13, fontWeight: FontWeight.w500)),
                         TextSpan(
-                          text: 'Note: ',
-                          style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                            color: Colors.red,
-                            fontSize: 13,
-                            fontWeight: FontWeight.w500,
-                          ),
-                        ),
-                        TextSpan(
-                          text:
-                          'Vendor team will contact you within the favorable Date & Favorable time only',
-                          style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                            color: Colors.grey,
-                            fontSize: 13,
-                          ),
+                          text: 'Vendor team will contact you within the favorable Date & Favorable time only',
+                          style: Theme.of(context).textTheme.bodySmall?.copyWith(color: Colors.grey, fontSize: 13),
                         ),
                       ],
                     ),
@@ -356,24 +279,12 @@ class _GetQuoteScreenState extends State<GetQuoteScreen> {
                     width: double.infinity,
                     height: 48,
                     child: ElevatedButton(
-                      onPressed:
-                      controller.isSubmitting ? null : _submitQuote,
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: const Color(0xFF2E5CDA),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(8),
-                        ),
-                      ),
-                      child: controller.isSubmitting
-                          ? const CircularProgressIndicator(color: Colors.white)
-                          : const Text(
-                        "Continue",
-                        style: TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.white,
-                        ),
-                      ),
+                      onPressed: controller.isSubmitting ? null : _submitQuote,
+                      style: ElevatedButton.styleFrom(backgroundColor: const Color(0xFF2E5CDA), shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8))),
+                      child:
+                          controller.isSubmitting
+                              ? const CircularProgressIndicator(color: Colors.white)
+                              : const Text("Continue", style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.white)),
                     ),
                   ),
                 ],
@@ -387,14 +298,8 @@ class _GetQuoteScreenState extends State<GetQuoteScreen> {
 
   InputDecoration _buildDecoration(String label, String hint) {
     return InputDecoration(
-      enabledBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(10),
-        borderSide: const BorderSide(color: Color(0xFFE6DFDF)),
-      ),
-      focusedBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(10),
-        borderSide: const BorderSide(color: Color(0xFFE6DFDF)),
-      ),
+      enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(10), borderSide: const BorderSide(color: Color(0xFFE6DFDF))),
+      focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(10), borderSide: const BorderSide(color: Color(0xFFE6DFDF))),
       fillColor: Colors.white,
       filled: true,
       labelText: label,
@@ -405,13 +310,7 @@ class _GetQuoteScreenState extends State<GetQuoteScreen> {
     );
   }
 
-  Widget _buildTextField(
-      String label,
-      TextEditingController controller, {
-        bool readOnly = false,
-        VoidCallback? onTap,
-        IconData? suffixIcon,
-      }) {
+  Widget _buildTextField(String label, TextEditingController controller, {bool readOnly = false, VoidCallback? onTap, IconData? suffixIcon}) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 8),
       child: TextField(
@@ -419,14 +318,8 @@ class _GetQuoteScreenState extends State<GetQuoteScreen> {
         readOnly: readOnly,
         onTap: onTap,
         decoration: InputDecoration(
-          enabledBorder: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(10),
-            borderSide: const BorderSide(color: Color(0xFFE6DFDF)),
-          ),
-          focusedBorder: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(10),
-            borderSide: const BorderSide(color: Color(0xFFE6DFDF)),
-          ),
+          enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(10), borderSide: const BorderSide(color: Color(0xFFE6DFDF))),
+          focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(10), borderSide: const BorderSide(color: Color(0xFFE6DFDF))),
           fillColor: Colors.white,
           filled: true,
           labelText: label,

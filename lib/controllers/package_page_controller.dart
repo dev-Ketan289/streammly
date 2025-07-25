@@ -3,6 +3,9 @@ import 'dart:convert';
 import 'package:get/get.dart';
 import 'package:http/http.dart' as http;
 
+import '../models/package/free_add_on_model.dart';
+import '../models/package/paid_addon_model.dart';
+
 class PackagesController extends GetxController {
   var isGridView = false.obs;
   var expandedStates = <int, bool>{}.obs;
@@ -47,28 +50,15 @@ class PackagesController extends GetxController {
     isLoading.value = true;
     packages.clear();
 
-    print("==> Starting package fetch...");
-    print("company_id: $companyId");
-    print("subcategory_id: $subCategoryId");
-    print("sub_vertical_id: $subVerticalId");
-    print("studioId: $studioId");
-
     try {
       final response = await http.post(
         Uri.parse("http://192.168.1.113:8000/api/v1/package/getpackages"),
         headers: {"Content-Type": "application/json"},
         body: jsonEncode({"company_id": companyId, "subcategory_id": subCategoryId, "sub_vertical_id": subVerticalId, 'studio_id': studioId}),
       );
-
-      print("==> Response status: ${response.statusCode}");
-      print("==> Response body: ${response.body}");
-
       if (response.statusCode == 200) {
         final jsonBody = json.decode(response.body);
         final List data = jsonBody["data"] ?? [];
-
-        print("==>Fetched ${data.length} packages");
-
         final filteredData = data.where((pkg) => pkg['sub_vertical_id'] == subVerticalId || subVerticalId == 0).toList();
 
         packages.assignAll(
@@ -115,48 +105,79 @@ class PackagesController extends GetxController {
     print("==> Package fetch completed. Total packages: ${packages.length}");
   }
 
-  Future<void> fetchProductsInPackage(int packageId, int companyId) async {
-    productsInPackageList.clear();
+  RxBool isFetchingFreeAddOns = false.obs;
+  Rx<FreeAddOnResponse?> freeAddOnResponse = Rx<FreeAddOnResponse?>(null);
+  RxInt selectedFreeAddOnIndex = RxInt(-1);
+
+  Future<void> fetchFreeAddOns(int packageId) async {
+    isFetchingFreeAddOns.value = true;
+    freeAddOnResponse.value = null;
+
     try {
-      final response = await http.get(
-        // Uri.parse('https://admin.streammly.com/api/v1/package/getproductinpackage?company_id=$companyId&package_id=$packageId'),
-        Uri.parse('http://192.168.1.113:8000/api/v1/package/getproductinpackage?company_id=$companyId&package_id=$packageId'),
-        headers: {'Content-Type': 'application/json'},
-      );
+      final url = Uri.parse('http://192.168.1.113:8000/api/v1/package/getfreeadons/?package_id=$packageId');
 
-      if (response.statusCode == 200) {
-        final jsonBody = json.decode(response.body);
-        final List data = jsonBody["data"] ?? [];
+      final res = await http.get(url, headers: {"Content-Type": "application/json"});
 
-        productsInPackageList.assignAll(
-          data.map<Map<String, dynamic>>((category) {
-            final categoryTitle = category["product_and_service_category"]["title"] ?? "Category";
-            final products =
-                category["product_in_packages"]
-                    ?.map<Map<String, dynamic>>((product) {
-                      final prod = product["products"];
-                      return {
-                        "id": product["id"],
-                        "title": prod["title"] ?? "",
-                        "description": prod["decription"] ?? "",
-                        // "image": 'https://admin.streammly.com/${prod["cover_image"]}',
-                        "image": 'http://192.168.1.113/${prod["cover_image"]}',
-                        "quantity": product["quantity"] ?? 1,
-                        "dataRequestStage": product["data_request_stage"] ?? "",
-                      };
-                    })
-                    .toList()
-                    .cast<Map<String, dynamic>>() ??
-                [];
-            return {"categoryTitle": categoryTitle, "products": products};
-          }).toList(),
-        );
+      if (res.statusCode == 200) {
+        final Map<String, dynamic> body = json.decode(res.body);
+        freeAddOnResponse.value = FreeAddOnResponse.fromJson(body);
       } else {
-        Get.snackbar("Error", "Failed to fetch products in package");
+        Get.snackbar("Error", "Unable to fetch free add ons (${res.statusCode})");
       }
     } catch (e) {
-      Get.snackbar("Exception", e.toString());
+      Get.snackbar("Error", "Exception: $e");
     }
+
+    isFetchingFreeAddOns.value = false;
+  }
+
+  RxBool isFetchingPaidAddOns = false.obs;
+  Rx<PaidAddOnResponse?> paidAddOnResponse = Rx<PaidAddOnResponse?>(null);
+  RxInt selectedPaidAddOnIndex = RxInt(-1);
+
+  Future<void> fetchPaidAddOns(int packageId, int studioId) async {
+    isFetchingPaidAddOns.value = true;
+    paidAddOnResponse.value = null;
+    selectedPaidAddOnIndex.value = -1;
+    try {
+      final url = Uri.parse('http://192.168.1.113:8000/api/v1/package/getpaidadons/?package_id=$packageId&studio_id=$studioId');
+      final res = await http.get(url, headers: {"Content-Type": "application/json"});
+      if (res.statusCode == 200) {
+        final Map<String, dynamic> body = json.decode(res.body);
+        paidAddOnResponse.value = PaidAddOnResponse.fromJson(body, studioId: studioId);
+      } else {
+        // handle error
+      }
+    } catch (e) {
+      // handle error
+    }
+    isFetchingPaidAddOns.value = false;
+  }
+
+  void setSelectedPaidAddOnIndex(int index) {
+    selectedPaidAddOnIndex.value = index;
+  }
+
+  PaidAddOn? get selectedPaidAddOn {
+    if (selectedPaidAddOnIndex.value >= 0 && paidAddOnResponse.value != null && selectedPaidAddOnIndex.value < paidAddOnResponse.value!.addons.length) {
+      return paidAddOnResponse.value!.addons[selectedPaidAddOnIndex.value];
+    }
+    return null;
+  }
+
+  void setSelectedFreeAddOnIndex(int index) {
+    selectedFreeAddOnIndex.value = index;
+  }
+
+  FreeAddOn? get selectedFreeAddOn {
+    if (selectedFreeAddOnIndex.value >= 0 && freeAddOnResponse.value != null && selectedFreeAddOnIndex.value < freeAddOnResponse.value!.addons.length) {
+      return freeAddOnResponse.value!.addons[selectedFreeAddOnIndex.value];
+    }
+    return null;
+  }
+
+  void clearSelectedFreeAddOn() {
+    selectedFreeAddOnIndex.value = -1;
   }
 
   // Free Item Selection Logic
@@ -202,7 +223,20 @@ class PackagesController extends GetxController {
     final selectedHoursForPackage = selectedHours[index] ?? {pkg["hours"].first};
     final selectedHour = selectedHoursForPackage.first;
     final priceMap = pkg["priceMap"] as Map<String, int>;
-    final billingPackage = {...pkg, 'selectedHours': selectedHoursForPackage.toList(), 'packageIndex': index, 'finalPrice': priceMap[selectedHour] ?? pkg["price"]};
+
+    final billingPackage = {
+      ...pkg,
+      'selectedHours': selectedHoursForPackage.toList(),
+      'packageIndex': index,
+      'finalPrice': priceMap[selectedHour] ?? pkg["price"],
+      'studio_id': studioId,
+      'company_id': companyId,
+      'subCategory': subCategoryId,
+      'sub_vertical_id': subVerticalId,
+      'type_id': pkg['type_id'],
+      'type': pkg['type'],
+    };
+
     selectedPackagesForBilling.add(billingPackage);
   }
 
