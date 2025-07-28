@@ -41,7 +41,7 @@ class CompanyLocation {
   final CompanyDetails? company;
 
   CompanyLocation({
-    required this.id,
+    required this.id, // studio id
     required this.companyId,
     required this.type,
     required this.name,

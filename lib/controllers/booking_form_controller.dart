@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:developer';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -6,16 +7,21 @@ import 'package:get/get.dart';
 import 'package:http/http.dart' as http;
 import 'package:intl/intl.dart';
 import 'package:streammly/controllers/auth_controller.dart';
+import 'package:streammly/data/repository/booking_repo.dart';
+import 'package:streammly/models/response/response_model.dart';
 import 'package:streammly/views/screens/package/booking/booking_page.dart';
 
 class BookingController extends GetxController {
   var currentPage = 0.obs;
   var selectedPackages = <Map<String, dynamic>>[].obs;
-
+  final BookingRepo bookingrepo;
+  bool isLoading = false;
   final personalInfo = {'name': ''.obs, 'mobile': ''.obs, 'email': ''.obs};
   final alternateMobiles = <RxString>[].obs;
   final alternateEmails = <RxString>[].obs;
   final packageFormsData = <int, Map<String, dynamic>>{}.obs;
+
+  BookingController({required this.bookingrepo});
   var acceptTerms = false.obs;
 
   late RxList<int> packagePrices;
@@ -46,12 +52,25 @@ class BookingController extends GetxController {
   }
 
   /// --- INITIALIZE SELECTED PACKAGES AND PREP FORM DATA ---
-  void initSelectedPackages(List<Map<String, dynamic>> packages, List<dynamic> locations) {
+  void initSelectedPackages(
+    List<Map<String, dynamic>> packages,
+    List<dynamic> locations,
+  ) {
     // locations must be in same order as packages, each with .company.advanceDayBooking etc
     companyLocations = locations;
     WidgetsBinding.instance.addPostFrameCallback((_) {
       selectedPackages.assignAll(packages);
-      packagePrices = List<int>.generate(packages.length, (index) => int.tryParse(packages[index]['packagevariations']?[0]?['amount']?.toString() ?? '0') ?? 0).obs;
+      packagePrices =
+          List<int>.generate(
+            packages.length,
+            (index) =>
+                int.tryParse(
+                  packages[index]['packagevariations']?[0]?['amount']
+                          ?.toString() ??
+                      '0',
+                ) ??
+                0,
+          ).obs;
       showPackageDetails = List<bool>.filled(packages.length, false).obs;
 
       for (int i = 0; i < packages.length; i++) {
@@ -61,13 +80,21 @@ class BookingController extends GetxController {
         final formattedTime = formatTimeOfDay(now);
 
         // --- Use companyLocations to get the advanceDayBooking for this package ---
-        final companyLocation = companyLocations.isNotEmpty ? companyLocations[i] : null;
-        final int advanceBlock = (companyLocation?.company?.advanceDayBooking ?? 0);
-        final DateTime firstAvailableDate = DateTime.now().add(Duration(days: advanceBlock));
-        final String formattedDate = "${firstAvailableDate.day} ${_getMonthName(firstAvailableDate.month)} ${firstAvailableDate.year}";
+        final companyLocation =
+            companyLocations.isNotEmpty ? companyLocations[i] : null;
+        final int advanceBlock =
+            (companyLocation?.company?.advanceDayBooking ?? 0);
+        final DateTime firstAvailableDate = DateTime.now().add(
+          Duration(days: advanceBlock),
+        );
+        final String formattedDate =
+            "${firstAvailableDate.day} ${_getMonthName(firstAvailableDate.month)} ${firstAvailableDate.year}";
 
         Map<String, String> extraAnswers = {};
-        final extraQuestions = package['extraQuestions'] ?? package['packageextra_questions'] ?? [];
+        final extraQuestions =
+            package['extraQuestions'] ??
+            package['packageextra_questions'] ??
+            [];
         for (var question in extraQuestions) {
           final uniqueKey = "${i}_${question['id']}";
           extraAnswers[uniqueKey] = '';
@@ -103,7 +130,7 @@ class BookingController extends GetxController {
 
   void editPackage(int index) {
     currentPage.value = index;
-    Get.to(() => BookingPage());
+    Get.to(() => BookingPage(packages: [], companyLocations: []));
   }
 
   void toggleDetails(int index) {
@@ -153,13 +180,19 @@ class BookingController extends GetxController {
 
   /// --- DATE PICKER with COMPANY BLOCK LOGIC ---
   Future<String> selectDate(int index, BuildContext context) async {
-    final companyLocation = companyLocations.isNotEmpty ? companyLocations[index] : null;
+    final companyLocation =
+        companyLocations.isNotEmpty ? companyLocations[index] : null;
     final int advanceBlock = (companyLocation?.company?.advanceDayBooking ?? 0);
 
     final DateTime now = DateTime.now();
     final DateTime firstAvailableDate = now.add(Duration(days: advanceBlock));
 
-    final picked = await showDatePicker(context: context, initialDate: firstAvailableDate, firstDate: firstAvailableDate, lastDate: now.add(Duration(days: 365)));
+    final picked = await showDatePicker(
+      context: context,
+      initialDate: firstAvailableDate,
+      firstDate: firstAvailableDate,
+      lastDate: now.add(Duration(days: 365)),
+    );
 
     String formatted = "";
     if (picked != null) {
@@ -170,7 +203,21 @@ class BookingController extends GetxController {
   }
 
   String _getMonthName(int month) {
-    const months = ['', 'January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+    const months = [
+      '',
+      'January',
+      'February',
+      'March',
+      'April',
+      'May',
+      'June',
+      'July',
+      'August',
+      'September',
+      'October',
+      'November',
+      'December',
+    ];
     return months[month];
   }
 
@@ -212,7 +259,8 @@ class BookingController extends GetxController {
       final packageTitle = selectedPackages[i]['title'];
       if (packageTitle == 'Cuteness' && form['babyInfo'] == null) return false;
       if (packageTitle == 'Moments' && form['theme'] == null) return false;
-      if (packageTitle == 'Wonders' && form['locationPreference'] == null) return false;
+      if (packageTitle == 'Wonders' && form['locationPreference'] == null)
+        return false;
       if (!(form['termsAccepted'] ?? false)) return false;
 
       final extraAnswers = Map<String, String>.from(form['extraAnswers'] ?? {});
@@ -225,7 +273,10 @@ class BookingController extends GetxController {
 
   void submitBooking() {
     if (!canSubmit()) {
-      Get.snackbar('Error', 'Please fill all required fields and accept terms for each package');
+      Get.snackbar(
+        'Error',
+        'Please fill all required fields and accept terms for each package',
+      );
       return;
     }
 
@@ -256,51 +307,88 @@ class BookingController extends GetxController {
     return total;
   }
 
-  /// === SLOT FETCH API ===
-  Future<void> fetchAvailableSlots({
-    required int studioId,
-    required int typeId,
-    required String type,
+  Future<ResponseModel?> fetchAvailableSlots({
+    required String companyId,
     required String date,
-    required String startTime,
-    required String endTime,
-    required int companyId,
+    required String studioId,
+    required String typeId,
   }) async {
-    final url = Uri.parse("http://192.168.1.113:8000/api/v1/workingtime/get-avilable-slots");
-    final headers = {
-      "Accept": "application/json",
-      "Authorization": "Bearer YOUR_TOKEN", // if needed
-    };
-
-    final request =
-        http.MultipartRequest("POST", url)
-          ..headers.addAll(headers)
-          ..fields['studio_id'] = studioId.toString()
-          ..fields['type_id'] = typeId.toString()
-          ..fields['type'] = type
-          ..fields['date'] = date
-          ..fields['start_time'] = startTime
-          ..fields['end_time'] = endTime
-          ..fields['company_id'] = companyId.toString();
-
-    debugPrint("Sending slot availability request...");
-    debugPrint("Payload: ${request.fields}");
-
+    isLoading = true;
+    update();
+    ResponseModel? responseModel;
     try {
-      final response = await request.send();
-      final resStr = await response.stream.bytesToString();
-
-      debugPrint("Status Code: ${response.statusCode}");
-      debugPrint("Response Body: $resStr");
-
+      Response response = await bookingrepo.fetchAvailableSlots(
+        companyId: companyId,
+        date: date,
+        studioId: studioId,
+        typeId: typeId,
+      );
+      log(
+        "***** Response in updateUserProfile () ******: ${response.bodyString}",
+      );
       if (response.statusCode == 200) {
-        final data = json.decode(resStr);
-        // Handle data here
+        responseModel = ResponseModel(
+          true,
+          "User profile updated successfully",
+        );
       } else {
-        debugPrint("Failed to fetch slots. Status: ${response.statusCode}");
+        responseModel = ResponseModel(false, "Failed to update user profile");
       }
     } catch (e) {
-      debugPrint("Error while fetching slots: $e");
+      responseModel = ResponseModel(false, "Error in update user profile");
+      log(e.toString(), name: "***** Error in updateUserProfile () ******");
     }
+    isLoading = false;
+    update();
+    return responseModel;
   }
+
+  /// === SLOT FETCH API ===
+  //   Future<void> fetchAvailableSlots({
+  //     required int studioId,
+  //     required int typeId,
+  //     required String type,
+  //     required String date,
+  //     required String startTime,
+  //     required String endTime,
+  //     required int companyId,
+  //   }) async {
+  //     final url = Uri.parse("http://192.168.1.113:8000/api/v1/workingtime/get-avilable-slots");
+  //     final headers = {
+  //       "Accept": "application/json",
+  //       "Authorization": "Bearer YOUR_TOKEN", // if needed
+  //     };
+
+  //     final request =
+  //         http.MultipartRequest("POST", url)
+  //           ..headers.addAll(headers)
+  //           ..fields['studio_id'] = studioId.toString()
+  //           ..fields['type_id'] = typeId.toString()
+  //           ..fields['type'] = type
+  //           ..fields['date'] = date
+  //           ..fields['start_time'] = startTime
+  //           ..fields['end_time'] = endTime
+  //           ..fields['company_id'] = companyId.toString();
+
+  //     debugPrint("Sending slot availability request...");
+  //     debugPrint("Payload: ${request.fields}");
+
+  //     try {
+  //       final response = await request.send();
+  //       final resStr = await response.stream.bytesToString();
+
+  //       debugPrint("Status Code: ${response.statusCode}");
+  //       debugPrint("Response Body: $resStr");
+
+  //       if (response.statusCode == 200) {
+  //         final data = json.decode(resStr);
+  //         // Handle data here
+  //       } else {
+  //         debugPrint("Failed to fetch slots. Status: ${response.statusCode}");
+  //       }
+  //     } catch (e) {
+  //       debugPrint("Error while fetching slots: $e");
+  //     }
+  //   }
+  // }
 }

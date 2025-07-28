@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:developer';
 
 import 'package:get/get.dart';
 import 'package:http/http.dart' as http;
@@ -17,20 +18,28 @@ class PackagesController extends GetxController {
   RxList<Map<String, dynamic>> packages = <Map<String, dynamic>>[].obs;
   RxBool isLoading = false.obs;
 
-  RxList<Map<String, dynamic>> popularPackagesList = <Map<String, dynamic>>[].obs;
+  RxList<Map<String, dynamic>> popularPackagesList =
+      <Map<String, dynamic>>[].obs;
 
-  RxList<Map<String, dynamic>> productsInPackageList = <Map<String, dynamic>>[].obs;
+  RxList<Map<String, dynamic>> productsInPackageList =
+      <Map<String, dynamic>>[].obs;
 
   // New: Free Item & Extra Add-On Selections
   RxMap<String, dynamic> selectedFreeItem = <String, dynamic>{}.obs;
-  RxList<Map<String, dynamic>> selectedExtraAddons = <Map<String, dynamic>>[].obs;
+  RxList<Map<String, dynamic>> selectedExtraAddons =
+      <Map<String, dynamic>>[].obs;
 
   late int companyId;
   late int subCategoryId;
   late int subVerticalId;
   late int studioId;
 
-  void initialize({required int companyId, required int subCategoryId, required int subVerticalId, required int studioId}) {
+  void initialize({
+    required int companyId,
+    required int subCategoryId,
+    required int subVerticalId,
+    required int studioId,
+  }) {
     this.companyId = companyId;
     this.subCategoryId = subCategoryId;
     this.subVerticalId = subVerticalId;
@@ -54,25 +63,54 @@ class PackagesController extends GetxController {
       final response = await http.post(
         Uri.parse("http://192.168.1.113:8000/api/v1/package/getpackages"),
         headers: {"Content-Type": "application/json"},
-        body: jsonEncode({"company_id": companyId, "subcategory_id": subCategoryId, "sub_vertical_id": subVerticalId, 'studio_id': studioId}),
+        body: jsonEncode({
+          "company_id": companyId,
+          "subcategory_id": subCategoryId,
+          "sub_vertical_id": subVerticalId,
+          'studio_id': studioId,
+        }),
       );
+
+      log(subVerticalId.toString(), name: "lkjfds");
+      log(response.body, name: "lkjfds");
       if (response.statusCode == 200) {
         final jsonBody = json.decode(response.body);
         final List data = jsonBody["data"] ?? [];
-        final filteredData = data.where((pkg) => pkg['sub_vertical_id'] == subVerticalId || subVerticalId == 0).toList();
+        final filteredData =
+            data
+                .where(
+                  (pkg) =>
+                      pkg['sub_vertical_id'].toString() ==
+                          subVerticalId.toString() ||
+                      subVerticalId == 0,
+                )
+                .toList();
 
         packages.assignAll(
           filteredData.map<Map<String, dynamic>>((pkg) {
             final List<dynamic>? variations = pkg["packagevariations"];
-            final firstVariation = (variations != null && variations.isNotEmpty) ? variations[0] : null;
+            final firstVariation =
+                (variations != null && variations.isNotEmpty)
+                    ? variations[0]
+                    : null;
 
-            final List<String> hours = variations != null ? variations.map<String>((v) => getDurationLabel(v)).toList() : ["1hr", "2hr", "3hr"];
+            final List<String> hours =
+                variations != null
+                    ? variations
+                        .map<String>((v) => getDurationLabel(v))
+                        .toList()
+                    : ["1hr", "2hr", "3hr"];
 
-            final priceMap = {for (var v in variations ?? []) getDurationLabel(v): int.tryParse(v["amount"]?.toString() ?? "0") ?? 0};
+            final priceMap = {
+              for (var v in variations ?? [])
+                getDurationLabel(v):
+                    int.tryParse(v["amount"]?.toString() ?? "0") ?? 0,
+            };
 
             return {
               "title": pkg["title"] ?? "",
               "type": pkg["type"] ?? "N/A",
+              "type_id": pkg['title'],
               "price": priceMap[getDurationLabel(firstVariation ?? {})] ?? 0,
               "priceMap": priceMap,
               "hours": hours,
@@ -80,7 +118,8 @@ class PackagesController extends GetxController {
               "shortDescription": pkg["long_description"] ?? "",
               "fullDescription": pkg["long_description"] ?? "",
               "termsAndCondition": pkg["terms_and_condition"] ?? "",
-              "specialOffer": (pkg["status"] ?? "").toString().toLowerCase() == "active",
+              "specialOffer":
+                  (pkg["status"] ?? "").toString().toLowerCase() == "active",
               "packageIndex": data.indexOf(pkg),
               "extraQuestions": pkg["packageextra_questions"] ?? [],
               "packageId": pkg["id"] ?? 0,
@@ -93,6 +132,7 @@ class PackagesController extends GetxController {
           selectedHours[i] = {packages[i]["hours"].first};
           expandedStates[i] = false;
         }
+        log(packages.toString(), name: "lkjfds");
       } else {
         Get.snackbar("Error", "Failed to fetch packages");
       }
@@ -114,15 +154,23 @@ class PackagesController extends GetxController {
     freeAddOnResponse.value = null;
 
     try {
-      final url = Uri.parse('http://192.168.1.113:8000/api/v1/package/getfreeadons/?package_id=$packageId');
+      final url = Uri.parse(
+        'http://192.168.1.113:8000/api/v1/package/getfreeadons/?package_id=$packageId',
+      );
 
-      final res = await http.get(url, headers: {"Content-Type": "application/json"});
+      final res = await http.get(
+        url,
+        headers: {"Content-Type": "application/json"},
+      );
 
       if (res.statusCode == 200) {
         final Map<String, dynamic> body = json.decode(res.body);
         freeAddOnResponse.value = FreeAddOnResponse.fromJson(body);
       } else {
-        Get.snackbar("Error", "Unable to fetch free add ons (${res.statusCode})");
+        Get.snackbar(
+          "Error",
+          "Unable to fetch free add ons (${res.statusCode})",
+        );
       }
     } catch (e) {
       Get.snackbar("Error", "Exception: $e");
@@ -140,11 +188,19 @@ class PackagesController extends GetxController {
     paidAddOnResponse.value = null;
     selectedPaidAddOnIndex.value = -1;
     try {
-      final url = Uri.parse('http://192.168.1.113:8000/api/v1/package/getpaidadons/?package_id=$packageId&studio_id=$studioId');
-      final res = await http.get(url, headers: {"Content-Type": "application/json"});
+      final url = Uri.parse(
+        'http://192.168.1.113:8000/api/v1/package/getpaidadons/?package_id=$packageId&studio_id=$studioId',
+      );
+      final res = await http.get(
+        url,
+        headers: {"Content-Type": "application/json"},
+      );
       if (res.statusCode == 200) {
         final Map<String, dynamic> body = json.decode(res.body);
-        paidAddOnResponse.value = PaidAddOnResponse.fromJson(body, studioId: studioId);
+        paidAddOnResponse.value = PaidAddOnResponse.fromJson(
+          body,
+          studioId: studioId,
+        );
       } else {
         // handle error
       }
@@ -159,7 +215,9 @@ class PackagesController extends GetxController {
   }
 
   PaidAddOn? get selectedPaidAddOn {
-    if (selectedPaidAddOnIndex.value >= 0 && paidAddOnResponse.value != null && selectedPaidAddOnIndex.value < paidAddOnResponse.value!.addons.length) {
+    if (selectedPaidAddOnIndex.value >= 0 &&
+        paidAddOnResponse.value != null &&
+        selectedPaidAddOnIndex.value < paidAddOnResponse.value!.addons.length) {
       return paidAddOnResponse.value!.addons[selectedPaidAddOnIndex.value];
     }
     return null;
@@ -170,7 +228,9 @@ class PackagesController extends GetxController {
   }
 
   FreeAddOn? get selectedFreeAddOn {
-    if (selectedFreeAddOnIndex.value >= 0 && freeAddOnResponse.value != null && selectedFreeAddOnIndex.value < freeAddOnResponse.value!.addons.length) {
+    if (selectedFreeAddOnIndex.value >= 0 &&
+        freeAddOnResponse.value != null &&
+        selectedFreeAddOnIndex.value < freeAddOnResponse.value!.addons.length) {
       return freeAddOnResponse.value!.addons[selectedFreeAddOnIndex.value];
     }
     return null;
@@ -211,7 +271,9 @@ class PackagesController extends GetxController {
   void togglePackageSelection(int index) {
     if (selectedPackageIndices.contains(index)) {
       selectedPackageIndices.remove(index);
-      selectedPackagesForBilling.removeWhere((pkg) => pkg['packageIndex'] == index);
+      selectedPackagesForBilling.removeWhere(
+        (pkg) => pkg['packageIndex'] == index,
+      );
     } else {
       selectedPackageIndices.add(index);
       _addPackageForBilling(index);
@@ -220,10 +282,11 @@ class PackagesController extends GetxController {
 
   void _addPackageForBilling(int index) {
     final pkg = packages[index];
-    final selectedHoursForPackage = selectedHours[index] ?? {pkg["hours"].first};
+    final selectedHoursForPackage =
+        selectedHours[index] ?? {pkg["hours"].first};
     final selectedHour = selectedHoursForPackage.first;
     final priceMap = pkg["priceMap"] as Map<String, int>;
-
+    log(pkg.toString(), name: "ksl;fl;sjslk");
     final billingPackage = {
       ...pkg,
       'selectedHours': selectedHoursForPackage.toList(),
@@ -244,7 +307,9 @@ class PackagesController extends GetxController {
     selectedHours[packageIndex] = {hour};
     selectedHours.refresh();
     if (selectedPackageIndices.contains(packageIndex)) {
-      selectedPackagesForBilling.removeWhere((pkg) => pkg['packageIndex'] == packageIndex);
+      selectedPackagesForBilling.removeWhere(
+        (pkg) => pkg['packageIndex'] == packageIndex,
+      );
       _addPackageForBilling(packageIndex);
     }
   }
@@ -258,7 +323,10 @@ class PackagesController extends GetxController {
   }
 
   int getTotalPrice() {
-    return selectedPackagesForBilling.fold(0, (sum, pkg) => sum + (pkg['finalPrice'] as int));
+    return selectedPackagesForBilling.fold(
+      0,
+      (sum, pkg) => sum + (pkg['finalPrice'] as int),
+    );
   }
 
   int getSelectedPackageCount() {
@@ -289,7 +357,9 @@ class PackagesController extends GetxController {
 
   void removePackageFromSelection(int index) {
     selectedPackageIndices.remove(index);
-    selectedPackagesForBilling.removeWhere((pkg) => pkg['packageIndex'] == index);
+    selectedPackagesForBilling.removeWhere(
+      (pkg) => pkg['packageIndex'] == index,
+    );
   }
 
   Map<String, dynamic>? getPackageByIndex(int index) {
@@ -316,7 +386,9 @@ class PackagesController extends GetxController {
 
   void updatePackagePricing(int packageIndex) {
     if (selectedPackageIndices.contains(packageIndex)) {
-      selectedPackagesForBilling.removeWhere((pkg) => pkg['packageIndex'] == packageIndex);
+      selectedPackagesForBilling.removeWhere(
+        (pkg) => pkg['packageIndex'] == packageIndex,
+      );
       _addPackageForBilling(packageIndex);
     }
   }
@@ -324,7 +396,10 @@ class PackagesController extends GetxController {
   Future<void> fetchPopularPackages() async {
     try {
       // final response = await http.get(Uri.parse("https://admin.streammly.com/api/v1/package/getpopularpackages"), headers: {"Content-Type": "application/json"});
-      final response = await http.get(Uri.parse("http://192.168.1.113/api/v1/package/getpopularpackages"), headers: {"Content-Type": "application/json"});
+      final response = await http.get(
+        Uri.parse("http://192.168.1.113/api/v1/package/getpopularpackages"),
+        headers: {"Content-Type": "application/json"},
+      );
 
       if (response.statusCode == 200) {
         final jsonBody = json.decode(response.body);
@@ -333,17 +408,23 @@ class PackagesController extends GetxController {
         popularPackagesList.assignAll(
           data.map<Map<String, dynamic>>((pkg) {
             final List<dynamic>? variations = pkg["packagevariations"];
-            final firstVariation = (variations != null && variations.isNotEmpty) ? variations[0] : null;
+            final firstVariation =
+                (variations != null && variations.isNotEmpty)
+                    ? variations[0]
+                    : null;
 
             return {
               "title": pkg["title"] ?? "",
               "type": pkg["type"] ?? "N/A",
-              "price": int.tryParse(firstVariation?["amount"]?.toString() ?? "0") ?? 0,
+              "price":
+                  int.tryParse(firstVariation?["amount"]?.toString() ?? "0") ??
+                  0,
               "shortDescription": pkg["short_description"] ?? "",
               "highlight": pkg["fullDescription"] ?? "",
               "packageIndex": data.indexOf(pkg),
               "image":
-                  (pkg["image_upload"] != null && pkg["image_upload"].isNotEmpty)
+                  (pkg["image_upload"] != null &&
+                          pkg["image_upload"].isNotEmpty)
                       // ? 'https://admin.streammly.com/${pkg["image_upload"]}'
                       ? 'http://192.168.1.113/${pkg["image_upload"]}'
                       : 'assets/images/category/vendor_category/Baby.jpg',

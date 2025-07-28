@@ -14,6 +14,7 @@ import 'package:streammly/data/repository/promo_slider_repo.dart';
 import 'package:streammly/data/repository/quote_repo.dart';
 import 'package:streammly/data/repository/wishlist_repo.dart';
 
+import '../controllers/booking_form_controller.dart';
 import '../controllers/business_setting_controller.dart';
 import '../controllers/category_controller.dart';
 import '../controllers/company_controller.dart';
@@ -23,6 +24,7 @@ import '../controllers/promo_slider_controller.dart';
 import '../controllers/quote_controller.dart';
 import '../services/constants.dart';
 import 'api/api_client.dart';
+import 'repository/booking_repo.dart';
 import 'repository/package_repo.dart';
 
 class Init {
@@ -77,6 +79,10 @@ class Init {
       Get.lazyPut(
         () => BusinessSettingController(businessSettingRepo: Get.find()),
       );
+
+      // //Booking Slots
+      Get.lazyPut(()=> BookingRepo(apiClient: Get.find()));
+      Get.lazyPut(()=> BookingController(bookingrepo : Get.find()));
 
       // Quote
       Get.lazyPut(() => QuoteRepo(apiClient: Get.find()));

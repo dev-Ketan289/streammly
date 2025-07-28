@@ -102,7 +102,6 @@ class StreammlyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return GetMaterialApp(
-      key: subnavigator,
       navigatorKey: subnavigator,
       debugShowCheckedModeBanner: false,
       title: 'Streammly',
