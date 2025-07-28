@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:streammly/controllers/company_controller.dart';
-import 'package:streammly/navigation_menu.dart';
+import 'package:streammly/navigation_flow.dart';
 import 'package:streammly/services/theme.dart';
 import 'package:streammly/views/widgets/custom_doodle.dart';
 
@@ -121,13 +121,26 @@ class _VendorDetailScreenState extends State<VendorDetailScreen> {
                             return CategoryItem(
                               label: sub.title,
                               imagePath: resolveImageUrl(sub.image),
-                              onTap:
-                                  () => Get.to(
-                                    VendorGroup(
-                                      company: widget.company,
-                                      subCategoryId: sub.id,
-                                    ),
+                              onTap: () {
+                                final mainState =
+                                    context
+                                        .findAncestorStateOfType<
+                                          NavigationFlowState
+                                        >();
+                                mainState?.pushToCurrentTab(
+                                  VendorGroup(
+                                    company: widget.company,
+                                    subCategoryId: sub.id,
                                   ),
+                                  hideBottomBar: false,
+                                );
+                              },
+                              // () => Get.to(
+                              //   VendorGroup(
+                              //     company: widget.company,
+                              //     subCategoryId: sub.id,
+                              //   ),
+                              // ),
                             );
                           }).toList(),
                     );

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:streammly/controllers/location_controller.dart';
+import 'package:streammly/navigation_flow.dart';
 import 'package:streammly/views/screens/common/enter_location_manually.dart';
 
 import '../../../navigation_menu.dart';
@@ -86,7 +87,7 @@ class LocationScreen extends StatelessWidget {
                                     try {
                                       await locationController.getCurrentLocation();
                                       locationController.saveSelectedLocation();
-                                      Get.to(() => NavigationMenu());
+                                      Get.to(() => NavigationFlow());
                                     } catch (e) {
                                       Get.snackbar(
                                         'Error',

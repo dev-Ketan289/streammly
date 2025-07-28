@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:streammly/controllers/company_controller.dart';
+import 'package:streammly/navigation_flow.dart';
 import 'package:streammly/views/screens/home/vendor_locator.dart';
 import 'package:streammly/views/screens/home/widgets/category/category.dart';
 import 'package:streammly/views/screens/home/widgets/page_nav.dart';
@@ -17,7 +18,6 @@ import '../home/widgets/category/widgets/category_scroller.dart';
 import '../home/widgets/header_banner.dart';
 import '../home/widgets/promo_slider.dart';
 import '../home/widgets/upcoming_offer_card.dart';
-import '../../../navigation_menu.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -47,7 +47,14 @@ class _HomeScreenState extends State<HomeScreen> {
         label: model.title,
         imagePath: model.icon,
         onTap: () {
-          Get.to(() => CompanyLocatorMapScreen(categoryId: model.id));
+          final mainState =
+              context.findAncestorStateOfType<NavigationFlowState>();
+          // Get.to(() => CompanyLocatorMapScreen(categoryId: cat.id));
+          mainState?.pushToCurrentTab(
+            CompanyLocatorMapScreen(categoryId: model.id),
+            hideBottomBar: true,
+          );
+          // Get.to(() => CompanyLocatorMapScreen(categoryId: model.id));
         },
       );
     }).toList();
@@ -86,7 +93,17 @@ class _HomeScreenState extends State<HomeScreen> {
                         ? const CircularProgressIndicator()
                         : CategoryScroller(
                           title: "Categories",
-                          onSeeAll: () => Get.to(CategoryListScreen()),
+                          onSeeAll: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) {
+                                  return CategoryListScreen();
+                                },
+                              ),
+                            );
+                          },
+                          // onSeeAll: () => Get.to(CategoryListScreen()),
                           categories: convertToCategoryItems(categoryModels),
                         ),
                     const SizedBox(height: 24),

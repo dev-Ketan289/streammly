@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:streammly/navigation_flow.dart';
 import 'package:streammly/navigation_menu.dart';
 import 'package:streammly/views/screens/auth_screens/create_user.dart';
 
@@ -34,7 +35,7 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
         Get.offNamed('/getQuote', arguments: formData);
       } else {
         // Default: go to main navigation
-        Get.off(() => const NavigationMenu());
+        Get.off(() =>  NavigationFlow());
       }
     });
   }

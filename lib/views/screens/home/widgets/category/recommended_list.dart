@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:streammly/controllers/wishlist_controller.dart';
 import 'package:streammly/models/vendors/recommanded_vendors.dart';
+import 'package:streammly/navigation_flow.dart';
 import 'package:streammly/navigation_menu.dart';
 import 'package:streammly/views/screens/home/widgets/category/widgets/recommended_vendor_card.dart';
 
@@ -116,8 +117,14 @@ class _RecommendedListState extends State<RecommendedList> {
                 specialities: vendor.specialities ?? [],
                 // If your CompanyLocation now supports other fields, add them here with similar null/default handling
               );
-
-              Navigator.push(context, MaterialPageRoute(builder: (_) => VendorDetailScreen(company: company)));
+              final mainState =
+                  context.findAncestorStateOfType<NavigationFlowState>();
+              // Get.to(() => CompanyLocatorMapScreen(categoryId: cat.id));
+              mainState?.pushToCurrentTab(
+                VendorDetailScreen(company: company),
+                hideBottomBar: true,
+              );
+              // Navigator.push(context, MaterialPageRoute(builder: (_) => VendorDetailScreen(company: company)));
               // final navKey = Get.find<NavigationController>().navigatorKeys[0];
               // navKey.currentState?.push(
               //   MaterialPageRoute(
