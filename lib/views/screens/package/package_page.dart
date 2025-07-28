@@ -47,7 +47,7 @@ class PackagesPage extends StatelessWidget {
             ],
           );
         }),
-        bottomNavigationBar: PackagesBottomBar(controller: controller),
+        bottomNavigationBar: PackagesBottomBar(controller: controller, companyLocations: []),
       ),
     );
   }

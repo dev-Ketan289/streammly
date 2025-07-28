@@ -30,7 +30,4 @@ class Slot {
       blockOutdoor: json['block_outdoorshoot_time'] ?? true,
     );
   }
-  bool get isSlotAvailable {
-    return !booked && !breakTime && !blockHome && !blockIndoor && !blockOutdoor;
-  }
 }

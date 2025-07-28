@@ -7,8 +7,6 @@ import 'package:http/http.dart' as http;
 import 'package:intl/intl.dart';
 import 'package:streammly/controllers/auth_controller.dart';
 import 'package:streammly/views/screens/package/booking/booking_page.dart';
-// Import your company location model
-// import 'package:streammly/models/company_location.dart';
 
 class BookingController extends GetxController {
   var currentPage = 0.obs;
@@ -155,7 +153,6 @@ class BookingController extends GetxController {
 
   /// --- DATE PICKER with COMPANY BLOCK LOGIC ---
   Future<String> selectDate(int index, BuildContext context) async {
-    // Get the company location for this package
     final companyLocation = companyLocations.isNotEmpty ? companyLocations[index] : null;
     final int advanceBlock = (companyLocation?.company?.advanceDayBooking ?? 0);
 
@@ -163,6 +160,7 @@ class BookingController extends GetxController {
     final DateTime firstAvailableDate = now.add(Duration(days: advanceBlock));
 
     final picked = await showDatePicker(context: context, initialDate: firstAvailableDate, firstDate: firstAvailableDate, lastDate: now.add(Duration(days: 365)));
+
     String formatted = "";
     if (picked != null) {
       formatted = "${picked.day} ${_getMonthName(picked.month)} ${picked.year}";
