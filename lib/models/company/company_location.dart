@@ -219,40 +219,99 @@ class WorkingHour {
 class CompanyDetails {
   final int id;
   final String companyName;
+  final String? companyOwnerName;
+  final String? email;
+  final String? phone;
   final String? logo;
   final String? bannerImage;
   final String? descriptionBackgroundImage;
   final String? description;
   final double? rating;
+  final String? status;
+  final String? companyType;
   final String? categoryName;
-  final int? advanceDayBooking;
+
+  // These handle both field and business settings approach:
+  final int? advanceBookingDaysRaw;
+  final int? advanceAmountPercentageRaw;
+  final List<dynamic>? businessSettings; // get_busniess_setting
 
   CompanyDetails({
     required this.id,
     required this.companyName,
+    this.companyOwnerName,
+    this.email,
+    this.phone,
     this.logo,
     this.bannerImage,
     this.descriptionBackgroundImage,
-    this.advanceDayBooking,
     this.description,
     this.rating,
+    this.status,
+    this.companyType,
     this.categoryName,
+    this.advanceBookingDaysRaw,
+    this.advanceAmountPercentageRaw,
+    this.businessSettings,
   });
 
   factory CompanyDetails.fromJson(Map<String, dynamic> json) {
+    int? parseInt(dynamic val) {
+      if (val == null) return null;
+      if (val is int) return val;
+      return int.tryParse(val.toString());
+    }
+
+    double? parseDouble(dynamic val) {
+      if (val == null) return null;
+      if (val is double) return val;
+      if (val is int) return val.toDouble();
+      return double.tryParse(val.toString());
+    }
+
     return CompanyDetails(
-      id: json['id'],
+      id: parseInt(json['id']) ?? 0,
       companyName: json['company_name'] ?? '',
+      companyOwnerName: json['company_owner_name'],
+      email: json['email'],
+      phone: json['phone'],
       logo: json['logo'],
       bannerImage: json['banner_image'],
       descriptionBackgroundImage: json['description_background_image'],
       description: json['description'],
-      rating: json['rating'] != null ? double.tryParse(json['rating'].toString()) : null,
+      rating: parseDouble(json['rating']),
+      status: json['status'],
+      companyType: json['company_type'],
       categoryName: json['category_title'],
-      advanceDayBooking: int.tryParse(json['advance_day_booking'].toString()) ?? 0,
+      advanceBookingDaysRaw: parseInt(json['advance_booking_days'] ?? json['advance_day_booking']),
+      advanceAmountPercentageRaw: parseInt(json['advance_amount_percentage']),
+      businessSettings: json['get_busniess_setting'],
     );
   }
 
-  String? get fullLogoUrl => logo;
-  String? get fullBannerImageUrl => bannerImage;
+  /// --- Get advance booking days, supporting both direct and business setting ---
+  int get advanceBookingDays {
+    if (advanceBookingDaysRaw != null) return advanceBookingDaysRaw!;
+    if (businessSettings is List) {
+      final match = (businessSettings as List).cast<Map<String, dynamic>>().firstWhere((e) => e['key'] == 'advance_booking_days', orElse: () => {});
+      if (match['value'] != null) {
+        final days = int.tryParse(match['value'].toString());
+        if (days != null) return days;
+      }
+    }
+    return 0;
+  }
+
+  /// --- Get advance amount percentage, from raw field or business setting ---
+  int get advanceAmountPercentage {
+    if (advanceAmountPercentageRaw != null) return advanceAmountPercentageRaw!;
+    if (businessSettings is List) {
+      final match = (businessSettings as List).cast<Map<String, dynamic>>().firstWhere((e) => e['key'] == 'advance_amount_percentage', orElse: () => {});
+      if (match['value'] != null) {
+        final val = int.tryParse(match['value'].toString());
+        if (val != null) return val;
+      }
+    }
+    return 0;
+  }
 }
