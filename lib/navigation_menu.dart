@@ -2,8 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:get/get.dart';
 import 'package:streammly/generated/assets.dart';
+import 'package:streammly/services/custom_exit_dailogue.dart';
 import 'package:streammly/views/screens/home/home_screen.dart';
-import 'package:streammly/views/screens/home/widgets/category/category.dart';
+import 'package:streammly/views/screens/package/booking/bookings.dart';
+import 'package:flutter/services.dart';
 
 class NavigationMenu extends StatefulWidget {
   final Set<int> hiddenIndices;
@@ -20,54 +22,101 @@ class NavigationMenu extends StatefulWidget {
 
 class _NavigationMenuState extends State<NavigationMenu> {
   final controller = Get.put(NavigationController());
+  // final List<GlobalKey<NavigatorState>> _navigatorKeys = List.generate(
+  //   5,
+  //   (index) => GlobalKey<NavigatorState>(),
+  // );
+
+  // void _onTabTapped(int index){
+  //   if(controller.selectedIndex==index){
+  //     _navigatorKeys[index].currentState?.popUntil((route)=>route.isFirst);
+  //   }else{
+  //     setState(() {
+  //       controller.selectedIndex = index;
+  //     });
+  //   }
+  // }
 
   @override
   Widget build(BuildContext context) {
     return PopScope(
       canPop: false,
       onPopInvoked: (didPop) async {
-        if (!didPop && controller.selectedIndex != 0) {
+        final currentNav =
+            controller.navigatorKeys[controller.selectedIndex].currentState;
+        if (!didPop && currentNav != null && currentNav.canPop()) {
+          currentNav.pop();
+        } else if (!didPop && controller.selectedIndex != 0) {
           controller.setIndex(0);
         } else if (!didPop) {
-          Navigator.of(context).maybePop();
+          final shouldExit = await showDialog<bool>(
+            context: context,
+            builder: (context) => const CustomExitDialog(),
+          );
+
+          if (shouldExit == true) {
+            SystemNavigator.pop();
+          }
+          // Exit the app if on Home tab root
+          // For Android:
+          // For iOS, you might want to do nothing or handle differently
         }
       },
+      // onPopInvoked: (didPop) async {
+      //   if (!didPop && controller.selectedIndex != 0) {
+      //     controller.setIndex(0);
+      //   } else if (!didPop) {
+      //     Navigator.of(context).maybePop();
+      //   }
+      // },
       child: Scaffold(
         body: GetBuilder<NavigationController>(
-          builder: (_) => IndexedStack(
-            index: controller.selectedIndex,
-            children: controller.screens.map((screenBuilder) => screenBuilder()).toList(),
-          ),
-        ),
-        floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
-        floatingActionButton: widget.hideFAB
-            ? null
-            : GetBuilder<NavigationController>(
-          builder: (_) => CircleAvatar(
-            radius: 25,
-            backgroundColor: Colors.white,
-            child: FloatingActionButton(
-              shape: const CircleBorder(),
-              backgroundColor: Colors.white,
-              elevation: 3,
-              onPressed: () {
-                controller.setIndex(2);
-              },
-              child: Container(
-                height: 40,
-                width: 40,
-                decoration: const BoxDecoration(
-                  color: Color(0xffD9D9D9),
-                  shape: BoxShape.circle,
-                ),
-                child: SvgPicture.asset(
-                  Assets.svgCarttt,
-                  fit: BoxFit.scaleDown,
+          builder:
+              (_) => IndexedStack(
+                index: controller.selectedIndex,
+                children: List.generate(
+                  controller.screens.length,
+                  (index) => Navigator(
+                    key: controller.navigatorKeys[index],
+                    onGenerateRoute:
+                        (settings) => MaterialPageRoute(
+                          builder: (_) => controller.screens[index](),
+                        ),
+                  ),
                 ),
               ),
-            ),
-          ),
         ),
+        floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
+        floatingActionButton:
+            widget.hideFAB
+                ? null
+                : GetBuilder<NavigationController>(
+                  builder:
+                      (_) => CircleAvatar(
+                        radius: 25,
+                        backgroundColor: Colors.white,
+                        child: FloatingActionButton(
+                          shape: const CircleBorder(),
+                          backgroundColor: Colors.white,
+                          elevation: 3,
+                          onPressed: () {
+                            controller.setIndex(2);
+                          },
+                          child: Container(
+                            height: 40,
+                            width: 40,
+                            decoration: const BoxDecoration(
+                              color: Color(0xffD9D9D9),
+                              shape: BoxShape.circle,
+                            ),
+                            child: SvgPicture.asset(
+                              Assets.svgCarttt,
+                              fit: BoxFit.scaleDown,
+                            ),
+                          ),
+                        ),
+                      ),
+                ),
         bottomNavigationBar: GetBuilder<NavigationController>(
           builder: (_) {
             return ClipRRect(
@@ -142,16 +191,25 @@ class _NavigationMenuState extends State<NavigationMenu> {
     final isSelected = controller.selectedIndex == index;
 
     return GestureDetector(
-      onTap: () => controller.setIndex(index),
+      onTap: () {
+        if (controller.selectedIndex == index) {
+          controller.navigatorKeys[index].currentState?.popUntil(
+            (r) => r.isFirst,
+          );
+        } else {
+          controller.setIndex(index);
+        }
+      },
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           SvgPicture.asset(
             icon,
             height: height,
-            colorFilter: isSelected
-                ? ColorFilter.mode(theme.primaryColor, BlendMode.srcIn)
-                : null,
+            colorFilter:
+                isSelected
+                    ? ColorFilter.mode(theme.primaryColor, BlendMode.srcIn)
+                    : null,
           ),
           SizedBox(height: spacing),
           Text(
@@ -170,14 +228,18 @@ class _NavigationMenuState extends State<NavigationMenu> {
 
 class NavigationController extends GetxController {
   int selectedIndex = 0;
+  final List<GlobalKey<NavigatorState>> navigatorKeys = List.generate(
+    5,
+    (index) => GlobalKey<NavigatorState>(),
+  );
 
   final List<Widget Function()> screens = [
-        () => const HomeScreen(),
-        () => const Center(child: Text('Shop Screen Coming Soon')),
-        () => const Center(child: Text('Cart Screen Coming Soon')),
-        () => const Center(child: Text('Booking Screen Coming Soon')),
-        () => const Center(child: Text('More Screen Coming Soon')),
-        () => const CategoryListScreen(),
+    () => const HomeScreen(),
+    () => const Center(child: Text('Shop Screen Coming Soon')),
+    () => const Center(child: Text('Cart Screen Coming Soon')),
+    () => const Bookings(),
+    () => const Center(child: Text('More Screen Coming Soon')),
+    // () => const CategoryListScreen(),
   ];
 
   void setIndex(int index) {
@@ -310,3 +372,10 @@ class NavigationHelper {
     );
   }
 }
+
+
+// Widget _buildTabNavigator(int index ,Widget child){
+//   return Offstage(
+//     offstage: controllrt,
+//   )
+// }

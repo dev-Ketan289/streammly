@@ -8,6 +8,7 @@ import 'package:get/get.dart';
 import 'package:streammly/controllers/auth_controller.dart'; // Added
 import 'package:streammly/generated/assets.dart';
 import 'package:streammly/services/route_helper.dart';
+import 'package:streammly/views/screens/package/booking/bookings.dart';
 import 'package:streammly/views/screens/profile/about_page.dart';
 import 'package:streammly/views/screens/profile/components/profile_section_widget.dart';
 import 'package:streammly/views/screens/profile/language_preferences.dart';
@@ -19,6 +20,7 @@ import 'package:streammly/views/screens/profile/faq_page.dart';
 
 import 'package:streammly/views/screens/profile/invoice_screen.dart';
 import 'package:streammly/views/screens/profile/my_wallet.dart';
+import 'package:streammly/views/screens/wishlist/wishlistpage.dart';
 import 'notifications_page.dart';
 import 'package:streammly/views/screens/profile/rate_your_experience.dart';
 import 'package:streammly/views/screens/profile/refer_and_earn.dart';
@@ -66,7 +68,14 @@ class _ProfilePageState extends State<ProfilePage> {
             Get.back();
           },
         ),
-        title: const Text('Profile', style: TextStyle(color: Color(0xFF2864A6), fontSize: 20, fontWeight: FontWeight.bold)),
+        title: const Text(
+          'Profile',
+          style: TextStyle(
+            color: Color(0xFF2864A6),
+            fontSize: 20,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
         centerTitle: true,
       ),
       body: ListView(
@@ -86,21 +95,35 @@ class _ProfilePageState extends State<ProfilePage> {
             child: Container(
               height: screenHeight * 0.08, // Responsive height
               width: double.infinity, // Take full width
-              padding: EdgeInsets.symmetric(horizontal: screenWidth * 0.04, vertical: screenHeight * 0.01),
-              decoration: BoxDecoration(color: Colors.blue[800], borderRadius: BorderRadius.circular(12)),
+              padding: EdgeInsets.symmetric(
+                horizontal: screenWidth * 0.04,
+                vertical: screenHeight * 0.01,
+              ),
+              decoration: BoxDecoration(
+                color: Colors.blue[800],
+                borderRadius: BorderRadius.circular(12),
+              ),
               child: Row(
                 children: [
                   CircleAvatar(
                     radius: screenWidth * 0.06, // Responsive radius
-                    backgroundImage: const AssetImage(''), // You can update later with profile image
+                    backgroundImage: const AssetImage(
+                      '',
+                    ), // You can update later with profile image
                   ),
                   SizedBox(width: screenWidth * 0.04),
                   Expanded(
                     child: GetBuilder<AuthController>(
                       builder:
                           (controller) => Text(
-                            controller.isLoggedIn() ? controller.userProfile?.name ?? "" : 'Login / Register',
-                            style: TextStyle(color: Colors.white, fontSize: screenWidth * 0.045, fontWeight: FontWeight.bold),
+                            controller.isLoggedIn()
+                                ? controller.userProfile?.name ?? ""
+                                : 'Login / Register',
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontSize: screenWidth * 0.045,
+                              fontWeight: FontWeight.bold,
+                            ),
                           ),
                     ),
                   ),
@@ -108,13 +131,30 @@ class _ProfilePageState extends State<ProfilePage> {
                     Container(
                       height: screenHeight * 0.04,
                       width: screenWidth * 0.22,
-                      padding: EdgeInsets.symmetric(horizontal: screenWidth * 0.03, vertical: screenHeight * 0.005),
-                      decoration: BoxDecoration(border: Border.all(color: Color(0xFFFFE49C)), color: Colors.white, borderRadius: BorderRadius.circular(20)),
+                      padding: EdgeInsets.symmetric(
+                        horizontal: screenWidth * 0.03,
+                        vertical: screenHeight * 0.005,
+                      ),
+                      decoration: BoxDecoration(
+                        border: Border.all(color: Color(0xFFFFE49C)),
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(20),
+                      ),
                       child: Row(
                         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                         children: [
-                          SvgPicture.asset(Assets.svgDiamond, height: screenWidth * 0.03, width: screenWidth * 0.03),
-                          Text("Upgrade", style: TextStyle(fontWeight: FontWeight.bold, fontSize: screenWidth * 0.03)),
+                          SvgPicture.asset(
+                            Assets.svgDiamond,
+                            height: screenWidth * 0.03,
+                            width: screenWidth * 0.03,
+                          ),
+                          Text(
+                            "Upgrade",
+                            style: TextStyle(
+                              fontWeight: FontWeight.bold,
+                              fontSize: screenWidth * 0.03,
+                            ),
+                          ),
                         ],
                       ),
                     ),
@@ -136,7 +176,10 @@ class _ProfilePageState extends State<ProfilePage> {
             icon: SvgPicture.asset(Assets.svgBell, height: 26, width: 26),
             title: "Notification",
             onTap: () {
-              Navigator.push(context, getCustomRoute(child: NotificationsPage()));
+              Navigator.push(
+                context,
+                getCustomRoute(child: NotificationsPage()),
+              );
             },
           ),
           ProfileItemWidget(
@@ -156,8 +199,22 @@ class _ProfilePageState extends State<ProfilePage> {
 
           SizedBox(height: screenHeight * 0.03),
           ProfileSectionWidget(title: "Bookings & Orders"),
-          ProfileItemWidget(icon: SvgPicture.asset(Assets.svgMybookings, height: 26, width: 26), title: "My Bookings", onTap: () {}),
-          ProfileItemWidget(icon: SvgPicture.asset(Assets.svgCancellation, height: 26, width: 26), title: "Cancellation History", onTap: () {}),
+          ProfileItemWidget(
+            icon: SvgPicture.asset(Assets.svgMybookings, height: 26, width: 26),
+            title: "My Bookings",
+            onTap: () {
+              Navigator.push(context, getCustomRoute(child: Bookings()));
+            },
+          ),
+          ProfileItemWidget(
+            icon: SvgPicture.asset(
+              Assets.svgCancellation,
+              height: 26,
+              width: 26,
+            ),
+            title: "Cancellation History",
+            onTap: () {},
+          ),
 
           SizedBox(height: screenHeight * 0.03),
           ProfileSectionWidget(title: "Offers & Wishlist"),
@@ -168,7 +225,13 @@ class _ProfilePageState extends State<ProfilePage> {
               Get.to(() => OffersPage());
             },
           ),
-          ProfileItemWidget(icon: SvgPicture.asset(Assets.svgSaved, height: 26, width: 26), title: "WishList", onTap: () {}),
+          ProfileItemWidget(
+            icon: SvgPicture.asset(Assets.svgSaved, height: 26, width: 26),
+            title: "WishList",
+            onTap: () {
+              Navigator.push(context, getCustomRoute(child: WishlistPage()));
+            },
+          ),
 
           SizedBox(height: screenHeight * 0.03),
           ProfileSectionWidget(title: "Payments & Wallet"),
@@ -180,14 +243,22 @@ class _ProfilePageState extends State<ProfilePage> {
             },
           ),
           ProfileItemWidget(
-            icon: SvgPicture.asset(Assets.svgTransaction, height: 26, width: 26),
+            icon: SvgPicture.asset(
+              Assets.svgTransaction,
+              height: 26,
+              width: 26,
+            ),
             title: "Transaction History",
             onTap: () {
               Get.to(() => TransactionHistoryScreen());
             },
           ),
           ProfileItemWidget(
-            icon: SvgPicture.asset(Assets.svgTransaction, height: 26, width: 26),
+            icon: SvgPicture.asset(
+              Assets.svgTransaction,
+              height: 26,
+              width: 26,
+            ),
             title: "Invoice",
             onTap: () {
               Get.to(() => InvoiceScreen());
@@ -200,7 +271,11 @@ class _ProfilePageState extends State<ProfilePage> {
               Get.to(() => ReferAndEarnPage());
             },
           ),
-          ProfileItemWidget(icon: SvgPicture.asset(Assets.svgPromo, height: 26, width: 26), title: "Apply Promo Code", onTap: () {}),
+          ProfileItemWidget(
+            icon: SvgPicture.asset(Assets.svgPromo, height: 26, width: 26),
+            title: "Apply Promo Code",
+            onTap: () {},
+          ),
           SizedBox(height: screenHeight * 0.03),
 
           ProfileSectionWidget(title: "Rating & Reviews"),
@@ -214,21 +289,45 @@ class _ProfilePageState extends State<ProfilePage> {
           SizedBox(height: screenHeight * 0.03),
 
           ProfileSectionWidget(title: "Help & Support"),
-          ProfileItemWidget(icon: SvgPicture.asset(Assets.svgChat, height: 26, width: 26), title: "Chat with Support", onTap: () {}),
-          ProfileItemWidget(icon: SvgPicture.asset(Assets.svgFaq, height: 26, width: 26), title: "FAQ's", onTap: () {
-            Navigator.push(context, getCustomRoute(child: FaqScreen()));
-          }),
-          ProfileItemWidget(icon: SvgPicture.asset(Assets.svgReport, height: 26, width: 26), title: "Report an Issue", onTap: () {}),
-          ProfileItemWidget(icon: SvgPicture.asset(Assets.svgWorks, height: 26, width: 26), title: "How it Works", onTap: () {}),
+          ProfileItemWidget(
+            icon: SvgPicture.asset(Assets.svgChat, height: 26, width: 26),
+            title: "Chat with Support",
+            onTap: () {},
+          ),
+          ProfileItemWidget(
+            icon: SvgPicture.asset(Assets.svgFaq, height: 26, width: 26),
+            title: "FAQ's",
+            onTap: () {
+              Navigator.push(context, getCustomRoute(child: FaqScreen()));
+            },
+          ),
+          ProfileItemWidget(
+            icon: SvgPicture.asset(Assets.svgReport, height: 26, width: 26),
+            title: "Report an Issue",
+            onTap: () {},
+          ),
+          ProfileItemWidget(
+            icon: SvgPicture.asset(Assets.svgWorks, height: 26, width: 26),
+            title: "How it Works",
+            onTap: () {},
+          ),
           SizedBox(height: screenHeight * 0.03),
 
           ProfileSectionWidget(title: "More"),
-          ProfileItemWidget(icon: SvgPicture.asset(Assets.svgAbout, height: 26, width: 26), title: "About", onTap: () {
-            Navigator.push(context, getCustomRoute(child: AboutScreen()));
-          }),
-          ProfileItemWidget(icon: SvgPicture.asset(Assets.svgSettings, height: 26, width: 26), title: "Settings", onTap: () {
-            Navigator.push(context, getCustomRoute(child: Settings()));
-          }),
+          ProfileItemWidget(
+            icon: SvgPicture.asset(Assets.svgAbout, height: 26, width: 26),
+            title: "About",
+            onTap: () {
+              Navigator.push(context, getCustomRoute(child: AboutScreen()));
+            },
+          ),
+          ProfileItemWidget(
+            icon: SvgPicture.asset(Assets.svgSettings, height: 26, width: 26),
+            title: "Settings",
+            onTap: () {
+              Navigator.push(context, getCustomRoute(child: Settings()));
+            },
+          ),
           ProfileItemWidget(
             icon: SvgPicture.asset(Assets.svgSupport, height: 26, width: 26),
             title: "Support",

@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:streammly/controllers/company_controller.dart';
+import 'package:streammly/navigation_menu.dart';
 import 'package:streammly/services/theme.dart';
 import 'package:streammly/views/widgets/custom_doodle.dart';
+
 import '../../../models/category/category_item.dart';
 import '../../../models/company/company_location.dart';
 import '../home/widgets/category/review_card.dart';
@@ -26,14 +28,13 @@ class _VendorDetailScreenState extends State<VendorDetailScreen> {
   @override
   void initState() {
     super.initState();
-    companyController.fetchCompanySubCategories(widget.company.id ?? 0);
+    companyController.fetchCompanySubCategories(widget.company.id);
   }
 
   /// Helper function to handle full URL or relative path for images
   String resolveImageUrl(String? url) {
     if (url == null || url.isEmpty) return '';
-    return url.startsWith('http') ? url :url.replaceFirst(RegExp(r'^/'), '');
-
+    return url.startsWith('http') ? url : url.replaceFirst(RegExp(r'^/'), '');
   }
 
   @override
@@ -54,12 +55,11 @@ class _VendorDetailScreenState extends State<VendorDetailScreen> {
                 HeaderBanner(
                   height: screenWidth * 0.7,
                   backgroundImage:
-                      (widget.company.bannerImage != null &&
-                              widget.company.bannerImage!.isNotEmpty)
-                          ? resolveImageUrl(widget.company.bannerImage)
+                      (widget.company.company?.bannerImage?.isNotEmpty == true)
+                          ? resolveImageUrl(widget.company.company?.bannerImage)
                           : 'assets/images/recommended_banner/FocusPointVendor.png',
                   overlayColor: primaryColor.withValues(alpha: 0.6),
-                  overrideTitle: widget.company.companyName,
+                  overrideTitle: widget.company.company?.companyName,
                   overrideSubtitle: widget.company.categoryName,
 
                   specialities: widget.company.specialities,
@@ -81,7 +81,7 @@ class _VendorDetailScreenState extends State<VendorDetailScreen> {
                                 'assets/images/category/vendor_category/img.png',
                             onTap:
                                 () => Get.to(
-                                  () => VendorGroup(
+                                  VendorGroup(
                                     company: widget.company,
                                     subCategoryId: 2,
                                   ),
@@ -123,7 +123,7 @@ class _VendorDetailScreenState extends State<VendorDetailScreen> {
                               imagePath: resolveImageUrl(sub.image),
                               onTap:
                                   () => Get.to(
-                                    () => VendorGroup(
+                                    VendorGroup(
                                       company: widget.company,
                                       subCategoryId: sub.id,
                                     ),

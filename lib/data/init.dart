@@ -11,6 +11,7 @@ import 'package:streammly/data/repository/category_repo.dart';
 import 'package:streammly/data/repository/company_repo.dart';
 import 'package:streammly/data/repository/header_repo.dart';
 import 'package:streammly/data/repository/promo_slider_repo.dart';
+import 'package:streammly/data/repository/quote_repo.dart';
 import 'package:streammly/data/repository/wishlist_repo.dart';
 
 import '../controllers/business_setting_controller.dart';
@@ -18,6 +19,7 @@ import '../controllers/category_controller.dart';
 import '../controllers/company_controller.dart';
 import '../controllers/home_screen_controller.dart';
 import '../controllers/promo_slider_controller.dart';
+import '../controllers/quote_controller.dart';
 import '../services/constants.dart';
 import 'api/api_client.dart';
 
@@ -57,7 +59,7 @@ class Init {
 
       //Wishlist
       Get.lazyPut(() => WishlistRepo(apiClient: Get.find()));
-      Get.lazyPut(() => WishlistController(companyController: Get.find()));
+      Get.lazyPut(() => WishlistController(wishlistRepo: Get.find()));
       // Package
       // Get.lazyPut(() => PackageRepo(apiClient: Get.find()));
       // Get.lazyPut(() => PackagesController(packageRepo: Get.find()));
@@ -65,6 +67,11 @@ class Init {
       //Business setting
       Get.lazyPut(() => BusinessSettingRepo(apiClient: Get.find()));
       Get.lazyPut(() => BusinessSettingController(businessSettingRepo: Get.find()));
+
+      // Quote
+      Get.lazyPut(() => QuoteRepo(apiClient: Get.find()));
+      Get.lazyPut(() => QuoteController(quoteRepo: Get.find()));
+
     } catch (e) {
       log('---- ${e.toString()} ----', name: "ERROR AT initialize()");
     }

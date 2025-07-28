@@ -1,12 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:streammly/controllers/wishlist_controller.dart';
-import 'package:streammly/services/constants.dart';
 import 'package:streammly/services/theme.dart';
 import 'package:streammly/views/widgets/custom_doodle.dart';
 
 import '../../../../../controllers/category_controller.dart';
-import '../../../../../navigation_menu.dart';
 import '../../../common/images/rounded_image.dart';
 import '../../vendor_locator.dart';
 
@@ -24,9 +22,6 @@ class _CategoryListScreenState extends State<CategoryListScreen> {
   @override
   void initState() {
     super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      Get.find<WishlistController>().loadBookmarks();
-    });
   }
 
   @override
@@ -120,52 +115,52 @@ class _CategoryListScreenState extends State<CategoryListScreen> {
                                 ),
                               ),
                             ),
-                            Positioned(
-                              top: 10,
-                              right: 10,
-                              child: GetBuilder<WishlistController>(
-                                builder: (wishlistController) {
-                                  return GestureDetector(
-                                    onTap: () {
-                                      wishlistController
-                                          .addBookmark(cat.id, "category")
-                                          .then((value) {
-                                            if (value.isSuccess) {
-                                              wishlistController
-                                                  .loadBookmarks();
-                                            }
-                                          });
-                                    },
-                                    child: Padding(
-                                      padding: const EdgeInsets.fromLTRB(
-                                        10,
-                                        5,
-                                        10,
-                                        10,
-                                      ),
-                                      child: Container(
-                                        height: 30,
-                                        width: 30,
-                                        decoration: BoxDecoration(
-                                          color: backgroundLight.withAlpha(70),
-                                          borderRadius: BorderRadius.circular(
-                                            10,
-                                          ),
-                                        ),
-                                        child: Icon(
-                                          Icons.bookmark_rounded,
-                                          size: 25,
-                                          color:
-                                              cat.isBookMarked
-                                                  ? Colors.red
-                                                  : Colors.white,
-                                        ),
-                                      ),
-                                    ),
-                                  );
-                                },
-                              ),
-                            ),
+                            // Positioned(
+                            //   top: 10,
+                            //   right: 10,
+                            //   child: GetBuilder<WishlistController>(
+                            //     builder: (wishlistController) {
+                            //       return GestureDetector(
+                            //         onTap: () {
+                            //           wishlistController
+                            //               .addBookmark(cat.id, "category")
+                            //               .then((value) {
+                            //                 if (value.isSuccess) {
+                            //                   wishlistController
+                            //                       .loadBookmarks("category");
+                            //                 }
+                            //               });
+                            //         },
+                            //         child: Padding(
+                            //           padding: const EdgeInsets.fromLTRB(
+                            //             10,
+                            //             5,
+                            //             10,
+                            //             10,
+                            //           ),
+                            //           child: Container(
+                            //             height: 30,
+                            //             width: 30,
+                            //             decoration: BoxDecoration(
+                            //               color: backgroundLight.withAlpha(70),
+                            //               borderRadius: BorderRadius.circular(
+                            //                 10,
+                            //               ),
+                            //             ),
+                            //             child: Icon(
+                            //               Icons.bookmark_rounded,
+                            //               size: 25,
+                            //               color:
+                            //                   cat.isBookMarked
+                            //                       ? Colors.red
+                            //                       : Colors.white,
+                            //             ),
+                            //           ),
+                            //         ),
+                            //       );
+                            //     },
+                            //   ),
+                            // ),
                           ],
                         ),
                         Padding(

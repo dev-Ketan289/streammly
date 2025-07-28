@@ -17,9 +17,9 @@ class OtpController extends GetxController implements GetxService {
   final AuthRepo authRepo;
   OtpController({required this.authRepo});
 
-  RxInt secondsRemaining = 30.obs;
-  RxString receivedOTP = ''.obs;
-  RxBool shakeOnError = false.obs;
+  int secondsRemaining = 30;
+  String receivedOTP = '';
+  bool shakeOnError = false;
   bool isLoading = false;
 
   Timer? _timer;
@@ -31,7 +31,6 @@ class OtpController extends GetxController implements GetxService {
 
     final phone = Get.find<AuthController>().phoneController.text.trim();
 
-    /// Bypass check for test number
     if (phone == "8111111111") {
       Get.find<AuthController>().setUserToken("test-token");
       Fluttertoast.showToast(msg: "Test number login successful");
@@ -41,33 +40,29 @@ class OtpController extends GetxController implements GetxService {
     }
 
     try {
-      /// Fetch device ID
       String deviceId = await Get.find<AuthController>().getOrCreateDeviceId();
 
-      /// Verify OTP with device ID
       Response response = await authRepo.verifyOtp(phone: phone, otp: otp, deviceId: deviceId);
 
       if (response.statusCode == 200 && response.body['data']['token'] != null) {
         Get.find<AuthController>().setUserToken(response.body['data']['token']);
         Get.find<AuthController>().loginMethod = 'phone';
 
-        /// Fetch user profile after login
         await Get.find<AuthController>().fetchUserProfile();
 
-        /// Check if user is new or existing
         if (Get.find<AuthController>().userProfile == null || Get.find<AuthController>().userProfile!.name == null || Get.find<AuthController>().userProfile!.email == null) {
-          /// New User → Show Profile Form
           Get.offAll(() => ProfileFormScreen());
         } else {
-          /// Existing User → Go to Welcome Screen
           Get.offAll(() => const WelcomeScreen());
         }
 
         responseModel = ResponseModel(true, "Verification Successful");
       } else {
-        shakeOnError.value = true;
+        shakeOnError = true;
+        update();
         Future.delayed(const Duration(milliseconds: 500), () {
-          shakeOnError.value = false;
+          shakeOnError = false;
+          update();
         });
         responseModel = ResponseModel(false, "Verification Failed");
       }
@@ -83,11 +78,13 @@ class OtpController extends GetxController implements GetxService {
 
   void startTimer() {
     _timer?.cancel();
-    secondsRemaining.value = 30;
+    secondsRemaining = 30;
+    update();
 
     _timer = Timer.periodic(const Duration(seconds: 1), (timer) {
-      if (secondsRemaining.value > 0) {
-        secondsRemaining.value--;
+      if (secondsRemaining > 0) {
+        secondsRemaining--;
+        update();
       } else {
         timer.cancel();
       }
@@ -97,7 +94,6 @@ class OtpController extends GetxController implements GetxService {
   void confirmOTP(String phone, String otp, {VoidCallback? onVerified}) {
     final enteredOTP = otp.trim();
 
-    ///  Bypass check for test number
     if (phone == "8111111111") {
       Fluttertoast.showToast(msg: "Test number login successful");
       onVerified?.call();
@@ -105,30 +101,34 @@ class OtpController extends GetxController implements GetxService {
       return;
     }
 
-    if (enteredOTP.length == 6 && enteredOTP == receivedOTP.value) {
+    if (enteredOTP.length == 6 && enteredOTP == receivedOTP) {
       Fluttertoast.showToast(msg: "OTP Verified");
       onVerified?.call();
       Get.delete<OtpController>();
     } else {
-      shakeOnError.value = true;
+      shakeOnError = true;
+      update();
       Fluttertoast.showToast(msg: "Invalid OTP");
       Future.delayed(const Duration(milliseconds: 500), () {
-        shakeOnError.value = false;
+        shakeOnError = false;
+        update();
       });
     }
   }
 
   void resendOTP(String phone) async {
     if (phone == "8111111111") {
-      receivedOTP.value = "123456";
+      receivedOTP = "123456";
+      update();
       startTimer();
       Fluttertoast.showToast(msg: "Test OTP resent: 123456");
       return;
     }
 
     try {
-      final url = Uri.parse("https://admin.streammly.com/api/v1/user/auth/generateOtp");
-      // final url = Uri.parse("http://192.168.1.113:8000/api/v1/user/auth/generateOtp");
+      // final url = Uri.parse("https://admin.streammly.com/api/v1/user/auth/generateOtp");
+      final url = Uri.parse("http://192.168.1.113:8000/api/v1/user/auth/generateOtp");
+
       final response = await http.post(url, headers: {'Content-Type': 'application/json'}, body: jsonEncode({"phone": phone}));
 
       final responseBody = jsonDecode(response.body);
@@ -138,7 +138,8 @@ class OtpController extends GetxController implements GetxService {
         final otpCode = RegExp(r'\d{6}').firstMatch(otpMessage)?.group(0) ?? '';
 
         if (otpCode.isNotEmpty) {
-          receivedOTP.value = otpCode;
+          receivedOTP = otpCode;
+          update();
           startTimer();
           Fluttertoast.showToast(msg: "OTP resent: $otpCode");
         } else {

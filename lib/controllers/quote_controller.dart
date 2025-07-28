@@ -1,13 +1,14 @@
-import 'dart:convert';
-
 import 'package:get/get.dart';
-import 'package:http/http.dart' as http;
-
-import '../views/screens/package/widgets/get_quote_conformation.dart';
+import '../data/repository/quote_repo.dart';
 import 'auth_controller.dart';
+import '../views/screens/package/widgets/get_quote_conformation.dart';
 
-class QuoteController extends GetxController {
-  final RxBool isSubmitting = false.obs;
+class QuoteController extends GetxController implements GetxService {
+  final QuoteRepo quoteRepo;
+
+  QuoteController({required this.quoteRepo});
+
+  bool isSubmitting = false;
   final AuthController authController = Get.find<AuthController>();
 
   Future<void> submitQuote({
@@ -24,16 +25,16 @@ class QuoteController extends GetxController {
     required String favorableStartTime,
     required String favorableEndTime,
     required String requirement,
-    required String shootType, // <-- Added shootType dynamically
+    required String shootType,
   }) async {
-    isSubmitting.value = true;
+    isSubmitting = true;
+    update();
 
     final String token = authController.getUserToken();
-    print("DEBUG TOKEN: $token");
-
     if (token.isEmpty) {
       Get.snackbar("Error", "You must be logged in to submit a quote.");
-      isSubmitting.value = false;
+      isSubmitting = false;
+      update();
       return;
     }
 
@@ -52,37 +53,25 @@ class QuoteController extends GetxController {
       "favorable_start_time": favorableStartTime,
       "favorable_end_time": favorableEndTime,
     };
-    
-    final url = Uri.parse("https://admin.streammly.com/api/v1/quotation/addquotation");
-    // final url = Uri.parse("http://192.168.1.113:8000/api/v1/quotation/addquotation");
-
-
-    print("POST URL: $url");
-    print("POST BODY: $body");
-    print("HEADERS: ${{"Content-Type": "application/json", "Authorization": "Bearer $token"}}");
 
     try {
-      final response = await http.post(url, headers: {"Content-Type": "application/json", "Authorization": "Bearer $token"}, body: jsonEncode(body));
-
-      print("STATUS CODE: ${response.statusCode}");
-      print("RESPONSE: ${response.body}");
+      final response = await quoteRepo.submitQuote(body);
 
       if (response.statusCode == 200) {
-        // Combine date and time into a readable format
         final formattedDateTime = "$dateOfShoot, $startTime";
-
-        // Navigate to confirmation screen
-        Get.off(() => QuoteSubmittedScreen(shootType: shootType, submittedDateTime: formattedDateTime));
-
+        Get.off(() => QuoteSubmittedScreen(
+          shootType: shootType,
+          submittedDateTime: formattedDateTime,
+        ));
         Get.snackbar("Success", "Quote request submitted!");
       } else {
-        Get.snackbar("Error", "Failed to submit quote. Please try again.");
+        Get.snackbar("Error", "Failed to submit quote.");
       }
     } catch (e) {
       Get.snackbar("Exception", e.toString());
-      print("EXCEPTION: $e");
     } finally {
-      isSubmitting.value = false;
+      isSubmitting = false;
+      update();
     }
   }
 }

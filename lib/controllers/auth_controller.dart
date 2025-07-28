@@ -81,6 +81,7 @@ class AuthController extends GetxController implements GetxService {
     return responseModel;
   }
 
+  // Otp Login
   Future<ResponseModel> sendOtp() async {
     isLoading = true;
     update();
@@ -102,6 +103,7 @@ class AuthController extends GetxController implements GetxService {
     return responseModel;
   }
 
+  // Google Login
   Future<ResponseModel?> signInWithGoogle() async {
     isLoading = true;
     update();
@@ -117,7 +119,10 @@ class AuthController extends GetxController implements GetxService {
       }
 
       final GoogleSignInAuthentication googleAuth = await googleUser.authentication;
-      final credential = GoogleAuthProvider.credential(accessToken: googleAuth.accessToken, idToken: googleAuth.idToken);
+      final credential = GoogleAuthProvider.credential(
+        accessToken: googleAuth.accessToken,
+        idToken: googleAuth.idToken,
+      );
 
       final UserCredential userCredential = await FirebaseAuth.instance.signInWithCredential(credential);
       final User? firebaseUser = userCredential.user;
@@ -136,17 +141,30 @@ class AuthController extends GetxController implements GetxService {
         return null;
       }
 
-      Response response = await authRepo.signInWithGoogle(token: firebaseIdToken ?? "", firebaseUid: firebaseUid, deviceId: deviceId);
+      Response response = await authRepo.signInWithGoogle(
+        token: firebaseIdToken ?? "",
+        firebaseUid: firebaseUid,
+        deviceId: deviceId,
+      );
 
       if (response.statusCode == 200 && response.body["token"] != null) {
         setUserToken(response.body['token']);
         loginMethod = 'google';
         await fetchUserProfile();
+
+        // NEW: Check for redirection target
+        final args = Get.arguments as Map<String, dynamic>?;
+
         if (userProfile == null || userProfile!.name == null || userProfile!.email == null) {
           Get.offAll(() => ProfileFormScreen());
         } else {
-          Get.offAll(() => const WelcomeScreen());
+          if (args != null && args['returnTo'] == 'quote') {
+            Get.offAllNamed('/quote', arguments: args['quoteData']);
+          } else {
+            Get.offAll(() => const WelcomeScreen());
+          }
         }
+
         responseModel = ResponseModel(true, "Google Sign-In Successful");
         emailController.text = googleUser.email;
       } else {

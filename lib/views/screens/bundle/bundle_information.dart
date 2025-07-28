@@ -3,7 +3,7 @@ import 'package:get/get.dart';
 import 'package:streammly/controllers/category_controller.dart';
 import 'package:streammly/views/screens/bundle/bundle_categories_page.dart';
 
-import '../package/booking/widgets/time_picker.dart';
+import '../package/booking/widgets/custom_time_picker.dart';
 
 class BundleInformation extends StatefulWidget {
   const BundleInformation({super.key});

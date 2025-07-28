@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:streammly/controllers/company_controller.dart';
 import 'package:streammly/views/screens/home/vendor_locator.dart';
+import 'package:streammly/views/screens/home/widgets/category/category.dart';
 import 'package:streammly/views/screens/home/widgets/page_nav.dart';
 import 'package:streammly/views/widgets/custom_doodle.dart';
 
@@ -10,15 +11,13 @@ import '../../../controllers/home_screen_controller.dart';
 import '../../../controllers/location_controller.dart';
 import '../../../models/category/category_item.dart';
 import '../../../models/category/category_model.dart';
-import '../../../navigation_menu.dart';
-import '../../../services/constants.dart';
-import '../home/widgets/category/category.dart';
 import '../home/widgets/category/explore_us.dart';
 import '../home/widgets/category/recommended_list.dart';
 import '../home/widgets/category/widgets/category_scroller.dart';
 import '../home/widgets/header_banner.dart';
 import '../home/widgets/promo_slider.dart';
 import '../home/widgets/upcoming_offer_card.dart';
+import '../../../navigation_menu.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -53,6 +52,7 @@ class _HomeScreenState extends State<HomeScreen> {
       );
     }).toList();
   }
+
   @override
   Widget build(BuildContext context) {
     return CustomBackground(
@@ -70,7 +70,6 @@ class _HomeScreenState extends State<HomeScreen> {
             }
 
             return SafeArea(
-            
               child: SingleChildScrollView(
                 child: Column(
                   children: [
@@ -87,7 +86,7 @@ class _HomeScreenState extends State<HomeScreen> {
                         ? const CircularProgressIndicator()
                         : CategoryScroller(
                           title: "Categories",
-                          onSeeAll: () => Get.find<NavigationController>().setIndex(5),
+                          onSeeAll: () => Get.to(CategoryListScreen()),
                           categories: convertToCategoryItems(categoryModels),
                         ),
                     const SizedBox(height: 24),

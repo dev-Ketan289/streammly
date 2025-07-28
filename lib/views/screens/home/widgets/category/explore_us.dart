@@ -5,6 +5,7 @@ import 'package:shimmer/shimmer.dart';
 import 'package:streammly/controllers/company_controller.dart';
 import 'package:streammly/generated/assets.dart';
 import 'package:streammly/services/theme.dart';
+
 import '../../../vendor/vendoer_detail.dart';
 import '../../vendor_locator.dart';
 
@@ -66,9 +67,9 @@ class _ExploreUsState extends State<ExploreUs> {
                 },
                 child: Row(
                   children: [
-                    Text("View Map", style: theme.textTheme.bodyMedium?.copyWith(color: theme.colorScheme.primary, fontWeight: FontWeight.w500)),
+                    Text("View Map", style: theme.textTheme.bodyMedium?.copyWith(color: primaryColor, fontWeight: FontWeight.w500)),
                     const SizedBox(width: 4),
-                    SvgPicture.asset(Assets.svgMap, height: 15, width: 15), 
+                    SvgPicture.asset(Assets.svgMap, height: 15, width: 15),
                   ],
                 ),
               ),
@@ -83,15 +84,10 @@ class _ExploreUsState extends State<ExploreUs> {
             }
 
             final vendors = controller.companies;
-            final filtered = widget.vendorIds != null && widget.vendorIds!.isNotEmpty
-                ? vendors.where((v) => widget.vendorIds!.contains(v.id)).toList()
-                : vendors;
+            final filtered = widget.vendorIds != null && widget.vendorIds!.isNotEmpty ? vendors.where((v) => widget.vendorIds!.contains(v.id)).toList() : vendors;
 
             if (filtered.isEmpty) {
-              return const Padding(
-                padding: EdgeInsets.all(16),
-                child: Center(child: Text("No matching vendors found")),
-              );
+              return const Padding(padding: EdgeInsets.all(16), child: Center(child: Text("No matching vendors found")));
             }
 
             return ListView.builder(
@@ -110,14 +106,15 @@ class _ExploreUsState extends State<ExploreUs> {
 
                     margin: const EdgeInsets.only(bottom: 10),
 
-                    decoration: BoxDecoration(borderRadius: BorderRadius.circular(18), border: Border.all(color: Color(0xffE2EDF9), width: 2), color: Colors.white),
+                    decoration: BoxDecoration(borderRadius: BorderRadius.circular(18), border: Border.all(color: Color(0xffE2EDF9), width: 2), color: theme.colorScheme.surface),
                     child: Column(
                       children: [
                         ClipRRect(
                           borderRadius: const BorderRadius.vertical(top: Radius.circular(18), bottom: Radius.circular(18)),
-                          child: vendor.bannerImage != null && vendor.bannerImage!.isNotEmpty
-                              ? Image.network(vendor.bannerImage!, height: 150, width: double.infinity, fit: BoxFit.fill)
-                              : Image.asset('assets/images/recommended_banner/FocusPointVendor.png', height: 150, width: double.infinity, fit: BoxFit.cover),
+                          child:
+                              vendor.bannerImage != null && vendor.bannerImage!.isNotEmpty
+                                  ? Image.network(vendor.bannerImage!, height: 150, width: double.infinity, fit: BoxFit.fill)
+                                  : Image.asset('assets/images/recommended_banner/FocusPointVendor.png', height: 150, width: double.infinity, fit: BoxFit.cover),
                         ),
                         Padding(
                           padding: const EdgeInsets.all(12),
@@ -136,7 +133,7 @@ class _ExploreUsState extends State<ExploreUs> {
                                       children: [
                                         const Icon(Icons.location_on, size: 14, color: Colors.grey),
                                         const SizedBox(width: 4),
-                                        Text(vendor.estimatedTime?? "N/A", style: theme.textTheme.bodySmall?.copyWith(color: Color(0xffB8B7C8), fontSize: 12)),
+                                        Text(vendor.estimatedTime ?? "N/A", style: theme.textTheme.bodySmall?.copyWith(color: Color(0xffB8B7C8), fontSize: 12)),
                                         Text(
                                           vendor.distanceKm != null && vendor.distanceKm! > 1
                                               ? " . ${vendor.distanceKm!.toStringAsFixed(1)} km"
@@ -150,7 +147,7 @@ class _ExploreUsState extends State<ExploreUs> {
                               ),
                               Container(
                                 padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                                decoration: BoxDecoration(color:  ratingColor, borderRadius: BorderRadius.circular(8)),
+                                decoration: BoxDecoration(color: ratingColor, borderRadius: BorderRadius.circular(8)),
                                 child: Row(
                                   children: [
                                     Text("${vendor.rating?.toStringAsFixed(1) ?? "0.0"} ", style: theme.textTheme.bodySmall?.copyWith(color: Colors.white, fontSize: 12)),

@@ -2,13 +2,13 @@ import 'package:dotted_border/dotted_border.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:streammly/views/screens/package/booking/widgets/free_add_on.dart';
-import 'package:streammly/views/screens/package/booking/widgets/time_picker.dart';
+import 'package:streammly/views/screens/package/booking/widgets/custom_time_picker.dart';
 
 import '../../../../../controllers/booking_form_controller.dart';
 import '../../../../../services/route_helper.dart';
 import '../../../common/widgets/custom_textfield.dart' show CustomTextField;
 import 'extra_add_on.dart';
+import 'free_add_on.dart';
 
 class PackageFormCard extends StatefulWidget {
   final int index;
@@ -41,9 +41,10 @@ class _PackageFormCardState extends State<PackageFormCard> {
 
     final extraQuestions = widget.package['extraQuestions'] ?? widget.package['packageextra_questions'] ?? [];
     for (var question in extraQuestions) {
-      final id = "${widget.index}_${question['id']}";
-      final answer = form['extraAnswers']?[question['id'].toString()] ?? '';
-      _extraQuestionControllers[id] = TextEditingController(text: answer);
+      final qid = question['id'].toString();
+      final uniqueKey = "${widget.index}_$qid";
+      final answer = form['extraAnswers']?[uniqueKey] ?? '';
+      _extraQuestionControllers[uniqueKey] = TextEditingController(text: answer);
     }
   }
 
@@ -94,11 +95,19 @@ class _PackageFormCardState extends State<PackageFormCard> {
               hintText: form['date']?.isEmpty ?? true ? 'Select Date' : null,
               readOnly: true,
               onTap: () async {
-                final selectedDate = await controller.selectDate(widget.index, context);
-                if (selectedDate.isNotEmpty) {
-                  dateTimeController.text = selectedDate;
+                final selectedDate = await showDatePicker(
+                  context: context,
+                  initialDate: DateTime.now().add(Duration(days: 1)), // Set to tomorrow
+                  firstDate: DateTime.now().add(Duration(days: 1)), // Prevent selecting today
+                  lastDate: DateTime(2100),
+                );
+                if (selectedDate != null) {
+                  final formatted = "${selectedDate.day}-${selectedDate.month}-${selectedDate.year}";
+                  controller.updatePackageForm(widget.index, 'date', formatted);
+                  dateTimeController.text = formatted;
                 }
               },
+
               prefixIcon: Icons.calendar_today,
             ),
             const SizedBox(height: 16),
@@ -108,7 +117,7 @@ class _PackageFormCardState extends State<PackageFormCard> {
                   child: CustomTextField(
                     controller: startTimeController,
                     labelText: 'Start Time *',
-                    hintText: form['startTime']?.isEmpty ?? true ? '00:00 AM' : null,
+                    hintText: form['startTime']?.isEmpty ?? true ? '09:00 AM' : null,
                     readOnly: true,
                     prefixIcon: Icons.access_time,
                     onTap: () {
@@ -124,7 +133,7 @@ class _PackageFormCardState extends State<PackageFormCard> {
                   child: CustomTextField(
                     controller: endTimeController,
                     labelText: 'End Time *',
-                    hintText: form['endTime']?.isEmpty ?? true ? '00:00 PM' : null,
+                    hintText: form['endTime']?.isEmpty ?? true ? '07:00 PM' : null,
                     readOnly: true,
                     prefixIcon: Icons.access_time,
                     onTap: () {
@@ -175,7 +184,8 @@ class _PackageFormCardState extends State<PackageFormCard> {
               title: 'Choose Free Item',
               isSelected: form['freeAddOn'] != null,
               onTap: () async {
-                final result = await Navigator.push(context, getCustomRoute(child: FreeItemsPage()));
+                final packageId = widget.package['packageId'] ?? widget.package['id']; // adjust according to your data
+                final result = await Navigator.push(context, getCustomRoute(child: FreeItemsPage(packageId: packageId)));
                 if (result != null) {
                   controller.updatePackageForm(widget.index, 'freeAddOn', result);
                 }
@@ -195,7 +205,8 @@ class _PackageFormCardState extends State<PackageFormCard> {
                           IconButton(
                             icon: Icon(Icons.edit, color: const Color(0xff2864A6)),
                             onPressed: () async {
-                              final result = await Navigator.push(context, getCustomRoute(child: FreeItemsPage()));
+                              final packageId = widget.package['packageId'] ?? widget.package['id'];
+                              final result = await Navigator.push(context, getCustomRoute(child: FreeItemsPage(packageId: packageId)));
                               if (result != null) {
                                 controller.updatePackageForm(widget.index, 'freeAddOn', result);
                               }
@@ -212,22 +223,43 @@ class _PackageFormCardState extends State<PackageFormCard> {
                     ],
                   ),
                   const SizedBox(height: 4),
-                  Text('Toddler Live Setup', style: theme.textTheme.bodyLarge?.copyWith(fontWeight: FontWeight.w600)),
+                  Text(
+                    form['freeAddOn']['mainTitle'] ?? '', // Dynamic main title
+                    style: theme.textTheme.bodyLarge?.copyWith(fontWeight: FontWeight.w600),
+                  ),
                   const SizedBox(height: 8),
                   Container(
                     decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(12), border: Border.all(color: Colors.grey.shade300)),
                     padding: const EdgeInsets.all(10),
                     child: Row(
                       children: [
-                        ClipRRect(borderRadius: BorderRadius.circular(8), child: Image.asset(form['freeAddOn']['image'], height: 50, width: 50, fit: BoxFit.cover)),
+                        ClipRRect(
+                          borderRadius: BorderRadius.circular(8),
+                          child: Builder(
+                            builder: (_) {
+                              final img = form['freeAddOn']['cover_image'];
+                              if (img != null && img.isNotEmpty) {
+                                final url = img;
+                                return Image.network(
+                                  url,
+                                  height: 50,
+                                  width: 50,
+                                  fit: BoxFit.cover,
+                                  errorBuilder: (c, o, e) => Container(height: 50, width: 50, color: Colors.grey[300], child: const Icon(Icons.broken_image)),
+                                );
+                              }
+                              return Container(height: 50, width: 50, color: Colors.grey[200], child: const Icon(Icons.image));
+                            },
+                          ),
+                        ),
                         const SizedBox(width: 12),
                         Expanded(
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              Text(form['freeAddOn']['title'], style: theme.textTheme.bodyLarge?.copyWith(fontWeight: FontWeight.bold)),
+                              Text(form['freeAddOn']['title'] ?? '', style: theme.textTheme.bodyLarge?.copyWith(fontWeight: FontWeight.bold)),
                               const SizedBox(height: 2),
-                              Text(form['freeAddOn']['description'], style: theme.textTheme.bodySmall?.copyWith(color: Colors.grey)),
+                              Text(form['freeAddOn']['description'] ?? '', style: theme.textTheme.bodySmall?.copyWith(color: Colors.grey)),
                               const SizedBox(height: 2),
                               const Text('Shoot Duration : 1', style: TextStyle(fontSize: 12, color: Colors.grey)),
                             ],
@@ -239,17 +271,21 @@ class _PackageFormCardState extends State<PackageFormCard> {
                 ],
               ),
             ],
+
             const SizedBox(height: 16),
             _buildExpandableSection(
               title: 'Extra Add-Ons (Extra Charged)',
               isSelected: (form['extraAddOn'] is List && (form['extraAddOn'] as List).isNotEmpty),
               onTap: () async {
-                final result = await Navigator.push(context, getCustomRoute(child: ExtraAddOnsPage()));
+                final packageId = widget.package['packageId'] ?? widget.package['id'];
+                final studioId = widget.package['studioId'] ?? widget.package['studio_id'];
+                final result = await Navigator.push(context, getCustomRoute(child: ExtraAddOnsPage(packageId: packageId, studioId: studioId)));
                 if (result != null && result is List) {
                   controller.updatePackageForm(widget.index, 'extraAddOn', result);
                 }
               },
             ),
+
             if (form['extraAddOn'] is List && (form['extraAddOn'] as List).isNotEmpty) ...[
               const SizedBox(height: 12),
               Column(
@@ -264,7 +300,9 @@ class _PackageFormCardState extends State<PackageFormCard> {
                           IconButton(
                             icon: Icon(Icons.edit, color: const Color(0xff2864A6)),
                             onPressed: () async {
-                              final result = await Navigator.push(context, getCustomRoute(child: ExtraAddOnsPage()));
+                              final packageId = widget.package['packageId'] ?? widget.package['id'];
+                              final studioId = widget.package['studioId'];
+                              final result = await Navigator.push(context, getCustomRoute(child: ExtraAddOnsPage(packageId: packageId, studioId: studioId)));
                               if (result != null && result is List) {
                                 controller.updatePackageForm(widget.index, 'extraAddOn', result);
                               }
@@ -281,32 +319,60 @@ class _PackageFormCardState extends State<PackageFormCard> {
                     ],
                   ),
                   const SizedBox(height: 4),
-                  Text('Toddler Live Setup', style: theme.textTheme.bodyLarge?.copyWith(fontWeight: FontWeight.w600)),
+                  Text(form['extraAddOnMainTitle'] ?? 'Extra Add-Ons', style: theme.textTheme.bodyLarge?.copyWith(fontWeight: FontWeight.w600)),
                   const SizedBox(height: 8),
                   ...form['extraAddOn'].map<Widget>((item) {
+                    final String? imageUrl = item['image'];
+
+                    Widget imageWidget;
+                    if (imageUrl != null && imageUrl.isNotEmpty) {
+                      final uri = Uri.tryParse(imageUrl);
+                      if (uri != null && uri.isAbsolute) {
+                        imageWidget = Image.network(
+                          imageUrl,
+                          height: 50,
+                          width: 50,
+                          fit: BoxFit.cover,
+                          errorBuilder: (context, error, stackTrace) => Container(height: 50, width: 50, color: Colors.grey.shade300, child: const Icon(Icons.broken_image)),
+                        );
+                      } else {
+                        final fullUrl = imageUrl;
+                        imageWidget = Image.network(
+                          fullUrl,
+                          height: 50,
+                          width: 50,
+                          fit: BoxFit.cover,
+                          errorBuilder: (context, error, stackTrace) => Container(height: 50, width: 50, color: Colors.grey.shade300, child: const Icon(Icons.broken_image)),
+                        );
+                      }
+                    } else {
+                      // If no image, show placeholder container
+                      imageWidget = Container(
+                        height: 50,
+                        width: 50,
+                        decoration: BoxDecoration(color: theme.colorScheme.surface, borderRadius: BorderRadius.circular(8)),
+                        child: const Icon(Icons.image, color: Colors.grey),
+                      );
+                    }
+
                     return Container(
                       margin: const EdgeInsets.only(bottom: 10),
                       decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(12), border: Border.all(color: Colors.grey.shade300)),
                       padding: const EdgeInsets.all(10),
                       child: Row(
                         children: [
-                          ClipRRect(
-                            borderRadius: BorderRadius.circular(8),
-                            child:
-                                item['image'] != null
-                                    ? Image.asset(item['image'], height: 50, width: 50, fit: BoxFit.cover)
-                                    : Container(height: 50, width: 50, color: theme.colorScheme.surface, child: const Icon(Icons.image, color: Colors.grey)),
-                          ),
+                          ClipRRect(borderRadius: BorderRadius.circular(8), child: imageWidget),
                           const SizedBox(width: 12),
                           Expanded(
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                Text(item['title'], style: theme.textTheme.bodyLarge?.copyWith(fontWeight: FontWeight.bold)),
+                                Text(item['title'] ?? '', style: theme.textTheme.bodyLarge?.copyWith(fontWeight: FontWeight.bold)),
                                 const SizedBox(height: 2),
-                                Text(item['description'], style: theme.textTheme.bodySmall?.copyWith(color: Colors.grey)),
+                                Text(item['description'] ?? '', style: theme.textTheme.bodySmall?.copyWith(color: Colors.grey)),
                                 const SizedBox(height: 2),
-                                Text('Shoot Duration : ${item['duration']}', style: const TextStyle(fontSize: 12, color: Colors.grey)),
+                                Text('Shoot Duration : ${item['duration'] ?? 1}', style: const TextStyle(fontSize: 12, color: Colors.grey)),
+                                if (item['price'] != null) Text('Price: Rs ${item['price']}', style: theme.textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.bold)),
                               ],
                             ),
                           ),
@@ -317,6 +383,7 @@ class _PackageFormCardState extends State<PackageFormCard> {
                 ],
               ),
             ],
+
             const SizedBox(height: 32),
             Row(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -369,28 +436,37 @@ class _PackageFormCardState extends State<PackageFormCard> {
 
   List<Widget> _buildExtraQuestions(BookingController controller) {
     final extraQuestions = widget.package['extraQuestions'] ?? widget.package['packageextra_questions'] ?? [];
+    final form = controller.packageFormsData[widget.index] ?? {};
     List<Widget> fields = [];
 
     for (var question in extraQuestions) {
-      final id = "${widget.index}_${question['id']}";
       final qid = question['id'].toString();
+      final uniqueKey = "${widget.index}_$qid";
       final label = question['question'] ?? 'Question';
       final type = question['question_type'] ?? 'Text';
+      final answer = form['extraAnswers']?[uniqueKey] ?? '';
+
+      // >>> SAFELY GET (or create) THE CONTROLLER <<<
+      final ctrl = _extraQuestionControllers.putIfAbsent(uniqueKey, () => TextEditingController());
+
+      // keep in sync
+      if (ctrl.text != answer) {
+        ctrl.text = answer;
+      }
 
       fields.add(const SizedBox(height: 16));
-
       if (type == 'Date Picker') {
         fields.add(
           CustomTextField(
             labelText: label,
-            controller: _extraQuestionControllers[id],
+            controller: ctrl,
             readOnly: true,
             prefixIcon: Icons.calendar_today,
             onTap: () async {
               final picked = await showDatePicker(context: context, initialDate: DateTime.now(), firstDate: DateTime(2000), lastDate: DateTime(2100));
               if (picked != null) {
                 final formatted = "${picked.day}-${picked.month}-${picked.year}";
-                _extraQuestionControllers[id]?.text = formatted;
+                ctrl.text = formatted;
                 controller.updateExtraAnswer(widget.index, qid, formatted);
               }
             },
@@ -404,19 +480,13 @@ class _PackageFormCardState extends State<PackageFormCard> {
               return Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  CustomTextField(
-                    labelText: label,
-                    controller: _extraQuestionControllers[id],
-                    readOnly: true,
-                    prefixIcon: Icons.access_time,
-                    onTap: () => setState(() => showTime = true),
-                  ),
+                  CustomTextField(labelText: label, controller: ctrl, readOnly: true, prefixIcon: Icons.access_time, onTap: () => setState(() => showTime = true)),
                   if (showTime)
                     CustomTimePicker(
                       isStart: true,
                       onCancel: () => setState(() => showTime = false),
                       onTimeSelected: (time) {
-                        _extraQuestionControllers[id]?.text = time;
+                        ctrl.text = time;
                         controller.updateExtraAnswer(widget.index, qid, time);
                         setState(() => showTime = false);
                       },
@@ -427,10 +497,9 @@ class _PackageFormCardState extends State<PackageFormCard> {
           ),
         );
       } else {
-        fields.add(CustomTextField(labelText: label, controller: _extraQuestionControllers[id], onChanged: (val) => controller.updateExtraAnswer(widget.index, qid, val)));
+        fields.add(CustomTextField(labelText: label, controller: ctrl, onChanged: (val) => controller.updateExtraAnswer(widget.index, qid, val)));
       }
     }
-
     return fields;
   }
 

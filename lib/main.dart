@@ -36,11 +36,50 @@ void main() async {
   await Init().initialize();
 
   // Register global controllers (singleton)
-  Get.put(BusinessSettingController(businessSettingRepo: BusinessSettingRepo(apiClient: ApiClient(appBaseUrl: AppConstants.baseUrl, sharedPreferences: Get.find()))));
-  Get.put(HomeController(homeRepo: HomeRepo(apiClient: ApiClient(appBaseUrl: AppConstants.baseUrl, sharedPreferences: Get.find()))), permanent: true);
+  Get.put(
+    BusinessSettingController(
+      businessSettingRepo: BusinessSettingRepo(
+        apiClient: ApiClient(
+          appBaseUrl: AppConstants.baseUrl,
+          sharedPreferences: Get.find(),
+        ),
+      ),
+    ),
+  );
+  Get.put(
+    HomeController(
+      homeRepo: HomeRepo(
+        apiClient: ApiClient(
+          appBaseUrl: AppConstants.baseUrl,
+          sharedPreferences: Get.find(),
+        ),
+      ),
+    ),
+    permanent: true,
+  );
   Get.put(LocationController(), permanent: true);
-  Get.put(CategoryController(categoryRepo: CategoryRepo(apiClient: ApiClient(appBaseUrl: AppConstants.baseUrl, sharedPreferences: Get.find()))), permanent: true);
-  Get.put(CompanyController(companyRepo: CompanyRepo(apiClient: ApiClient(appBaseUrl: AppConstants.baseUrl, sharedPreferences: Get.find()))), permanent: true);
+  Get.put(
+    CategoryController(
+      categoryRepo: CategoryRepo(
+        apiClient: ApiClient(
+          appBaseUrl: AppConstants.baseUrl,
+          sharedPreferences: Get.find(),
+        ),
+      ),
+    ),
+    permanent: true,
+  );
+  Get.put(
+    CompanyController(
+      companyRepo: CompanyRepo(
+        apiClient: ApiClient(
+          appBaseUrl: AppConstants.baseUrl,
+          sharedPreferences: Get.find(),
+        ),
+      ),
+    ),
+    permanent: true,
+  );
 
   // Ask permissions (optional before launch)
   await requestPermissions();
@@ -66,8 +105,7 @@ class StreammlyApp extends StatelessWidget {
       debugShowCheckedModeBanner: false,
       title: 'Streammly',
       theme: CustomTheme.light,
-      darkTheme: CustomTheme.dark,
-      themeMode: ThemeMode.system,
+      themeMode: ThemeMode.light,
       initialRoute: '/splash',
       getPages: [
         GetPage(name: '/splash', page: () => const SplashScreen()),

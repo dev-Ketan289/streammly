@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:streammly/services/custom_image.dart';
 import 'package:streammly/services/theme.dart';
 
 import '../../../../../../models/category/category_item.dart';
@@ -17,6 +18,8 @@ class CategoryScroller extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
       child: Column(
@@ -28,9 +31,10 @@ class CategoryScroller extends StatelessWidget {
               children: [
                 Text(
                   title!,
-                  style: Theme.of(
-                    context,
-                  ).textTheme.bodyLarge?.copyWith(fontWeight: FontWeight.bold),
+                  style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                    fontWeight: FontWeight.bold,
+                    color: backgroundDark,
+                  ),
                 ),
                 if (onSeeAll != null)
                   InkWell(
@@ -81,15 +85,19 @@ class CategoryScroller extends StatelessWidget {
                               item.imagePath != null
                                   ? ClipRRect(
                                     borderRadius: BorderRadius.circular(16),
-                                    child: Image.network(
-                                      item.imagePath!,
+                                    child: CustomImage(
+                                      path: item.imagePath!,
                                       fit: BoxFit.cover,
-                                      errorBuilder:
-                                          (_, __, ___) => const Icon(
-                                            Icons.broken_image,
-                                            color: Colors.grey,
-                                          ),
                                     ),
+                                    // child: Image.network(
+                                    //   item.imagePath!,
+                                    //   fit: BoxFit.cover,
+                                    //   errorBuilder:
+                                    //       (_, __, ___) => const Icon(
+                                    //         Icons.broken_image,
+                                    //         color: Colors.grey,
+                                    //       ),
+                                    // ),
                                   )
                                   : Icon(
                                     item.icon,
