@@ -4,7 +4,7 @@ import 'package:streammly/views/screens/package/booking/booking_summary.dart';
 import 'package:streammly/views/screens/package/booking/widgets/booking_form_page.dart';
 import 'package:streammly/views/screens/package/booking/widgets/booking_personal_info.dart';
 import 'package:streammly/views/widgets/custom_doodle.dart';
-
+art';
 import '../../../../controllers/booking_form_controller.dart';
 
 class BookingPage extends StatelessWidget {
