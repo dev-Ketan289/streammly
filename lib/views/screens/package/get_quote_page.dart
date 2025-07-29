@@ -150,7 +150,7 @@ class _GetQuoteScreenState extends State<GetQuoteScreen> {
         Get.to(
           () => const LoginScreen(),
           arguments: {
-            'redirectTo': 'GetQuoteScreen',
+            'redirectTo': '/getQuote',
             'formData': {
               'companyId': widget.companyId,
               'subCategoryId': widget.subCategoryId,

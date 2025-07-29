@@ -31,7 +31,7 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
       if (authController.userProfile == null || (authController.userProfile!.name ?? '').isEmpty || (authController.userProfile!.email ?? '').isEmpty) {
         // New user: show profile form
         Get.off(() => ProfileFormScreen());
-      } else if (redirectTo == 'GetQuoteScreen') {
+      } else if (redirectTo == '/getQuote') {
         Get.offNamed('/getQuote', arguments: formData);
       } else {
         // Default: go to main navigation

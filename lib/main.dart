@@ -86,7 +86,8 @@ void main() async {
 
   runApp(StreammlyApp());
 }
-
+   final GlobalKey<NavigatorState> subnavigator =
+      GlobalKey<NavigatorState>();
 Future<void> requestPermissions() async {
   // Request SMS permission
   await Permission.sms.request();
@@ -97,8 +98,7 @@ Future<void> requestPermissions() async {
 
 class StreammlyApp extends StatelessWidget {
   const StreammlyApp({super.key});
-  static final GlobalKey<NavigatorState> subnavigator =
-      GlobalKey<NavigatorState>();
+
   @override
   Widget build(BuildContext context) {
     return GetMaterialApp(

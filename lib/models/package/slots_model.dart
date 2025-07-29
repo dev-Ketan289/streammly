@@ -17,7 +17,8 @@ class Slot {
     required this.blockOutdoor,
   });
 
-  bool get isAvailable => !booked && !breakTime && !blockHome && !blockIndoor && !blockOutdoor;
+  bool get isAvailable =>
+      !booked && !breakTime && !blockHome && !blockIndoor && !blockOutdoor;
 
   factory Slot.fromJson(Map<String, dynamic> json) {
     return Slot(
@@ -30,4 +31,15 @@ class Slot {
       blockOutdoor: json['block_outdoorshoot_time'] ?? true,
     );
   }
+}
+
+class SlotMananger {
+  final int hour;
+  final int minute;
+  final bool isAvailable;
+  SlotMananger({
+    required this.hour,
+    required this.minute,
+    required this.isAvailable,
+  });
 }
