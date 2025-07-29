@@ -4,6 +4,7 @@ import 'package:streammly/controllers/company_controller.dart';
 import 'package:streammly/navigation_flow.dart';
 import 'package:streammly/views/screens/home/vendor_locator.dart';
 import 'package:streammly/views/screens/home/widgets/category/category.dart';
+import 'package:streammly/views/screens/home/widgets/home_header_banner.dart';
 import 'package:streammly/views/screens/home/widgets/page_nav.dart';
 import 'package:streammly/views/widgets/custom_doodle.dart';
 
@@ -15,7 +16,6 @@ import '../../../models/category/category_model.dart';
 import '../home/widgets/category/explore_us.dart';
 import '../home/widgets/category/recommended_list.dart';
 import '../home/widgets/category/widgets/category_scroller.dart';
-import '../home/widgets/header_banner.dart';
 import '../home/widgets/promo_slider.dart';
 import '../home/widgets/upcoming_offer_card.dart';
 
@@ -47,13 +47,9 @@ class _HomeScreenState extends State<HomeScreen> {
         label: model.title,
         imagePath: model.icon,
         onTap: () {
-          final mainState =
-              context.findAncestorStateOfType<NavigationFlowState>();
+          final mainState = context.findAncestorStateOfType<NavigationFlowState>();
           // Get.to(() => CompanyLocatorMapScreen(categoryId: cat.id));
-          mainState?.pushToCurrentTab(
-            CompanyLocatorMapScreen(categoryId: model.id),
-            hideBottomBar: true,
-          );
+          mainState?.pushToCurrentTab(CompanyLocatorMapScreen(categoryId: model.id), hideBottomBar: true);
           // Get.to(() => CompanyLocatorMapScreen(categoryId: model.id));
         },
       );
@@ -80,11 +76,8 @@ class _HomeScreenState extends State<HomeScreen> {
               child: SingleChildScrollView(
                 child: Column(
                   children: [
-                    HeaderBanner(
-                      slides: slides,
-                      height: 370,
-                      backgroundImage: "assets/images/banner.png",
-                      overlayColor: Colors.white.withValues(alpha: 0.1),
+                    HomeHeaderBanner(
+                      slides: slides, // coming from backend
                     ),
                     const SizedBox(height: 24),
                     UpcomingOfferCard(),
@@ -114,18 +107,11 @@ class _HomeScreenState extends State<HomeScreen> {
                     GetBuilder<HomeController>(
                       builder: (headerCtrl) {
                         if (headerCtrl.isRecommendedLoading) {
-                          return const Center(
-                            child: CircularProgressIndicator(),
-                          );
+                          return const Center(child: CircularProgressIndicator());
                         } else if (headerCtrl.recommendedVendors.isEmpty) {
-                          return const Center(
-                            child: Text("No recommended vendors found."),
-                          );
+                          return const Center(child: Text("No recommended vendors found."));
                         } else {
-                          return RecommendedList(
-                            context: context,
-                            recommendedVendors: headerCtrl.recommendedVendors,
-                          );
+                          return RecommendedList(context: context, recommendedVendors: headerCtrl.recommendedVendors);
                         }
                       },
                     ),
