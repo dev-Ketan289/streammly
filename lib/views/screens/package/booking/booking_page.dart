@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:streammly/views/screens/package/booking/booking_summary.dart';
@@ -8,16 +10,25 @@ import 'package:streammly/views/widgets/custom_doodle.dart';
 import '../../../../controllers/booking_form_controller.dart';
 
 class BookingPage extends StatelessWidget {
-  const BookingPage({super.key});
+  // final Map<String, dynamic> args;
+
+  final List<Map<String, dynamic>> packages;
+  final List<dynamic> companyLocations;
+  const BookingPage({
+    super.key,
+    required this.packages,
+    required this.companyLocations,
+  });
 
   @override
   Widget build(BuildContext context) {
-    final controller = Get.put(BookingController());
+    log(packages.toString(), name: "packages");
+    final controller = Get.put(BookingController(bookingrepo: Get.find()));
 
     // Receive selected packages from previous screen
-    final args = Get.arguments as Map<String, dynamic>;
-    final packages = args['packages'] as List<Map<String, dynamic>>;
-    final companyLocations = args['companyLocations'] as List<dynamic>;
+    // final args = Get.arguments as Map<String, dynamic>;
+    // final packages = args['packages'] as List<Map<String, dynamic>>;
+    // final companyLocations = args['companyLocations'] as List<dynamic>;
 
     controller.initSelectedPackages(packages, companyLocations);
 
