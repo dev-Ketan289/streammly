@@ -1,10 +1,8 @@
-import 'dart:convert';
 import 'dart:developer';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:http/http.dart' as http;
 import 'package:intl/intl.dart';
 import 'package:streammly/controllers/auth_controller.dart';
 import 'package:streammly/data/repository/booking_repo.dart';
@@ -52,25 +50,12 @@ class BookingController extends GetxController {
   }
 
   /// --- INITIALIZE SELECTED PACKAGES AND PREP FORM DATA ---
-  void initSelectedPackages(
-    List<Map<String, dynamic>> packages,
-    List<dynamic> locations,
-  ) {
+  void initSelectedPackages(List<Map<String, dynamic>> packages, List<dynamic> locations) {
     // locations must be in same order as packages, each with .company.advanceDayBooking etc
     companyLocations = locations;
     WidgetsBinding.instance.addPostFrameCallback((_) {
       selectedPackages.assignAll(packages);
-      packagePrices =
-          List<int>.generate(
-            packages.length,
-            (index) =>
-                int.tryParse(
-                  packages[index]['packagevariations']?[0]?['amount']
-                          ?.toString() ??
-                      '0',
-                ) ??
-                0,
-          ).obs;
+      packagePrices = List<int>.generate(packages.length, (index) => int.tryParse(packages[index]['packagevariations']?[0]?['amount']?.toString() ?? '0') ?? 0).obs;
       showPackageDetails = List<bool>.filled(packages.length, false).obs;
 
       for (int i = 0; i < packages.length; i++) {
@@ -80,21 +65,13 @@ class BookingController extends GetxController {
         final formattedTime = formatTimeOfDay(now);
 
         // --- Use companyLocations to get the advanceDayBooking for this package ---
-        final companyLocation =
-            companyLocations.isNotEmpty ? companyLocations[i] : null;
-        final int advanceBlock =
-            (companyLocation?.company?.advanceDayBooking ?? 0);
-        final DateTime firstAvailableDate = DateTime.now().add(
-          Duration(days: advanceBlock),
-        );
-        final String formattedDate =
-            "${firstAvailableDate.day} ${_getMonthName(firstAvailableDate.month)} ${firstAvailableDate.year}";
+        final companyLocation = companyLocations.isNotEmpty ? companyLocations[i] : null;
+        final int advanceBlock = (companyLocation?.company?.advanceDayBooking ?? 0);
+        final DateTime firstAvailableDate = DateTime.now().add(Duration(days: advanceBlock));
+        final String formattedDate = "${firstAvailableDate.day} ${(firstAvailableDate.month)} ${firstAvailableDate.year}";
 
         Map<String, String> extraAnswers = {};
-        final extraQuestions =
-            package['extraQuestions'] ??
-            package['packageextra_questions'] ??
-            [];
+        final extraQuestions = package['extraQuestions'] ?? package['packageextra_questions'] ?? [];
         for (var question in extraQuestions) {
           final uniqueKey = "${i}_${question['id']}";
           extraAnswers[uniqueKey] = '';
@@ -180,46 +157,40 @@ class BookingController extends GetxController {
 
   /// --- DATE PICKER with COMPANY BLOCK LOGIC ---
   Future<String> selectDate(int index, BuildContext context) async {
-    final companyLocation =
-        companyLocations.isNotEmpty ? companyLocations[index] : null;
+    final companyLocation = companyLocations.isNotEmpty ? companyLocations[index] : null;
     final int advanceBlock = (companyLocation?.company?.advanceDayBooking ?? 0);
 
     final DateTime now = DateTime.now();
     final DateTime firstAvailableDate = now.add(Duration(days: advanceBlock));
 
-    final picked = await showDatePicker(
-      context: context,
-      initialDate: firstAvailableDate,
-      firstDate: firstAvailableDate,
-      lastDate: now.add(Duration(days: 365)),
-    );
+    final picked = await showDatePicker(context: context, initialDate: firstAvailableDate, firstDate: firstAvailableDate, lastDate: now.add(Duration(days: 365)));
 
     String formatted = "";
     if (picked != null) {
-      formatted = "${picked.day} ${_getMonthName(picked.month)} ${picked.year}";
+      formatted = "${picked.year} ${(picked.month)} ${picked.day}";
       updatePackageForm(index, 'date', formatted);
     }
     return formatted;
   }
 
-  String _getMonthName(int month) {
-    const months = [
-      '',
-      'January',
-      'February',
-      'March',
-      'April',
-      'May',
-      'June',
-      'July',
-      'August',
-      'September',
-      'October',
-      'November',
-      'December',
-    ];
-    return months[month];
-  }
+  // String _getMonthName(int month) {
+  //   const months = [
+  //     '',
+  //     'January',
+  //     'February',
+  //     'March',
+  //     'April',
+  //     'May',
+  //     'June',
+  //     'July',
+  //     'August',
+  //     'September',
+  //     'October',
+  //     'November',
+  //     'December',
+  //   ];
+  //   return months[month];
+  // }
 
   void toggleAddOn(int index, String type) {
     Get.snackbar("Info", "This feature is currently disabled.");
@@ -259,8 +230,7 @@ class BookingController extends GetxController {
       final packageTitle = selectedPackages[i]['title'];
       if (packageTitle == 'Cuteness' && form['babyInfo'] == null) return false;
       if (packageTitle == 'Moments' && form['theme'] == null) return false;
-      if (packageTitle == 'Wonders' && form['locationPreference'] == null)
-        return false;
+      if (packageTitle == 'Wonders' && form['locationPreference'] == null) return false;
       if (!(form['termsAccepted'] ?? false)) return false;
 
       final extraAnswers = Map<String, String>.from(form['extraAnswers'] ?? {});
@@ -273,10 +243,7 @@ class BookingController extends GetxController {
 
   void submitBooking() {
     if (!canSubmit()) {
-      Get.snackbar(
-        'Error',
-        'Please fill all required fields and accept terms for each package',
-      );
+      Get.snackbar('Error', 'Please fill all required fields and accept terms for each package');
       return;
     }
 
@@ -307,30 +274,15 @@ class BookingController extends GetxController {
     return total;
   }
 
-  Future<ResponseModel?> fetchAvailableSlots({
-    required String companyId,
-    required String date,
-    required String studioId,
-    required String typeId,
-  }) async {
+  Future<ResponseModel?> fetchAvailableSlots({required String companyId, required String date, required String studioId, required String typeId}) async {
     isLoading = true;
     update();
     ResponseModel? responseModel;
     try {
-      Response response = await bookingrepo.fetchAvailableSlots(
-        companyId: companyId,
-        date: date,
-        studioId: studioId,
-        typeId: typeId,
-      );
-      log(
-        "***** Response in updateUserProfile () ******: ${response.bodyString}",
-      );
+      Response response = await bookingrepo.fetchAvailableSlots(companyId: companyId, date: date, studioId: studioId, typeId: typeId);
+      log("***** Response in updateUserProfile () ******: ${response.bodyString}");
       if (response.statusCode == 200) {
-        responseModel = ResponseModel(
-          true,
-          "User profile updated successfully",
-        );
+        responseModel = ResponseModel(true, "User profile updated successfully");
       } else {
         responseModel = ResponseModel(false, "Failed to update user profile");
       }
