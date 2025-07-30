@@ -26,6 +26,9 @@ class BookingController extends GetxController {
   late RxList<int> packagePrices;
   late RxList<bool> showPackageDetails;
 
+              TimeOfDay? selectedStartTime;
+            TimeOfDay? selectedEndTime;
+
   // Each entry should be a CompanyLocation (your model) instance corresponding to each selected package.
   List<dynamic> companyLocations = [];
 
@@ -307,8 +310,7 @@ class BookingController extends GetxController {
   }
 
   List<Slot> timeSlots = [];
-  List<int> hours = [];
-  List<int> minutes = [];
+  List<TimeOfDay?> startTime = [];
 
   Future<ResponseModel?> fetchAvailableSlots({
     required String companyId,
@@ -318,6 +320,7 @@ class BookingController extends GetxController {
   }) async {
     isLoading = true;
     timeSlots = [];
+    startTime = [];
     update();
     ResponseModel? responseModel;
     try {
@@ -336,23 +339,16 @@ class BookingController extends GetxController {
                 .map((e) => Slot.fromJson(e))
                 .toList();
         for (var i = 0; i < timeSlots.length; i++) {
-          if (!hours.contains(
-            int.parse(timeSlots[i].startTime.split(":").first ),
-          )&& timeSlots[i].isAvailable) {
-            hours.add(int.parse(timeSlots[i].startTime.split(":").first));
-          }
-          if (!minutes.contains(
-            int.parse(timeSlots[i].startTime.split(":")[1].padLeft(2,"0")),
-          )&& timeSlots[i].isAvailable) {
-            minutes.add(int.parse(timeSlots[i].startTime.split(":")[1].padLeft(2,"0")));
+          startTime.add(timeSlots[i].startTime);
+          if(timeSlots.length-1==i){
+            startTime.add(timeSlots[i].endTime);
           }
         }
-        log("$hours  $minutes");
         responseModel = ResponseModel(
           true,
           "User profile updated successfully",
         );
-      } else {  
+      } else {
         timeSlots.clear();
         responseModel = ResponseModel(false, "Failed to update user profile");
       }

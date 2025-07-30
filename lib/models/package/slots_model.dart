@@ -1,6 +1,8 @@
+import 'package:flutter/material.dart';
+
 class Slot {
-  final String startTime;
-  final String endTime;
+  final TimeOfDay? startTime;
+  final TimeOfDay? endTime;
   final bool booked;
   final bool breakTime;
   final bool blockHome;
@@ -8,8 +10,8 @@ class Slot {
   final bool blockOutdoor;
 
   Slot({
-    required this.startTime,
-    required this.endTime,
+     this.startTime,
+     this.endTime,
     required this.booked,
     required this.breakTime,
     required this.blockHome,
@@ -20,10 +22,16 @@ class Slot {
   bool get isAvailable =>
       !booked && !breakTime && !blockHome && !blockIndoor && !blockOutdoor;
 
-  factory Slot.fromJson(Map<String, dynamic> json) {
+  factory Slot.fromJson(Map<String?, dynamic> json) {
     return Slot(
-      startTime: json['start_time'],
-      endTime: json['end_time'],
+      startTime: json['start_time'] != null ? TimeOfDay(
+        hour: int.parse(json['start_time'].split(":")[0]),
+        minute: int.parse(json['start_time'].split(":")[1]),
+      ) : null,
+      endTime: json['end_time'] != null ? TimeOfDay(
+        hour: int.parse(json['end_time'].split(":")[0]),
+        minute: int.parse(json['end_time'].split(":")[1]),
+      ) : null,   
       booked: json['booked'] ?? true,
       breakTime: json['break'] ?? true,
       blockHome: json['block_homeshoot_time'] ?? true,

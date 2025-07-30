@@ -128,10 +128,12 @@ class BookingPage extends StatelessWidget {
                       // Active Form
                       PackageFormCard(
                         index: controller.currentPage.value,
+                        
                         package:
                             controller.selectedPackages[controller
                                 .currentPage
                                 .value],
+                        
                       ),
                     ],
                   ),

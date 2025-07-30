@@ -1,14 +1,13 @@
 import 'dart:developer';
-
 import 'package:dotted_border/dotted_border.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:get/get.dart';
 import 'package:streammly/models/package/slots_model.dart';
-import 'package:streammly/services/extensions.dart';
 import 'package:streammly/services/input_decoration.dart';
+import 'package:streammly/services/theme.dart';
 import 'package:streammly/views/screens/package/booking/widgets/custom_time_picker.dart';
-
 import '../../../../../controllers/booking_form_controller.dart';
 import '../../../../../services/route_helper.dart';
 import '../../../common/widgets/custom_textfield.dart' show CustomTextField;
@@ -33,7 +32,7 @@ class _PackageFormCardState extends State<PackageFormCard> {
   late TextEditingController startTimeController;
   late TextEditingController endTimeController;
   late TextEditingController dateTimeController;
-  final TextEditingController selectedTimingController = TextEditingController();
+  late TextEditingController selectedTimingController;
   bool isStartTime = true;
   bool showTimePicker = false;
 
@@ -48,6 +47,12 @@ class _PackageFormCardState extends State<PackageFormCard> {
     startTimeController = TextEditingController(text: form['startTime'] ?? '');
     endTimeController = TextEditingController(text: form['endTime'] ?? '');
     dateTimeController = TextEditingController(text: form['date'] ?? '');
+    selectedTimingController = TextEditingController(
+      text:
+          form['startTime'] != null && form['endTime'] != null
+              ? "${form['startTime']} - ${form['endTime']}"
+              : '',
+    );
 
     final extraQuestions =
         widget.package['extraQuestions'] ??
@@ -68,7 +73,7 @@ class _PackageFormCardState extends State<PackageFormCard> {
     startTimeController.dispose();
     endTimeController.dispose();
     dateTimeController.dispose();
-    startTimeController.dispose();
+    selectedTimingController.dispose();
     for (final controller in _extraQuestionControllers.values) {
       controller.dispose();
     }
@@ -98,6 +103,15 @@ class _PackageFormCardState extends State<PackageFormCard> {
       if (dateTimeController.text != (form['date'] ?? '')) {
         dateTimeController.text = form['date'] ?? '';
       }
+      if (selectedTimingController.text !=
+          (form['startTime'] != null && form['endTime'] != null
+              ? "${form['startTime']} - ${form['endTime']}"
+              : '')) {
+        selectedTimingController.text =
+            form['startTime'] != null && form['endTime'] != null
+                ? "${form['startTime']} - ${form['endTime']}"
+                : '';
+      }
 
       return Container(
         padding: const EdgeInsets.all(20),
@@ -122,160 +136,123 @@ class _PackageFormCardState extends State<PackageFormCard> {
               readOnly: true,
             ),
             const SizedBox(height: 16),
-              CustomTextField(
-                labelText: 'Date of Shoot *',
+            CustomTextField(
+              labelText: 'Date of Shoot *',
               controller: dateTimeController,
               hintText: form['date']?.isEmpty ?? true ? 'Select Date' : null,
               readOnly: true,
+              validator: (value) {
+                if (value == null || value.isEmpty) {
+                  return 'Please select a date';
+                }
+                return null;
+              },
               onTap: () async {
                 final selectedDate = await showDatePicker(
                   context: context,
-                  initialDate: DateTime.now().add(
-                    Duration(days: 2),
-                  ), // Set to tomorrow
-                  firstDate: DateTime.now().add(
-                    Duration(days: 2),
-                  ), // Prevent selecting today
+                  initialDate: DateTime.now().add(const Duration(days: 2)),
+                  firstDate: DateTime.now().add(const Duration(days: 2)),
                   lastDate: DateTime(2100),
                 );
                 if (selectedDate != null) {
                   final formatted =
-                      "${selectedDate.year}-${selectedDate.month}-${selectedDate.date}";
-
+                      "${selectedDate.year}-${selectedDate.month.toString().padLeft(2, '0')}-${selectedDate.day.toString().padLeft(2, '0')}";
                   log(formatted);
                   controller.updatePackageForm(widget.index, 'date', formatted);
-                  dateTimeController.text = formatted;
-                  Get.find<BookingController>().fetchAvailableSlots(
-                    companyId: widget.package["company_id"].toString(),
-                    date: formatted,
-                    studioId: widget.package["studio_id"].toString(),
-                    typeId: widget.package["typeId"].toString(),
-                  );
+                  controller.updatePackageForm(widget.index, 'startTime', '');
+                  controller.updatePackageForm(widget.index, 'endTime', '');
+                  selectedTimingController.text = '';
+                  try {
+                    await controller.fetchAvailableSlots(
+                      companyId: widget.package["company_id"].toString(),
+                      date: formatted,
+                      studioId: widget.package["studio_id"].toString(),
+                      typeId: widget.package["typeId"].toString(),
+                    );
+                  } catch (e) {
+                    Get.snackbar(
+                      'Error',
+                      'Failed to fetch available slots: $e',
+                    );
+                  }
                 }
               },
-
               prefixIcon: Icons.calendar_today,
             ),
             const SizedBox(height: 16),
-           TextFormField(
-  controller: selectedTimingController,
-  readOnly: true,
-  validator: (value) {
-    if (value == null || value.isEmpty) {
-      return 'Please Select Time Slot';
-    }
-    return null;
-  },
-  onTap: () {
-    final slots = Get.find<BookingController>().timeSlots;
-    showTimeSlotSelector(
-      context: context,
-      slots: slots,
-      onSlotSelected: (selectedSlot) {
-        final formatted = "${selectedSlot.startTime} - ${selectedSlot.endTime}";
-        selectedTimingController.text = formatted;
+            TextFormField(
+              controller: selectedTimingController,
+              readOnly: true,
+              validator: (value) {
+                if (value == null || value.isEmpty) {
+                  return 'Please Select Time Slot';
+                }
+                return null;
+              },
+              onTap: () {
+                print('TextFormField tapped');
+                final slots = Get.find<BookingController>().startTime;
+                log('Slots: $slots');
+                TimeOfDay? startTime;
+                TimeOfDay? endTime;
+                try {
+                  log("$startTime", name: "fgngjn");
+                  startTime =
+                      form['startTime'] != null
+                          ? parseTimeOfDay(form['startTime'])
+                          : null;
 
-        controller.updatePackageForm(
-          widget.index,
-          'startTime',
-          selectedSlot.startTime,
-        );
-        controller.updatePackageForm(
-          widget.index,
-          'endTime',
-          selectedSlot.endTime,
-        );
-      },
-    );
-  },
-  decoration: CustomDecoration.inputDecoration(
-    label: "Select Time Slot",
-    floating: true,
-    suffix: const Icon(Icons.arrow_drop_down),
-    borderRadius: 6,
-  ),
-),
-
-            // Row(
-            //   children: [
-            //     Expanded(
-            //       child: CustomTextField(
-            //         controller: startTimeController,
-            //         labelText: 'Start Time *',
-            //         hintText:
-            //             form['startTime']?.isEmpty ?? true ? '09:00 AM' : null,
-            //         readOnly: true,  
-            //         prefixIcon: Icons.access_time,
-            //         onTap: () {
-            //           setState(() {
-            //             isStartTime = true;
-            //             showTimePicker = true;
-            //           });
-            //         },
-            //       ),
-            //     ),
-            //     const SizedBox(width: 12),
-            //     Expanded(
-            //       child: CustomTextField(
-            //         controller: endTimeController,
-            //         labelText: 'End Time *',
-            //         hintText:
-            //             form['endTime']?.isEmpty ?? true ? '07:00 PM' : null,
-            //         readOnly: true,
-            //         prefixIcon: Icons.access_time,
-            //         onTap: () {
-            //           setState(() {
-            //             isStartTime = false;
-            //             showTimePicker = true;
-            //           });
-            //         },
-            //       ),
-            //     ),
-            //   ],
-            // ),
-            // const SizedBox(height: 16),
-            // if (showTimePicker)
-            //   CustomTimePicker(
-            //     isStart: isStartTime,
-                
-            //     onCancel: () {
-            //       setState(() {
-            //         if (isStartTime) {
-            //           startTimeController.text = "";
-            //           controller.updatePackageForm(
-            //             widget.index,
-            //             'startTime',
-            //             '',
-            //           );
-            //         } else {
-            //           endTimeController.text = "";
-            //           controller.updatePackageForm(widget.index, 'endTime', '');
-            //         }
-            //         showTimePicker = false;
-            //       });
-            //     },
-            //     onTimeSelected: (time) {
-            //       log("$time");
-            //       setState(() {
-            //         if (isStartTime) {
-            //           startTimeController.text = time;
-            //           controller.updatePackageForm(
-            //             widget.index,
-            //             'startTime',
-            //             time,
-            //           );
-            //         } else {
-            //           endTimeController.text = time;
-            //           controller.updatePackageForm(
-            //             widget.index,
-            //             'endTime',
-            //             time,
-            //           );
-            //         }
-            //         showTimePicker = false;
-            //       });
-            //     },
-            //   ),
+                  endTime =
+                      form['endTime'] != null
+                          ? parseTimeOfDay(form['endTime'])
+                          : null;
+                } catch (e) {
+                  Fluttertoast.showToast(
+                    msg:
+                        "Invalid time format in previous selection. Please select a new time slot.",
+                    toastLength: Toast.LENGTH_LONG,
+                  );
+                  controller.updatePackageForm(widget.index, 'startTime', '');
+                  controller.updatePackageForm(widget.index, 'endTime', '');
+                  selectedTimingController.text = '';
+                }
+                showTimeSlotSelector(
+                  context: context,
+                  slots: slots,
+                  packageHours: widget.package["hours"]?.toString() ?? "1",
+                  index: widget.index,
+                  startTime: startTime,
+                  endTime: endTime,
+                  onSlotSelected: (TimeOfDay? startTime, TimeOfDay? endTime) {
+                    log(
+                      'Selected: ${startTime?.format(context)} - ${endTime?.format(context)}',
+                    );
+                    if (startTime != null && endTime != null) {
+                      final formattedTime =
+                          "${startTime.format(context)} - ${endTime.format(context)}";
+                      selectedTimingController.text = formattedTime;
+                      controller.updatePackageForm(
+                        widget.index,
+                        'startTime',
+                        startTime.format(context),
+                      );
+                      controller.updatePackageForm(
+                        widget.index,
+                        'endTime',
+                        endTime.format(context),
+                      );
+                    }
+                  },
+                );
+                log(widget.package["hours"]?.toString() ?? "1");
+              },
+              decoration: CustomDecoration.inputDecoration(
+                label: "Select Time Slot",
+                floating: true,
+                suffix: const Icon(Icons.arrow_drop_down),
+                borderRadius: 6,
+              ),
+            ),
             const SizedBox(height: 16),
             Text(
               "Questions",
@@ -291,8 +268,7 @@ class _PackageFormCardState extends State<PackageFormCard> {
               isSelected: form['freeAddOn'] != null,
               onTap: () async {
                 final packageId =
-                    widget.package['packageId'] ??
-                    widget.package['id']; // adjust according to your data
+                    widget.package['packageId'] ?? widget.package['id'];
                 final result = await Navigator.push(
                   context,
                   getCustomRoute(child: FreeItemsPage(packageId: packageId)),
@@ -323,9 +299,9 @@ class _PackageFormCardState extends State<PackageFormCard> {
                       Row(
                         children: [
                           IconButton(
-                            icon: Icon(
+                            icon: const Icon(
                               Icons.edit,
-                              color: const Color(0xff2864A6),
+                              color: Color(0xff2864A6),
                             ),
                             onPressed: () async {
                               final packageId =
@@ -365,7 +341,7 @@ class _PackageFormCardState extends State<PackageFormCard> {
                   ),
                   const SizedBox(height: 4),
                   Text(
-                    form['freeAddOn']['mainTitle'] ?? '', // Dynamic main title
+                    form['freeAddOn']['mainTitle'] ?? '',
                     style: theme.textTheme.bodyLarge?.copyWith(
                       fontWeight: FontWeight.w600,
                     ),
@@ -445,7 +421,6 @@ class _PackageFormCardState extends State<PackageFormCard> {
                 ],
               ),
             ],
-
             const SizedBox(height: 16),
             _buildExpandableSection(
               title: 'Extra Add-Ons (Extra Charged)',
@@ -475,7 +450,6 @@ class _PackageFormCardState extends State<PackageFormCard> {
                 }
               },
             ),
-
             if (form['extraAddOn'] is List &&
                 (form['extraAddOn'] as List).isNotEmpty) ...[
               const SizedBox(height: 12),
@@ -494,9 +468,9 @@ class _PackageFormCardState extends State<PackageFormCard> {
                       Row(
                         children: [
                           IconButton(
-                            icon: Icon(
+                            icon: const Icon(
                               Icons.edit,
-                              color: const Color(0xff2864A6),
+                              color: Color(0xff2864A6),
                             ),
                             onPressed: () async {
                               final packageId =
@@ -583,7 +557,6 @@ class _PackageFormCardState extends State<PackageFormCard> {
                         );
                       }
                     } else {
-                      // If no image, show placeholder container
                       imageWidget = Container(
                         height: 50,
                         width: 50,
@@ -652,7 +625,6 @@ class _PackageFormCardState extends State<PackageFormCard> {
                 ],
               ),
             ],
-
             const SizedBox(height: 32),
             Row(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -677,7 +649,11 @@ class _PackageFormCardState extends State<PackageFormCard> {
                     ),
                     child:
                         form['termsAccepted'] == true
-                            ? Icon(Icons.check, color: Colors.white, size: 14)
+                            ? const Icon(
+                              Icons.check,
+                              color: Colors.white,
+                              size: 14,
+                            )
                             : null,
                   ),
                 ),
@@ -743,13 +719,11 @@ class _PackageFormCardState extends State<PackageFormCard> {
       final type = question['question_type'] ?? 'Text';
       final answer = form['extraAnswers']?[uniqueKey] ?? '';
 
-      // >>> SAFELY GET (or create) THE CONTROLLER <<<
       final ctrl = _extraQuestionControllers.putIfAbsent(
         uniqueKey,
         () => TextEditingController(),
       );
 
-      // keep in sync
       if (ctrl.text != answer) {
         ctrl.text = answer;
       }
@@ -761,6 +735,12 @@ class _PackageFormCardState extends State<PackageFormCard> {
             labelText: label,
             controller: ctrl,
             readOnly: true,
+            validator: (value) {
+              if (value == null || value.isEmpty) {
+                return 'Please select a date';
+              }
+              return null;
+            },
             prefixIcon: Icons.calendar_today,
             onTap: () async {
               final picked = await showDatePicker(
@@ -790,6 +770,12 @@ class _PackageFormCardState extends State<PackageFormCard> {
                     labelText: label,
                     controller: ctrl,
                     readOnly: true,
+                    validator: (value) {
+                      if (value == null || value.isEmpty) {
+                        return 'Please select a time';
+                      }
+                      return null;
+                    },
                     prefixIcon: Icons.access_time,
                     onTap: () => setState(() => showTime = true),
                   ),
@@ -813,6 +799,12 @@ class _PackageFormCardState extends State<PackageFormCard> {
           CustomTextField(
             labelText: label,
             controller: ctrl,
+            validator: (value) {
+              if (value == null || value.isEmpty) {
+                return 'This field is required';
+              }
+              return null;
+            },
             onChanged:
                 (val) => controller.updateExtraAnswer(widget.index, qid, val),
           ),
@@ -865,152 +857,557 @@ class _PackageFormCardState extends State<PackageFormCard> {
     );
   }
 }
+
 void showSelectedSlotSheet(BuildContext context, Slot selectedSlot) {
   showModalBottomSheet(
     context: context,
     shape: const RoundedRectangleBorder(
       borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
     ),
-    builder: (_) => Padding(
-      padding: const EdgeInsets.all(16.0),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          const Text(
-            'Selected Slot',
-            style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-          ),
-          const SizedBox(height: 16),
-          Row(
+    builder:
+        (_) => Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
             children: [
-              const Icon(Icons.access_time),
-              const SizedBox(width: 8),
-              Text(
-                '${selectedSlot.startTime} - ${selectedSlot.endTime}',
-                style: const TextStyle(fontSize: 16),
+              const Text(
+                'Selected Slot',
+                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+              ),
+              const SizedBox(height: 16),
+              Row(
+                children: [
+                  const Icon(Icons.access_time),
+                  const SizedBox(width: 8),
+                  Text(
+                    '${selectedSlot.startTime} - ${selectedSlot.endTime}',
+                    style: const TextStyle(fontSize: 16),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 16),
+              ElevatedButton.icon(
+                onPressed: () => Navigator.pop(context),
+                icon: const Icon(Icons.check),
+                label: const Text('OK'),
+                style: ElevatedButton.styleFrom(backgroundColor: Colors.green),
               ),
             ],
           ),
-          const SizedBox(height: 16),
-          ElevatedButton.icon(
-            onPressed: () => Navigator.pop(context),
-            icon: const Icon(Icons.check),
-            label: const Text('OK'),
-            style: ElevatedButton.styleFrom(
-              backgroundColor: Colors.green,
-            ),
-          ),
-        ],
-      ),
-    ),
+        ),
   );
+}
+
+TimeOfDay? parseTimeOfDay(String? timeString) {
+  if (timeString == null || timeString.isEmpty) return null;
+  try {
+    // Split the time string into time and period (e.g., "10:00 AM" -> ["10:00", "AM"])
+    final parts = timeString.trim().split(' ');
+    if (parts.length != 2) throw const FormatException('Invalid time format');
+
+    final timeParts = parts[0].split(':');
+    if (timeParts.length < 2)
+      throw const FormatException('Invalid time format');
+
+    int hour = int.parse(timeParts[0]);
+    final minute = int.parse(timeParts[1]);
+    final period = parts[1].toUpperCase();
+
+    // Convert to 24-hour format
+    if (period == 'PM' && hour != 12) {
+      hour += 12;
+    } else if (period == 'AM' && hour == 12) {
+      hour = 0;
+    }
+
+    return TimeOfDay(hour: hour, minute: minute);
+  } catch (e) {
+    log('Error parsing time: $timeString, $e');
+    throw const FormatException('Invalid time format');
+  }
 }
 
 void showTimeSlotSelector({
   required BuildContext context,
-  required List<Slot> slots,
-  required Function(Slot) onSlotSelected,
+  required List<TimeOfDay?> slots,
+  required String packageHours,
+  required int index,
+  required TimeOfDay? startTime,
+  required TimeOfDay? endTime,
+  required Function(TimeOfDay? startTime, TimeOfDay? endTime) onSlotSelected,
 }) {
   showModalBottomSheet(
+    
     context: context,
+    isDismissible: true,
+    enableDrag: true,
     isScrollControlled: true,
     shape: const RoundedRectangleBorder(
       borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
     ),
     backgroundColor: Colors.white,
     builder: (context) {
-      final availableSlots = slots.where((s) => s.isAvailable).toList();
-
-      return Padding(
-        padding: const EdgeInsets.all(20.0),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                const Text(
-                  'Select a Time Slot',
-                  style: TextStyle(
-                    fontSize: 20,
-                    fontWeight: FontWeight.w600,
-                    color: Colors.black87,
-                  ),
-                ),
-                IconButton(
-                  icon: const Icon(Icons.close, color: Colors.black54),
-                  onPressed: () => Navigator.pop(context),
-                ),
-              ],
-            ),
-            const SizedBox(height: 16),
-            if (availableSlots.isEmpty)
-              const Padding(
-                padding: EdgeInsets.symmetric(vertical: 20),
-                child: Center(
-                  child: Text(
-                    "No available slots",
-                    style: TextStyle(
-                      fontSize: 16,
-                      color: Colors.grey,
-                      fontWeight: FontWeight.w400,
-                    ),
-                  ),
-                ),
-              )
-            else
-              SingleChildScrollView(
-                child: Wrap(
-                  spacing: 12,
-                  runSpacing: 12,
-                  children: availableSlots.map((slot) {
-                    final time = "${slot.startTime} - ${slot.endTime}";
-                    return ElevatedButton(
-                      style: ElevatedButton.styleFrom(
-                        foregroundColor: Colors.white,
-                        backgroundColor: Theme.of(context).primaryColor,
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 20,
-                          vertical: 14,
-                        ),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                        elevation: 2,
-                        shadowColor: Colors.black26,
-                        textStyle: const TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.w500,
-                        ),
-                      ),
-                      onPressed: () {
-                        onSlotSelected(slot);
-                        Navigator.pop(context);
-                      },
-                      child: Text(time),
-                    );
-                  }).toList(),
-                ),
-              ),
-            const SizedBox(height: 20),
-            SizedBox(
-              width: double.infinity,
-              child: TextButton(
-                onPressed: () => Navigator.pop(context),
-                child: const Text(
-                  'Cancel',
-                  style: TextStyle(
-                    fontSize: 16,
-                    color: Colors.grey,
-                    fontWeight: FontWeight.w500,
-                  ),
-                ),
-              ),
-            ),
-          ],
-        ),
+      return TimeSlotSelecter(
+        context: context,
+        slots: slots,
+        packageHours: packageHours,
+        index: index,
+        onSlotSelected: onSlotSelected,
       );
     },
   );
+}
+
+class TimeSlotSelecter extends StatefulWidget {
+  final BuildContext context;
+  final List<TimeOfDay?> slots;
+  final String packageHours;
+  final int index;
+  final TimeOfDay? startTime;
+  final TimeOfDay? endTime;
+  final Function(TimeOfDay? startTime, TimeOfDay? endTime) onSlotSelected;
+  const TimeSlotSelecter({
+    super.key,
+    required this.context,
+    required this.slots,
+    required this.packageHours,
+    required this.index,
+    this.startTime,
+    this.endTime,
+    required this.onSlotSelected,
+  });
+
+  @override
+  State<TimeSlotSelecter> createState() => _TimeSlotSelecterState();
+}
+
+class _TimeSlotSelecterState extends State<TimeSlotSelecter> {
+  TimeOfDay? tempStartTime;
+  TimeOfDay? tempEndTime;
+  int maxHours = 1;
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      tempStartTime = widget.startTime;
+      tempEndTime = widget.endTime;
+      maxHours = int.tryParse(widget.packageHours) ?? 1;
+    });
+  }
+
+  void onTimeSlotTap(TimeOfDay timeSlot) {
+    log(
+      'Tapped slot: ${timeSlot.format(context)} , $tempStartTime , $tempStartTime, ${widget.startTime}, ${widget.endTime}',
+    );
+
+    if (tempStartTime == timeSlot || tempEndTime == timeSlot) {
+      log("one");
+      Fluttertoast.cancel();
+      Fluttertoast.showToast(
+        msg: "Start time and end time cannot be the same.",
+        toastLength: Toast.LENGTH_LONG,
+      );
+      setState(() {
+        log('Updating state: start=$tempStartTime, end=$tempEndTime');
+        tempStartTime = null;
+        tempEndTime = null;
+      });
+    } else if (tempStartTime == null) {
+      log("two");
+
+      setState(() {
+        tempStartTime = timeSlot;
+      });
+    } else if (tempEndTime == null) {
+      log("three");
+
+      if (TimeCalculations.isTimeBeforeOrEqual(timeSlot, tempStartTime!)) {
+        Fluttertoast.cancel();
+        Fluttertoast.showToast(
+          msg: "End time must be after start time.",
+          toastLength: Toast.LENGTH_LONG,
+        );
+        setState(() {
+          tempEndTime = null;
+          tempStartTime = null;
+        });
+      } else {
+        setState(() {
+          tempEndTime = timeSlot;
+        });
+      }
+    } else {
+      log("five ${timeSlot.toString()}");
+      setState(() {
+        tempStartTime = timeSlot;
+        tempEndTime = null;
+      });
+    }
+
+    if (tempStartTime != null && tempEndTime != null) {
+      final duration = int.parse(
+        TimeCalculations.calculateDuration(tempStartTime!, tempEndTime!),
+      );
+      final durationHours = (duration / 60).ceil();
+      if (durationHours > maxHours) {
+        Fluttertoast.cancel();
+        Fluttertoast.showToast(
+          msg:
+              "Selected duration ($durationHours hours) exceeds package limit ($maxHours hours). Extra charges will apply.",
+          toastLength: Toast.LENGTH_LONG,
+        );
+      } else if (durationHours < maxHours) {
+        Fluttertoast.cancel();
+        Fluttertoast.showToast(
+          msg: "Please select minimum $maxHours hours",
+          toastLength: Toast.LENGTH_LONG,
+        );
+        setState(() {
+          tempStartTime = null;
+          tempEndTime = null;
+        });
+      } else {
+        log("$tempStartTime , $tempEndTime");
+        widget.onSlotSelected(tempStartTime, tempEndTime);
+      }
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return SizedBox(
+      height: MediaQuery.of(context).size.height * 0.70,
+      child: GetBuilder<BookingController>(
+        builder: (bookingController) {
+          if (bookingController.startTime.isEmpty) {
+            return const Center(
+              child: Text(
+                'No time slots available for the selected date.',
+                style: TextStyle(fontSize: 16, color: Colors.grey),
+              ),
+            );
+          }
+          return StatefulBuilder(
+            builder: (context, setState) {
+              return Column(
+                children: [
+                  Container(
+                    padding: const EdgeInsets.symmetric(vertical: 16.0),
+                    width: double.infinity,
+                    decoration: const BoxDecoration(
+                      borderRadius: BorderRadius.vertical(
+                        top: Radius.circular(20),
+                      ),
+                      color: Colors.white,
+                    ),
+                    child: const Text(
+                      'Select Time Slot',
+                      textAlign: TextAlign.center,
+                      style: TextStyle(
+                        fontSize: 20,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ),
+                  if (bookingController.isLoading)
+                    const Padding(
+                      padding: EdgeInsets.all(80),
+                      child: Center(child: CircularProgressIndicator()),
+                    )
+                  else
+                    Expanded(
+                      
+                      child: Padding(
+                        padding: const EdgeInsets.all(16.0),
+                        child: GridView.builder(
+                          gridDelegate:
+                              const SliverGridDelegateWithFixedCrossAxisCount(
+                                crossAxisCount: 4,
+                                mainAxisSpacing: 12,
+                                crossAxisSpacing: 12,
+                                childAspectRatio: 1.2,
+                              ),
+                          itemCount: widget.slots.length,
+                          itemBuilder: (context, slotIndex) {
+                            final timeSlot = widget.slots[slotIndex];
+                            if (timeSlot == null) {
+                              return const SizedBox.shrink();
+                            }
+
+                            final isSelected =
+                                timeSlot == tempStartTime ||
+                                timeSlot == tempEndTime;
+                            final isInRange =
+                                tempStartTime != null &&
+                                tempEndTime != null &&
+                                TimeCalculations.isTimeBeforeOrEqual(
+                                  timeSlot,
+                                  tempEndTime!,
+                                ) &&
+                                TimeCalculations.isTimeAfterOrEqual(
+                                  timeSlot,
+                                  tempStartTime!,
+                                );
+
+                            return GestureDetector(
+                              onTap: () {
+                                log("tapped${timeSlot.toString()}");
+                                onTimeSlotTap(timeSlot);
+                              },
+                              child: Container(
+                                padding: const EdgeInsets.all(2),
+                                margin: const EdgeInsets.all(1),
+                                decoration: BoxDecoration(
+                                  borderRadius: BorderRadius.circular(20),
+                                  
+                                  color:
+                                      isSelected
+                                          ? primaryColor
+                                          : isInRange
+                                          ? Colors.blue[100]
+                                          : Colors.grey.shade300,
+                                          
+                                  border: Border.all(
+                                    color:
+                                        isSelected
+                                            ? Colors.blue.shade100
+                                            : Colors.grey.shade300,
+                                    width: isSelected ? 4.0 : 2.0,
+                                  ),
+                                  boxShadow: [
+                                    BoxShadow(
+                                      color: Colors.black.withOpacity(0.10),
+                                      offset: const Offset(0, 1),
+                                      blurRadius: 1,
+                                    ),
+                                    
+                                  ],
+                                ),
+                                child: Center(
+                                  child: Text(
+                                    timeSlot.format(context),
+                                    style: TextStyle(
+                                      color:
+                                          isSelected
+                                              ? Colors.white
+                                              : Colors.black87,
+                                      fontWeight: FontWeight.w500,
+                                      fontSize: 12
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            );
+                          },
+                        ),
+                      ),
+                    ),
+                  if (!bookingController.isLoading)
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 16),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Expanded(
+                            child: Container(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 16,
+                                vertical: 5,
+                              ),
+                              decoration: BoxDecoration(
+                                color:
+                                    tempStartTime != null
+                                        ? Colors.blue[50]
+                                        : Colors.white,
+                                border: Border.all(color: Colors.blue),
+                                borderRadius: BorderRadius.circular(10),
+                              ),
+                              child: Column(
+                                children: [
+                                  Text(
+                                    "START TIME",
+                                    style: Theme.of(
+                                      context,
+                                    ).textTheme.labelLarge?.copyWith(
+                                      color:
+                                          tempStartTime != null
+                                              ? Colors.blue[700]
+                                              : Colors.grey,
+                                              fontWeight: FontWeight.bold
+                                    ),
+                                  ),
+                                  const Divider(),
+                                  Text(
+                                    tempStartTime?.format(context) ??
+                                        'Select start time',
+                                    style: Theme.of(
+                                      context,
+                                    ).textTheme.labelLarge?.copyWith(
+                                      color:
+                                          tempStartTime != null
+                                              ? Colors.black87
+                                              : Colors.grey,
+                                              fontWeight: FontWeight.bold
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ),
+                          const SizedBox(width: 15),
+                          Expanded(
+                            child: Container(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 16,
+                                vertical: 5,
+                              ),
+                              decoration: BoxDecoration(
+                                color:
+                                    tempEndTime != null
+                                        ? Colors.blue[50]
+                                        : Colors.white,
+                                border: Border.all(color: Colors.blue),
+                                borderRadius: BorderRadius.circular(10),
+                              ),
+                              child: Column(
+                                children: [
+                                  Text(
+                                    "END TIME",
+                                    style: Theme.of(
+                                      context,
+                                    ).textTheme.labelLarge?.copyWith(
+                                      color:
+                                          tempEndTime != null
+                                              ? Colors.blue[700]
+                                              : Colors.grey,
+                                              fontWeight: FontWeight.bold
+                                    ),
+                                  ),
+                                  const Divider(),
+                                  Text(
+                                    tempEndTime?.format(context) ??
+                                        'Select end time',
+                                    style: Theme.of(
+                                      context,
+                                    ).textTheme.labelLarge?.copyWith(
+                                      color:
+                                          tempEndTime != null
+                                              ? Colors.black87
+                                              : Colors.grey,
+                                              fontWeight: FontWeight.bold
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  if (tempStartTime != null && tempEndTime != null)
+                    Container(
+                      width: 100,
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 10,
+                        vertical: 8,
+                      ),
+                      margin: const EdgeInsets.only(top: 20),
+                      decoration: BoxDecoration(
+                        color: Colors.black,
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                      child: Text(
+                        '${(int.parse(TimeCalculations.calculateDuration(tempStartTime!, tempEndTime!)) / 60).ceil()} Hours',
+                        style: Theme.of(context).textTheme.labelLarge?.copyWith(color: Colors.white),
+                        textAlign: TextAlign.center,
+                      ),
+                    ),
+                  const SizedBox(height: 20),
+                  ElevatedButton(
+                    
+                    onPressed:
+                        tempStartTime != null && tempEndTime != null
+                            ? () {
+                              widget.onSlotSelected(tempStartTime, tempEndTime);
+                              Navigator.pop(context);
+                            }
+                            : null,
+                            
+                    style: ElevatedButton.styleFrom(
+                      fixedSize: Size(300, 50),
+                      
+                      backgroundColor:
+                          tempStartTime != null && tempEndTime != null
+                              ? primaryColor
+                              : Colors.grey.shade400,
+                      foregroundColor: Colors.white,
+                      shape: ContinuousRectangleBorder(
+                        borderRadius: BorderRadius.all(Radius.circular(15))
+                      ),
+                      padding: const EdgeInsets.symmetric(
+                        
+                        horizontal: 20,
+                        vertical: 10,
+                      ),
+                    ),
+
+                    child: const Text('Confirm'),
+                  ),
+                  const SizedBox(height: 40),
+                ],
+              );
+            },
+          );
+        },
+      ),
+    );
+  }
+}
+
+class TimeCalculations {
+  static String calculateDuration(TimeOfDay startTime, TimeOfDay endTime) {
+    final startMinutes = startTime.hour * 60 + startTime.minute;
+    final endMinutes = endTime.hour * 60 + endTime.minute;
+    final durationMinutes = endMinutes - startMinutes;
+    return durationMinutes.toString();
+  }
+
+  static bool isTimeAfterOrEqual(TimeOfDay time, TimeOfDay reference) {
+    return time.hour > reference.hour ||
+        (time.hour == reference.hour && time.minute >= reference.minute);
+  }
+
+  static bool isTimeBeforeOrEqual(TimeOfDay time, TimeOfDay reference) {
+    return time.hour < reference.hour ||
+        (time.hour == reference.hour && time.minute <= reference.minute);
+  }
+
+  static bool isTimeInBetween(
+    TimeOfDay time,
+    TimeOfDay startTime,
+    TimeOfDay endTime,
+  ) {
+    return time.hour >= startTime.hour &&
+        time.hour <= endTime.hour &&
+        ((time.hour == startTime.hour && time.minute >= startTime.minute) ||
+            (time.hour == endTime.hour && time.minute <= endTime.minute) ||
+            (time.hour > startTime.hour && time.hour < endTime.hour));
+  }
+}
+
+List<TimeOfDay?> convertSlots(List<dynamic> apiSlots) {
+  return apiSlots.map((slot) {
+    if (slot['startTime'] != null) {
+      final parts = slot['startTime'].split(':');
+      if (parts.length >= 2) {
+        final hour = int.tryParse(parts[0]);
+        final minute = int.tryParse(parts[1]);
+        if (hour != null && minute != null) {
+          return TimeOfDay(hour: hour, minute: minute);
+        }
+      }
+    }
+    return null;
+  }).toList();
 }
