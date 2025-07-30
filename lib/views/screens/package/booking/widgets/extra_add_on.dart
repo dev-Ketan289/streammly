@@ -31,6 +31,7 @@ class _ExtraAddOnsPageState extends State<ExtraAddOnsPage> {
     final addons = packagesController.paidAddOnResponse.value?.addons ?? [];
     final selectedAddons = _selectedIndexes.map((i) => addons[i]).toList();
 
+    // Build the result map to return
     final result =
         selectedAddons.map((addon) {
           return {
@@ -43,6 +44,8 @@ class _ExtraAddOnsPageState extends State<ExtraAddOnsPage> {
             'usageType': addon.usageType,
           };
         }).toList();
+
+    packagesController.selectedExtraAddons.value = result;
 
     Navigator.pop(context, result);
   }

@@ -8,6 +8,8 @@ import '../models/package/free_add_on_model.dart';
 import '../models/package/paid_addon_model.dart';
 
 class PackagesController extends GetxController {
+  final double gstPercentage = 18;
+
   var isGridView = false.obs;
   var expandedStates = <int, bool>{}.obs;
   var selectedHours = <int, Set<String>>{}.obs;
@@ -258,6 +260,30 @@ class PackagesController extends GetxController {
   List<Map<String, dynamic>> getSelectedPackagesForBilling() {
     return selectedPackagesForBilling.toList();
   }
+
+  /// Total of all selected packages (inclusive of GST)
+  double get packageTotal => selectedPackagesForBilling.fold(0.0, (sum, pkg) => sum + (pkg['finalPrice'] as num).toDouble());
+
+  /// Total of all selected extra paid add-ons (inclusive of GST)
+  double get totalExtraAddOnPrice => selectedExtraAddons.fold(0.0, (sum, addon) => sum + (addon['price'] as num).toDouble());
+
+  /// Utility: Convert inclusive amount to exclusive base price
+  double _exclusiveFromInclusive(double inclusive) => inclusive * (100 / (100 + gstPercentage));
+
+  /// Base (exclusive) total for packages
+  double get packageBaseTotal => _exclusiveFromInclusive(packageTotal);
+
+  /// Base (exclusive) total for add-ons
+  double get addonBaseTotal => _exclusiveFromInclusive(totalExtraAddOnPrice);
+
+  /// Combined base subtotal (before GST)
+  double get subtotal => packageBaseTotal + addonBaseTotal;
+
+  /// GST amount extracted from inclusive prices
+  double get gstAmount => subtotal * gstPercentage / 100;
+
+  /// Final total the user pays (same as packageTotal + addonTotal)
+  double get finalAmount => packageTotal + totalExtraAddOnPrice;
 
   bool isPackageSelected(int index) {
     return selectedPackageIndices.contains(index);
