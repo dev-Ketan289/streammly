@@ -89,20 +89,25 @@ class CompanyLocation {
 
     Map<String, String> extractSpecialityMap(dynamic vendorsubcategory) {
       final Map<String, String> result = {};
+
       if (vendorsubcategory is List) {
         for (var item in vendorsubcategory) {
           final subcategory = item['subcategory'];
           if (subcategory != null && subcategory['specialities'] != null) {
-            for (var speciality in subcategory['specialities']) {
-              final title = speciality['title'];
-              final image = speciality['image'];
-              if (title != null) {
-                result[title] = fullUrl(image);
+            for (var specialityWrapper in subcategory['specialities']) {
+              final speciality = specialityWrapper['speciality']; // ✅ FIXED
+              if (speciality != null) {
+                final title = speciality['title'];
+                final image = speciality['image'];
+                if (title != null) {
+                  result[title] = image != null && image.toString().isNotEmpty ? fullUrl(image) : ""; // fallback
+                }
               }
             }
           }
         }
       }
+
       return result;
     }
 

@@ -99,7 +99,7 @@ class _ExploreUsState extends State<ExploreUs> {
                 final vendor = filtered[index];
                 return InkWell(
                   onTap: () {
-                    Navigator.push(context, MaterialPageRoute(builder: (_) => VendorDetailScreen(company: vendor)));
+                    Navigator.push(context, MaterialPageRoute(builder: (_) => VendorDetailScreen(studio: vendor)));
                   },
                   child: Container(
                     padding: const EdgeInsets.all(10),

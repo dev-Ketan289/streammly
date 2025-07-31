@@ -114,19 +114,19 @@ class _HomeHeaderBannerState extends State<HomeHeaderBanner> {
                     height: 37,
                     padding: const EdgeInsets.only(left: 4),
                     decoration: BoxDecoration(
-                      color: theme.cardColor,
+                      color: Color(0xFFE2EDF9), // Adapt background to theme
                       borderRadius: BorderRadius.circular(30),
                       border: Border.all(color: theme.colorScheme.onSurface.withAlpha(60), width: 1),
                     ),
                     child: TextField(
                       style: TextStyle(color: theme.colorScheme.onSurface),
                       decoration: InputDecoration(
-                        hintText: "What are you looking for",
+                        hintText: "Searching",
                         hintStyle: GoogleFonts.openSans(color: theme.colorScheme.onSurface.withValues(alpha: 0.6), fontSize: 13),
                         prefixIcon: Icon(Icons.search, color: theme.colorScheme.primary, size: 23),
                         border: InputBorder.none,
                         isDense: true,
-                        contentPadding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+                        contentPadding: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
                       ),
                     ),
                   ),
@@ -137,7 +137,6 @@ class _HomeHeaderBannerState extends State<HomeHeaderBanner> {
               ],
             ),
           ),
-
           // Banner slider section
           if (loopedSlides.isNotEmpty)
             Column(
@@ -167,40 +166,60 @@ class _HomeHeaderBannerState extends State<HomeHeaderBanner> {
                     },
                     itemBuilder: (_, index) {
                       final item = loopedSlides[index];
-                      return Container(
-                        margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                        decoration: BoxDecoration(color: Colors.blue.shade700, borderRadius: BorderRadius.circular(16)),
-                        child: Row(
-                          children: [
-                            Expanded(
-                              flex: 5,
-                              child: Padding(
-                                padding: const EdgeInsets.all(20),
-                                child: Column(
-                                  mainAxisAlignment: MainAxisAlignment.center,
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Text(item.title ?? '', style: GoogleFonts.dmSerifDisplay(fontSize: 24, color: Colors.white)),
-                                    const SizedBox(height: 10),
-                                    if (item.description != null && item.description!.isNotEmpty)
-                                      Text(item.description!, style: GoogleFonts.openSans(fontSize: 13, color: Colors.white70)),
-                                  ],
+                      final screenWidth = MediaQuery.of(context).size.width;
+
+                      return Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                        child: SizedBox(
+                          height: 180, // or larger if needed for your image
+                          child: Stack(
+                            clipBehavior: Clip.none, // allow overflow
+                            children: [
+                              // The Card (lower in z-order)
+                              Positioned(
+                                left: 0,
+                                right: 0,
+                                bottom: 0,
+                                child: Container(
+                                  height: 164, // less than Stack max height
+                                  decoration: BoxDecoration(color: Colors.blue.shade700, borderRadius: BorderRadius.circular(16)),
+                                  padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+                                  child: Row(
+                                    children: [
+                                      Expanded(
+                                        flex: 5,
+                                        child: Column(
+                                          crossAxisAlignment: CrossAxisAlignment.start,
+                                          mainAxisAlignment: MainAxisAlignment.center,
+                                          children: [
+                                            SizedBox(height: 30, child: Text(item.title ?? '', style: GoogleFonts.dmSerifDisplay(fontSize: 24, color: Colors.white))),
+                                            const SizedBox(height: 3),
+                                            if (item.description != null && item.description!.isNotEmpty)
+                                              Text(item.description!, style: GoogleFonts.openSans(fontSize: 13, color: Colors.white70)),
+                                          ],
+                                        ),
+                                      ),
+                                      const SizedBox(width: 16),
+                                      SizedBox(width: screenWidth * 0.3),
+                                    ],
+                                  ),
                                 ),
                               ),
-                            ),
-                            Expanded(
-                              flex: 4,
-                              child: Padding(
-                                padding: const EdgeInsets.all(10),
-                                child:
-                                    item.vectorImage.isNotEmpty
-                                        ? item.isSvg
-                                            ? SvgPicture.network(item.vectorImage, fit: BoxFit.contain)
-                                            : Image.network(item.vectorImage, fit: BoxFit.contain)
-                                        : const SizedBox.shrink(),
+
+                              // The image placed ABOVE the card, touching the bottom edge
+                              Positioned(
+                                right: 10,
+                                bottom: 0,
+                                child: SizedBox(
+                                  height: 203, // bigger than card to float above
+                                  child:
+                                      item.vectorImage.isNotEmpty
+                                          ? (item.isSvg ? SvgPicture.network(item.vectorImage, fit: BoxFit.contain) : Image.network(item.vectorImage, fit: BoxFit.contain))
+                                          : const SizedBox.shrink(),
+                                ),
                               ),
-                            ),
-                          ],
+                            ],
+                          ),
                         ),
                       );
                     },

@@ -56,6 +56,8 @@ class BookingSummaryPage extends StatelessWidget {
                                   const SizedBox(height: 16),
                                 ],
                               ),
+                            // <<< Add-Ons Section Here >>>
+                            _buildSelectedAddOnsSection(context),
                             const SizedBox(height: 24),
                             _buildTotalPaymentSection(context),
                             const SizedBox(height: 24),
@@ -209,20 +211,63 @@ class BookingSummaryPage extends StatelessWidget {
   }
 
   Widget _buildTotalPaymentSection(BuildContext context) {
-    final totalPrice = packagesController.getSelectedPackagesForBilling().fold<int>(0, (sum, pkg) => sum + (pkg['finalPrice'] as int));
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-      decoration: BoxDecoration(borderRadius: BorderRadius.circular(8)),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          Text('Total Payment', style: Theme.of(context).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w600)),
-          Text(
-            'Rs. ${totalPrice.toString().replaceAllMapped(RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'), (Match m) => '${m[1]},')}',
-            style: Theme.of(context).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w600),
+    final packageTotal = packagesController.packageTotal;
+    final addonsTotal = packagesController.totalExtraAddOnPrice;
+    final subtotal = packagesController.subtotal;
+    final gstAmount = packagesController.gstAmount;
+    final finalAmount = packagesController.finalAmount;
+
+    String formatPrice(double price) {
+      return '₹${price.toStringAsFixed(0).replaceAllMapped(RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'), (match) => '${match[1]},')}';
+    }
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 16.0),
+          child: Text('Bill Summary', style: Theme.of(context).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w700)),
+        ),
+        const SizedBox(height: 12),
+
+        Container(
+          margin: const EdgeInsets.symmetric(horizontal: 16.0),
+          padding: const EdgeInsets.all(16),
+          decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(12), border: Border.all(color: const Color(0xFFE9ECEF))),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              _buildPriceRow(context, 'Package Total', formatPrice(packageTotal)),
+              const SizedBox(height: 8),
+              _buildPriceRow(context, 'Add-ons', formatPrice(addonsTotal)),
+              const SizedBox(height: 8),
+              _buildPriceRow(context, 'Subtotal', formatPrice(subtotal)),
+              const SizedBox(height: 8),
+              _buildPriceRow(context, 'GST (18%)', formatPrice(gstAmount)),
+
+              const Divider(height: 32, color: Color(0xFFE9ECEF)),
+
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text('Total Payment', style: Theme.of(context).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold)),
+                  Text(formatPrice(finalAmount), style: Theme.of(context).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold, color: const Color(0xFF1F73F0))),
+                ],
+              ),
+            ],
           ),
-        ],
-      ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildPriceRow(BuildContext context, String label, String value) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        Text(label, style: Theme.of(context).textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.w500)),
+        Text(value, style: Theme.of(context).textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.w500)),
+      ],
     );
   }
 
@@ -256,6 +301,54 @@ class BookingSummaryPage extends StatelessWidget {
           ),
         ],
       ),
+    );
+  }
+
+  Widget _buildSelectedAddOnsSection(BuildContext context) {
+    final List<Map<String, dynamic>> extraAddons = packagesController.selectedExtraAddons;
+    if (extraAddons.isEmpty) return SizedBox.shrink();
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          children: [
+            Text('Add-ons', style: Theme.of(context).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w700)),
+            const Spacer(),
+            GestureDetector(
+              onTap: () {
+                // Navigate to add-ons selection
+              },
+              child: Text('+ Add', style: TextStyle(fontWeight: FontWeight.w600, color: Theme.of(context).primaryColor)),
+            ),
+          ],
+        ),
+        const SizedBox(height: 12),
+        ...extraAddons.map(
+          (addon) => Container(
+            margin: const EdgeInsets.only(bottom: 12),
+            padding: const EdgeInsets.all(12),
+            decoration: BoxDecoration(color: const Color(0xFFF1F7FF), borderRadius: BorderRadius.circular(12)),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(addon['name'] ?? addon['title'] ?? 'Add-on', style: Theme.of(context).textTheme.bodyLarge?.copyWith(fontWeight: FontWeight.w600)),
+                const SizedBox(height: 4),
+                Row(
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    Expanded(child: Text(addon['description'] ?? '', style: Theme.of(context).textTheme.bodySmall?.copyWith(color: Colors.grey[700]))),
+                    const SizedBox(width: 8),
+                    Text('₹${addon['price']}', style: Theme.of(context).textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.w600, color: Theme.of(context).primaryColor)),
+                    const SizedBox(width: 8),
+                    GestureDetector(onTap: () => packagesController.removeExtraAddon(addon), child: const Icon(Icons.remove, size: 20, color: Colors.black87)),
+                  ],
+                ),
+              ],
+            ),
+          ),
+        ),
+      ],
     );
   }
 
