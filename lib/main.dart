@@ -2,7 +2,7 @@ import 'dart:developer';
 
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
-import 'package:get/get.dart';
+import 'package:get/get.dart'; 
 import 'package:permission_handler/permission_handler.dart';
 import 'package:streammly/controllers/home_screen_controller.dart';
 import 'package:streammly/data/api/api_client.dart';

@@ -104,12 +104,12 @@ class _CustomTimePickerState extends State<CustomTimePicker> {
               return GetBuilder<BookingController>(
                 builder: (bookingController) {
                   bool isAvailable = false;
-                  if (isHour && !bookingController.hours.contains(val)) {
-                    isAvailable = true;
-                  }
-                  if (isMin && !bookingController.minutes.contains(val)) {
-                    isAvailable = true;
-                  }
+                  // if (isHour && !bookingController.hours.contains(val)) {
+                  //   isAvailable = true;
+                  // }
+                  // if (isMin && !bookingController.minutes.contains(val)) {
+                  //   isAvailable = true;
+                  // }
                   return Center(
                     child: Text(
                       val is int
