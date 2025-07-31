@@ -1,3 +1,4 @@
+
 import 'dart:developer';
 
 import 'package:flutter/material.dart';
@@ -5,7 +6,6 @@ import 'package:fluttertoast/fluttertoast.dart';
 import 'package:get/get.dart';
 import 'package:streammly/controllers/booking_form_controller.dart';
 import 'package:streammly/services/theme.dart';
-import 'package:streammly/views/widgets/custom_doodle.dart';
 
 class TimeSlotSelecter extends StatefulWidget {
   final BuildContext context;
@@ -33,66 +33,83 @@ class TimeSlotSelecter extends StatefulWidget {
 class _TimeSlotSelecterState extends State<TimeSlotSelecter> {
   TimeOfDay? tempStartTime;
   TimeOfDay? tempEndTime;
-  late int maxHours = 1;
-
+  int maxHours = 1;
   @override
   void initState() {
+    // TODO: implement initState
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
       tempStartTime = widget.startTime;
       tempEndTime = widget.endTime;
-      maxHours = int.parse(widget.packageHours); // Directly parse packageHours
+      maxHours = int.tryParse(widget.packageHours) ?? 1;
     });
   }
 
   void onTimeSlotTap(TimeOfDay timeSlot) {
-    log('Tapped slot: ${timeSlot.format(context)}');
+    log(
+      'Tapped slot: ${timeSlot.format(context)} , $tempStartTime , $tempStartTime, ${widget.startTime}, ${widget.endTime}',
+    );
 
-    // If the tapped slot is already the start or end time, reset both
     if (tempStartTime == timeSlot || tempEndTime == timeSlot) {
-      log("Resetting selection");
-        
-      Get.snackbar("Error", "Start time and end time cannot be the same.");
-      // Fluttertoast.cancel();
-      // Fluttertoast.showToast(
-      //   msg: "Start time and end time cannot be the same.",
-      //   toastLength: Toast.LENGTH_LONG,
-      // );
-      // );
+      log("one");
+      Fluttertoast.cancel();
+      Fluttertoast.showToast(
+        msg: "Start time and end time cannot be the same.",
+        toastLength: Toast.LENGTH_LONG,
+      );
       setState(() {
+        log('Updating state: start=$tempStartTime, end=$tempEndTime');
         tempStartTime = null;
         tempEndTime = null;
       });
-      return;
+    } else if (tempStartTime == null) {
+      log("two");
+
+      setState(() {
+        tempStartTime = timeSlot;
+      });
+    } else if (tempEndTime == null) {
+      log("three");
+
+      if (TimeCalculations.isTimeBeforeOrEqual(timeSlot, tempStartTime!)) {
+        Fluttertoast.cancel();
+        Fluttertoast.showToast(
+          msg: "End time must be after start time.",
+          toastLength: Toast.LENGTH_LONG,
+        );
+        setState(() {
+          tempEndTime = null;
+          tempStartTime = null;
+        });
+      } else {
+        setState(() {
+          tempEndTime = timeSlot;
+        });
+      }
+    } else {
+      log("five ${timeSlot.toString()}");
+      setState(() {
+        tempStartTime = timeSlot;
+        tempEndTime = null;
+      });
     }
 
-    // Set start time and calculate end time based on package hours
-    setState(() {
-      tempStartTime = timeSlot;
-      tempEndTime = _calculateEndTime(timeSlot);
-    });
-
-    // Validate the selection
     if (tempStartTime != null && tempEndTime != null) {
       final duration = int.parse(
         TimeCalculations.calculateDuration(tempStartTime!, tempEndTime!),
       );
       final durationHours = (duration / 60).ceil();
-
-      if (durationHours != maxHours) {
+      if (durationHours > maxHours) {
         Fluttertoast.cancel();
         Fluttertoast.showToast(
-          msg: "Selected duration must be exactly $maxHours hours.",
+          msg:
+              "Selected duration ($durationHours hours) exceeds package limit ($maxHours hours). Extra charges will apply.",
           toastLength: Toast.LENGTH_LONG,
         );
-        setState(() {
-          tempStartTime = null;
-          tempEndTime = null;
-        });
-      } else if (!_isEndTimeValid(tempEndTime!)) {
+      } else if (durationHours < maxHours) {
         Fluttertoast.cancel();
         Fluttertoast.showToast(
-          msg: "Selected end time is not available in the time slots.",
+          msg: "Please select minimum $maxHours hours",
           toastLength: Toast.LENGTH_LONG,
         );
         setState(() {
@@ -100,376 +117,298 @@ class _TimeSlotSelecterState extends State<TimeSlotSelecter> {
           tempEndTime = null;
         });
       } else {
-        log("Valid selection: start=$tempStartTime, end=$tempEndTime");
+        log("$tempStartTime , $tempEndTime");
         widget.onSlotSelected(tempStartTime, tempEndTime);
       }
     }
   }
 
-  // Calculate end time by adding package hours to start time
-  TimeOfDay? _calculateEndTime(TimeOfDay startTime) {
-    final startMinutes = startTime.hour * 60 + startTime.minute;
-    final durationMinutes = maxHours * 60;
-    final endMinutes = startMinutes + durationMinutes;
-
-    final endHour = (endMinutes ~/ 60) % 24;
-    final endMinute = endMinutes % 60;
-
-    final calculatedEndTime = TimeOfDay(hour: endHour, minute: endMinute);
-
-    // Check if the calculated end time exists in the available slots
-    for (var slot in widget.slots) {
-      if (slot != null &&
-          slot.hour == calculatedEndTime.hour &&
-          slot.minute == calculatedEndTime.minute) {
-        return calculatedEndTime;
-      }
-    }
-
-    return null; // Return null if no matching slot is found
-  }
-
-  // Validate if the end time is in the available slots
-  bool _isEndTimeValid(TimeOfDay endTime) {
-    return widget.slots.any(
-      (slot) =>
-          slot != null &&
-          slot.hour == endTime.hour &&
-          slot.minute == endTime.minute,
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
-    return CustomBackground(
-      child: SizedBox(
-        height: MediaQuery.of(context).size.height * 0.70,
-        child: GetBuilder<BookingController>(
-          builder: (bookingController) {
-            if (bookingController.startTime.isEmpty) {
-              return  Center(
-                child: Padding(
-                  padding: const EdgeInsets.all(20.0),
-                  child: Container(
-                    height: 100,
-                    width: 300,
-                    decoration: BoxDecoration(
-                      color: Colors.red.shade900,
-                      border: Border.all(color: Colors.amber,width: 10),
+    return SizedBox(
+      height: MediaQuery.of(context).size.height * 0.70,
+      child: GetBuilder<BookingController>(
+        builder: (bookingController) {
+          if (bookingController.startTime.isEmpty) {
+            return const Center(
+              child: Text(
+                'No time slots available for the selected date.',
+                style: TextStyle(fontSize: 16, color: Colors.grey),
+              ),
+            );
+          }
+          return StatefulBuilder(
+            builder: (context, setState) {
+              return Column(
+                children: [
+                  Container(
+                    padding: const EdgeInsets.symmetric(vertical: 16.0),
+                    width: double.infinity,
+                    decoration: const BoxDecoration(
+                      borderRadius: BorderRadius.vertical(
+                        top: Radius.circular(20),
+                      ),
+                      color: Colors.white,
                     ),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Icon(Icons.warning, color: Colors.amberAccent,size: 50,),
-                        SizedBox(width: 20,),
-                        Text(
-                          'No time slots available\n for the selected date.',
-                          style: TextStyle(fontSize: 16, color: Colors.white),
-                          textAlign: TextAlign.center,
-                          overflow:TextOverflow.visible,
-                        ),
-                      ],
+                    child: const Text(
+                      'Select Time Slot',
+                      textAlign: TextAlign.center,
+                      style: TextStyle(
+                        fontSize: 20,
+                        fontWeight: FontWeight.bold,
+                      ),
                     ),
                   ),
-                ),
-              );
-            }
-            return StatefulBuilder(
-              builder: (context, setState) {
-                return Column(
-                  children: [
-                    Container(
-                      padding: const EdgeInsets.symmetric(vertical: 16.0),
-                      width: double.infinity,
-                      decoration: const BoxDecoration(
-                        borderRadius: BorderRadius.vertical(
-                          top: Radius.circular(20),
-                        ),
-                        color: Colors.white,
-                      ),
+                  if (bookingController.isLoading)
+                    const Padding(
+                      padding: EdgeInsets.all(80),
+                      child: Center(child: CircularProgressIndicator()),
+                    )
+                  else
+                    Expanded(
+                      
                       child: Padding(
-                        padding: const EdgeInsets.all(12.0),
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            Expanded(
-                              child: Row(
+                        padding: const EdgeInsets.all(16.0),
+                        child: GridView.builder(
+                          gridDelegate:
+                              const SliverGridDelegateWithFixedCrossAxisCount(
+                                crossAxisCount: 4,
+                                mainAxisSpacing: 12,
+                                crossAxisSpacing: 12,
+                                childAspectRatio: 1.2,
+                              ),
+                          itemCount: widget.slots.length,
+                          itemBuilder: (context, slotIndex) {
+                            final timeSlot = widget.slots[slotIndex];
+                            if (timeSlot == null) {
+                              return const SizedBox.shrink();
+                            }
+
+                            final isSelected =
+                                timeSlot == tempStartTime ||
+                                timeSlot == tempEndTime;
+                            final isInRange =
+                                tempStartTime != null &&
+                                tempEndTime != null &&
+                                TimeCalculations.isTimeBeforeOrEqual(
+                                  timeSlot,
+                                  tempEndTime!,
+                                ) &&
+                                TimeCalculations.isTimeAfterOrEqual(
+                                  timeSlot,
+                                  tempStartTime!,
+                                );
+
+                            return GestureDetector(
+                              onTap: () {
+                                log("tapped${timeSlot.toString()}");
+                                onTimeSlotTap(timeSlot);
+                              },
+                              child: Container(
+                                padding: const EdgeInsets.all(2),
+                                margin: const EdgeInsets.all(1),
+                                decoration: BoxDecoration(
+                                  borderRadius: BorderRadius.circular(20),
+                                  
+                                  color:
+                                      isSelected
+                                          ? primaryColor
+                                          : isInRange
+                                          ? Colors.blue[100]
+                                          : Colors.grey.shade300,
+                                          
+                                  border: Border.all(
+                                    color:
+                                        isSelected
+                                            ? Colors.blue.shade100
+                                            : Colors.grey.shade300,
+                                    width: isSelected ? 4.0 : 2.0,
+                                  ),
+                                  boxShadow: [
+                                    BoxShadow(
+                                      color: Colors.black.withOpacity(0.10),
+                                      offset: const Offset(0, 1),
+                                      blurRadius: 1,
+                                    ),
+                                    
+                                  ],
+                                ),
+                                child: Center(
+                                  child: Text(
+                                    timeSlot.format(context),
+                                    style: TextStyle(
+                                      color:
+                                          isSelected
+                                              ? Colors.white
+                                              : Colors.black87,
+                                      fontWeight: FontWeight.w500,
+                                      fontSize: 12
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            );
+                          },
+                        ),
+                      ),
+                    ),
+                  if (!bookingController.isLoading)
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 16),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Expanded(
+                            child: Container(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 16,
+                                vertical: 5,
+                              ),
+                              decoration: BoxDecoration(
+                                color:
+                                    tempStartTime != null
+                                        ? Colors.blue[50]
+                                        : Colors.white,
+                                border: Border.all(color: Colors.blue),
+                                borderRadius: BorderRadius.circular(10),
+                              ),
+                              child: Column(
                                 children: [
-                                  const SizedBox(width: 10),
-                                  Expanded(
-                                    child: Text(
-                                      "Select Time Slot",
-                                      style: Theme.of(
-                                        context,
-                                      ).textTheme.labelLarge?.copyWith(
-                                        fontWeight: FontWeight.bold,
-                                        color: backgroundDark,
-                                        fontSize: 30,
-                                      ),
-                                      textAlign: TextAlign.center,
+                                  Text(
+                                    "START TIME",
+                                    style: Theme.of(
+                                      context,
+                                    ).textTheme.labelLarge?.copyWith(
+                                      color:
+                                          tempStartTime != null
+                                              ? Colors.blue[700]
+                                              : Colors.grey,
+                                              fontWeight: FontWeight.bold
+                                    ),
+                                  ),
+                                  const Divider(),
+                                  Text(
+                                    tempStartTime?.format(context) ??
+                                        'Select start time',
+                                    style: Theme.of(
+                                      context,
+                                    ).textTheme.labelLarge?.copyWith(
+                                      color:
+                                          tempStartTime != null
+                                              ? Colors.black87
+                                              : Colors.grey,
+                                              fontWeight: FontWeight.bold
                                     ),
                                   ),
                                 ],
                               ),
                             ),
-                            GestureDetector(
-                              onTap: () {
-                                Navigator.pop(context);
-                              },
-                              child: const CircleAvatar(
-                                radius: 18,
-                                backgroundColor: Colors.red,
-                                child: Icon(Icons.close, color: Colors.white),
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-                    if (bookingController.isLoading)
-                      const Padding(
-                        padding: EdgeInsets.all(80),
-                        child: Center(child: CircularProgressIndicator()),
-                      )
-                    else
-                      Expanded(
-                        child: Padding(
-                          padding: const EdgeInsets.all(16.0),
-                          child: GridView.builder(
-                            gridDelegate:
-                                const SliverGridDelegateWithFixedCrossAxisCount(
-                                  crossAxisCount: 4,
-                                  mainAxisSpacing: 12,
-                                  crossAxisSpacing: 12,
-                                  childAspectRatio: 1.2,
-                                ),
-                            itemCount: widget.slots.length,
-                            itemBuilder: (context, slotIndex) {
-                              final timeSlot = widget.slots[slotIndex];
-                              if (timeSlot == null) {
-                                return const SizedBox.shrink();
-                              }
-      
-                              final isSelected =
-                                  timeSlot == tempStartTime ||
-                                  timeSlot == tempEndTime;
-                              final isInRange =
-                                  tempStartTime != null &&
-                                  tempEndTime != null &&
-                                  TimeCalculations.isTimeBeforeOrEqual(
-                                    timeSlot,
-                                    tempEndTime!,
-                                  ) &&
-                                  TimeCalculations.isTimeAfterOrEqual(
-                                    timeSlot,
-                                    tempStartTime!,
-                                  );
-      
-                              return GestureDetector(
-                                onTap: () {
-                                  log("tapped${timeSlot.toString()}");
-                                  onTimeSlotTap(timeSlot);
-                                },
-                                child: Container(
-                                  padding: const EdgeInsets.all(2),
-                                  margin: const EdgeInsets.all(1),
-                                  decoration: BoxDecoration(
-                                    borderRadius: BorderRadius.circular(20),
-                                    color:
-                                        isSelected
-                                            ? primaryColor
-                                            : isInRange
-                                            ? Colors.blue[100]
-                                            : Colors.grey.shade300,
-                                    border: Border.all(
-                                      color:
-                                          isSelected
-                                              ? Colors.blue.shade100
-                                              : Colors.grey.shade300,
-                                      width: isSelected ? 4.0 : 2.0,
-                                    ),
-                                    boxShadow: [
-                                      BoxShadow(
-                                        color: Colors.black.withOpacity(0.10),
-                                        offset: const Offset(0, 1),
-                                        blurRadius: 1,
-                                      ),
-                                    ],
-                                  ),
-                                  child: Center(
-                                    child: Text(
-                                      timeSlot.format(context),
-                                      style: TextStyle(
-                                        color:
-                                            isSelected
-                                                ? Colors.white
-                                                : Colors.black87,
-                                        fontWeight: FontWeight.w500,
-                                        fontSize: 12,
-                                      ),
-                                    ),
-                                  ),
-                                ),
-                              );
-                            },
                           ),
-                        ),
-                      ),
-                    if (!bookingController.isLoading)
-                      Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 16),
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            Expanded(
-                              child: Container(
-                                padding: const EdgeInsets.symmetric(
-                                  horizontal: 16,
-                                  vertical: 5,
-                                ),
-                                decoration: BoxDecoration(
-                                  color:
-                                      tempStartTime != null
-                                          ? Colors.blue[50]
-                                          : Colors.white,
-                                  border: Border.all(color: Colors.blue),
-                                  borderRadius: BorderRadius.circular(10),
-                                ),
-                                child: Column(
-                                  children: [
-                                    Text(
-                                      "START TIME",
-                                      style: Theme.of(
-                                        context,
-                                      ).textTheme.labelLarge?.copyWith(
-                                        color:
-                                            tempStartTime != null
-                                                ? Colors.blue[700]
-                                                : Colors.grey,
-                                        fontWeight: FontWeight.bold,
-                                      ),
+                          const SizedBox(width: 15),
+                          Expanded(
+                            child: Container(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 16,
+                                vertical: 5,
+                              ),
+                              decoration: BoxDecoration(
+                                color:
+                                    tempEndTime != null
+                                        ? Colors.blue[50]
+                                        : Colors.white,
+                                border: Border.all(color: Colors.blue),
+                                borderRadius: BorderRadius.circular(10),
+                              ),
+                              child: Column(
+                                children: [
+                                  Text(
+                                    "END TIME",
+                                    style: Theme.of(
+                                      context,
+                                    ).textTheme.labelLarge?.copyWith(
+                                      color:
+                                          tempEndTime != null
+                                              ? Colors.blue[700]
+                                              : Colors.grey,
+                                              fontWeight: FontWeight.bold
                                     ),
-                                    const Divider(),
-                                    Text(
-                                      tempStartTime?.format(context) ??
-                                          'Select start time',
-                                      style: Theme.of(
-                                        context,
-                                      ).textTheme.labelLarge?.copyWith(
-                                        color:
-                                            tempStartTime != null
-                                                ? Colors.black87
-                                                : Colors.grey,
-                                        fontWeight: FontWeight.bold,
-                                      ),
+                                  ),
+                                  const Divider(),
+                                  Text(
+                                    tempEndTime?.format(context) ??
+                                        'Select end time',
+                                    style: Theme.of(
+                                      context,
+                                    ).textTheme.labelLarge?.copyWith(
+                                      color:
+                                          tempEndTime != null
+                                              ? Colors.black87
+                                              : Colors.grey,
+                                              fontWeight: FontWeight.bold
                                     ),
-                                  ],
-                                ),
+                                  ),
+                                ],
                               ),
                             ),
-                            const SizedBox(width: 15),
-                            Expanded(
-                              child: Container(
-                                padding: const EdgeInsets.symmetric(
-                                  horizontal: 16,
-                                  vertical: 5,
-                                ),
-                                decoration: BoxDecoration(
-                                  color:
-                                      tempEndTime != null
-                                          ? Colors.blue[50]
-                                          : Colors.white,
-                                  border: Border.all(color: Colors.blue),
-                                  borderRadius: BorderRadius.circular(10),
-                                ),
-                                child: Column(
-                                  children: [
-                                    Text(
-                                      "END TIME",
-                                      style: Theme.of(
-                                        context,
-                                      ).textTheme.labelLarge?.copyWith(
-                                        color:
-                                            tempEndTime != null
-                                                ? Colors.blue[700]
-                                                : Colors.grey,
-                                        fontWeight: FontWeight.bold,
-                                      ),
-                                    ),
-                                    const Divider(),
-                                    Text(
-                                      tempEndTime?.format(context) ??
-                                          'Select end time',
-                                      style: Theme.of(
-                                        context,
-                                      ).textTheme.labelLarge?.copyWith(
-                                        color:
-                                            tempEndTime != null
-                                                ? Colors.black87
-                                                : Colors.grey,
-                                        fontWeight: FontWeight.bold,
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
+                          ),
+                        ],
                       ),
-                    // if (tempStartTime != null && tempEndTime != null)
-                    //   Container(
-                    //     width: 100,
-                    //     padding: const EdgeInsets.symmetric(
-                    //       horizontal: 10,
-                    //       vertical: 8,
-                    //     ),
-                    //     margin: const EdgeInsets.only(top: 20),
-                    //     decoration: BoxDecoration(
-                    //       color: Colors.black,
-                    //       borderRadius: BorderRadius.circular(10),
-                    //     ),
-                    //     child: Text(
-                    //       '${(int.parse(TimeCalculations.calculateDuration(tempStartTime!, tempEndTime!)) / 60).ceil()} Hours',
-                    //       style: Theme.of(
-                    //         context,
-                    //       ).textTheme.labelLarge?.copyWith(color: Colors.white),
-                    //       textAlign: TextAlign.center,
-                    //     ),
-                    //   ),
-                    const SizedBox(height: 20),
-                    ElevatedButton(
-                      onPressed:
-                          tempStartTime != null && tempEndTime != null
-                              ? () {
-                                widget.onSlotSelected(tempStartTime, tempEndTime);
-                                Navigator.pop(context);
-                              }
-                              : null,
-                      style: ElevatedButton.styleFrom(
-                        fixedSize: Size(300, 50),
-                        backgroundColor:
-                            tempStartTime != null && tempEndTime != null
-                                ? primaryColor
-                                : Colors.grey.shade400,
-                        foregroundColor: Colors.white,
-                        shape: ContinuousRectangleBorder(
-                          borderRadius: BorderRadius.all(Radius.circular(15)),
-                        ),
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 20,
-                          vertical: 10,
-                        ),
-                      ),
-                      child: const Text('Confirm'),
                     ),
-                    const SizedBox(height: 40),
-                  ],
-                );
-              },
-            );
-          },
-        ),
+                  if (tempStartTime != null && tempEndTime != null)
+                    Container(
+                      width: 100,
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 10,
+                        vertical: 8,
+                      ),
+                      margin: const EdgeInsets.only(top: 20),
+                      decoration: BoxDecoration(
+                        color: Colors.black,
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                      child: Text(
+                        '${(int.parse(TimeCalculations.calculateDuration(tempStartTime!, tempEndTime!)) / 60).ceil()} Hours',
+                        style: Theme.of(context).textTheme.labelLarge?.copyWith(color: Colors.white),
+                        textAlign: TextAlign.center,
+                      ),
+                    ),
+                  const SizedBox(height: 20),
+                  ElevatedButton(
+                    
+                    onPressed:
+                        tempStartTime != null && tempEndTime != null
+                            ? () {
+                              widget.onSlotSelected(tempStartTime, tempEndTime);
+                              Navigator.pop(context);
+                            }
+                            : null,
+                            
+                    style: ElevatedButton.styleFrom(
+                      fixedSize: Size(300, 50),
+                      
+                      backgroundColor:
+                          tempStartTime != null && tempEndTime != null
+                              ? primaryColor
+                              : Colors.grey.shade400,
+                      foregroundColor: Colors.white,
+                      shape: ContinuousRectangleBorder(
+                        borderRadius: BorderRadius.all(Radius.circular(15))
+                      ),
+                      padding: const EdgeInsets.symmetric(
+                        
+                        horizontal: 20,
+                        vertical: 10,
+                      ),
+                    ),
+
+                    child: const Text('Confirm'),
+                  ),
+                  const SizedBox(height: 40),
+                ],
+              );
+            },
+          );
+        },
       ),
     );
   }
@@ -520,4 +459,4 @@ List<TimeOfDay?> convertSlots(List<dynamic> apiSlots) {
     }
     return null;
   }).toList();
-}
+} 
