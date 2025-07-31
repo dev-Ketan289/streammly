@@ -1,148 +1,523 @@
-// import 'package:flutter/material.dart';
-// import 'package:intl/intl.dart';
-// import 'package:streammly/models/package/slots_model.dart';
+import 'dart:developer';
 
-// class SlotSelectionSheet extends StatefulWidget {
-//   final List<Slot> slots;
-//   final int minimumDuration;
-//   final void Function(Slot start, Slot end) onSelected;
+import 'package:flutter/material.dart';
+import 'package:fluttertoast/fluttertoast.dart';
+import 'package:get/get.dart';
+import 'package:streammly/controllers/booking_form_controller.dart';
+import 'package:streammly/services/theme.dart';
+import 'package:streammly/views/widgets/custom_doodle.dart';
 
-//   const SlotSelectionSheet({
-//     super.key,
-//     required this.slots,
-//     required this.minimumDuration,
-//     required this.onSelected,
-//   });
+class TimeSlotSelecter extends StatefulWidget {
+  final BuildContext context;
+  final List<TimeOfDay?> slots;
+  final String packageHours;
+  final int index;
+  final TimeOfDay? startTime;
+  final TimeOfDay? endTime;
+  final Function(TimeOfDay? startTime, TimeOfDay? endTime) onSlotSelected;
+  const TimeSlotSelecter({
+    super.key,
+    required this.context,
+    required this.slots,
+    required this.packageHours,
+    required this.index,
+    this.startTime,
+    this.endTime,
+    required this.onSlotSelected,
+  });
 
-//   @override
-//   State<SlotSelectionSheet> createState() => _SlotSelectionSheetState();
-// }
+  @override
+  State<TimeSlotSelecter> createState() => _TimeSlotSelecterState();
+}
 
-// class _SlotSelectionSheetState extends State<SlotSelectionSheet> {
-//   Slot? selectedStart;
-//   Slot? selectedEnd;
+class _TimeSlotSelecterState extends State<TimeSlotSelecter> {
+  TimeOfDay? tempStartTime;
+  TimeOfDay? tempEndTime;
+  late int maxHours = 1;
 
-//   DateTime _parse(String time) {
-//     return DateFormat("HH:mm").parse(time);
-//   }
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      tempStartTime = widget.startTime;
+      tempEndTime = widget.endTime;
+      maxHours = int.parse(widget.packageHours); // Directly parse packageHours
+    });
+  }
 
-//   int _durationInMinutes(Slot start, Slot end) {
-//     // final s = _parse(start.startTime);
-//     // final e = _parse(end.endTime);
-//     return e.difference(s).inMinutes;
-//   }
+  void onTimeSlotTap(TimeOfDay timeSlot) {
+    log('Tapped slot: ${timeSlot.format(context)}');
 
-//   bool _isBeforeOrSame(Slot a, Slot b) =>
-//       // _parse(a.startTime).isBefore(_parse(b.startTime)) || a.startTime == b.startTime;
+    // If the tapped slot is already the start or end time, reset both
+    if (tempStartTime == timeSlot || tempEndTime == timeSlot) {
+      log("Resetting selection");
+        
+      Get.snackbar("Error", "Start time and end time cannot be the same.");
+      // Fluttertoast.cancel();
+      // Fluttertoast.showToast(
+      //   msg: "Start time and end time cannot be the same.",
+      //   toastLength: Toast.LENGTH_LONG,
+      // );
+      // );
+      setState(() {
+        tempStartTime = null;
+        tempEndTime = null;
+      });
+      return;
+    }
 
-//   void _onTap(Slot tappedSlot) {
-//     if (!tappedSlot.isAvailable) return;
+    // Set start time and calculate end time based on package hours
+    setState(() {
+      tempStartTime = timeSlot;
+      tempEndTime = _calculateEndTime(timeSlot);
+    });
 
-//     if (selectedStart == null) {
-//       setState(() => selectedStart = tappedSlot);
-//     } else if (selectedEnd == null) {
-//       if (_isBeforeOrSame(tappedSlot, selectedStart!)) {
-//         setState(() {
-//           selectedStart = tappedSlot;
-//           selectedEnd = null;
-//         });
-//       } else {
-//         final duration = _durationInMinutes(selectedStart!, tappedSlot);
-//         if (duration < widget.minimumDuration) {
-//           ScaffoldMessenger.of(context).showSnackBar(
-//             SnackBar(content: Text("Minimum ${widget.minimumDuration} minutes required")),
-//           );
-//         } else {
-//           setState(() => selectedEnd = tappedSlot);
-//         }
-//       }
-//     } else {
-//       setState(() {
-//         selectedStart = tappedSlot;
-//         selectedEnd = null;
-//       });
-//     }
-//   }
+    // Validate the selection
+    if (tempStartTime != null && tempEndTime != null) {
+      final duration = int.parse(
+        TimeCalculations.calculateDuration(tempStartTime!, tempEndTime!),
+      );
+      final durationHours = (duration / 60).ceil();
 
-//   bool _isInRange(Slot slot) {
-//     if (selectedStart == null || selectedEnd == null) return false;
-//     // final s = _parse(slot.startTime);
-//     // return s.isAfter(_parse(selectedStart!.startTime)) &&
-//     //        s.isBefore(_parse(selectedEnd!.startTime));
-//   }
+      if (durationHours != maxHours) {
+        Fluttertoast.cancel();
+        Fluttertoast.showToast(
+          msg: "Selected duration must be exactly $maxHours hours.",
+          toastLength: Toast.LENGTH_LONG,
+        );
+        setState(() {
+          tempStartTime = null;
+          tempEndTime = null;
+        });
+      } else if (!_isEndTimeValid(tempEndTime!)) {
+        Fluttertoast.cancel();
+        Fluttertoast.showToast(
+          msg: "Selected end time is not available in the time slots.",
+          toastLength: Toast.LENGTH_LONG,
+        );
+        setState(() {
+          tempStartTime = null;
+          tempEndTime = null;
+        });
+      } else {
+        log("Valid selection: start=$tempStartTime, end=$tempEndTime");
+        widget.onSlotSelected(tempStartTime, tempEndTime);
+      }
+    }
+  }
 
-//   @override
-//   Widget build(BuildContext context) {
-//     final slots = widget.slots;
+  // Calculate end time by adding package hours to start time
+  TimeOfDay? _calculateEndTime(TimeOfDay startTime) {
+    final startMinutes = startTime.hour * 60 + startTime.minute;
+    final durationMinutes = maxHours * 60;
+    final endMinutes = startMinutes + durationMinutes;
 
-//     return Padding(
-//       padding: MediaQuery.of(context).viewInsets,
-//       child: SafeArea(
-//         child: Container(
-//           padding: const EdgeInsets.all(16),
-//           child: Column(
-//             mainAxisSize: MainAxisSize.min,
-//             children: [
-//               Text("Select Time Slot", style: Theme.of(context).textTheme.titleLarge),
-//               const SizedBox(height: 12),
-//               GridView.builder(
-//                 shrinkWrap: true,
-//                 itemCount: slots.length,
-//                 physics: const NeverScrollableScrollPhysics(),
-//                 gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-//                   crossAxisCount: 3,
-//                   childAspectRatio: 2.8,
-//                   crossAxisSpacing: 8,
-//                   mainAxisSpacing: 8,
-//                 ),
-//                 itemBuilder: (_, i) {
-//                   final slot = slots[i];
-//                   final isSelected = selectedStart == slot || selectedEnd == slot;
-//                   final inRange = _isInRange(slot);
-//                   final color = !slot.isAvailable
-//                       ? Colors.grey[300]
-//                       : isSelected
-//                           ? Colors.deepPurple
-//                           : inRange
-//                               ? Colors.purple[100]
-//                               : Colors.white;
+    final endHour = (endMinutes ~/ 60) % 24;
+    final endMinute = endMinutes % 60;
 
-//                   return GestureDetector(
-//                     onTap: () => _onTap(slot),
-//                     child: Container(
-//                       decoration: BoxDecoration(
-//                         color: color,
-//                         border: Border.all(color: Colors.grey),
-//                         borderRadius: BorderRadius.circular(8),
-//                       ),
-//                       child: Center(
-//                         child: Text(
-//                           "${slot.startTime} - ${slot.endTime}",
-//                           style: TextStyle(
-//                             color: slot.isAvailable ? Colors.black : Colors.grey,
-//                             fontWeight: FontWeight.w600,
-//                             fontSize: 13,
-//                           ),
-//                         ),
-//                       ),
-//                     ),
-//                   );
-//                 },
-//               ),
-//               const SizedBox(height: 20),
-//               ElevatedButton(
-//                 onPressed: selectedStart != null && selectedEnd != null
-//                     ? () {
-//                         widget.onSelected(selectedStart!, selectedEnd!);
-//                         Navigator.pop(context);
-//                       }
-//                     : null,
-//                 child: const Text("Done"),
-//               ),
-//             ],
-//           ),
-//         ),
-//       ),
-//     );
-//   }
-// }
+    final calculatedEndTime = TimeOfDay(hour: endHour, minute: endMinute);
+
+    // Check if the calculated end time exists in the available slots
+    for (var slot in widget.slots) {
+      if (slot != null &&
+          slot.hour == calculatedEndTime.hour &&
+          slot.minute == calculatedEndTime.minute) {
+        return calculatedEndTime;
+      }
+    }
+
+    return null; // Return null if no matching slot is found
+  }
+
+  // Validate if the end time is in the available slots
+  bool _isEndTimeValid(TimeOfDay endTime) {
+    return widget.slots.any(
+      (slot) =>
+          slot != null &&
+          slot.hour == endTime.hour &&
+          slot.minute == endTime.minute,
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return CustomBackground(
+      child: SizedBox(
+        height: MediaQuery.of(context).size.height * 0.70,
+        child: GetBuilder<BookingController>(
+          builder: (bookingController) {
+            if (bookingController.startTime.isEmpty) {
+              return  Center(
+                child: Padding(
+                  padding: const EdgeInsets.all(20.0),
+                  child: Container(
+                    height: 100,
+                    width: 300,
+                    decoration: BoxDecoration(
+                      color: Colors.red.shade900,
+                      border: Border.all(color: Colors.amber,width: 10),
+                    ),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Icon(Icons.warning, color: Colors.amberAccent,size: 50,),
+                        SizedBox(width: 20,),
+                        Text(
+                          'No time slots available\n for the selected date.',
+                          style: TextStyle(fontSize: 16, color: Colors.white),
+                          textAlign: TextAlign.center,
+                          overflow:TextOverflow.visible,
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              );
+            }
+            return StatefulBuilder(
+              builder: (context, setState) {
+                return Column(
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.symmetric(vertical: 16.0),
+                      width: double.infinity,
+                      decoration: const BoxDecoration(
+                        borderRadius: BorderRadius.vertical(
+                          top: Radius.circular(20),
+                        ),
+                        color: Colors.white,
+                      ),
+                      child: Padding(
+                        padding: const EdgeInsets.all(12.0),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Expanded(
+                              child: Row(
+                                children: [
+                                  const SizedBox(width: 10),
+                                  Expanded(
+                                    child: Text(
+                                      "Select Time Slot",
+                                      style: Theme.of(
+                                        context,
+                                      ).textTheme.labelLarge?.copyWith(
+                                        fontWeight: FontWeight.bold,
+                                        color: backgroundDark,
+                                        fontSize: 30,
+                                      ),
+                                      textAlign: TextAlign.center,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                            GestureDetector(
+                              onTap: () {
+                                Navigator.pop(context);
+                              },
+                              child: const CircleAvatar(
+                                radius: 18,
+                                backgroundColor: Colors.red,
+                                child: Icon(Icons.close, color: Colors.white),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                    if (bookingController.isLoading)
+                      const Padding(
+                        padding: EdgeInsets.all(80),
+                        child: Center(child: CircularProgressIndicator()),
+                      )
+                    else
+                      Expanded(
+                        child: Padding(
+                          padding: const EdgeInsets.all(16.0),
+                          child: GridView.builder(
+                            gridDelegate:
+                                const SliverGridDelegateWithFixedCrossAxisCount(
+                                  crossAxisCount: 4,
+                                  mainAxisSpacing: 12,
+                                  crossAxisSpacing: 12,
+                                  childAspectRatio: 1.2,
+                                ),
+                            itemCount: widget.slots.length,
+                            itemBuilder: (context, slotIndex) {
+                              final timeSlot = widget.slots[slotIndex];
+                              if (timeSlot == null) {
+                                return const SizedBox.shrink();
+                              }
+      
+                              final isSelected =
+                                  timeSlot == tempStartTime ||
+                                  timeSlot == tempEndTime;
+                              final isInRange =
+                                  tempStartTime != null &&
+                                  tempEndTime != null &&
+                                  TimeCalculations.isTimeBeforeOrEqual(
+                                    timeSlot,
+                                    tempEndTime!,
+                                  ) &&
+                                  TimeCalculations.isTimeAfterOrEqual(
+                                    timeSlot,
+                                    tempStartTime!,
+                                  );
+      
+                              return GestureDetector(
+                                onTap: () {
+                                  log("tapped${timeSlot.toString()}");
+                                  onTimeSlotTap(timeSlot);
+                                },
+                                child: Container(
+                                  padding: const EdgeInsets.all(2),
+                                  margin: const EdgeInsets.all(1),
+                                  decoration: BoxDecoration(
+                                    borderRadius: BorderRadius.circular(20),
+                                    color:
+                                        isSelected
+                                            ? primaryColor
+                                            : isInRange
+                                            ? Colors.blue[100]
+                                            : Colors.grey.shade300,
+                                    border: Border.all(
+                                      color:
+                                          isSelected
+                                              ? Colors.blue.shade100
+                                              : Colors.grey.shade300,
+                                      width: isSelected ? 4.0 : 2.0,
+                                    ),
+                                    boxShadow: [
+                                      BoxShadow(
+                                        color: Colors.black.withOpacity(0.10),
+                                        offset: const Offset(0, 1),
+                                        blurRadius: 1,
+                                      ),
+                                    ],
+                                  ),
+                                  child: Center(
+                                    child: Text(
+                                      timeSlot.format(context),
+                                      style: TextStyle(
+                                        color:
+                                            isSelected
+                                                ? Colors.white
+                                                : Colors.black87,
+                                        fontWeight: FontWeight.w500,
+                                        fontSize: 12,
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                              );
+                            },
+                          ),
+                        ),
+                      ),
+                    if (!bookingController.isLoading)
+                      Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 16),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Expanded(
+                              child: Container(
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 16,
+                                  vertical: 5,
+                                ),
+                                decoration: BoxDecoration(
+                                  color:
+                                      tempStartTime != null
+                                          ? Colors.blue[50]
+                                          : Colors.white,
+                                  border: Border.all(color: Colors.blue),
+                                  borderRadius: BorderRadius.circular(10),
+                                ),
+                                child: Column(
+                                  children: [
+                                    Text(
+                                      "START TIME",
+                                      style: Theme.of(
+                                        context,
+                                      ).textTheme.labelLarge?.copyWith(
+                                        color:
+                                            tempStartTime != null
+                                                ? Colors.blue[700]
+                                                : Colors.grey,
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                    ),
+                                    const Divider(),
+                                    Text(
+                                      tempStartTime?.format(context) ??
+                                          'Select start time',
+                                      style: Theme.of(
+                                        context,
+                                      ).textTheme.labelLarge?.copyWith(
+                                        color:
+                                            tempStartTime != null
+                                                ? Colors.black87
+                                                : Colors.grey,
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ),
+                            const SizedBox(width: 15),
+                            Expanded(
+                              child: Container(
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 16,
+                                  vertical: 5,
+                                ),
+                                decoration: BoxDecoration(
+                                  color:
+                                      tempEndTime != null
+                                          ? Colors.blue[50]
+                                          : Colors.white,
+                                  border: Border.all(color: Colors.blue),
+                                  borderRadius: BorderRadius.circular(10),
+                                ),
+                                child: Column(
+                                  children: [
+                                    Text(
+                                      "END TIME",
+                                      style: Theme.of(
+                                        context,
+                                      ).textTheme.labelLarge?.copyWith(
+                                        color:
+                                            tempEndTime != null
+                                                ? Colors.blue[700]
+                                                : Colors.grey,
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                    ),
+                                    const Divider(),
+                                    Text(
+                                      tempEndTime?.format(context) ??
+                                          'Select end time',
+                                      style: Theme.of(
+                                        context,
+                                      ).textTheme.labelLarge?.copyWith(
+                                        color:
+                                            tempEndTime != null
+                                                ? Colors.black87
+                                                : Colors.grey,
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    // if (tempStartTime != null && tempEndTime != null)
+                    //   Container(
+                    //     width: 100,
+                    //     padding: const EdgeInsets.symmetric(
+                    //       horizontal: 10,
+                    //       vertical: 8,
+                    //     ),
+                    //     margin: const EdgeInsets.only(top: 20),
+                    //     decoration: BoxDecoration(
+                    //       color: Colors.black,
+                    //       borderRadius: BorderRadius.circular(10),
+                    //     ),
+                    //     child: Text(
+                    //       '${(int.parse(TimeCalculations.calculateDuration(tempStartTime!, tempEndTime!)) / 60).ceil()} Hours',
+                    //       style: Theme.of(
+                    //         context,
+                    //       ).textTheme.labelLarge?.copyWith(color: Colors.white),
+                    //       textAlign: TextAlign.center,
+                    //     ),
+                    //   ),
+                    const SizedBox(height: 20),
+                    ElevatedButton(
+                      onPressed:
+                          tempStartTime != null && tempEndTime != null
+                              ? () {
+                                widget.onSlotSelected(tempStartTime, tempEndTime);
+                                Navigator.pop(context);
+                              }
+                              : null,
+                      style: ElevatedButton.styleFrom(
+                        fixedSize: Size(300, 50),
+                        backgroundColor:
+                            tempStartTime != null && tempEndTime != null
+                                ? primaryColor
+                                : Colors.grey.shade400,
+                        foregroundColor: Colors.white,
+                        shape: ContinuousRectangleBorder(
+                          borderRadius: BorderRadius.all(Radius.circular(15)),
+                        ),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 20,
+                          vertical: 10,
+                        ),
+                      ),
+                      child: const Text('Confirm'),
+                    ),
+                    const SizedBox(height: 40),
+                  ],
+                );
+              },
+            );
+          },
+        ),
+      ),
+    );
+  }
+}
+
+class TimeCalculations {
+  static String calculateDuration(TimeOfDay startTime, TimeOfDay endTime) {
+    final startMinutes = startTime.hour * 60 + startTime.minute;
+    final endMinutes = endTime.hour * 60 + endTime.minute;
+    final durationMinutes = endMinutes - startMinutes;
+    return durationMinutes.toString();
+  }
+
+  static bool isTimeAfterOrEqual(TimeOfDay time, TimeOfDay reference) {
+    return time.hour > reference.hour ||
+        (time.hour == reference.hour && time.minute >= reference.minute);
+  }
+
+  static bool isTimeBeforeOrEqual(TimeOfDay time, TimeOfDay reference) {
+    return time.hour < reference.hour ||
+        (time.hour == reference.hour && time.minute <= reference.minute);
+  }
+
+  static bool isTimeInBetween(
+    TimeOfDay time,
+    TimeOfDay startTime,
+    TimeOfDay endTime,
+  ) {
+    return time.hour >= startTime.hour &&
+        time.hour <= endTime.hour &&
+        ((time.hour == startTime.hour && time.minute >= startTime.minute) ||
+            (time.hour == endTime.hour && time.minute <= endTime.minute) ||
+            (time.hour > startTime.hour && time.hour < endTime.hour));
+  }
+}
+
+List<TimeOfDay?> convertSlots(List<dynamic> apiSlots) {
+  return apiSlots.map((slot) {
+    if (slot['startTime'] != null) {
+      final parts = slot['startTime'].split(':');
+      if (parts.length >= 2) {
+        final hour = int.tryParse(parts[0]);
+        final minute = int.tryParse(parts[1]);
+        if (hour != null && minute != null) {
+          return TimeOfDay(hour: hour, minute: minute);
+        }
+      }
+    }
+    return null;
+  }).toList();
+}

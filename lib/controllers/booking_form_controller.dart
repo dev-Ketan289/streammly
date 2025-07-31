@@ -103,6 +103,7 @@ class BookingController extends GetxController {
         }
 
         packageFormsData[i] = {
+
           'date': '',
           'startTime': formattedTime,
           'endTime': formattedTime,
