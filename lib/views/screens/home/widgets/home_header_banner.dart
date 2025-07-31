@@ -5,7 +5,9 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:streammly/generated/assets.dart';
+import 'package:streammly/navigation_flow.dart';
 import 'package:streammly/views/screens/common/enter_location_manually.dart';
+import 'package:streammly/views/screens/home/widgets/category/search_screen.dart';
 import 'package:streammly/views/screens/profile/drawer.dart';
 
 import '../../../../controllers/location_controller.dart';
@@ -41,7 +43,10 @@ class _HomeHeaderBannerState extends State<HomeHeaderBanner> {
     if (loopedSlides.isNotEmpty) {
       autoScrollTimer = Timer.periodic(const Duration(seconds: 4), (_) {
         if (pageController.hasClients) {
-          pageController.nextPage(duration: const Duration(milliseconds: 500), curve: Curves.easeInOut);
+          pageController.nextPage(
+            duration: const Duration(milliseconds: 500),
+            curve: Curves.easeInOut,
+          );
         }
       });
     }
@@ -60,7 +65,10 @@ class _HomeHeaderBannerState extends State<HomeHeaderBanner> {
 
     return Container(
       padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 0),
-      decoration: BoxDecoration(color: Colors.transparent, borderRadius: BorderRadius.circular(24)),
+      decoration: BoxDecoration(
+        color: Colors.transparent,
+        borderRadius: BorderRadius.circular(24),
+      ),
       child: Column(
         children: [
           // Location Row
@@ -69,20 +77,41 @@ class _HomeHeaderBannerState extends State<HomeHeaderBanner> {
             child: Obx(
               () => GestureDetector(
                 onTap: () {
-                  Navigator.push(context, MaterialPageRoute(builder: (_) => EnterLocationManuallyScreen()));
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (_) => EnterLocationManuallyScreen(),
+                    ),
+                  );
                 },
                 child: Row(
                   children: [
-                    Icon(Icons.location_on, color: theme.colorScheme.primary, size: 20),
+                    Icon(
+                      Icons.location_on,
+                      color: theme.colorScheme.primary,
+                      size: 20,
+                    ),
                     const SizedBox(width: 8),
                     Expanded(
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text("Current Location", style: GoogleFonts.openSans(color: theme.colorScheme.primary, fontWeight: FontWeight.bold, fontSize: 12)),
                           Text(
-                            locationController.selectedAddress.value.isNotEmpty ? locationController.selectedAddress.value : "Fetching...",
-                            style: GoogleFonts.openSans(color: theme.colorScheme.primary, fontSize: 10),
+                            "Current Location",
+                            style: GoogleFonts.openSans(
+                              color: theme.colorScheme.primary,
+                              fontWeight: FontWeight.bold,
+                              fontSize: 12,
+                            ),
+                          ),
+                          Text(
+                            locationController.selectedAddress.value.isNotEmpty
+                                ? locationController.selectedAddress.value
+                                : "Fetching...",
+                            style: GoogleFonts.openSans(
+                              color: theme.colorScheme.primary,
+                              fontSize: 10,
+                            ),
                             overflow: TextOverflow.ellipsis,
                             maxLines: 1,
                           ),
@@ -102,38 +131,88 @@ class _HomeHeaderBannerState extends State<HomeHeaderBanner> {
               children: [
                 // Menu
                 IconButton(
-                  icon: SvgPicture.asset(Assets.svgMenu, colorFilter: ColorFilter.mode(Colors.blue, BlendMode.srcIn)),
+                  icon: SvgPicture.asset(
+                    Assets.svgMenu,
+                    colorFilter: ColorFilter.mode(Colors.blue, BlendMode.srcIn),
+                  ),
                   onPressed: () {
-                    Get.to(() => const ProfilePage(), transition: Transition.leftToRight, duration: const Duration(milliseconds: 800));
+                    Get.to(
+                      () => const ProfilePage(),
+                      transition: Transition.leftToRight,
+                      duration: const Duration(milliseconds: 800),
+                    );
                   },
                 ),
                 const SizedBox(width: 4),
                 // Search field
                 Expanded(
-                  child: Container(
-                    height: 37,
-                    padding: const EdgeInsets.only(left: 4),
-                    decoration: BoxDecoration(
-                      color: Color(0xFFE2EDF9), // Adapt background to theme
-                      borderRadius: BorderRadius.circular(30),
-                      border: Border.all(color: theme.colorScheme.onSurface.withAlpha(60), width: 1),
-                    ),
-                    child: TextField(
-                      style: TextStyle(color: theme.colorScheme.onSurface),
-                      decoration: InputDecoration(
-                        hintText: "Searching",
-                        hintStyle: GoogleFonts.openSans(color: theme.colorScheme.onSurface.withValues(alpha: 0.6), fontSize: 13),
-                        prefixIcon: Icon(Icons.search, color: theme.colorScheme.primary, size: 23),
-                        border: InputBorder.none,
-                        isDense: true,
-                        contentPadding: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
+                  child: GestureDetector(
+                    onTap: () {
+                      final mainState =
+                          context
+                              .findAncestorStateOfType<NavigationFlowState>();
+                      mainState?.pushToCurrentTab(
+                        SearchScreen(),
+                        hideBottomBar: true,
+                      );
+                    },
+                    child: Container(
+                      height: 37,
+                      padding: const EdgeInsets.only(left: 4),
+                      decoration: BoxDecoration(
+                        color: Color(0xFFE2EDF9), // Adapt background to theme
+                        borderRadius: BorderRadius.circular(30),
+                        border: Border.all(
+                          color: theme.colorScheme.onSurface.withAlpha(60),
+                          width: 1,
+                        ),
+                      ),
+                      child: Row(
+                        children: [
+                          SizedBox(width: 10),
+                          Icon(Icons.search),
+                          SizedBox(width: 5),
+
+                          Text(
+                            "What are you looking for",
+                            style: theme.textTheme.bodySmall?.copyWith(
+                              fontSize: 13,
+                              color: Colors.grey.shade500,
+                            ),
+                            // decoration: InputDecoration(
+                            //   hintText: "Searching",
+                            //   hintStyle: GoogleFonts.openSans(
+                            //     color: theme.colorScheme.onSurface.withValues(
+                            //       alpha: 0.6,
+                            //     ),
+                            //     fontSize: 13,
+                            //   ),
+                            //   prefixIcon: Icon(
+                            //     Icons.search,
+                            //     color: theme.colorScheme.primary,
+                            //     size: 23,
+                            //   ),
+                            //   border: InputBorder.none,
+                            //   isDense: true,
+                            //   contentPadding: const EdgeInsets.symmetric(
+                            //     horizontal: 10,
+                            //     vertical: 10,
+                            //   ),
+                            // ),
+                            textAlign: TextAlign.justify,
+                          ),
+                        ],
                       ),
                     ),
                   ),
                 ),
                 const SizedBox(width: 8),
                 // "Diamond" icon
-                CircleAvatar(radius: 16, backgroundColor: theme.colorScheme.surface, child: SvgPicture.asset(Assets.svgDiamondhome)),
+                CircleAvatar(
+                  radius: 16,
+                  backgroundColor: theme.colorScheme.surface,
+                  child: SvgPicture.asset(Assets.svgDiamondhome),
+                ),
               ],
             ),
           ),
@@ -169,7 +248,10 @@ class _HomeHeaderBannerState extends State<HomeHeaderBanner> {
                       final screenWidth = MediaQuery.of(context).size.width;
 
                       return Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 16,
+                          vertical: 8,
+                        ),
                         child: SizedBox(
                           height: 180, // or larger if needed for your image
                           child: Stack(
@@ -182,20 +264,45 @@ class _HomeHeaderBannerState extends State<HomeHeaderBanner> {
                                 bottom: 0,
                                 child: Container(
                                   height: 164, // less than Stack max height
-                                  decoration: BoxDecoration(color: Colors.blue.shade700, borderRadius: BorderRadius.circular(16)),
-                                  padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+                                  decoration: BoxDecoration(
+                                    color: Colors.blue.shade700,
+                                    borderRadius: BorderRadius.circular(16),
+                                  ),
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 20,
+                                    vertical: 16,
+                                  ),
                                   child: Row(
                                     children: [
                                       Expanded(
                                         flex: 5,
                                         child: Column(
-                                          crossAxisAlignment: CrossAxisAlignment.start,
-                                          mainAxisAlignment: MainAxisAlignment.center,
+                                          crossAxisAlignment:
+                                              CrossAxisAlignment.start,
+                                          mainAxisAlignment:
+                                              MainAxisAlignment.center,
                                           children: [
-                                            SizedBox(height: 30, child: Text(item.title ?? '', style: GoogleFonts.dmSerifDisplay(fontSize: 24, color: Colors.white))),
+                                            SizedBox(
+                                              height: 30,
+                                              child: Text(
+                                                item.title ?? '',
+                                                style:
+                                                    GoogleFonts.dmSerifDisplay(
+                                                      fontSize: 24,
+                                                      color: Colors.white,
+                                                    ),
+                                              ),
+                                            ),
                                             const SizedBox(height: 3),
-                                            if (item.description != null && item.description!.isNotEmpty)
-                                              Text(item.description!, style: GoogleFonts.openSans(fontSize: 13, color: Colors.white70)),
+                                            if (item.description != null &&
+                                                item.description!.isNotEmpty)
+                                              Text(
+                                                item.description!,
+                                                style: GoogleFonts.openSans(
+                                                  fontSize: 13,
+                                                  color: Colors.white70,
+                                                ),
+                                              ),
                                           ],
                                         ),
                                       ),
@@ -211,10 +318,19 @@ class _HomeHeaderBannerState extends State<HomeHeaderBanner> {
                                 right: 10,
                                 bottom: 0,
                                 child: SizedBox(
-                                  height: 203, // bigger than card to float above
+                                  height:
+                                      203, // bigger than card to float above
                                   child:
                                       item.vectorImage.isNotEmpty
-                                          ? (item.isSvg ? SvgPicture.network(item.vectorImage, fit: BoxFit.contain) : Image.network(item.vectorImage, fit: BoxFit.contain))
+                                          ? (item.isSvg
+                                              ? SvgPicture.network(
+                                                item.vectorImage,
+                                                fit: BoxFit.contain,
+                                              )
+                                              : Image.network(
+                                                item.vectorImage,
+                                                fit: BoxFit.contain,
+                                              ))
                                           : const SizedBox.shrink(),
                                 ),
                               ),
@@ -233,10 +349,17 @@ class _HomeHeaderBannerState extends State<HomeHeaderBanner> {
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     IconButton(
-                      icon: const Icon(Icons.arrow_back_ios, color: Colors.black87, size: 18),
+                      icon: const Icon(
+                        Icons.arrow_back_ios,
+                        color: Colors.black87,
+                        size: 18,
+                      ),
                       onPressed: () {
                         if (pageController.hasClients) {
-                          pageController.previousPage(duration: const Duration(milliseconds: 300), curve: Curves.easeInOut);
+                          pageController.previousPage(
+                            duration: const Duration(milliseconds: 300),
+                            curve: Curves.easeInOut,
+                          );
                         }
                       },
                     ),
@@ -251,7 +374,15 @@ class _HomeHeaderBannerState extends State<HomeHeaderBanner> {
                           margin: const EdgeInsets.symmetric(horizontal: 4),
                           width: isActive ? 10 : 6,
                           height: isActive ? 10 : 6,
-                          decoration: BoxDecoration(shape: BoxShape.circle, color: isActive ? theme.colorScheme.primary : theme.colorScheme.primary.withOpacity(0.3)),
+                          decoration: BoxDecoration(
+                            shape: BoxShape.circle,
+                            color:
+                                isActive
+                                    ? theme.colorScheme.primary
+                                    : theme.colorScheme.primary.withOpacity(
+                                      0.3,
+                                    ),
+                          ),
                         );
                       }),
                     ),
@@ -259,10 +390,17 @@ class _HomeHeaderBannerState extends State<HomeHeaderBanner> {
                     const SizedBox(width: 8),
 
                     IconButton(
-                      icon: const Icon(Icons.arrow_forward_ios, color: Colors.black87, size: 18),
+                      icon: const Icon(
+                        Icons.arrow_forward_ios,
+                        color: Colors.black87,
+                        size: 18,
+                      ),
                       onPressed: () {
                         if (pageController.hasClients) {
-                          pageController.nextPage(duration: const Duration(milliseconds: 300), curve: Curves.easeInOut);
+                          pageController.nextPage(
+                            duration: const Duration(milliseconds: 300),
+                            curve: Curves.easeInOut,
+                          );
                         }
                       },
                     ),
