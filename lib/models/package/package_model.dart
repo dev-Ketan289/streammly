@@ -57,33 +57,24 @@ class PackageModel {
       offerEnd: json['offer_end'],
       actionAfterExpiry: json['action_after_expiry'],
       markPopular: json['mark_popular'],
-      variations:
-          (json['packagevariations'] as List<dynamic>? ?? [])
-              .map((v) => Variation.fromJson(v))
-              .toList(),
-      packageExtraQuestions:
-          (json['packageextra_questions'] as List<dynamic>? ?? [])
-              .map((v) => PackageExtraQuestion.fromJson(v))
-              .toList(),
+      variations: (json['packagevariations'] as List<dynamic>? ?? []).map((v) => Variation.fromJson(v)).toList(),
+      packageExtraQuestions: (json['packageextra_questions'] as List<dynamic>? ?? []).map((v) => PackageExtraQuestion.fromJson(v)).toList(),
     );
   }
 }
 
 class Variation {
+  final int id;
   final String duration;
   final String durationType;
   final String amount;
   final String? extraDurationCharge;
 
-  Variation({
-    required this.duration,
-    required this.durationType,
-    required this.amount,
-    this.extraDurationCharge,
-  });
+  Variation({required this.id, required this.duration, required this.durationType, required this.amount, this.extraDurationCharge});
 
   factory Variation.fromJson(Map<String, dynamic> json) {
     return Variation(
+      id: json['id'],
       duration: json['duration']?.toString() ?? '',
       durationType: json['duration_type']?.toString() ?? '',
       amount: json['amount']?.toString() ?? '',
@@ -97,17 +88,9 @@ class PackageExtraQuestion {
   final String questionType;
   final String question;
 
-  PackageExtraQuestion({
-    required this.id,
-    required this.questionType,
-    required this.question,
-  });
+  PackageExtraQuestion({required this.id, required this.questionType, required this.question});
 
   factory PackageExtraQuestion.fromJson(Map<String, dynamic> json) {
-    return PackageExtraQuestion(
-      id: json['id'],
-      questionType: json['question_type'] ?? '',
-      question: json['question'] ?? '',
-    );
+    return PackageExtraQuestion(id: json['id'], questionType: json['question_type'] ?? '', question: json['question'] ?? '');
   }
 }
