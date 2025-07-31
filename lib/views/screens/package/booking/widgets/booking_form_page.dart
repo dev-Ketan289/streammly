@@ -75,6 +75,9 @@ class _PackageFormCardState extends State<PackageFormCard> {
     TextEditingController studioAddController = TextEditingController(text: widget.package['address'] ?? '305/A, Navneet Building, Saivihar Road, Bhandup (W), Mumbai 400078.');
     final controller = Get.find<BookingController>();
     final packageTitle = widget.package['title'] as String;
+    final selectedHours = widget.package['selectedHours'];
+    // List<String> selectedHours = List<String>.from(widget.package['selectedHours'] ?? []);
+    log(selectedHours.toString(), name: "raj");
 
     return Obx(() {
       final form = controller.packageFormsData[widget.index] ?? {};
@@ -182,7 +185,7 @@ class _PackageFormCardState extends State<PackageFormCard> {
                 showTimeSlotSelector(
                   context: context,
                   slots: slots,
-                  packageHours: widget.package["hours"]?.toString() ?? "1",
+                  packageHours: selectedHours.toString(),
                   index: widget.index,
                   startTime: startTime,
                   endTime: endTime,
