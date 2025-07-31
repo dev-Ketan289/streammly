@@ -8,8 +8,20 @@ class UserProfile {
   final int userType;
   final String? dob;
   final String? gender;
+  final double? wallet; // newly added
 
-  UserProfile({required this.id, this.phone, this.name, this.email, required this.status, this.profileImage, required this.userType, this.dob, this.gender});
+  UserProfile({
+    required this.id,
+    this.phone,
+    this.name,
+    this.email,
+    required this.status,
+    this.profileImage,
+    required this.userType,
+    this.dob,
+    this.gender,
+    this.wallet, // newly added
+  });
 
   factory UserProfile.fromJson(Map<String, dynamic> json) {
     return UserProfile(
@@ -22,6 +34,7 @@ class UserProfile {
       userType: json['user_type'],
       dob: json['dob'],
       gender: json['gender'],
+      wallet: json['wallet'] != null ? (json['wallet'] as num).toDouble() : null, // safely parse
     );
   }
 }

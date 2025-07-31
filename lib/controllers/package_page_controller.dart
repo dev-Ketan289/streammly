@@ -231,7 +231,13 @@ class PackagesController extends GetxController {
     final selectedHoursForPackage = selectedHours[index] ?? {pkg["hours"].first};
     final selectedHour = selectedHoursForPackage.first;
     final priceMap = pkg["priceMap"] as Map<String, int>;
-    log(pkg.toString(), name: "ksl;fl;sjslk");
+
+    // Extract the correct variation from the original variation list
+    final List<dynamic> variations = pkg["packagevariations"] ?? [];
+    final matchedVariation = variations.firstWhere((v) => getDurationLabel(v) == selectedHour, orElse: () => null);
+
+    final variationId = matchedVariation != null ? matchedVariation["id"] : null;
+
     final billingPackage = {
       ...pkg,
       'selectedHours': selectedHoursForPackage.toList(),
@@ -243,6 +249,8 @@ class PackagesController extends GetxController {
       'sub_vertical_id': subVerticalId,
       "type_id": pkg['typeId'] is int ? pkg['typeId'] : int.tryParse(pkg['type_id']?.toString() ?? "0") ?? 0,
       'type': pkg['type'],
+      'variationId': variationId, // ✅ New field
+      'selectedHour': selectedHour, // ✅ New field
     };
 
     selectedPackagesForBilling.add(billingPackage);
