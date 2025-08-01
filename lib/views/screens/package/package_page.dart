@@ -23,6 +23,10 @@ class PackagesPage extends StatelessWidget {
     final controller = Get.find<PackagesController>();
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
+      debugPrint('[PACKAGES PAGE] companyId: $companyId');
+      debugPrint('[PACKAGES PAGE] studioId: $studioId');
+      debugPrint('[PACKAGES PAGE] subCategoryId: $subCategoryId');
+      debugPrint('[PACKAGES PAGE] subVerticalId: $subVerticalId');
       controller.initialize(companyId: companyId, subCategoryId: subCategoryId, subVerticalId: subVerticalId, studioId: studioId);
     });
 
@@ -32,7 +36,18 @@ class PackagesPage extends StatelessWidget {
         appBar: AppBar(
           backgroundColor: Colors.transparent,
           elevation: 0,
-          leading: IconButton(icon: const Icon(Icons.arrow_back_ios, color: Colors.black54), onPressed: () => Get.back()),
+          leading: IconButton(
+            icon: const Icon(Icons.arrow_back_ios, color: Colors.black54),
+            onPressed: () {
+              if (Navigator.of(context).canPop()) {
+                Navigator.of(context).pop();
+              } else {
+                // Prevent app exit loop
+                // For example: show a dialog or redirect somewhere safe
+                Get.offAllNamed('/home'); // fallback route
+              }
+            },
+          ),
           title: Center(child: Text("Packages", style: Theme.of(context).textTheme.titleMedium?.copyWith(color: primaryColor, fontWeight: FontWeight.w600))),
           actions: [IconButton(icon: Icon(Icons.filter_alt, color: primaryColor), onPressed: () => Get.bottomSheet(const FilterPage(), isScrollControlled: true))],
         ),

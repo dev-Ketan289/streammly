@@ -417,7 +417,7 @@ class _CompanyLocatorMapScreenState extends State<CompanyLocatorMapScreen> {
                                   return Container(
                                     child: GestureDetector(
                                       onTap: () async {
-                                        await controller.fetchCompanyById(company.id);
+                                        await controller.fetchCompanyById(company.companyId);
                                         final mainState = context.findAncestorStateOfType<NavigationFlowState>();
                                         mainState?.pushToCurrentTab(VendorDescription(company: company), hideBottomBar: true);
                                         // Get.to(() => VendorDescription(company: company));

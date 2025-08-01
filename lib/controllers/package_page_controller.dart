@@ -4,11 +4,20 @@ import 'dart:developer';
 import 'package:get/get.dart';
 import 'package:http/http.dart' as http;
 
+import '../models/company/company_location.dart';
 import '../models/package/free_add_on_model.dart';
 import '../models/package/paid_addon_model.dart';
 
 class PackagesController extends GetxController {
   final double gstPercentage = 18;
+
+  CompanyLocation? _companyLocation;
+
+  CompanyLocation? get companyLocation => _companyLocation;
+
+  void setCompanyLocation(CompanyLocation location) {
+    _companyLocation = location;
+  }
 
   var isGridView = false.obs;
   var expandedStates = <int, bool>{}.obs;
@@ -249,8 +258,10 @@ class PackagesController extends GetxController {
       'sub_vertical_id': subVerticalId,
       "type_id": pkg['typeId'] is int ? pkg['typeId'] : int.tryParse(pkg['type_id']?.toString() ?? "0") ?? 0,
       'type': pkg['type'],
-      'variationId': variationId, // ✅ New field
-      'selectedHour': selectedHour, // ✅ New field
+      'variationId': variationId,
+      'selectedHour': selectedHour,
+      'advanceBookingDays': companyLocation?.company?.advanceBookingDays ?? 0,
+      'companyLocation': companyLocation, // ✅ Add this line**
     };
 
     selectedPackagesForBilling.add(billingPackage);

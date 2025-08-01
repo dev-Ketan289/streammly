@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import '../../models/company/company_location.dart';
 import '../api/api_client.dart';
 
@@ -36,5 +38,17 @@ class CompanyRepo {
   Future<List<dynamic>> fetchSubVerticals({required int companyId, required int subCategoryId}) async {
     final response = await apiClient.postData("api/v1/company/getsubvertical", {"company_id": companyId, "sub_category_id": subCategoryId});
     return response.body['data'];
+  }
+
+  // 5. Fetch specialized sub-verticals for a company
+  Future<List<dynamic>> fetchSpecialized(int companyId) async {
+    final response = await apiClient.postData("api/v1/company/getspecializedin", {"company_id": companyId});
+
+    if (response.statusCode == 200 && response.body['data'] != null) {
+      log(response.body.toString()); // ensure log always takes a String
+      return response.body['data'];
+    } else {
+      throw Exception("Failed to fetch specialized sub-verticals: ${response.body.toString()}"); // fix here
+    }
   }
 }

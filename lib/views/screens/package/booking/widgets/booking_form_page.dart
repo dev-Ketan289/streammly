@@ -117,15 +117,24 @@ class _PackageFormCardState extends State<PackageFormCard> {
                 return null;
               },
               onTap: () async {
-                final selectedDate = await showDatePicker(
-                  context: context,
-                  initialDate: DateTime.now().add(const Duration(days: 2)),
-                  firstDate: DateTime.now().add(const Duration(days: 2)),
-                  lastDate: DateTime(2100),
-                );
+                final int advanceBookingDays = widget.package['advanceBookingDays'] ?? 0;
+
+                // 🧠 Blocked dates (today + next 'n' days)
+                final List<DateTime> blockedDates = List.generate(advanceBookingDays + 1, (i) => DateTime.now().add(Duration(days: i)));
+
+                // 🪵 Log blocked dates
+                for (var date in blockedDates) {
+                  final formatted = "${date.year}-${date.month.toString().padLeft(2, '0')}-${date.day.toString().padLeft(2, '0')}";
+                  log("Blocked Date: $formatted");
+                }
+
+                final DateTime firstAvailableDate = DateTime.now().add(Duration(days: advanceBookingDays + 1));
+
+                final selectedDate = await showDatePicker(context: context, initialDate: firstAvailableDate, firstDate: firstAvailableDate, lastDate: DateTime(2100));
+
                 if (selectedDate != null) {
                   final formatted = "${selectedDate.year}-${selectedDate.month.toString().padLeft(2, '0')}-${selectedDate.day.toString().padLeft(2, '0')}";
-                  log(formatted);
+                  log("Selected Date: $formatted");
                   controller.updatePackageForm(widget.index, 'date', formatted);
                   controller.updatePackageForm(widget.index, 'startTime', '');
                   controller.updatePackageForm(widget.index, 'endTime', '');

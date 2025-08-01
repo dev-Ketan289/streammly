@@ -26,8 +26,8 @@ class BookingController extends GetxController {
   late RxList<int> packagePrices;
   late RxList<bool> showPackageDetails;
 
-              TimeOfDay? selectedStartTime;
-            TimeOfDay? selectedEndTime;
+  TimeOfDay? selectedStartTime;
+  TimeOfDay? selectedEndTime;
 
   // Each entry should be a CompanyLocation (your model) instance corresponding to each selected package.
   List<dynamic> companyLocations = [];
@@ -54,25 +54,12 @@ class BookingController extends GetxController {
   }
 
   /// --- INITIALIZE SELECTED PACKAGES AND PREP FORM DATA ---
-  void initSelectedPackages(
-    List<Map<String, dynamic>> packages,
-    List<dynamic> locations,
-  ) {
+  void initSelectedPackages(List<Map<String, dynamic>> packages, List<dynamic> locations) {
     // locations must be in same order as packages, each with .company.advanceDayBooking etc
     companyLocations = locations;
     WidgetsBinding.instance.addPostFrameCallback((_) {
       selectedPackages.assignAll(packages);
-      packagePrices =
-          List<int>.generate(
-            packages.length,
-            (index) =>
-                int.tryParse(
-                  packages[index]['packagevariations']?[0]?['amount']
-                          ?.toString() ??
-                      '0',
-                ) ??
-                0,
-          ).obs;
+      packagePrices = List<int>.generate(packages.length, (index) => int.tryParse(packages[index]['packagevariations']?[0]?['amount']?.toString() ?? '0') ?? 0).obs;
       showPackageDetails = List<bool>.filled(packages.length, false).obs;
 
       for (int i = 0; i < packages.length; i++) {
@@ -82,28 +69,19 @@ class BookingController extends GetxController {
         final formattedTime = formatTimeOfDay(now);
 
         // --- Use companyLocations to get the advanceDayBooking for this package ---
-        final companyLocation =
-            companyLocations.isNotEmpty ? companyLocations[i] : null;
-        final int advanceBlock =
-            (companyLocation?.company?.advanceDayBooking ?? 0);
-        final DateTime firstAvailableDate = DateTime.now().add(
-          Duration(days: advanceBlock),
-        );
-        final String formattedDate =
-            "${firstAvailableDate.day} ${(firstAvailableDate.month)} ${firstAvailableDate.year}";
+        final companyLocation = companyLocations.isNotEmpty ? companyLocations[i] : null;
+        final int advanceBlock = (companyLocation?.studio?.advanceDayBooking ?? 0);
+        final DateTime firstAvailableDate = DateTime.now().add(Duration(days: advanceBlock));
+        final String formattedDate = "${firstAvailableDate.day} ${(firstAvailableDate.month)} ${firstAvailableDate.year}";
 
         Map<String, String> extraAnswers = {};
-        final extraQuestions =
-            package['extraQuestions'] ??
-            package['packageextra_questions'] ??
-            [];
+        final extraQuestions = package['extraQuestions'] ?? package['packageextra_questions'] ?? [];
         for (var question in extraQuestions) {
           final uniqueKey = "${i}_${question['id']}";
           extraAnswers[uniqueKey] = '';
         }
 
         packageFormsData[i] = {
-
           'date': '',
           'startTime': formattedTime,
           'endTime': formattedTime,
@@ -183,19 +161,13 @@ class BookingController extends GetxController {
 
   /// --- DATE PICKER with COMPANY BLOCK LOGIC ---
   Future<String> selectDate(int index, BuildContext context) async {
-    final companyLocation =
-        companyLocations.isNotEmpty ? companyLocations[index] : null;
-    final int advanceBlock = (companyLocation?.company?.advanceDayBooking ?? 0);
+    final companyLocation = companyLocations.isNotEmpty ? companyLocations[index] : null;
+    final int advanceBlock = (companyLocation?.studio?.advanceDayBooking ?? 0);
 
     final DateTime now = DateTime.now();
-    final DateTime firstAvailableDate = now.add(Duration(days: advanceBlock));
+    final DateTime firstAvailableDate = now.add(Duration(days: advanceBlock + 1));
 
-    final picked = await showDatePicker(
-      context: context,
-      initialDate: firstAvailableDate,
-      firstDate: firstAvailableDate,
-      lastDate: now.add(Duration(days: 365)),
-    );
+    final picked = await showDatePicker(context: context, initialDate: firstAvailableDate, firstDate: firstAvailableDate, lastDate: now.add(Duration(days: 365)));
 
     String formatted = "";
     if (picked != null) {
@@ -262,8 +234,7 @@ class BookingController extends GetxController {
       final packageTitle = selectedPackages[i]['title'];
       if (packageTitle == 'Cuteness' && form['babyInfo'] == null) return false;
       if (packageTitle == 'Moments' && form['theme'] == null) return false;
-      if (packageTitle == 'Wonders' && form['locationPreference'] == null)
-        return false;
+      if (packageTitle == 'Wonders' && form['locationPreference'] == null) return false;
       if (!(form['termsAccepted'] ?? false)) return false;
 
       final extraAnswers = Map<String, String>.from(form['extraAnswers'] ?? {});
@@ -276,10 +247,7 @@ class BookingController extends GetxController {
 
   void submitBooking() {
     if (!canSubmit()) {
-      Get.snackbar(
-        'Error',
-        'Please fill all required fields and accept terms for each package',
-      );
+      Get.snackbar('Error', 'Please fill all required fields and accept terms for each package');
       return;
     }
 
@@ -313,42 +281,24 @@ class BookingController extends GetxController {
   List<Slot> timeSlots = [];
   List<TimeOfDay?> startTime = [];
 
-  Future<ResponseModel?> fetchAvailableSlots({
-    required String companyId,
-    required String date,
-    required String studioId,
-    required String typeId,
-  }) async {
+  Future<ResponseModel?> fetchAvailableSlots({required String companyId, required String date, required String studioId, required String typeId}) async {
     isLoading = true;
     timeSlots = [];
     startTime = [];
     update();
     ResponseModel? responseModel;
     try {
-      Response response = await bookingrepo.fetchAvailableSlots(
-        companyId: companyId,
-        date: date,
-        studioId: studioId,
-        typeId: typeId,
-      );
-      log(
-        "***** Response in updateUserProfile () ******: ${response.bodyString}",
-      );
+      Response response = await bookingrepo.fetchAvailableSlots(companyId: companyId, date: date, studioId: studioId, typeId: typeId);
+      log("***** Response in updateUserProfile () ******: ${response.bodyString}");
       if (response.statusCode == 200) {
-        timeSlots =
-            (response.body["data"]["open_hours"] as List)
-                .map((e) => Slot.fromJson(e))
-                .toList();
+        timeSlots = (response.body["data"]["open_hours"] as List).map((e) => Slot.fromJson(e)).toList();
         for (var i = 0; i < timeSlots.length; i++) {
           startTime.add(timeSlots[i].startTime);
-          if(timeSlots.length-1==i){
+          if (timeSlots.length - 1 == i) {
             startTime.add(timeSlots[i].endTime);
           }
         }
-        responseModel = ResponseModel(
-          true,
-          "User profile updated successfully",
-        );
+        responseModel = ResponseModel(true, "User profile updated successfully");
       } else {
         timeSlots.clear();
         responseModel = ResponseModel(false, "Failed to update user profile");
