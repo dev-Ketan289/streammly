@@ -238,7 +238,7 @@ class _HeaderBannerState extends State<HeaderBanner> {
                                   if (subtitle.isNotEmpty) const SizedBox(height: 6),
                                   if (subtitle.isNotEmpty)
                                     SizedBox(
-                                      height: 45,
+                                      height: 35,
                                       width: 168,
                                       child: Text(
                                         subtitle,
@@ -258,10 +258,10 @@ class _HeaderBannerState extends State<HeaderBanner> {
                               padding: const EdgeInsets.symmetric(horizontal: 16),
                               child: Text(
                                 "Specialized in",
-                                style: theme.textTheme.bodyMedium?.copyWith(color: theme.colorScheme.onPrimary, fontWeight: FontWeight.w600, fontSize: 14),
+                                style: theme.textTheme.bodyLarge?.copyWith(color: theme.colorScheme.onPrimary, fontWeight: FontWeight.bold, fontSize: 14),
                               ),
                             ),
-                            const SizedBox(height: 10),
+                            const SizedBox(height: 5),
                             Padding(
                               padding: const EdgeInsets.symmetric(horizontal: 16),
                               child: Wrap(

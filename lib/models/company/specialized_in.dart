@@ -6,11 +6,6 @@ class SpecializedItem {
 
   factory SpecializedItem.fromJson(Map<String, dynamic> json) {
     final sub = json['subverticals'];
-    if (sub is Map<String, dynamic>) {
-      return SpecializedItem(title: sub['title'] ?? '', image: sub['image'] ?? '');
-    } else {
-      // fallback or log error
-      return SpecializedItem(title: '', image: '');
-    }
+    return SpecializedItem(title: sub['title'] ?? '', image: sub['image'] ?? '');
   }
 }

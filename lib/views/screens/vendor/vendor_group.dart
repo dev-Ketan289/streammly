@@ -60,6 +60,7 @@ class _VendorGroupState extends State<VendorGroup> {
             children: [
               GetBuilder<CompanyController>(
                 builder: (controller) {
+                  final specialized = controller.specialized;
                   return HeaderBanner(
                     height: screenWidth * 0.7,
                     backgroundImage:
@@ -69,6 +70,7 @@ class _VendorGroupState extends State<VendorGroup> {
                     overlayColor: primaryColor.withValues(alpha: 0.6),
                     overrideTitle: widget.studio.company?.companyName,
                     overrideSubtitle: widget.studio.categoryName,
+                    specialized: specialized,
                   );
                 },
               ),
