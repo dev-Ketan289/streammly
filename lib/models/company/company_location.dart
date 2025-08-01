@@ -1,6 +1,6 @@
 import 'package:streammly/services/constants.dart';
 
-import 'Speciality.dart';
+import 'speciality_model.dart';
 
 class CompanyLocation {
   // Primary identifiers and location

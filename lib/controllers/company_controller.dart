@@ -1,16 +1,20 @@
 import 'package:geolocator/geolocator.dart';
 import 'package:get/get.dart';
+import 'package:streammly/models/company/speciality_model.dart';
 
 import '../data/repository/company_repo.dart';
 import '../models/category/sub_category_model.dart';
 import '../models/category/sub_vertical_model.dart';
-import '../models/company/company_location.dart';
+import 'package:streammly/models/company/company_location.dart';
 import '../models/company/specialized_in.dart';
 
 class CompanyController extends GetxController {
   final CompanyRepo companyRepo;
 
   CompanyController({required this.companyRepo});
+
+  final List<Speciality> specialities = [];
+  bool isSpecialityLoading = false;
 
   final List<SpecializedItem> specialized = [];
   bool isSpecializedLoading = false;
@@ -199,6 +203,23 @@ class CompanyController extends GetxController {
       update();
     } finally {
       isSpecializedLoading = false;
+      update();
+    }
+  }
+
+  Future<void> fetchSpecialities() async {
+    try {
+      isSpecialityLoading = true;
+      update();
+
+      final data = await companyRepo.fetchSpecialities();
+      specialities.clear();
+      specialities.addAll(data);
+    } catch (e) {
+      specialities.clear();
+      Get.snackbar("Error", "Could not fetch specialities: ${e.toString()}");
+    } finally {
+      isSpecialityLoading = false;
       update();
     }
   }
