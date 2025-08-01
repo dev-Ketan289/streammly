@@ -1,5 +1,7 @@
 import 'package:streammly/services/constants.dart';
 
+import 'Speciality.dart';
+
 class CompanyLocation {
   // Primary identifiers and location
   final int id;
@@ -95,7 +97,7 @@ class CompanyLocation {
           final subcategory = item['subcategory'];
           if (subcategory != null && subcategory['specialities'] != null) {
             for (var specialityWrapper in subcategory['specialities']) {
-              final speciality = specialityWrapper['speciality']; // ✅ FIXED
+              final speciality = specialityWrapper['speciality'];
               if (speciality != null) {
                 final title = speciality['title'];
                 final image = speciality['image'];
@@ -138,7 +140,13 @@ class CompanyLocation {
       specialities: specialityMap.keys.toList(),
       specialityTitleToImage: specialityMap,
       studioLocation: json['studiolocation'] != null ? StudioLocation.fromJson(json['studiolocation']) : null,
-      company: json['company'] != null ? CompanyDetails.fromJson(json['company']) : null,
+      company:
+          json['company'] != null
+              ? CompanyDetails.fromJson({
+                ...json['company'],
+                'vendorsubcategory': json['company']['vendorsubcategory'], // pass it in manually
+              })
+              : null,
     );
   }
 }
@@ -235,11 +243,10 @@ class CompanyDetails {
   final String? status;
   final String? companyType;
   final String? categoryName;
-
-  // These handle both field and business settings approach:
   final int? advanceBookingDaysRaw;
   final int? advanceAmountPercentageRaw;
-  final List<dynamic>? businessSettings; // get_busniess_setting
+  final List<dynamic>? businessSettings;
+  final List<Speciality> specialities;
 
   CompanyDetails({
     required this.id,
@@ -258,6 +265,7 @@ class CompanyDetails {
     this.advanceBookingDaysRaw,
     this.advanceAmountPercentageRaw,
     this.businessSettings,
+    this.specialities = const [],
   });
 
   factory CompanyDetails.fromJson(Map<String, dynamic> json) {
@@ -272,6 +280,26 @@ class CompanyDetails {
       if (val is double) return val;
       if (val is int) return val.toDouble();
       return double.tryParse(val.toString());
+    }
+
+    List<Speciality> extractSpecialities(dynamic vendorsubcategoryList) {
+      final List<Speciality> result = [];
+
+      if (vendorsubcategoryList is List) {
+        for (final item in vendorsubcategoryList) {
+          final subcategory = item['subcategory'];
+          if (subcategory is Map && subcategory['specialities'] is List) {
+            for (final specWrapper in subcategory['specialities']) {
+              final spec = specWrapper['speciality'];
+              if (spec is Map<String, dynamic>) {
+                result.add(Speciality.fromJson(spec));
+              }
+            }
+          }
+        }
+      }
+
+      return result;
     }
 
     return CompanyDetails(
@@ -291,10 +319,10 @@ class CompanyDetails {
       advanceBookingDaysRaw: parseInt(json['advance_booking_days'] ?? json['advance_day_booking']),
       advanceAmountPercentageRaw: parseInt(json['advance_amount_percentage']),
       businessSettings: json['get_busniess_setting'],
+      specialities: extractSpecialities(json['vendorsubcategory']),
     );
   }
 
-  /// --- Get advance booking days, supporting both direct and business setting ---
   int get advanceBookingDays {
     if (advanceBookingDaysRaw != null) return advanceBookingDaysRaw!;
     if (businessSettings is List) {
@@ -307,7 +335,6 @@ class CompanyDetails {
     return 0;
   }
 
-  /// --- Get advance amount percentage, from raw field or business setting ---
   int get advanceAmountPercentage {
     if (advanceAmountPercentageRaw != null) return advanceAmountPercentageRaw!;
     if (businessSettings is List) {

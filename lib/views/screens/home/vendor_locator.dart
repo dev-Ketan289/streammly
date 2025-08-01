@@ -579,7 +579,7 @@ class _CompanyLocatorMapScreenState extends State<CompanyLocatorMapScreen> {
                                         child: GestureDetector(
                                           onTap: () async {
                                             await controller.fetchCompanyById(
-                                              company.id,
+                                              company.companyId,
                                             );
                                             final mainState =
                                                 context

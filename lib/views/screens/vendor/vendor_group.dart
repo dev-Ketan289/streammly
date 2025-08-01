@@ -13,10 +13,10 @@ import '../package/get_quote_page.dart';
 import '../package/package_page.dart';
 
 class VendorGroup extends StatefulWidget {
-  final CompanyLocation company;
+  final CompanyLocation studio;
   final int subCategoryId;
 
-  const VendorGroup({super.key, required this.company, required this.subCategoryId});
+  const VendorGroup({super.key, required this.studio, required this.subCategoryId});
 
   @override
   State<VendorGroup> createState() => _VendorGroupState();
@@ -36,8 +36,9 @@ class _VendorGroupState extends State<VendorGroup> {
     selectedSubCategoryId = widget.subCategoryId;
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      controller.fetchCompanySubCategories(widget.company.id);
-      controller.fetchSubVerticalCards(widget.company.id, selectedSubCategoryId);
+      controller.fetchCompanySubCategories(widget.studio.companyId);
+      controller.fetchSubVerticalCards(widget.studio.companyId, selectedSubCategoryId);
+      controller.fetchSpecialized(widget.studio.companyId);
     });
   }
 
@@ -57,16 +58,19 @@ class _VendorGroupState extends State<VendorGroup> {
         child: SafeArea(
           child: Column(
             children: [
-              HeaderBanner(
-                height: screenWidth * 0.7,
-                backgroundImage:
-                    (widget.company.company?.bannerImage?.isNotEmpty == true)
-                        ? resolveImageUrl(widget.company.company?.bannerImage)
-                        : 'assets/images/recommended_banner/FocusPointVendor.png',
-                overlayColor: primaryColor.withValues(alpha: 0.6),
-                overrideTitle: widget.company.company?.companyName,
-                overrideSubtitle: widget.company.categoryName,
-                specialities: widget.company.specialities,
+              GetBuilder<CompanyController>(
+                builder: (controller) {
+                  return HeaderBanner(
+                    height: screenWidth * 0.7,
+                    backgroundImage:
+                        (widget.studio.company?.bannerImage?.isNotEmpty == true)
+                            ? resolveImageUrl(widget.studio.company?.bannerImage)
+                            : 'assets/images/recommended_banner/FocusPointVendor.png',
+                    overlayColor: primaryColor.withValues(alpha: 0.6),
+                    overrideTitle: widget.studio.company?.companyName,
+                    overrideSubtitle: widget.studio.categoryName,
+                  );
+                },
               ),
 
               const SizedBox(height: 10),
@@ -95,7 +99,7 @@ class _VendorGroupState extends State<VendorGroup> {
                             setState(() {
                               selectedSubCategoryId = sub.id;
                             });
-                            controller.fetchSubVerticalCards(widget.company.id, sub.id);
+                            controller.fetchSubVerticalCards(widget.studio.id, sub.id);
                           },
                           child: Column(
                             children: [
@@ -181,7 +185,7 @@ class _VendorGroupState extends State<VendorGroup> {
                         final id = int.tryParse(item['id'] ?? '') ?? 0;
 
                         return GestureDetector(
-                          onTap: () => _showShootOptionsBottomSheet(context, label, id, widget.company.id, selectedSubCategoryId),
+                          onTap: () => _showShootOptionsBottomSheet(context, label, id, widget.studio.companyId, selectedSubCategoryId),
                           child: Column(
                             children: [
                               Container(
@@ -248,6 +252,8 @@ class _VendorGroupState extends State<VendorGroup> {
                   label: "Get Quote",
                   onTap: () {
                     Navigator.pop(context);
+                    print('[Get Quote] companyId: $companyId | subCategoryId: $subCategoryId | subVerticalId: $subVerticalId');
+
                     final selectedSubCategory = controller.subCategories.firstWhereOrNull((element) => element.id == subCategoryId);
                     final subCategoryTitle = selectedSubCategory?.title ?? '';
 
@@ -282,10 +288,11 @@ class _VendorGroupState extends State<VendorGroup> {
                   iconColor: Colors.amber,
                   onTap: () {
                     Navigator.pop(context);
+                    print('[Packages] companyId: ${widget.studio.companyId} | subCategoryId: $subCategoryId | subVerticalId: $subVerticalId | studioId: ${widget.studio.id}');
 
                     final mainState = context.findAncestorStateOfType<NavigationFlowState>();
                     mainState?.pushToCurrentTab(
-                      PackagesPage(companyId: companyId, subCategoryId: subCategoryId, subVerticalId: subVerticalId, studioId: widget.company.id),
+                      PackagesPage(companyId: widget.studio.companyId, subCategoryId: subCategoryId, subVerticalId: subVerticalId, studioId: widget.studio.id),
                       hideBottomBar: true,
                     );
 
@@ -317,17 +324,17 @@ class _VendorGroupState extends State<VendorGroup> {
                   alignment: WrapAlignment.center,
                   children: () {
                     final maxToShow = 3;
-                    final specs = widget.company.specialities;
+                    final specs = widget.studio.specialities;
                     final total = specs.length;
                     final shown = specs.take(maxToShow).toList();
                     final remaining = total - maxToShow;
-                    print("Specialities List: ${widget.company.specialities}");
+                    print("Specialities List: ${widget.studio.specialities}");
 
                     List<Widget> widgets = [];
 
                     for (int i = 0; i < shown.length; i++) {
                       final title = shown[i];
-                      final imageUrl = resolveImageUrl(widget.company.getSpecialityImage(title));
+                      final imageUrl = resolveImageUrl(widget.studio.getSpecialityImage(title));
                       final isSvg = (imageUrl.isNotEmpty && imageUrl.toLowerCase().endsWith('.svg'));
                       final words = splitWords(title);
 

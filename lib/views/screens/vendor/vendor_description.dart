@@ -12,8 +12,6 @@ class VendorDescription extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    print("✅ Specialities: ${company.specialities}");
-
     final theme = Theme.of(context);
     final screenWidth = MediaQuery.of(context).size.width;
     final horizontalPadding = screenWidth * 0.05;
@@ -25,7 +23,7 @@ class VendorDescription extends StatelessWidget {
     if (bannerUrl != null && bannerUrl.isNotEmpty && (Uri.tryParse(bannerUrl)?.hasAbsolutePath ?? false)) {
       bannerWidget = Image.network(
         bannerUrl,
-        fit: BoxFit.cover,
+        fit: BoxFit.fitHeight,
         errorBuilder: (context, error, stackTrace) {
           return Image.asset('assets/images/newBorn.jpg', fit: BoxFit.cover);
         },

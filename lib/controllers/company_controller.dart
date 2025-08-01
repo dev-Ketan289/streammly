@@ -5,11 +5,15 @@ import '../data/repository/company_repo.dart';
 import '../models/category/sub_category_model.dart';
 import '../models/category/sub_vertical_model.dart';
 import '../models/company/company_location.dart';
+import '../models/company/specialized_in.dart';
 
 class CompanyController extends GetxController {
   final CompanyRepo companyRepo;
 
   CompanyController({required this.companyRepo});
+
+  final List<SpecializedItem> specialized = [];
+  bool isSpecializedLoading = false;
 
   var companies = <CompanyLocation>[];
   var isLoading = true;
@@ -174,6 +178,28 @@ class CompanyController extends GetxController {
     } catch (e) {
       Get.snackbar("Error", "Could not load vendor $companyId: $e");
       return null;
+    }
+  }
+
+  Future<void> fetchSpecialized(int companyId) async {
+    try {
+      isSpecializedLoading = true;
+      update();
+
+      final data = await companyRepo.fetchSpecialized(companyId);
+      specialized.clear();
+      specialized.addAll(data.map((e) => SpecializedItem.fromJson(e)));
+
+      print("🔍 Specialized fetched: ${specialized.map((s) => s.title).toList()}");
+
+      update();
+    } catch (e) {
+      specialized.clear();
+      Get.snackbar("Error", "Could not fetch specialization: ${e.toString()}"); // fix here
+      update();
+    } finally {
+      isSpecializedLoading = false;
+      update();
     }
   }
 

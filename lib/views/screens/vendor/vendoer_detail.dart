@@ -28,10 +28,12 @@ class _VendorDetailScreenState extends State<VendorDetailScreen> {
   @override
   void initState() {
     super.initState();
-    companyController.fetchCompanySubCategories(widget.studio.id);
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      companyController.fetchCompanySubCategories(widget.studio.companyId);
+      companyController.fetchSpecialized(widget.studio.companyId);
+    });
   }
 
-  /// Helper function to handle full URL or relative path for images
   String resolveImageUrl(String? url) {
     if (url == null || url.isEmpty) return '';
     return url.startsWith('http') ? url : url.replaceFirst(RegExp(r'^/'), '');
@@ -41,7 +43,7 @@ class _VendorDetailScreenState extends State<VendorDetailScreen> {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final screenWidth = MediaQuery.of(context).size.width;
-    final horizontalPadding = screenWidth * 0.04; // 4% padding for better scaling
+    final horizontalPadding = screenWidth * 0.04;
 
     return Scaffold(
       body: CustomBackground(
@@ -51,25 +53,29 @@ class _VendorDetailScreenState extends State<VendorDetailScreen> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 /// ---- Header Banner ----
-                HeaderBanner(
-                  height: screenWidth * 0.7,
-                  backgroundImage:
-                      (widget.studio.company?.bannerImage?.isNotEmpty == true)
-                          ? resolveImageUrl(widget.studio.company?.bannerImage)
-                          : 'assets/images/recommended_banner/FocusPointVendor.png',
-                  overlayColor: primaryColor.withValues(alpha: 0.6),
-                  overrideTitle: widget.studio.company?.companyName,
-                  overrideSubtitle: widget.studio.categoryName,
-
-                  specialities: widget.studio.specialities,
+                GetBuilder<CompanyController>(
+                  builder: (controller) {
+                    final specialized = controller.specialized;
+                    return HeaderBanner(
+                      height: screenWidth * 0.7,
+                      backgroundImage:
+                          (widget.studio.company?.bannerImage?.isNotEmpty == true)
+                              ? resolveImageUrl(widget.studio.company?.bannerImage)
+                              : 'assets/images/recommended_banner/FocusPointVendor.png',
+                      overlayColor: primaryColor.withValues(alpha: 0.6),
+                      overrideTitle: widget.studio.company?.companyName,
+                      overrideSubtitle: widget.studio.categoryName,
+                      specialized: specialized,
+                    );
+                  },
                 ),
 
                 SizedBox(height: screenWidth * 0.02),
 
                 /// ---- Category Scroller (Subcategories) ----
                 GetBuilder<CompanyController>(
-                  builder: (_) {
-                    final subs = companyController.subCategories;
+                  builder: (controller) {
+                    final subs = controller.subCategories;
 
                     if (subs.isEmpty) {
                       return CategoryScroller(
@@ -77,7 +83,7 @@ class _VendorDetailScreenState extends State<VendorDetailScreen> {
                           CategoryItem(
                             label: 'Baby Shoot',
                             imagePath: 'assets/images/category/vendor_category/img.png',
-                            onTap: () => Get.to(VendorGroup(company: widget.studio, subCategoryId: 2)),
+                            onTap: () => Get.to(VendorGroup(studio: widget.studio, subCategoryId: 2)),
                           ),
                           CategoryItem(label: 'Wedding Shoot', imagePath: 'assets/images/category/vendor_category/img.png', onTap: () {}),
                           CategoryItem(label: 'Portfolio Shoot', imagePath: 'assets/images/category/vendor_category/img.png', onTap: () {}),
@@ -95,14 +101,8 @@ class _VendorDetailScreenState extends State<VendorDetailScreen> {
                               imagePath: resolveImageUrl(sub.image),
                               onTap: () {
                                 final mainState = context.findAncestorStateOfType<NavigationFlowState>();
-                                mainState?.pushToCurrentTab(VendorGroup(company: widget.studio, subCategoryId: sub.id), hideBottomBar: false);
+                                mainState?.pushToCurrentTab(VendorGroup(studio: widget.studio, subCategoryId: sub.id), hideBottomBar: false);
                               },
-                              // () => Get.to(
-                              //   VendorGroup(
-                              //     company: widget.company,
-                              //     subCategoryId: sub.id,
-                              //   ),
-                              // ),
                             );
                           }).toList(),
                     );
