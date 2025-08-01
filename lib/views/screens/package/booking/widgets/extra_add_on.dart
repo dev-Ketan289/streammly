@@ -108,7 +108,7 @@ class _ExtraAddOnsPageState extends State<ExtraAddOnsPage> {
                         Widget imageWidget;
                         if (item.coverImage != null && item.coverImage!.isNotEmpty) {
                           final uri = Uri.tryParse(item.coverImage!);
-                          final url = (uri != null && uri.isAbsolute) ? item.coverImage! : "http://192.168.1.113:8000/${item.coverImage!}";
+                          final url = (uri != null && uri.isAbsolute) ? item.coverImage! : "http://admin.streammly.com/${item.coverImage!}";
                           imageWidget = Image.network(
                             url,
                             height: 50,

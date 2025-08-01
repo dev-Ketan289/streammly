@@ -535,30 +535,37 @@ class _CompanyLocatorMapScreenState extends State<CompanyLocatorMapScreen> {
                         child: Column(
                           children: [
                             // Page indicator
-                            Container(
-                              padding: const EdgeInsets.symmetric(vertical: 8),
-                              child: Row(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: List.generate(
-                                  controller.companies.length,
-                                  (index) => AnimatedContainer(
-                                    duration: const Duration(milliseconds: 200),
-                                    width: _currentPageIndex == index ? 12 : 8,
-                                    height: _currentPageIndex == index ? 12 : 8,
-                                    margin: const EdgeInsets.symmetric(
-                                      horizontal: 4,
-                                    ),
-                                    decoration: BoxDecoration(
-                                      shape: BoxShape.circle,
-                                      color:
-                                          _currentPageIndex == index
-                                              ? Colors.blue
-                                              : Colors.grey.withOpacity(0.5),
-                                    ),
-                                  ),
-                                ),
-                              ),
-                            ),
+                            // Container(
+                            //   padding: const EdgeInsets.symmetric(vertical: 8),
+                            //   child: SingleChildScrollView(
+                            //     scrollDirection: Axis.horizontal,
+                            //     child: Row(
+                            //       mainAxisAlignment: MainAxisAlignment.center,
+                            //       children: List.generate(
+                            //         controller.companies.length,
+                            //         (index) => AnimatedContainer(
+                            //           duration: const Duration(
+                            //             milliseconds: 200,
+                            //           ),
+                            //           width:
+                            //               _currentPageIndex == index ? 12 : 8,
+                            //           height:
+                            //               _currentPageIndex == index ? 12 : 8,
+                            //           margin: const EdgeInsets.symmetric(
+                            //             horizontal: 4,
+                            //           ),
+                            //           decoration: BoxDecoration(
+                            //             shape: BoxShape.circle,
+                            //             color:
+                            //                 _currentPageIndex == index
+                            //                     ? Colors.blue
+                            //                     : Colors.grey.withOpacity(0.5),
+                            //           ),
+                            //         ),
+                            //       ),
+                            //     ),
+                            //   ),
+                            // ),
 
                             // Company cards slider
                             Expanded(
