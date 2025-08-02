@@ -1,8 +1,6 @@
 import 'dart:convert';
-
 import 'package:get/get.dart';
 import 'package:http/http.dart' as http;
-
 import '../models/package/free_add_on_model.dart';
 import '../models/package/paid_addon_model.dart';
 
