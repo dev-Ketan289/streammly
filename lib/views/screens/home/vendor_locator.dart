@@ -400,7 +400,7 @@ class _CompanyLocatorMapScreenState extends State<CompanyLocatorMapScreen> {
           } else if (isFilterSelected) {
             return FilterCompanyListScreen(
               onTap: () {
-                toggleSelection("vendor");
+                isFilterSelected = false;
                 _loadData();
               },
             );

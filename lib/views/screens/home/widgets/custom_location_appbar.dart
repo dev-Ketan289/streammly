@@ -19,7 +19,7 @@ class CustomLocAppBar extends StatelessWidget implements PreferredSizeWidget {
     this.isFilterSelected = false,
     this.isVendorSelected = false,
     this.subtitle = '',
-    required this.companyCount ,
+    required this.companyCount,
   });
 
   @override
@@ -110,6 +110,7 @@ class CustomLocAppBar extends StatelessWidget implements PreferredSizeWidget {
               Center(
                 child: Container(
                   width: 420,
+                  height: 40,
                   padding: const EdgeInsets.symmetric(
                     horizontal: 20,
                     vertical: 8,
