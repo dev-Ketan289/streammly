@@ -285,7 +285,7 @@ class _HomeHeaderBannerState extends State<HomeHeaderBanner> {
                                             SizedBox(
                                               height: 30,
                                               child: Text(
-                                                item.title ?? '',
+                                                item.title,
                                                 style:
                                                     GoogleFonts.dmSerifDisplay(
                                                       fontSize: 24,
@@ -294,10 +294,9 @@ class _HomeHeaderBannerState extends State<HomeHeaderBanner> {
                                               ),
                                             ),
                                             const SizedBox(height: 3),
-                                            if (item.description != null &&
-                                                item.description!.isNotEmpty)
+                                            if (item.description.isNotEmpty)
                                               Text(
-                                                item.description!,
+                                                item.description,
                                                 style: GoogleFonts.openSans(
                                                   fontSize: 13,
                                                   color: Colors.white70,
@@ -319,7 +318,9 @@ class _HomeHeaderBannerState extends State<HomeHeaderBanner> {
                                 bottom: 0,
                                 child: SizedBox(
                                   height:
-                                      203, // bigger than card to float above
+                                      203,
+                                  width:
+                                      163,// bigger than card to float above
                                   child:
                                       item.vectorImage.isNotEmpty
                                           ? (item.isSvg
@@ -379,7 +380,7 @@ class _HomeHeaderBannerState extends State<HomeHeaderBanner> {
                             color:
                                 isActive
                                     ? theme.colorScheme.primary
-                                    : theme.colorScheme.primary.withOpacity(
+                                    : theme.colorScheme.primary.withValues(alpha:
                                       0.3,
                                     ),
                           ),

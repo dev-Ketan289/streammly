@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:streammly/services/theme.dart';
-import 'package:streammly/views/screens/package/widgets/package%20header.dart';
+import 'package:streammly/views/screens/package/widgets/package header.dart';
 import 'package:streammly/views/screens/package/widgets/package_bottom_summary.dart';
 import 'package:streammly/views/screens/package/widgets/package_card_grid.dart';
 import 'package:streammly/views/screens/package/widgets/package_card_list.dart';
@@ -16,18 +16,30 @@ class PackagesPage extends StatelessWidget {
   final int subVerticalId;
   final int studioId;
 
-  const PackagesPage({super.key, required this.companyId, required this.subCategoryId, required this.subVerticalId, required this.studioId});
+  const PackagesPage({
+    super.key,
+    required this.companyId,
+    required this.subCategoryId,
+    required this.subVerticalId,
+    required this.studioId,
+  });
 
   @override
   Widget build(BuildContext context) {
     final controller = Get.find<PackagesController>();
 
+    // Only call .initialize() once to avoid refetch on every rebuild
     WidgetsBinding.instance.addPostFrameCallback((_) {
       debugPrint('[PACKAGES PAGE] companyId: $companyId');
       debugPrint('[PACKAGES PAGE] studioId: $studioId');
       debugPrint('[PACKAGES PAGE] subCategoryId: $subCategoryId');
       debugPrint('[PACKAGES PAGE] subVerticalId: $subVerticalId');
-      controller.initialize(companyId: companyId, subCategoryId: subCategoryId, subVerticalId: subVerticalId, studioId: studioId);
+      controller.initialize(
+        companyId: companyId,
+        subCategoryId: subCategoryId,
+        subVerticalId: subVerticalId,
+        studioId: studioId,
+      );
     });
 
     return CustomBackground(
@@ -43,26 +55,50 @@ class PackagesPage extends StatelessWidget {
                 Navigator.of(context).pop();
               } else {
                 // Prevent app exit loop
-                // For example: show a dialog or redirect somewhere safe
-                Get.offAllNamed('/home'); // fallback route
+                Get.offAllNamed('/home');
               }
             },
           ),
-          title: Center(child: Text("Packages", style: Theme.of(context).textTheme.titleMedium?.copyWith(color: primaryColor, fontWeight: FontWeight.w600))),
-          actions: [IconButton(icon: Icon(Icons.filter_alt, color: primaryColor), onPressed: () => Get.bottomSheet(const FilterPage(), isScrollControlled: true))],
+          title: Center(
+            child: Text(
+              "Packages",
+              style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                color: primaryColor,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+          ),
+          actions: [
+            IconButton(
+              icon: Icon(Icons.filter_alt, color: primaryColor),
+              onPressed: () => Get.bottomSheet(
+                const FilterPage(),
+                isScrollControlled: true,
+              ),
+            )
+          ],
         ),
-        body: Obx(() {
-          if (controller.isLoading.value) {
-            return const Center(child: CircularProgressIndicator());
-          }
-          return Column(
-            children: [
-              PackagesHeader(controller: controller),
-              Expanded(child: controller.isGridView.value ? PackagesGridView(controller: controller) : PackagesListView(controller: controller)),
-            ],
-          );
-        }),
-        bottomNavigationBar: PackagesBottomBar(controller: controller, companyLocations: []),
+        body: GetBuilder<PackagesController>(
+          builder: (controller) {
+            if (controller.isLoading) {
+              return const Center(child: CircularProgressIndicator());
+            }
+            return Column(
+              children: [
+                PackagesHeader(controller: controller),
+                Expanded(
+                  child: controller.isGridView
+                      ? PackagesGridView(controller: controller)
+                      : PackagesListView(controller: controller),
+                ),
+              ],
+            );
+          },
+        ),
+        bottomNavigationBar: GetBuilder<PackagesController>(
+          builder: (controller) =>
+              PackagesBottomBar(controller: controller, companyLocations: []),
+        ),
       ),
     );
   }

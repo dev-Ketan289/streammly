@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:streammly/services/constants.dart';
 
 import '../../../../../controllers/package_page_controller.dart'; // Update import as needed
 
@@ -28,24 +29,24 @@ class _ExtraAddOnsPageState extends State<ExtraAddOnsPage> {
   }
 
   void _onContinuePressed() {
-    final addons = packagesController.paidAddOnResponse.value?.addons ?? [];
+    final addons = packagesController.paidAddOnResponse?.addons ?? [];
     final selectedAddons = _selectedIndexes.map((i) => addons[i]).toList();
 
     // Build the result map to return
     final result =
-        selectedAddons.map((addon) {
-          return {
-            'id': addon.id,
-            'title': addon.productTitle,
-            'description': addon.description,
-            'image': addon.coverImage,
-            'price': addon.price,
-            'mainTitle': addon.mainTitle,
-            'usageType': addon.usageType,
-          };
-        }).toList();
+    selectedAddons.map((addon) {
+      return {
+        'id': addon.id,
+        'title': addon.productTitle,
+        'description': addon.description,
+        'image': addon.coverImage,
+        'price': addon.price,
+        'mainTitle': addon.mainTitle,
+        'usageType': addon.usageType,
+      };
+    }).toList();
 
-    packagesController.selectedExtraAddons.value = result;
+    packagesController.selectedExtraAddons = result;
 
     Navigator.pop(context, result);
   }
@@ -68,9 +69,9 @@ class _ExtraAddOnsPageState extends State<ExtraAddOnsPage> {
         child: Container(
           padding: const EdgeInsets.all(16),
           decoration: BoxDecoration(color: theme.cardColor, borderRadius: BorderRadius.circular(12), boxShadow: [BoxShadow(color: Colors.grey.withAlpha(30), blurRadius: 8)]),
-          child: Obx(() {
-            final loading = packagesController.isFetchingPaidAddOns.value;
-            final resp = packagesController.paidAddOnResponse.value;
+          child: GetBuilder<PackagesController>(builder: (controller) {
+            final loading = controller.isFetchingPaidAddOns;
+            final resp = controller.paidAddOnResponse;
             final items = resp?.addons ?? [];
             final mainTitle = (resp?.mainTitles.isNotEmpty == true) ? resp!.mainTitles.first : "Extra Add-Ons";
 
@@ -108,7 +109,9 @@ class _ExtraAddOnsPageState extends State<ExtraAddOnsPage> {
                         Widget imageWidget;
                         if (item.coverImage != null && item.coverImage!.isNotEmpty) {
                           final uri = Uri.tryParse(item.coverImage!);
-                          final url = (uri != null && uri.isAbsolute) ? item.coverImage! : "http://admin.streammly.com/${item.coverImage!}";
+                          final url = (uri != null && uri.hasScheme)
+                              ? item.coverImage!
+                              : "${AppConstants.baseUrl}/${item.coverImage!}";
                           imageWidget = Image.network(
                             url,
                             height: 50,

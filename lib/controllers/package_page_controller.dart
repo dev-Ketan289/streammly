@@ -17,25 +17,26 @@ class PackagesController extends GetxController {
 
   void setCompanyLocation(CompanyLocation location) {
     _companyLocation = location;
+    update();
   }
 
-  var isGridView = false.obs;
-  var expandedStates = <int, bool>{}.obs;
-  var selectedHours = <int, Set<String>>{}.obs;
+  bool isGridView = false;
+  Map<int, bool> expandedStates = {};
+  Map<int, Set<String>> selectedHours = {};
 
-  var selectedPackagesForBilling = <Map<String, dynamic>>[].obs;
-  var selectedPackageIndices = <int>{}.obs;
+  List<Map<String, dynamic>> selectedPackagesForBilling = [];
+  Set<int> selectedPackageIndices = {};
 
-  RxList<Map<String, dynamic>> packages = <Map<String, dynamic>>[].obs;
-  RxBool isLoading = false.obs;
+  List<Map<String, dynamic>> packages = [];
+  bool isLoading = false;
 
-  RxList<Map<String, dynamic>> popularPackagesList = <Map<String, dynamic>>[].obs;
+  List<Map<String, dynamic>> popularPackagesList = [];
 
-  RxList<Map<String, dynamic>> productsInPackageList = <Map<String, dynamic>>[].obs;
+  List<Map<String, dynamic>> productsInPackageList = [];
 
   // New: Free Item & Extra Add-On Selections
-  RxMap<String, dynamic> selectedFreeItem = <String, dynamic>{}.obs;
-  RxList<Map<String, dynamic>> selectedExtraAddons = <Map<String, dynamic>>[].obs;
+  Map<String, dynamic> selectedFreeItem = {};
+  List<Map<String, dynamic>> selectedExtraAddons = [];
 
   late int companyId;
   late int subCategoryId;
@@ -59,12 +60,13 @@ class PackagesController extends GetxController {
   }
 
   Future<void> fetchPackages() async {
-    isLoading.value = true;
+    isLoading = true;
     packages.clear();
+    update();
 
     try {
       final response = await http.post(
-        Uri.parse("http://admin.streammly.com/api/v1/package/getpackages"),
+        Uri.parse("https://admin.streammly.com/api/v1/package/getpackages"),
         headers: {"Content-Type": "application/json"},
         body: jsonEncode({"company_id": companyId, "subcategory_id": subCategoryId, "sub_vertical_id": subVerticalId, 'studio_id': studioId}),
       );
@@ -76,35 +78,35 @@ class PackagesController extends GetxController {
         final List data = jsonBody["data"] ?? [];
         final filteredData = data.where((pkg) => pkg['sub_vertical_id'].toString() == subVerticalId.toString() || subVerticalId == 0).toList();
 
-        packages.assignAll(
-          filteredData.map<Map<String, dynamic>>((pkg) {
-            final List<dynamic>? variations = pkg["packagevariations"];
-            final firstVariation = (variations != null && variations.isNotEmpty) ? variations[0] : null;
+        packages = filteredData.map<Map<String, dynamic>>((pkg) {
+          final List<dynamic>? variations = pkg["packagevariations"];
+          final firstVariation = (variations != null && variations.isNotEmpty) ? variations[0] : null;
 
-            final List<String> hours = variations != null ? variations.map<String>((v) => getDurationLabel(v)).toList() : ["1hr", "2hr", "3hr"];
+          final List<String> hours = variations != null ? variations.map<String>((v) => getDurationLabel(v)).toList() : ["1hr", "2hr", "3hr"];
 
-            final priceMap = {for (var v in variations ?? []) getDurationLabel(v): int.tryParse(v["amount"]?.toString() ?? "0") ?? 0};
+          final priceMap = {for (var v in variations ?? []) getDurationLabel(v): int.tryParse(v["amount"]?.toString() ?? "0") ?? 0};
 
-            return {
-              "title": pkg["title"] ?? "",
-              "type": pkg["type"] ?? "N/A",
-              "typeId": pkg['type_id'],
-              "price": priceMap[getDurationLabel(firstVariation ?? {})] ?? 0,
-              "priceMap": priceMap,
-              "hours": hours,
-              "highlight": pkg["short_description"] ?? "",
-              "shortDescription": pkg["long_description"] ?? "",
-              "fullDescription": pkg["long_description"] ?? "",
-              "termsAndCondition": pkg["terms_and_condition"] ?? "",
-              "specialOffer": (pkg["status"] ?? "").toString().toLowerCase() == "active",
-              "packageIndex": data.indexOf(pkg),
-              "extraQuestions": pkg["packageextra_questions"] ?? [],
-              "packageId": pkg["id"] ?? 0,
-              "companyId": companyId,
-            };
-          }).toList(),
-        );
+          return {
+            "title": pkg["title"] ?? "",
+            "type": pkg["type"] ?? "N/A",
+            "typeId": pkg['type_id'],
+            "price": priceMap[getDurationLabel(firstVariation ?? {})] ?? 0,
+            "priceMap": priceMap,
+            "hours": hours,
+            "highlight": pkg["short_description"] ?? "",
+            "shortDescription": pkg["long_description"] ?? "",
+            "fullDescription": pkg["long_description"] ?? "",
+            "termsAndCondition": pkg["terms_and_condition"] ?? "",
+            "specialOffer": (pkg["status"] ?? "").toString().toLowerCase() == "active",
+            "packageIndex": data.indexOf(pkg),
+            "extraQuestions": pkg["packageextra_questions"] ?? [],
+            "packageId": pkg["id"] ?? 0,
+            "companyId": companyId,
+          };
+        }).toList();
 
+        expandedStates = {};
+        selectedHours = {};
         for (int i = 0; i < packages.length; i++) {
           selectedHours[i] = {packages[i]["hours"].first};
           expandedStates[i] = false;
@@ -118,26 +120,28 @@ class PackagesController extends GetxController {
       Get.snackbar("Exception", e.toString());
     }
 
-    isLoading.value = false;
+    isLoading = false;
+    update();
     print("==> Package fetch completed. Total packages: ${packages.length}");
   }
 
-  RxBool isFetchingFreeAddOns = false.obs;
-  Rx<FreeAddOnResponse?> freeAddOnResponse = Rx<FreeAddOnResponse?>(null);
-  RxInt selectedFreeAddOnIndex = RxInt(-1);
+  bool isFetchingFreeAddOns = false;
+  FreeAddOnResponse? freeAddOnResponse;
+  int selectedFreeAddOnIndex = -1;
 
   Future<void> fetchFreeAddOns(int packageId) async {
-    isFetchingFreeAddOns.value = true;
-    freeAddOnResponse.value = null;
+    isFetchingFreeAddOns = true;
+    freeAddOnResponse = null;
+    update();
 
     try {
-      final url = Uri.parse('http://admin.streammly.com/api/v1/package/getfreeadons/?package_id=$packageId');
+      final url = Uri.parse('https://admin.streammly.com/api/v1/package/getfreeadons/?package_id=$packageId');
 
       final res = await http.get(url, headers: {"Content-Type": "application/json"});
 
       if (res.statusCode == 200) {
         final Map<String, dynamic> body = json.decode(res.body);
-        freeAddOnResponse.value = FreeAddOnResponse.fromJson(body);
+        freeAddOnResponse = FreeAddOnResponse.fromJson(body);
       } else {
         Get.snackbar("Error", "Unable to fetch free add ons (${res.statusCode})");
       }
@@ -145,84 +149,92 @@ class PackagesController extends GetxController {
       Get.snackbar("Error", "Exception: $e");
     }
 
-    isFetchingFreeAddOns.value = false;
+    isFetchingFreeAddOns = false;
+    update();
   }
 
-  RxBool isFetchingPaidAddOns = false.obs;
-  Rx<PaidAddOnResponse?> paidAddOnResponse = Rx<PaidAddOnResponse?>(null);
-  RxInt selectedPaidAddOnIndex = RxInt(-1);
+  bool isFetchingPaidAddOns = false;
+  PaidAddOnResponse? paidAddOnResponse;
+  int selectedPaidAddOnIndex = -1;
 
   Future<void> fetchPaidAddOns(int packageId, int studioId) async {
-    isFetchingPaidAddOns.value = true;
-    paidAddOnResponse.value = null;
-    selectedPaidAddOnIndex.value = -1;
+    isFetchingPaidAddOns = true;
+    paidAddOnResponse = null;
+    selectedPaidAddOnIndex = -1;
+    update();
     try {
-      final url = Uri.parse('http://admin.streammly.com/api/v1/package/getpaidadons/?package_id=$packageId&studio_id=$studioId');
+      final url = Uri.parse('https://admin.streammly.com/api/v1/package/getpaidadons/?package_id=$packageId&studio_id=$studioId');
       final res = await http.get(url, headers: {"Content-Type": "application/json"});
       if (res.statusCode == 200) {
         final Map<String, dynamic> body = json.decode(res.body);
-        paidAddOnResponse.value = PaidAddOnResponse.fromJson(body, studioId: studioId);
-      } else {
-        // handle error
+        paidAddOnResponse = PaidAddOnResponse.fromJson(body, studioId: studioId);
       }
-    } catch (e) {
-      // handle error
-    }
-    isFetchingPaidAddOns.value = false;
+    } catch (e) {}
+    isFetchingPaidAddOns = false;
+    update();
   }
 
   void setSelectedPaidAddOnIndex(int index) {
-    selectedPaidAddOnIndex.value = index;
+    selectedPaidAddOnIndex = index;
+    update();
   }
 
   PaidAddOn? get selectedPaidAddOn {
-    if (selectedPaidAddOnIndex.value >= 0 && paidAddOnResponse.value != null && selectedPaidAddOnIndex.value < paidAddOnResponse.value!.addons.length) {
-      return paidAddOnResponse.value!.addons[selectedPaidAddOnIndex.value];
+    if (selectedPaidAddOnIndex >= 0 && paidAddOnResponse != null && selectedPaidAddOnIndex < paidAddOnResponse!.addons.length) {
+      return paidAddOnResponse!.addons[selectedPaidAddOnIndex];
     }
     return null;
   }
 
   void setSelectedFreeAddOnIndex(int index) {
-    selectedFreeAddOnIndex.value = index;
+    selectedFreeAddOnIndex = index;
+    update();
   }
 
   FreeAddOn? get selectedFreeAddOn {
-    if (selectedFreeAddOnIndex.value >= 0 && freeAddOnResponse.value != null && selectedFreeAddOnIndex.value < freeAddOnResponse.value!.addons.length) {
-      return freeAddOnResponse.value!.addons[selectedFreeAddOnIndex.value];
+    if (selectedFreeAddOnIndex >= 0 && freeAddOnResponse != null && selectedFreeAddOnIndex < freeAddOnResponse!.addons.length) {
+      return freeAddOnResponse!.addons[selectedFreeAddOnIndex];
     }
     return null;
   }
 
   void clearSelectedFreeAddOn() {
-    selectedFreeAddOnIndex.value = -1;
+    selectedFreeAddOnIndex = -1;
+    update();
   }
 
   // Free Item Selection Logic
   void selectFreeItem(Map<String, dynamic> item) {
-    selectedFreeItem.value = item;
+    selectedFreeItem = Map<String, dynamic>.from(item);
+    update();
   }
 
   void clearFreeItem() {
     selectedFreeItem.clear();
+    update();
   }
 
   // Extra Add-Ons Selection Logic
   void addExtraAddon(Map<String, dynamic> item) {
     if (!selectedExtraAddons.any((e) => e['id'] == item['id'])) {
       selectedExtraAddons.add(item);
+      update();
     }
   }
 
   void removeExtraAddon(Map<String, dynamic> item) {
     selectedExtraAddons.removeWhere((e) => e['id'] == item['id']);
+    update();
   }
 
   void toggleView() {
-    isGridView.value = !isGridView.value;
+    isGridView = !isGridView;
+    update();
   }
 
   void setGridView(bool value) {
-    isGridView.value = value;
+    isGridView = value;
+    update();
   }
 
   void togglePackageSelection(int index) {
@@ -233,6 +245,7 @@ class PackagesController extends GetxController {
       selectedPackageIndices.add(index);
       _addPackageForBilling(index);
     }
+    update();
   }
 
   void _addPackageForBilling(int index) {
@@ -241,7 +254,6 @@ class PackagesController extends GetxController {
     final selectedHour = selectedHoursForPackage.first;
     final priceMap = pkg["priceMap"] as Map<String, int>;
 
-    // Extract the correct variation from the original variation list
     final List<dynamic> variations = pkg["packagevariations"] ?? [];
     final matchedVariation = variations.firstWhere((v) => getDurationLabel(v) == selectedHour, orElse: () => null);
 
@@ -261,7 +273,7 @@ class PackagesController extends GetxController {
       'variationId': variationId,
       'selectedHour': selectedHour,
       'advanceBookingDays': companyLocation?.company?.advanceBookingDays ?? 0,
-      'companyLocation': companyLocation, // ✅ Add this line**
+      'companyLocation': companyLocation,
     };
 
     selectedPackagesForBilling.add(billingPackage);
@@ -269,39 +281,24 @@ class PackagesController extends GetxController {
 
   void toggleHour(int packageIndex, String hour) {
     selectedHours[packageIndex] = {hour};
-    selectedHours.refresh();
     if (selectedPackageIndices.contains(packageIndex)) {
       selectedPackagesForBilling.removeWhere((pkg) => pkg['packageIndex'] == packageIndex);
       _addPackageForBilling(packageIndex);
     }
+    update();
   }
 
   List<Map<String, dynamic>> getSelectedPackagesForBilling() {
-    return selectedPackagesForBilling.toList();
+    return List<Map<String, dynamic>>.from(selectedPackagesForBilling);
   }
 
-  /// Total of all selected packages (inclusive of GST)
   double get packageTotal => selectedPackagesForBilling.fold(0.0, (sum, pkg) => sum + (pkg['finalPrice'] as num).toDouble());
-
-  /// Total of all selected extra paid add-ons (inclusive of GST)
   double get totalExtraAddOnPrice => selectedExtraAddons.fold(0.0, (sum, addon) => sum + (addon['price'] as num).toDouble());
-
-  /// Utility: Convert inclusive amount to exclusive base price
   double _exclusiveFromInclusive(double inclusive) => inclusive * (100 / (100 + gstPercentage));
-
-  /// Base (exclusive) total for packages
   double get packageBaseTotal => _exclusiveFromInclusive(packageTotal);
-
-  /// Base (exclusive) total for add-ons
   double get addonBaseTotal => _exclusiveFromInclusive(totalExtraAddOnPrice);
-
-  /// Combined base subtotal (before GST)
   double get subtotal => packageBaseTotal + addonBaseTotal;
-
-  /// GST amount extracted from inclusive prices
   double get gstAmount => subtotal * gstPercentage / 100;
-
-  /// Final total the user pays (same as packageTotal + addonTotal)
   double get finalAmount => packageTotal + totalExtraAddOnPrice;
 
   bool isPackageSelected(int index) {
@@ -318,16 +315,18 @@ class PackagesController extends GetxController {
 
   void toggleExpanded(int index) {
     expandedStates[index] = !(expandedStates[index] ?? false);
-    expandedStates.refresh();
+    update();
   }
 
   void switchToListView() {
-    isGridView.value = false;
+    isGridView = false;
+    update();
   }
 
   void clearAllSelections() {
     selectedPackageIndices.clear();
     selectedPackagesForBilling.clear();
+    update();
   }
 
   void selectAllPackages() {
@@ -336,11 +335,13 @@ class PackagesController extends GetxController {
       selectedPackageIndices.add(i);
       _addPackageForBilling(i);
     }
+    update();
   }
 
   void removePackageFromSelection(int index) {
     selectedPackageIndices.remove(index);
     selectedPackagesForBilling.removeWhere((pkg) => pkg['packageIndex'] == index);
+    update();
   }
 
   Map<String, dynamic>? getPackageByIndex(int index) {
@@ -369,38 +370,35 @@ class PackagesController extends GetxController {
     if (selectedPackageIndices.contains(packageIndex)) {
       selectedPackagesForBilling.removeWhere((pkg) => pkg['packageIndex'] == packageIndex);
       _addPackageForBilling(packageIndex);
+      update();
     }
   }
 
   Future<void> fetchPopularPackages() async {
     try {
       final response = await http.get(Uri.parse("https://admin.streammly.com/api/v1/package/getpopularpackages"), headers: {"Content-Type": "application/json"});
-      // final response = await http.get(Uri.parse("http://192.168.1.113/api/v1/package/getpopularpackages"), headers: {"Content-Type": "application/json"});
-
       if (response.statusCode == 200) {
         final jsonBody = json.decode(response.body);
         final List data = jsonBody["data"] ?? [];
 
-        popularPackagesList.assignAll(
-          data.map<Map<String, dynamic>>((pkg) {
-            final List<dynamic>? variations = pkg["packagevariations"];
-            final firstVariation = (variations != null && variations.isNotEmpty) ? variations[0] : null;
+        popularPackagesList = data.map<Map<String, dynamic>>((pkg) {
+          final List<dynamic>? variations = pkg["packagevariations"];
+          final firstVariation = (variations != null && variations.isNotEmpty) ? variations[0] : null;
 
-            return {
-              "title": pkg["title"] ?? "",
-              "type": pkg["type"] ?? "N/A",
-              "price": int.tryParse(firstVariation?["amount"]?.toString() ?? "0") ?? 0,
-              "shortDescription": pkg["short_description"] ?? "",
-              "highlight": pkg["fullDescription"] ?? "",
-              "packageIndex": data.indexOf(pkg),
-              "image":
-                  (pkg["image_upload"] != null && pkg["image_upload"].isNotEmpty)
-                      ? 'https://admin.streammly.com/${pkg["image_upload"]}'
-                      // ? 'http://192.168.1.113/${pkg["image_upload"]}'
-                      : 'assets/images/category/vendor_category/Baby.jpg',
-            };
-          }).toList(),
-        );
+          return {
+            "title": pkg["title"] ?? "",
+            "type": pkg["type"] ?? "N/A",
+            "price": int.tryParse(firstVariation?["amount"]?.toString() ?? "0") ?? 0,
+            "shortDescription": pkg["short_description"] ?? "",
+            "highlight": pkg["fullDescription"] ?? "",
+            "packageIndex": data.indexOf(pkg),
+            "image":
+            (pkg["image_upload"] != null && pkg["image_upload"].isNotEmpty)
+                ? 'https://admin.streammly.com/${pkg["image_upload"]}'
+                : 'assets/images/category/vendor_category/Baby.jpg',
+          };
+        }).toList();
+        update();
       } else {
         Get.snackbar("Error", "Failed to fetch popular packages");
       }

@@ -2,6 +2,9 @@ import 'dart:developer';
 
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:streammly/data/api/api_client.dart';
+import 'package:streammly/data/repository/booking_repo.dart';
+import 'package:streammly/services/constants.dart';
 import 'package:streammly/views/screens/package/booking/booking_summary.dart';
 import 'package:streammly/views/screens/package/booking/widgets/booking_form_page.dart';
 import 'package:streammly/views/screens/package/booking/widgets/booking_personal_info.dart';
@@ -23,7 +26,7 @@ class BookingPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     log(packages.toString(), name: "packages");
-    final controller = Get.put(BookingController(bookingrepo: Get.find()));
+    final controller = Get.put(BookingController(bookingrepo: BookingRepo(apiClient: ApiClient(appBaseUrl: AppConstants.baseUrl, sharedPreferences: Get.find()))));
 
     // Receive selected packages from previous screen
     // final args = Get.arguments as Map<String, dynamic>;
