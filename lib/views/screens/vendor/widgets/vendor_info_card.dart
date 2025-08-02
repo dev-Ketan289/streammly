@@ -349,7 +349,7 @@ class _VendorInfoCardState extends State<VendorInfoCard> {
 
     return Text(
       _stripHtml(widget.description),
-      style: TextStyle(fontSize: isSmallScreen ? 11 : 13, color: Colors.grey),
+      style: TextStyle(fontSize: isSmallScreen ? 8 : 8, color: Colors.grey),
       maxLines: 2,
       overflow: TextOverflow.visible,
     );

@@ -153,7 +153,7 @@ class _HomeHeaderBannerState extends State<HomeHeaderBanner> {
                               .findAncestorStateOfType<NavigationFlowState>();
                       mainState?.pushToCurrentTab(
                         SearchScreen(),
-                        hideBottomBar: true,
+                        hideBottomBar: false,
                       );
                     },
                     child: Container(

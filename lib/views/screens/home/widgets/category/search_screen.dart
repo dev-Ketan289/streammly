@@ -9,13 +9,12 @@ import 'package:streammly/models/category/category_item.dart';
 import 'package:streammly/models/category/category_model.dart';
 import 'package:streammly/services/theme.dart';
 import 'package:streammly/views/screens/home/vendor_locator.dart';
-import 'package:streammly/views/screens/home/widgets/category/category.dart';
 import 'package:streammly/views/screens/home/widgets/category/recommended_list.dart';
 import 'package:streammly/views/screens/home/widgets/category/widgets/category_scroller.dart';
+import 'package:streammly/views/screens/home/widgets/promo_slider.dart';
 
 class SearchScreen extends StatelessWidget {
   const SearchScreen({super.key});
-  
 
   @override
   Widget build(BuildContext context) {
@@ -39,7 +38,7 @@ class SearchScreen extends StatelessWidget {
             Get.back();
           },
         ),
-        title:  Text(
+        title: Text(
           'Search',
           style: TextStyle(
             color: primaryColor,
@@ -57,29 +56,33 @@ class SearchScreen extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 SizedBox(
-                  child: Container(
-                    height: 37,
-                    
-                    width: 350,
-                    padding: const EdgeInsets.only(left: 4),
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(10),
-                      border: Border.all(
-                        color: theme.colorScheme.onSurface.withAlpha(60),
-                        width: 1,
-                      ),
-                    ),
-                    child: TextField(
-                      style: TextStyle(color: theme.colorScheme.onSurface),
-                      decoration: InputDecoration(
-                        hintText: "Search for vendors, services, or event types...",
-                        hintStyle: GoogleFonts.openSans(
-                          color: theme.colorScheme.onSurface.withOpacity(0.6),
-                          fontSize: 10,
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 20),
+                    child: Container(
+                      height: 37,
+
+                      width: 350,
+                      padding: const EdgeInsets.only(left: 4),
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(10),
+                        border: Border.all(
+                          color: theme.colorScheme.onSurface.withAlpha(60),
+                          width: 1,
                         ),
-                        prefixIcon: const Icon(Icons.search, size: 16),
-                        border: InputBorder.none,
-                        isDense: true,
+                      ),
+                      child: TextField(
+                        style: TextStyle(color: theme.colorScheme.onSurface),
+                        decoration: InputDecoration(
+                          hintText:
+                              "Search for vendors, services, or event types...",
+                          hintStyle: GoogleFonts.openSans(
+                            color: theme.colorScheme.onSurface.withOpacity(0.6),
+                            fontSize: 10,
+                          ),
+                          prefixIcon: const Icon(Icons.search, size: 16),
+                          border: InputBorder.none,
+                          isDense: true,
+                        ),
                       ),
                     ),
                   ),
@@ -149,7 +152,21 @@ class SearchScreen extends StatelessWidget {
                     }
                   },
                 ),
-                Text("Exclusive Offers", textAlign: TextAlign.start,)
+                Padding(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 20,
+                    vertical: 10,
+                  ),
+                  child: Text(
+                    "Exclusive Offers",
+                    style: theme.textTheme.titleLarge?.copyWith(
+                      color: Colors.black,
+                      fontSize: 14,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ),
+                PromoSlider(),
               ],
             ),
           ),

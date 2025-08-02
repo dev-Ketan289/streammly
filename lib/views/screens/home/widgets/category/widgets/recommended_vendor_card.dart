@@ -18,7 +18,7 @@ class RecommendedVendorCard extends StatelessWidget {
   final VoidCallback onTap;
 
   const RecommendedVendorCard({
-    Key? key,
+    super.key,
     required this.vendor,
     required this.imageUrl,
     required this.rating,
@@ -29,7 +29,7 @@ class RecommendedVendorCard extends StatelessWidget {
     required this.theme,
     required this.wishlistController,
     required this.onTap,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -130,7 +130,7 @@ class RecommendedVendorCard extends StatelessWidget {
                           companyName,
                           style: TextStyle(
                             fontWeight: FontWeight.bold,
-                            fontSize: itemWidth * 0.08,
+                            fontSize: itemWidth * 0.06,
                             color: theme.colorScheme.onSurface,
                             overflow: TextOverflow.visible,
                           ),

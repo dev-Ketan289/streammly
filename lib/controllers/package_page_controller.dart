@@ -64,8 +64,7 @@ class PackagesController extends GetxController {
 
     try {
       final response = await http.post(
-        // Uri.parse("http://192.168.1.113:8000/api/v1/package/getpackages"),
-        Uri.parse("https://admin.streammly.com/api/v1/package/getpackages"),
+        Uri.parse("http://admin.streammly.com/api/v1/package/getpackages"),
         headers: {"Content-Type": "application/json"},
         body: jsonEncode({"company_id": companyId, "subcategory_id": subCategoryId, "sub_vertical_id": subVerticalId, 'studio_id': studioId}),
       );
@@ -132,8 +131,7 @@ class PackagesController extends GetxController {
     freeAddOnResponse.value = null;
 
     try {
-      // final url = Uri.parse('http://192.168.1.113:8000/api/v1/package/getfreeadons/?package_id=$packageId');
-      final url = Uri.parse('https://admin.streammly.com/api/v1/package/getfreeadons/?package_id=$packageId');
+      final url = Uri.parse('http://admin.streammly.com/api/v1/package/getfreeadons/?package_id=$packageId');
 
       final res = await http.get(url, headers: {"Content-Type": "application/json"});
 
@@ -159,8 +157,7 @@ class PackagesController extends GetxController {
     paidAddOnResponse.value = null;
     selectedPaidAddOnIndex.value = -1;
     try {
-      // final url = Uri.parse('http://192.168.1.113:8000/api/v1/package/getpaidadons/?package_id=$packageId&studio_id=$studioId');
-      final url = Uri.parse('https://admin.streammly.com/api/v1/package/getpaidadons/?package_id=$packageId&studio_id=$studioId');
+      final url = Uri.parse('http://admin.streammly.com/api/v1/package/getpaidadons/?package_id=$packageId&studio_id=$studioId');
       final res = await http.get(url, headers: {"Content-Type": "application/json"});
       if (res.statusCode == 200) {
         final Map<String, dynamic> body = json.decode(res.body);
@@ -264,7 +261,7 @@ class PackagesController extends GetxController {
       'variationId': variationId,
       'selectedHour': selectedHour,
       'advanceBookingDays': companyLocation?.company?.advanceBookingDays ?? 0,
-      'companyLocation': companyLocation,
+      'companyLocation': companyLocation, // ✅ Add this line**
     };
 
     selectedPackagesForBilling.add(billingPackage);
