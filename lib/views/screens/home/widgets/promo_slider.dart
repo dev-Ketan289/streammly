@@ -39,22 +39,21 @@ class _PromoSliderState extends State<PromoSlider> {
         return Column(
           children: [
             CarouselSlider(
-              items:
-                  validSliders.map((item) {
-                    // final imageUrl = item.media != null ? AppConstants.baseUrl + item.media! : '';
-                    return GestureDetector(
-                      onTap: () {
-                        // navigation logic here
-                      },
-                      child: Container(
-                        margin: const EdgeInsets.symmetric(horizontal: 6),
-                        decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(18),
-                          border: Border.all(color: Color(0xffE2EDF9), width: 2),
-                          boxShadow: [BoxShadow(color: theme.shadowColor.withAlpha(25), blurRadius: 6, offset: const Offset(0, 4))],
-                        ),
-                        child: ClipRRect(
-                          borderRadius: BorderRadius.circular(18),
+              items: validSliders.map((item) {
+                // final imageUrl = item.media != null ? AppConstants.baseUrl + item.media! : '';
+                return GestureDetector(
+                  onTap: () {
+                    // navigation logic here
+                  },
+                  child: Container(
+                    margin: const EdgeInsets.symmetric(horizontal: 6),
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(18),
+                      border: Border.all(color: const Color(0xffE2EDF9), width: 2),
+                      boxShadow: [BoxShadow(color: theme.shadowColor.withAlpha(25), blurRadius: 6, offset: const Offset(0, 4))],
+                    ),
+                    child: ClipRRect(
+                      borderRadius: BorderRadius.circular(18),
                       child: Image.network(
                         item.media!,
                         fit: BoxFit.cover,
@@ -73,25 +72,25 @@ class _PromoSliderState extends State<PromoSlider> {
                         },
                       ),
                     ),
-
-                    ),
-                    );
-                  }).toList(),
-              options: CarouselOptions(height: 180, autoPlay: true, enlargeCenterPage: true, viewportFraction: 0.9, onPageChanged: (index, _) => controller.setCurrentIndex(index),),
+                  ),
+                );
+              }).toList(),
+              options: CarouselOptions(
+                height: 180,
+                autoPlay: true,
+                enlargeCenterPage: true,
+                viewportFraction: 0.9,
+                onPageChanged: (index, _) => controller.setCurrentIndex(index),
+              ),
             ),
             const SizedBox(height: 8),
-            Row(
-              mainAxisSize: MainAxisSize.min,
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: List.generate(
-                validSliders.length,
-                (i) => TCircularContainer(
-                  width: 20,
-                  height: 4,
-                  margin: const EdgeInsets.only(right: 10),
-                  backgroundColor: controller.currentIndex == i ? theme.colorScheme.primary : theme.colorScheme.outlineVariant,
-                ),
-              ),
+
+            // Replaced Row with custom ExpandingDotIndicator below
+            ExpandingDotIndicator(
+              count: validSliders.length,
+              activeIndex: controller.currentIndex,
+              activeColor: theme.colorScheme.primary,
+              inactiveColor: theme.colorScheme.outlineVariant,
             ),
           ],
         );
@@ -107,6 +106,43 @@ class _PromoSliderState extends State<PromoSlider> {
         highlightColor: theme.colorScheme.surface,
         child: Container(height: 180, decoration: BoxDecoration(color: theme.colorScheme.surface, borderRadius: BorderRadius.circular(18))),
       ),
+    );
+  }
+}
+
+// Custom expanding dot indicator widget
+class ExpandingDotIndicator extends StatelessWidget {
+  final int count;
+  final int activeIndex;
+  final Color activeColor;
+  final Color inactiveColor;
+
+  const ExpandingDotIndicator({
+    super.key,
+    required this.count,
+    required this.activeIndex,
+    required this.activeColor,
+    required this.inactiveColor,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: List.generate(count, (index) {
+        final isActive = index == activeIndex;
+        return AnimatedContainer(
+          duration: const Duration(milliseconds: 300),
+          margin: const EdgeInsets.only(right: 10),
+          width: isActive ? 20 : 4,
+          height: 4,
+          decoration: BoxDecoration(
+            color: isActive ? activeColor : inactiveColor,
+            borderRadius: BorderRadius.circular(12),
+          ),
+        );
+      }),
     );
   }
 }

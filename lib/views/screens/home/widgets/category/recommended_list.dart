@@ -73,20 +73,30 @@ class _RecommendedListState extends State<RecommendedList> {
               final company = CompanyLocation(
                 id: vendor.id ?? 0,
                 companyId: vendor.id ?? 0,
-                type: 'studio', // fallback/default (if you need type)
-                name: vendor.companyName ?? "Unknown", // fallback
+                type: 'studio',
+                name: vendor.companyName ?? "Unknown",
                 companyName: vendor.companyName ?? "Unknown",
                 latitude: lat,
                 longitude: lng,
-                distanceKm: null, // You can add a front-end calculation here if desired
-                estimatedTime: null, // Same
+                distanceKm: null,
+                estimatedTime: null,
                 bannerImage: vendor.bannerImage,
                 logo: vendor.logo,
                 description: vendor.description,
                 categoryName: vendor.vendorcategory?.isNotEmpty == true ? vendor.vendorcategory!.first.getCategory?.title : "Service",
                 rating: vendor.rating?.toDouble(),
                 specialities: vendor.specialities ?? [],
-                // If your CompanyLocation now supports other fields, add them here with similar null/default handling
+
+                // THIS IS THE CRUCIAL PART:
+                company: CompanyDetails(
+                  id: vendor.id ?? 0,
+                  companyName: vendor.companyName ?? "Unknown",
+                  logo: vendor.logo,
+                  bannerImage: vendor.bannerImage,
+                  description: vendor.description,
+                  rating: vendor.rating?.toDouble(),
+                  // Add other company details if available in vendor
+                ),
               );
               final mainState = context.findAncestorStateOfType<NavigationFlowState>();
               // Get.to(() => CompanyLocatorMapScreen(categoryId: cat.id));

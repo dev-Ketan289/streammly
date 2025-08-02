@@ -42,13 +42,20 @@ class _HomeHeaderBannerState extends State<HomeHeaderBanner> {
 
     if (loopedSlides.isNotEmpty) {
       autoScrollTimer = Timer.periodic(const Duration(seconds: 4), (_) {
-        if (pageController.hasClients) {
-          pageController.nextPage(
-            duration: const Duration(milliseconds: 500),
-            curve: Curves.easeInOut,
-          );
+        if (!mounted) return;
+        try {
+          if (pageController.hasClients) {
+            pageController.nextPage(
+              duration: const Duration(milliseconds: 500),
+              curve: Curves.easeInOut,
+            );
+          }
+        } catch (e) {
+          // Optionally log or ignore
         }
       });
+
+
     }
   }
 

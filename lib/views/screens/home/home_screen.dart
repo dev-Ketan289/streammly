@@ -126,41 +126,51 @@ class _HomeScreenState extends State<HomeScreen> {
               child: SingleChildScrollView(
                 child: Column(
                   children: [
-                    slides.isEmpty ? _shimmerHomeHeaderBanner() : HomeHeaderBanner(slides: slides),
+                    slides.isEmpty
+                        ? _shimmerHomeHeaderBanner()
+                        : HomeHeaderBanner(key: const ValueKey('home_header_banner'), slides: slides),
                     const SizedBox(height: 24),
-                    UpcomingOfferCard(),
+                    UpcomingOfferCard(key: const ValueKey('upcoming_offer_card')),
                     const SizedBox(height: 24),
                     isCategoryLoading
                         ? _shimmerCategoryScroller()
                         : CategoryScroller(
-                          title: "Categories",
-                          onSeeAll: () {
-                            Navigator.push(context, MaterialPageRoute(builder: (context) => CategoryListScreen()));
-                          },
-                          categories: convertToCategoryItems(categoryModels),
-                        ),
+                      key: const ValueKey('category_scroller'),
+                      title: "Categories",
+                      onSeeAll: () {
+                        Navigator.push(context, MaterialPageRoute(builder: (context) => CategoryListScreen()));
+                      },
+                      categories: convertToCategoryItems(categoryModels),
+                    ),
                     const SizedBox(height: 24),
-                    PageNav(),
+                    PageNav(key: const ValueKey('page_nav')),
                     const SizedBox(height: 24),
 
-                    // RECOMMENDED LIST shimmer
+                    // RECOMMENDED LIST shimmer and list
                     GetBuilder<HomeController>(
                       builder: (headerCtrl) {
                         if (headerCtrl.isRecommendedLoading) {
                           return _shimmerRecommendedList();
                         } else if (headerCtrl.recommendedVendors.isEmpty) {
-                          return const Center(child: Text("No recommended vendors found."));
+                          return const Center(
+                            key: ValueKey('no_recommended_vendors'),
+                            child: Text("No recommended vendors found."),
+                          );
                         } else {
-                          return RecommendedList(context: context, recommendedVendors: headerCtrl.recommendedVendors);
+                          return RecommendedList(
+                            key: const ValueKey('recommended_list'),
+                            context: context,
+                            recommendedVendors: headerCtrl.recommendedVendors,
+                          );
                         }
                       },
                     ),
 
                     const SizedBox(height: 24),
-                    ExploreUs(vendorIds: ([1])),
+                    ExploreUs(key: const ValueKey('explore_us'), vendorIds: ([1])),
                     const SizedBox(height: 26),
-                    PromoSlider(),
-                    const SizedBox(height: 24),
+                    PromoSlider(key: const ValueKey('promo_slider')),
+                    const SizedBox(height: 35),
                   ],
                 ),
               ),
