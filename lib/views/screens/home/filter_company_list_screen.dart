@@ -55,16 +55,21 @@ class _FilterCompanyListScreenState extends State<FilterCompanyListScreen> {
                       final category = categoryController.categories[index];
                       final isSelected = selectedCategory == category.title;
                       return GestureDetector(
-                        onTap: () {
+                        onTap: () async {
                           setState(() {
                             selectedCategory = category.title;
                           });
-                          // Get.find<CompanyController>().setCategoryId(
-                          //   category.id,
-                          // );
-                          // log(widget.onTap.toString());
-                          // log(widget.onTap == null ? "null" : "not null");
-                          // widget.onTap?.call();
+                          final companyController =
+                              Get.find<CompanyController>();
+                          companyController.setCategoryId(category.id);
+                          await companyController.fetchCompaniesByCategory(
+                            category.id,
+                          );
+                          if (widget.onTap != null) widget.onTap!();
+                          log(
+                            selectedCategory.toString(),
+                            name: "Selected Category",
+                          );
                         },
                         child: CustomContainer(
                           isSelected: isSelected,

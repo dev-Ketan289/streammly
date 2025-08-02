@@ -399,12 +399,13 @@ class _CompanyLocatorMapScreenState extends State<CompanyLocatorMapScreen> {
             return CompanyListScreen(categoryId: widget.categoryId);
           } else if (isFilterSelected) {
             return FilterCompanyListScreen(
-              // onTap: () {
-              //   toggleSelection("vendor");
-              //   _loadData();
-              // },
+              onTap: () {
+                toggleSelection("vendor");
+                _loadData();
+              },
             );
           }
+
           // } else if (isSearchSelected) {
           //   return FilterCompanyListScreen(
           //     onTap: () {
