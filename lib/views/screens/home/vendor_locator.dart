@@ -193,13 +193,23 @@ class _CompanyLocatorMapScreenState extends State<CompanyLocatorMapScreen> {
       final company = controller.companies[pageIndex];
       controller.fetchCompanyById(company.companyId);
 
-      // Animate map to the selected marker
-      if (company.latitude != null && company.longitude != null) {
+      // Find the marker corresponding to this company
+      final marker = _customMarkers.firstWhere(
+        (m) => m.markerId.value.startsWith("${company.companyName}-$pageIndex"),
+        orElse:
+            () => Marker(
+              markerId: MarkerId("${company.companyName}-$pageIndex"),
+              position: LatLng(company.latitude ?? 0, company.longitude ?? 0),
+            ),
+      );
+
+      // Animate map to the marker's position
+      if (marker.position.latitude != 0 && marker.position.longitude != 0) {
         _mapController.future.then((mapController) {
           mapController.animateCamera(
             CameraUpdate.newLatLngZoom(
-              LatLng(company.latitude!, company.longitude!),
-              15,
+              marker.position, // Use the marker's adjusted position
+              30, // Adjusted zoom level for better visibility
             ),
           );
         });
