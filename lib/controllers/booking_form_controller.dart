@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'dart:developer';
 
 import 'package:flutter/foundation.dart';
@@ -5,43 +6,47 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
 import 'package:streammly/controllers/auth_controller.dart';
+import 'package:streammly/controllers/package_page_controller.dart';
 import 'package:streammly/data/repository/booking_repo.dart';
 import 'package:streammly/models/package/slots_model.dart';
 import 'package:streammly/models/response/response_model.dart';
 import 'package:streammly/views/screens/package/booking/booking_page.dart';
+import 'package:streammly/views/screens/package/booking/thanks_for_booking.dart';
 
 class BookingController extends GetxController {
+  final AuthController authController = Get.find();
+  final PackagesController packagesController = Get.find();
+  final BookingRepo bookingrepo;
+
+  BookingController({required this.bookingrepo});
+
   int currentPage = 0;
   List<Map<String, dynamic>> selectedPackages = [];
-  final BookingRepo bookingrepo;
   bool isLoading = false;
 
-  // Changed from Map<String, RxString> to simple Map<String, String>
-  final personalInfo = {'name': '', 'mobile': '', 'email': ''};
-
-  // Changed lists of RxString to normal List<String>
+  final Map<String, String> personalInfo = {'name': '', 'mobile': '', 'email': ''};
   final List<String> alternateMobiles = [];
   final List<String> alternateEmails = [];
-
-  // packageFormsData as map int-> Map<String,dynamic> remains but non-Rx
   final Map<int, Map<String, dynamic>> packageFormsData = {};
 
   bool acceptTerms = false;
-
   late List<int> packagePrices;
   late List<bool> showPackageDetails;
+
+  List<dynamic> companyLocations = [];
 
   TimeOfDay? selectedStartTime;
   TimeOfDay? selectedEndTime;
 
-  List<dynamic> companyLocations = [];
+  @override
+  void onInit() {
+    super.onInit();
+    autofillFromUserProfile();
+  }
 
-  BookingController({required this.bookingrepo});
-
-  /// --- AUTO-FILL PERSONAL INFO BASED ON LOGGED-IN USER PROFILE ---
+  /// Autofill user info from AuthController
   void autofillFromUserProfile() {
     try {
-      final authController = Get.find<AuthController>();
       final userProfile = authController.userProfile;
       if (userProfile != null) {
         personalInfo['name'] = userProfile.name ?? '';
@@ -50,17 +55,11 @@ class BookingController extends GetxController {
         update();
       }
     } catch (e) {
-      if (kDebugMode) print("AuthController not found or error: $e");
+      if (kDebugMode) print("AuthController error: $e");
     }
   }
 
-  @override
-  void onInit() {
-    super.onInit();
-    autofillFromUserProfile();
-  }
-
-  /// --- INITIALIZE SELECTED PACKAGES AND PREP FORM DATA ---
+  /// Initialize packages data and forms
   void initSelectedPackages(List<Map<String, dynamic>> packages, List<dynamic> locations) {
     companyLocations = locations;
 
@@ -74,23 +73,17 @@ class BookingController extends GetxController {
 
       for (int i = 0; i < packages.length; i++) {
         final package = packages[i];
-        final packageTitle = package['title'];
+        final packageTitle = package['title'] ?? '';
         final now = TimeOfDay.now();
         final formattedTime = formatTimeOfDay(now);
-
-        final companyLocation = companyLocations.isNotEmpty ? companyLocations[i] : null;
-        final int advanceBlock = (companyLocation?.studio?.advanceDayBooking ?? 0);
-        final DateTime firstAvailableDate = DateTime.now().add(Duration(days: advanceBlock));
-        final String formattedDate = "${firstAvailableDate.day} ${(firstAvailableDate.month)} ${firstAvailableDate.year}";
-
         Map<String, String> extraAnswers = {};
         final extraQuestions = package['extraQuestions'] ?? package['packageextra_questions'] ?? [];
         for (var question in extraQuestions) {
-          final uniqueKey = "${i}_${question['id']}";
-          extraAnswers[uniqueKey] = '';
+          extraAnswers["${i}_${question['id']}"] = '';
         }
 
         packageFormsData[i] = {
+          'address': package['address'] ?? '',
           'date': '',
           'startTime': formattedTime,
           'endTime': formattedTime,
@@ -108,7 +101,6 @@ class BookingController extends GetxController {
     });
   }
 
-  // --- Time formatting helper ---
   String formatTimeOfDay(TimeOfDay time) {
     final hour = time.hourOfPeriod.toString().padLeft(2, '0');
     final minute = time.minute.toString().padLeft(2, '0');
@@ -116,7 +108,28 @@ class BookingController extends GetxController {
     return "$hour:$minute $period";
   }
 
-  int get totalPayment => packagePrices.fold(0, (sum, price) => sum + price);
+  String convertToBackendTimeFormat(String? timeStr) {
+    if (timeStr == null || timeStr.isEmpty) return "";
+    try {
+      final dateTime = DateFormat.jm().parse(timeStr);
+      return DateFormat("HH:mm:ss").format(dateTime);
+    } catch (e) {
+      return "";
+    }
+  }
+
+  String calculateTotalHours(String? startTime, String? endTime) {
+    if (startTime == null || endTime == null) return "0";
+    try {
+      final start = DateFormat.jm().parse(startTime);
+      final end = DateFormat.jm().parse(endTime);
+      final duration = end.difference(start);
+      final hours = duration.inMinutes / 60;
+      return hours.toStringAsFixed(1);
+    } catch (e) {
+      return "0";
+    }
+  }
 
   void editPackage(int index) {
     currentPage = index;
@@ -164,7 +177,6 @@ class BookingController extends GetxController {
     final data = packageFormsData[index] ?? {};
     data[field] = value;
     packageFormsData[index] = data;
-
     update();
   }
 
@@ -185,7 +197,6 @@ class BookingController extends GetxController {
     update();
   }
 
-  /// --- DATE PICKER with COMPANY BLOCK LOGIC ---
   Future<String> selectDate(int index, BuildContext context) async {
     final companyLocation = companyLocations.isNotEmpty ? companyLocations[index] : null;
     final int advanceBlock = (companyLocation?.studio?.advanceDayBooking ?? 0);
@@ -202,30 +213,11 @@ class BookingController extends GetxController {
 
     String formatted = "";
     if (picked != null) {
-      formatted = "${picked.year} ${(picked.month)} ${picked.day}";
+      formatted = "${picked.day.toString().padLeft(2, '0')}-${picked.month.toString().padLeft(2, '0')}-${picked.year}";
       updatePackageForm(index, 'date', formatted);
     }
     return formatted;
   }
-
-  // String _getMonthName(int month) {
-  //   const months = [
-  //     '',
-  //     'January',
-  //     'February',
-  //     'March',
-  //     'April',
-  //     'May',
-  //     'June',
-  //     'July',
-  //     'August',
-  //     'September',
-  //     'October',
-  //     'November',
-  //     'December',
-  //   ];
-  //   return months[month];
-  // }
 
   void toggleAddOn(int index, String type) {
     Get.snackbar("Info", "This feature is currently disabled.");
@@ -243,73 +235,184 @@ class BookingController extends GetxController {
     update();
   }
 
+// Utility to clean possible invisible spaces in the time string
+  String cleanTimeString(String? time) {
+    if (time == null) return '';
+    // Replace non-breaking space or unusual spaces with normal space, then trim
+    return time.replaceAll(RegExp(r'\s+'), ' ').trim();
+  }
+
   bool canSubmit() {
-    if (personalInfo['name']?.isEmpty ?? true) return false;
-    if (personalInfo['mobile']?.isEmpty ?? true) return false;
-    if (personalInfo['email']?.isEmpty ?? true) return false;
-    if (!acceptTerms) return false;
+    if (personalInfo['name']?.isEmpty ?? true) {
+      debugPrint("Validation fail: Name is empty");
+      return false;
+    }
+    if (personalInfo['mobile']?.isEmpty ?? true) {
+      debugPrint("Validation fail: Mobile is empty");
+      return false;
+    }
+    if (personalInfo['email']?.isEmpty ?? true) {
+      debugPrint("Validation fail: Email is empty");
+      return false;
+    }
+    if (!acceptTerms) {
+      debugPrint("Validation fail: Global terms not accepted");
+      return false;
+    }
 
     for (int i = 0; i < selectedPackages.length; i++) {
       final form = packageFormsData[i] ?? {};
-      if (form['date']?.toString().isEmpty ?? true) return false;
-      if (form['startTime']?.toString().isEmpty ?? true) return false;
-      if (form['endTime']?.toString().isEmpty ?? true) return false;
-
-      try {
-        final start = DateFormat('h:mm a').parse(form['startTime']);
-        final end = DateFormat('h:mm a').parse(form['endTime']);
-        if (end.isBefore(start)) return false;
-      } catch (e) {
+      if ((form['address'] as String?)?.trim().isEmpty ?? true) {
+        debugPrint("Validation fail: Address empty for package $i");
+        return false;
+      }
+      if ((form['date'] as String?)?.isEmpty ?? true) {
+        debugPrint("Validation fail: Date empty for package $i");
+        return false;
+      }
+      if ((form['startTime'] as String?)?.isEmpty ?? true) {
+        debugPrint("Validation fail: Start time empty for package $i");
+        return false;
+      }
+      if ((form['endTime'] as String?)?.isEmpty ?? true) {
+        debugPrint("Validation fail: End time empty for package $i");
         return false;
       }
 
-      final packageTitle = selectedPackages[i]['title'];
-      if (packageTitle == 'Cuteness' && form['babyInfo'] == null) return false;
-      if (packageTitle == 'Moments' && form['theme'] == null) return false;
-      if (packageTitle == 'Wonders' && form['locationPreference'] == null) return false;
-      if (!(form['termsAccepted'] ?? false)) return false;
+      try {
+        final start = DateFormat.jm().parse(cleanTimeString(form['startTime']));
+        final end = DateFormat.jm().parse(cleanTimeString(form['endTime']));
+        if (end.isBefore(start)) {
+          debugPrint("Validation fail: End time is before start time for package $i");
+          return false;
+        }
+      } catch (e) {
+        debugPrint("Validation fail: Time parsing error for package $i: $e");
+        return false;
+      }
 
-      final extraAnswers = Map<String, String>.from(form['extraAnswers'] ?? {});
-      for (var answer in extraAnswers.values) {
-        if (answer.trim().isEmpty) return false;
+      final packageTitle = form['package_title'] ?? selectedPackages[i]['title'] ?? '';
+      if (packageTitle == 'Cuteness' && (form['babyInfo'] == null || (form['babyInfo'] as String).isEmpty)) {
+        debugPrint("Validation fail: Baby info missing for package $i");
+        return false;
+      }
+      if (packageTitle == 'Moments' && (form['theme'] == null || (form['theme'] as String).isEmpty)) {
+        debugPrint("Validation fail: Theme missing for package $i");
+        return false;
+      }
+      if (packageTitle == 'Wonders' && (form['locationPreference'] == null || (form['locationPreference'] as String).isEmpty)) {
+        debugPrint("Validation fail: Location preference missing for package $i");
+        return false;
+      }
+
+      if (!(form['termsAccepted'] ?? false)) {
+        debugPrint("Validation fail: Terms not accepted for package $i");
+        return false;
+      }
+
+      final answers = Map<String, String>.from(form['extraAnswers'] ?? {});
+      if (answers.values.any((value) => value.trim().isEmpty)) {
+        debugPrint("Validation fail: Some extra answers are empty for package $i");
+        return false;
       }
     }
+    debugPrint("All validations passed");
     return true;
   }
 
-  void submitBooking() {
-    if (!canSubmit()) {
-      Get.snackbar('Error', 'Please fill all required fields and accept terms for each package');
-      return;
-    }
-
-    final data = {
-      'personalInfo': personalInfo,
-      'altMobiles': alternateMobiles,
-      'altEmails': alternateEmails,
-      'packages': List.generate(selectedPackages.length, (i) {
-        final form = packageFormsData[i];
-        return {'info': selectedPackages[i], 'form': form};
-      }),
-      'termsAccepted': acceptTerms,
-    };
-
-    if (kDebugMode) {
-      print('Booking Data Submitted:\n$data');
-    }
+  /// Package extra answers serialization
+  String extractExtraQuestionsAsString(Map<String, dynamic> form) {
+    final extraAnswers = Map<String, String>.from(form['extraAnswers'] ?? {});
+    if (extraAnswers.isEmpty) return '[]';
+    return jsonEncode(extraAnswers);
   }
 
-  int get totalExtraAddOnPrice {
+  /// Calculate wallet usage for payment
+  int calculateWalletUsage(num payableAmount) {
+    final walletBalance = authController.userProfile?.wallet ?? 0;
+    final int payable = payableAmount.toInt();
+    final int walletBal = walletBalance.toInt();
+    return payable <= walletBal ? payable : walletBal;
+  }
+
+  /// Calculate total addon price
+  int totalExtraAddOnPrice() {
     int total = 0;
     for (final form in packageFormsData.values) {
-      final extras = form['extraAddOn'] as List<Map<String, dynamic>>? ?? [];
+      final extras = form['extraAddOn'] as List<dynamic>? ?? [];
       for (final item in extras) {
-        total += int.tryParse(item['price'].toString()) ?? 0;
+        total += int.tryParse(item['price']?.toString() ?? '0') ?? 0;
       }
     }
     return total;
   }
 
+  /// Calculate total payable amount (package prices + addons)
+  int totalPayableAmount() {
+    final packageTotal = packagePrices.fold(0, (sum, p) => sum + p);
+    final addonsTotal = totalExtraAddOnPrice();
+    return packageTotal + addonsTotal;
+  }
+
+  /// Submit booking to backend
+  Future<void> submitBooking() async {
+    if (!canSubmit()) {
+      Get.snackbar("Error", "Please fill all required fields and accept terms");
+      return;
+    }
+
+    isLoading = true;
+    update();
+
+    try {
+      final userId = authController.userProfile?.id ?? 0;
+      final package = selectedPackages.first;
+      final form = packageFormsData[0] ?? {};
+      final variations = package['packagevariations'] as List<dynamic>? ?? [];
+      final variation = variations.isNotEmpty ? variations[0] : {};
+
+      final payableAmount = totalPayableAmount();
+      final walletUsed = calculateWalletUsage(payableAmount);
+
+      final payload = {
+        "app_user_id": userId,
+        "company_id": package['company_id'] ?? 0,
+        "studio_id": package['studio_id'] ?? 0,
+        "package_id": package['id'] ?? 0,
+        "package_variation_id": variation['id'] ?? 0,
+        "total_hours": calculateTotalHours(form['startTime'], form['endTime']),
+        "name": personalInfo['name'] ?? '',
+        "mobile": personalInfo['mobile'] ?? '',
+        "alternate_mobile": alternateMobiles.isNotEmpty ? alternateMobiles.join(",") : '',
+        "email": personalInfo['email'] ?? '',
+        "address": form['address'] ?? '',
+        "date_of_shoot": form['date'] ?? '',
+        "start_time": convertToBackendTimeFormat(form['startTime']),
+        "end_time": convertToBackendTimeFormat(form['endTime']),
+        "extra_questions": extractExtraQuestionsAsString(form),
+        "terms_accepted": form['termsAccepted'] ?? false,
+        "free_add_on": form['freeAddOn'] ?? {},
+        "extra_add_on": form['extraAddOn'] ?? [],
+        "wallet_used": walletUsed,
+      };
+
+      final response = await bookingrepo.placeBooking(payload);
+      if (response != null && response.isSuccess) {
+        await authController.fetchUserProfile(); // Refresh wallet balance after booking
+        Get.offAll(() => ThanksForBookingPage());
+      } else {
+        Get.snackbar("Error", response?.message ?? "Booking failed");
+      }
+    } catch (e) {
+      log("Booking submission error: $e");
+      Get.snackbar("Error", "Something went wrong during booking");
+    } finally {
+      isLoading = false;
+      update();
+    }
+  }
+
+  /// Fetch available slots API (unchanged)
   List<Slot> timeSlots = [];
   List<TimeOfDay?> startTime = [];
 
@@ -325,76 +428,32 @@ class BookingController extends GetxController {
     update();
     ResponseModel? responseModel;
     try {
-      Response response = await bookingrepo.fetchAvailableSlots(companyId: companyId, date: date, studioId: studioId, typeId: typeId);
-      log("***** Response in updateUserProfile () ******: ${response.bodyString}");
+      Response response = await bookingrepo.fetchAvailableSlots(
+        companyId: companyId,
+        date: date,
+        studioId: studioId,
+        typeId: typeId,
+      );
+      log("Slots response: ${response.bodyString}");
       if (response.statusCode == 200) {
         timeSlots = (response.body["data"]["open_hours"] as List).map((e) => Slot.fromJson(e)).toList();
         for (var i = 0; i < timeSlots.length; i++) {
           startTime.add(timeSlots[i].startTime);
-          if (timeSlots.length - 1 == i) {
+          if (i == timeSlots.length -1) {
             startTime.add(timeSlots[i].endTime);
           }
         }
-        responseModel = ResponseModel(true, "User profile updated successfully");
+        responseModel = ResponseModel(true, "Slots fetched successfully");
       } else {
         timeSlots.clear();
-        responseModel = ResponseModel(false, "Failed to update user profile");
+        responseModel = ResponseModel(false, "Failed to fetch slots");
       }
     } catch (e) {
-      responseModel = ResponseModel(false, "Error in update user profile");
-      log(e.toString(), name: "***** Error in updateUserProfile () ******");
+      responseModel = ResponseModel(false, "Error fetching slots");
+      log(e.toString(), name: "fetchAvailableSlots");
     }
     isLoading = false;
     update();
     return responseModel;
   }
-
-/// === SLOT FETCH API ===
-// Future<void> fetchAvailableSlots({
-//   required int studioId,
-//   required int typeId,
-//   required String type,
-//   required String date,
-//   required String startTime,
-//   required String endTime,
-//   required int companyId,
-// }) async {
-//   final url = Uri.parse("http://192.168.1.113:8000/api/v1/workingtime/get-avilable-slots");
-//   final headers = {
-//     "Accept": "application/json",
-//     "Authorization": "Bearer YOUR_TOKEN", // if needed
-//   };
-//
-//   final request =
-//       http.MultipartRequest("POST", url)
-//         ..headers.addAll(headers)
-//         ..fields['studio_id'] = studioId.toString()
-//         ..fields['type_id'] = typeId.toString()
-//         ..fields['type'] = type
-//         ..fields['date'] = date
-//         ..fields['start_time'] = startTime
-//         ..fields['end_time'] = endTime
-//         ..fields['company_id'] = companyId.toString();
-//
-//   debugPrint("Sending slot availability request...");
-//   debugPrint("Payload: ${request.fields}");
-//
-//   try {
-//     final response = await request.send();
-//     final resStr = await response.stream.bytesToString();
-//
-//     debugPrint("Status Code: ${response.statusCode}");
-//     debugPrint("Response Body: $resStr");
-//
-//     if (response.statusCode == 200) {
-//       final data = json.decode(resStr);
-//       // Handle data here
-//     } else {
-//       debugPrint("Failed to fetch slots. Status: ${response.statusCode}");
-//     }
-//   } catch (e) {
-//     debugPrint("Error while fetching slots: $e");
-//   }
-// }
-// }
 }

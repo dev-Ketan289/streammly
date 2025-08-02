@@ -4,7 +4,6 @@ import 'package:streammly/controllers/wishlist_controller.dart';
 import 'package:streammly/models/vendors/recommanded_vendors.dart';
 import 'package:streammly/navigation_flow.dart';
 import 'package:streammly/views/screens/home/widgets/category/widgets/recommended_vendor_card.dart';
-
 import '../../../../../models/company/company_location.dart';
 import '../../../vendor/vendoer_detail.dart';
 

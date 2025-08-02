@@ -177,10 +177,25 @@ class BookingPage extends StatelessWidget {
                     width: double.infinity,
                     child: ElevatedButton(
                       onPressed: () {
-                        Get.to(() => BookingSummaryPage());
+                        final controller = Get.find<BookingController>();  // get existing controller
+
+                        // Validate required fields and terms acceptance
+                        if (controller.canSubmit()) {
+                          // Proceed to booking summary page
+                          Get.to(() => BookingSummaryPage());
+                        } else {
+                          // Show error snackbar or dialog to fill missing fields
+                          Get.snackbar(
+                            'Incomplete Details',
+                            'Please fill all required fields and accept terms and conditions before continuing.',
+                            snackPosition: SnackPosition.BOTTOM,
+                            backgroundColor: Colors.redAccent,
+                            colorText: Colors.white,
+                          );
+                        }
                       },
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: const Color(0xFF4A6CF7),
+                        backgroundColor: Color(0xFF4A6CF7),
                         padding: const EdgeInsets.symmetric(vertical: 16),
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(12),
@@ -188,11 +203,7 @@ class BookingPage extends StatelessWidget {
                       ),
                       child: const Text(
                         "Let's Continue",
-                        style: TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.w600,
-                          color: Colors.white,
-                        ),
+                        style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600, color: Colors.white),
                       ),
                     ),
                   ),

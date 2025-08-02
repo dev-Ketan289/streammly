@@ -36,37 +36,39 @@ class BookingSummaryPage extends StatelessWidget {
                     child: Container(
                       padding: const EdgeInsets.all(20),
                       decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(12)),
-                      child: Obx(() {
-                        final packages = controller.selectedPackages;
-                        return Column(
-                          children: [
-                            for (int i = 0; i < packages.length; i++)
-                              Column(
-                                children: [
-                                  _buildPackageCard(
-                                    context: context,
-                                    index: i,
-                                    title: packages[i]['title'],
-                                    subtitle: _getSubtitle(i),
-                                    price: packagesController.getSelectedPackagesForBilling()[i]['finalPrice'] ?? 0,
-                                    showLocationDetails: controller.showPackageDetails[i],
-                                    onEdit: () => controller.editPackage(i),
-                                    onToggleDetails: () => controller.toggleDetails(i),
-                                  ),
-                                  const SizedBox(height: 16),
-                                ],
-                              ),
-                            // <<< Add-Ons Section Here >>>
-                            _buildSelectedAddOnsSection(context),
-                            const SizedBox(height: 24),
-                            _buildTotalPaymentSection(context),
-                            const SizedBox(height: 24),
-                            _buildPaymentMethodSection(context),
-                            const SizedBox(height: 24),
-                            _buildContinueButton(context),
-                          ],
-                        );
-                      }),
+                      child: GetBuilder<BookingController>(
+                        builder: (_) {
+                          final packages = controller.selectedPackages;
+                          return Column(
+                            children: [
+                              for (int i = 0; i < packages.length; i++)
+                                Column(
+                                  children: [
+                                    _buildPackageCard(
+                                      context: context,
+                                      index: i,
+                                      title: packages[i]['title'],
+                                      subtitle: _getSubtitle(i),
+                                      price: packagesController.getSelectedPackagesForBilling()[i]['finalPrice'] ?? 0,
+                                      showLocationDetails: controller.showPackageDetails[i],
+                                      onEdit: () => controller.editPackage(i),
+                                      onToggleDetails: () => controller.toggleDetails(i),
+                                    ),
+                                    const SizedBox(height: 16),
+                                  ],
+                                ),
+                              // <<< Add-Ons Section Here >>>
+                              _buildSelectedAddOnsSection(context),
+                              const SizedBox(height: 24),
+                              _buildTotalPaymentSection(context),
+                              const SizedBox(height: 24),
+                              _buildPaymentMethodSection(context),
+                              const SizedBox(height: 24),
+                              _buildContinueButton(context),
+                            ],
+                          );
+                        },
+                      ),
                     ),
                   ),
                 ),
@@ -325,7 +327,7 @@ class BookingSummaryPage extends StatelessWidget {
         ),
         const SizedBox(height: 12),
         ...extraAddons.map(
-          (addon) => Container(
+              (addon) => Container(
             margin: const EdgeInsets.only(bottom: 12),
             padding: const EdgeInsets.all(12),
             decoration: BoxDecoration(color: const Color(0xFFF1F7FF), borderRadius: BorderRadius.circular(12)),
@@ -358,10 +360,17 @@ class BookingSummaryPage extends StatelessWidget {
       height: 48,
       margin: const EdgeInsets.only(top: 16),
       child: ElevatedButton(
-        onPressed: () => Get.to(() => ThanksForBookingPage()),
-        style: ElevatedButton.styleFrom(backgroundColor: Theme.of(context).primaryColor, shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)), elevation: 0),
-        child: Text('Let\'s Continue', style: Theme.of(context).textTheme.labelLarge?.copyWith(color: Colors.white)),
+        onPressed: () async {
+          await controller.submitBooking();  // Call submitBooking to post to backend and handle wallet payment
+        },
+        style: ElevatedButton.styleFrom(
+            backgroundColor: Theme.of(context).primaryColor,
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+            elevation: 0),
+        child: Text('Pay Now',
+            style: Theme.of(context).textTheme.labelLarge?.copyWith(color: Colors.white)),
       ),
     );
   }
 }
+
