@@ -78,66 +78,66 @@ class RecommendedVendors {
     this.specialities,
   });
 
-  factory RecommendedVendors.fromJson(Map<String, dynamic> json) =>
-      RecommendedVendors(
-        id: json["id"],
-        uniqueId: json["unique_id"],
-        vendorId: json["vendor_id"],
-        companyName: json["company_name"],
-        companyOwnerName: json["company_owner_name"],
-        email: json["email"],
-        phone: json["phone"],
-        password: json["password"],
-        isVerified: json["is_verified"],
-        isFeatured: json["is_featured"],
-        logo: json["logo"],
-        bannerImage: json["banner_image"],
-        companyType: json["company_type"],
-        gstno: json["gstno"],
-        rating: json["rating"],
-        line1: json["line1"],
-        line2: json["line2"],
-        country: json["country"],
-        state: json["state"],
-        city: json["city"],
-        pincode: json["pincode"],
-        latitude: json["latitude"],
-        longitude: json["longitude"],
-        bankName: json["bank_name"],
-        branchName: json["branch_name"],
-        accountHolderName: json["account_holder_name"],
-        accountNo: json["account_no"],
-        ifscCode: json["ifsc_code"],
-        createdAt: json["created_at"] == null
-            ? null
-            : DateTime.parse(json["created_at"]),
-        updatedAt: json["updated_at"] == null
-            ? null
-            : DateTime.parse(json["updated_at"]),
-        status: json["status"],
-        description: json["description"],
-        rememberToken: json["remember_token"],
-        deletedAt: json["deleted_at"],
-        vendorcategory: json["vendorcategory"] == null
-            ? []
-            : List<Vendorcategory>.from(json["vendorcategory"]!
-            .map((x) => Vendorcategory.fromJson(x))),
-        specialities: json["vendorsubcategory"] != null
+  factory RecommendedVendors.fromJson(Map<String, dynamic> json) => RecommendedVendors(
+    id: json["id"],
+    uniqueId: json["unique_id"],
+    vendorId: json["vendor_id"],
+    companyName: json["company_name"],
+    companyOwnerName: json["company_owner_name"],
+    email: json["email"],
+    phone: json["phone"],
+    password: json["password"],
+    isVerified: json["is_verified"],
+    isFeatured: json["is_featured"],
+    logo: json["logo"],
+    bannerImage: json["banner_image"],
+    companyType: json["company_type"],
+    gstno: json["gstno"],
+    rating: json["rating"],
+    line1: json["line1"],
+    line2: json["line2"],
+    country: json["country"],
+    state: json["state"],
+    city: json["city"],
+    pincode: json["pincode"],
+    latitude: json["latitude"],
+    longitude: json["longitude"],
+    bankName: json["bank_name"],
+    branchName: json["branch_name"],
+    accountHolderName: json["account_holder_name"],
+    accountNo: json["account_no"],
+    ifscCode: json["ifsc_code"],
+    createdAt: json["created_at"] == null ? null : DateTime.tryParse(json["created_at"]),
+    updatedAt: json["updated_at"] == null ? null : DateTime.tryParse(json["updated_at"]),
+    status: json["status"],
+    description: json["description"],
+    rememberToken: json["remember_token"],
+    deletedAt: json["deleted_at"],
+    vendorcategory: () {
+      final raw = json["vendorcategory"];
+      if (raw == null) {
+        return <Vendorcategory>[]; // explicit type
+      } else if (raw is List) {
+        return raw.map((x) => Vendorcategory.fromJson(x as Map<String, dynamic>)).toList();
+      } else if (raw is Map) {
+        return [Vendorcategory.fromJson(raw as Map<String, dynamic>)];
+      } else {
+        return <Vendorcategory>[];
+      }
+    }(),
+    specialities:
+        json["vendorsubcategory"] != null
             ? (json["vendorsubcategory"] as List)
-            .expand((subCat) => (subCat["subcategory"]?["specialities"] ?? []) as List)
-            .map<String>((spec) => spec["title"]?.toString() ?? "")
-            .toSet() // optional: to remove duplicates
-            .toList()
+                .expand((subCat) => (subCat["subcategory"]?["specialities"] ?? []) as List)
+                .map<String>((spec) => spec["title"]?.toString() ?? "")
+                .where((s) => s.isNotEmpty)
+                .toSet() // remove duplicates
+                .toList()
             : [],
-
-      );
+  );
 
   bool get isChecked {
-    return Get.find<WishlistController>().bookmarks.any(
-          (e) =>
-      id == e.id &&
-          (e.companyType?.contains("company") ?? false),
-    );
+    return Get.find<WishlistController>().bookmarks.any((e) => id == e.id && (e.companyType?.contains("company") ?? false));
   }
 
   Map<String, dynamic> toJson() => {
@@ -175,9 +175,7 @@ class RecommendedVendors {
     "description": description,
     "remember_token": rememberToken,
     "deleted_at": deletedAt,
-    "vendorcategory": vendorcategory == null
-        ? []
-        : List<dynamic>.from(vendorcategory!.map((x) => x.toJson())),
+    "vendorcategory": vendorcategory?.map((x) => x.toJson()).toList(),
     "specialities": specialities,
   };
 }
@@ -209,26 +207,19 @@ class Vendorcategory {
     this.getCategory,
   });
 
-  factory Vendorcategory.fromJson(Map<String, dynamic> json) =>
-      Vendorcategory(
-        id: json["id"],
-        uniqueId: json["unique_id"],
-        companyId: json["company_id"],
-        vendorId: json["vendor_id"],
-        categoryId: json["category_id"],
-        subCategoryId: json["sub_category_id"],
-        createdAt: json["created_at"] == null
-            ? null
-            : DateTime.parse(json["created_at"]),
-        updatedAt: json["updated_at"] == null
-            ? null
-            : DateTime.parse(json["updated_at"]),
-        status: json["status"],
-        deletedAt: json["deleted_at"],
-        getCategory: json["get_category"] == null
-            ? null
-            : GetCategory.fromJson(json["get_category"]),
-      );
+  factory Vendorcategory.fromJson(Map<String, dynamic> json) => Vendorcategory(
+    id: json["id"],
+    uniqueId: json["unique_id"],
+    companyId: json["company_id"],
+    vendorId: json["vendor_id"],
+    categoryId: json["category_id"],
+    subCategoryId: json["sub_category_id"],
+    createdAt: json["created_at"] == null ? null : DateTime.tryParse(json["created_at"]),
+    updatedAt: json["updated_at"] == null ? null : DateTime.tryParse(json["updated_at"]),
+    status: json["status"],
+    deletedAt: json["deleted_at"],
+    getCategory: json["get_category"] == null ? null : GetCategory.fromJson(json["get_category"] as Map<String, dynamic>),
+  );
 
   Map<String, dynamic> toJson() => {
     "id": id,
@@ -255,18 +246,9 @@ class GetCategory {
   DateTime? updatedAt;
   String? status;
   dynamic deletedAt;
+  dynamic icon;
 
-  GetCategory({
-    this.id,
-    this.title,
-    this.image,
-    this.shortDescription,
-    this.uniqueId,
-    this.createdAt,
-    this.updatedAt,
-    this.status,
-    this.deletedAt,
-  });
+  GetCategory({this.id, this.title, this.image, this.shortDescription, this.uniqueId, this.createdAt, this.updatedAt, this.status, this.deletedAt, this.icon});
 
   factory GetCategory.fromJson(Map<String, dynamic> json) => GetCategory(
     id: json["id"],
@@ -274,14 +256,11 @@ class GetCategory {
     image: json["image"],
     shortDescription: json["short_description"],
     uniqueId: json["unique_id"],
-    createdAt: json["created_at"] == null
-        ? null
-        : DateTime.parse(json["created_at"]),
-    updatedAt: json["updated_at"] == null
-        ? null
-        : DateTime.parse(json["updated_at"]),
+    createdAt: json["created_at"] == null ? null : DateTime.tryParse(json["created_at"]),
+    updatedAt: json["updated_at"] == null ? null : DateTime.tryParse(json["updated_at"]),
     status: json["status"],
     deletedAt: json["deleted_at"],
+    icon: json["icon"],
   );
 
   Map<String, dynamic> toJson() => {
@@ -294,5 +273,6 @@ class GetCategory {
     "updated_at": updatedAt?.toIso8601String(),
     "status": status,
     "deleted_at": deletedAt,
+    "icon": icon,
   };
 }

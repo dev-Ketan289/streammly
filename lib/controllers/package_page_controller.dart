@@ -1,10 +1,24 @@
 import 'dart:convert';
+import 'dart:developer';
+
 import 'package:get/get.dart';
 import 'package:http/http.dart' as http;
+
+import '../models/company/company_location.dart';
 import '../models/package/free_add_on_model.dart';
 import '../models/package/paid_addon_model.dart';
 
 class PackagesController extends GetxController {
+  final double gstPercentage = 18;
+
+  CompanyLocation? _companyLocation;
+
+  CompanyLocation? get companyLocation => _companyLocation;
+
+  void setCompanyLocation(CompanyLocation location) {
+    _companyLocation = location;
+  }
+
   var isGridView = false.obs;
   var expandedStates = <int, bool>{}.obs;
   var selectedHours = <int, Set<String>>{}.obs;
@@ -54,10 +68,13 @@ class PackagesController extends GetxController {
         headers: {"Content-Type": "application/json"},
         body: jsonEncode({"company_id": companyId, "subcategory_id": subCategoryId, "sub_vertical_id": subVerticalId, 'studio_id': studioId}),
       );
+
+      log(subVerticalId.toString(), name: "lkjfds");
+      log(response.body, name: "lkjfds");
       if (response.statusCode == 200) {
         final jsonBody = json.decode(response.body);
         final List data = jsonBody["data"] ?? [];
-        final filteredData = data.where((pkg) => pkg['sub_vertical_id'] == subVerticalId || subVerticalId == 0).toList();
+        final filteredData = data.where((pkg) => pkg['sub_vertical_id'].toString() == subVerticalId.toString() || subVerticalId == 0).toList();
 
         packages.assignAll(
           filteredData.map<Map<String, dynamic>>((pkg) {
@@ -71,6 +88,7 @@ class PackagesController extends GetxController {
             return {
               "title": pkg["title"] ?? "",
               "type": pkg["type"] ?? "N/A",
+              "typeId": pkg['type_id'],
               "price": priceMap[getDurationLabel(firstVariation ?? {})] ?? 0,
               "priceMap": priceMap,
               "hours": hours,
@@ -91,6 +109,7 @@ class PackagesController extends GetxController {
           selectedHours[i] = {packages[i]["hours"].first};
           expandedStates[i] = false;
         }
+        log(packages.toString(), name: "lkjfds");
       } else {
         Get.snackbar("Error", "Failed to fetch packages");
       }
@@ -222,6 +241,12 @@ class PackagesController extends GetxController {
     final selectedHour = selectedHoursForPackage.first;
     final priceMap = pkg["priceMap"] as Map<String, int>;
 
+    // Extract the correct variation from the original variation list
+    final List<dynamic> variations = pkg["packagevariations"] ?? [];
+    final matchedVariation = variations.firstWhere((v) => getDurationLabel(v) == selectedHour, orElse: () => null);
+
+    final variationId = matchedVariation != null ? matchedVariation["id"] : null;
+
     final billingPackage = {
       ...pkg,
       'selectedHours': selectedHoursForPackage.toList(),
@@ -231,8 +256,12 @@ class PackagesController extends GetxController {
       'company_id': companyId,
       'subCategory': subCategoryId,
       'sub_vertical_id': subVerticalId,
-      'type_id': pkg['type_id'],
+      "type_id": pkg['typeId'] is int ? pkg['typeId'] : int.tryParse(pkg['type_id']?.toString() ?? "0") ?? 0,
       'type': pkg['type'],
+      'variationId': variationId,
+      'selectedHour': selectedHour,
+      'advanceBookingDays': companyLocation?.company?.advanceBookingDays ?? 0,
+      'companyLocation': companyLocation, // ✅ Add this line**
     };
 
     selectedPackagesForBilling.add(billingPackage);
@@ -250,6 +279,30 @@ class PackagesController extends GetxController {
   List<Map<String, dynamic>> getSelectedPackagesForBilling() {
     return selectedPackagesForBilling.toList();
   }
+
+  /// Total of all selected packages (inclusive of GST)
+  double get packageTotal => selectedPackagesForBilling.fold(0.0, (sum, pkg) => sum + (pkg['finalPrice'] as num).toDouble());
+
+  /// Total of all selected extra paid add-ons (inclusive of GST)
+  double get totalExtraAddOnPrice => selectedExtraAddons.fold(0.0, (sum, addon) => sum + (addon['price'] as num).toDouble());
+
+  /// Utility: Convert inclusive amount to exclusive base price
+  double _exclusiveFromInclusive(double inclusive) => inclusive * (100 / (100 + gstPercentage));
+
+  /// Base (exclusive) total for packages
+  double get packageBaseTotal => _exclusiveFromInclusive(packageTotal);
+
+  /// Base (exclusive) total for add-ons
+  double get addonBaseTotal => _exclusiveFromInclusive(totalExtraAddOnPrice);
+
+  /// Combined base subtotal (before GST)
+  double get subtotal => packageBaseTotal + addonBaseTotal;
+
+  /// GST amount extracted from inclusive prices
+  double get gstAmount => subtotal * gstPercentage / 100;
+
+  /// Final total the user pays (same as packageTotal + addonTotal)
+  double get finalAmount => packageTotal + totalExtraAddOnPrice;
 
   bool isPackageSelected(int index) {
     return selectedPackageIndices.contains(index);

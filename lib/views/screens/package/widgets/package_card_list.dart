@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:streammly/services/theme.dart';
@@ -29,7 +31,7 @@ class PackagesListView extends StatelessWidget {
                     : pkg["hours"].first;
             final priceMap = pkg["priceMap"] as Map<String, int>;
             final updatedPrice = priceMap[selectedHour] ?? pkg["price"];
-
+            log(pkg.toString());
             return GestureDetector(
               onTap: () => controller.togglePackageSelection(index),
               child: Container(
@@ -93,7 +95,7 @@ class PackagesListView extends StatelessWidget {
                                           CrossAxisAlignment.start,
                                       children: [
                                         Text(
-                                          pkg["title"] ?? '',
+                                          "${pkg["title"] ?? ''}",
                                           style: theme.textTheme.titleMedium
                                               ?.copyWith(
                                                 fontWeight: FontWeight.bold,

@@ -3,6 +3,7 @@ import 'package:get/get.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:streammly/controllers/location_controller.dart';
 import 'package:streammly/controllers/promo_slider_controller.dart';
+import 'package:streammly/navigation_flow.dart';
 import 'package:streammly/navigation_menu.dart';
 import 'package:streammly/views/screens/common/widgets/add_new_address.dart';
 
@@ -193,7 +194,7 @@ class EnterLocationManuallyScreen extends StatelessWidget {
                               Get.find<CategoryController>().fetchCategories();
                               Get.find<PromoSliderController>().fetchSliders();
                               Get.find<CompanyController>().fetchAndCacheCompanyById(1);
-                              Get.to(() => NavigationMenu());
+                              Get.to(() => NavigationFlow());
                             },
                             style: ElevatedButton.styleFrom(
                               backgroundColor: colorScheme.primary,

@@ -1,8 +1,15 @@
+import 'dart:developer';
+
 import 'package:dotted_border/dotted_border.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:get/get.dart';
+import 'package:streammly/models/package/slots_model.dart';
+import 'package:streammly/services/input_decoration.dart';
 import 'package:streammly/views/screens/package/booking/widgets/custom_time_picker.dart';
+import 'package:streammly/views/screens/package/booking/widgets/time_slot_select.dart';
 
 import '../../../../../controllers/booking_form_controller.dart';
 import '../../../../../services/route_helper.dart';
@@ -24,6 +31,7 @@ class _PackageFormCardState extends State<PackageFormCard> {
   late TextEditingController startTimeController;
   late TextEditingController endTimeController;
   late TextEditingController dateTimeController;
+  late TextEditingController selectedTimingController;
   bool isStartTime = true;
   bool showTimePicker = false;
 
@@ -38,6 +46,7 @@ class _PackageFormCardState extends State<PackageFormCard> {
     startTimeController = TextEditingController(text: form['startTime'] ?? '');
     endTimeController = TextEditingController(text: form['endTime'] ?? '');
     dateTimeController = TextEditingController(text: form['date'] ?? '');
+    selectedTimingController = TextEditingController(text: form['startTime'] != null && form['endTime'] != null ? "${form['startTime']} - ${form['endTime']}" : '');
 
     final extraQuestions = widget.package['extraQuestions'] ?? widget.package['packageextra_questions'] ?? [];
     for (var question in extraQuestions) {
@@ -53,6 +62,7 @@ class _PackageFormCardState extends State<PackageFormCard> {
     startTimeController.dispose();
     endTimeController.dispose();
     dateTimeController.dispose();
+    selectedTimingController.dispose();
     for (final controller in _extraQuestionControllers.values) {
       controller.dispose();
     }
@@ -65,6 +75,9 @@ class _PackageFormCardState extends State<PackageFormCard> {
     TextEditingController studioAddController = TextEditingController(text: widget.package['address'] ?? '305/A, Navneet Building, Saivihar Road, Bhandup (W), Mumbai 400078.');
     final controller = Get.find<BookingController>();
     final packageTitle = widget.package['title'] as String;
+    final selectedHours = widget.package['selectedHours'];
+    // List<String> selectedHours = List<String>.from(widget.package['selectedHours'] ?? []);
+    log(selectedHours.toString(), name: "raj");
 
     return Obx(() {
       final form = controller.packageFormsData[widget.index] ?? {};
@@ -77,6 +90,9 @@ class _PackageFormCardState extends State<PackageFormCard> {
       }
       if (dateTimeController.text != (form['date'] ?? '')) {
         dateTimeController.text = form['date'] ?? '';
+      }
+      if (selectedTimingController.text != (form['startTime'] != null && form['endTime'] != null ? "${form['startTime']} - ${form['endTime']}" : '')) {
+        selectedTimingController.text = form['startTime'] != null && form['endTime'] != null ? "${form['startTime']} - ${form['endTime']}" : '';
       }
 
       return Container(
@@ -94,87 +110,108 @@ class _PackageFormCardState extends State<PackageFormCard> {
               controller: dateTimeController,
               hintText: form['date']?.isEmpty ?? true ? 'Select Date' : null,
               readOnly: true,
+              validator: (value) {
+                if (value == null || value.isEmpty) {
+                  return 'Please select a date';
+                }
+                return null;
+              },
               onTap: () async {
-                final selectedDate = await showDatePicker(
-                  context: context,
-                  initialDate: DateTime.now().add(Duration(days: 1)), // Set to tomorrow
-                  firstDate: DateTime.now().add(Duration(days: 1)), // Prevent selecting today
-                  lastDate: DateTime(2100),
-                );
+                final int advanceBookingDays = widget.package['advanceBookingDays'] ?? 0;
+
+                // 🧠 Blocked dates (today + next 'n' days)
+                final List<DateTime> blockedDates = List.generate(advanceBookingDays + 1, (i) => DateTime.now().add(Duration(days: i)));
+
+                // 🪵 Log blocked dates
+                for (var date in blockedDates) {
+                  final formatted = "${date.year}-${date.month.toString().padLeft(2, '0')}-${date.day.toString().padLeft(2, '0')}";
+                  log("Blocked Date: $formatted");
+                }
+
+                final DateTime firstAvailableDate = DateTime.now().add(Duration(days: advanceBookingDays + 1));
+
+                final selectedDate = await showDatePicker(context: context, initialDate: firstAvailableDate, firstDate: firstAvailableDate, lastDate: DateTime(2100));
+
                 if (selectedDate != null) {
-                  final formatted = "${selectedDate.day}-${selectedDate.month}-${selectedDate.year}";
+                  final formatted = "${selectedDate.year}-${selectedDate.month.toString().padLeft(2, '0')}-${selectedDate.day.toString().padLeft(2, '0')}";
+                  log("Selected Date: $formatted");
                   controller.updatePackageForm(widget.index, 'date', formatted);
-                  dateTimeController.text = formatted;
+                  controller.updatePackageForm(widget.index, 'startTime', '');
+                  controller.updatePackageForm(widget.index, 'endTime', '');
+                  selectedTimingController.text = '';
+                  try {
+                    await controller.fetchAvailableSlots(
+                      companyId: widget.package["company_id"].toString(),
+                      date: formatted,
+                      studioId: widget.package["studio_id"].toString(),
+                      typeId: widget.package["typeId"].toString(),
+                    );
+                  } catch (e) {
+                    Get.snackbar('Error', 'Failed to fetch available slots: $e');
+                  }
                 }
               },
-
               prefixIcon: Icons.calendar_today,
             ),
             const SizedBox(height: 16),
-            Row(
-              children: [
-                Expanded(
-                  child: CustomTextField(
-                    controller: startTimeController,
-                    labelText: 'Start Time *',
-                    hintText: form['startTime']?.isEmpty ?? true ? '09:00 AM' : null,
-                    readOnly: true,
-                    prefixIcon: Icons.access_time,
-                    onTap: () {
-                      setState(() {
-                        isStartTime = true;
-                        showTimePicker = true;
-                      });
-                    },
-                  ),
-                ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: CustomTextField(
-                    controller: endTimeController,
-                    labelText: 'End Time *',
-                    hintText: form['endTime']?.isEmpty ?? true ? '07:00 PM' : null,
-                    readOnly: true,
-                    prefixIcon: Icons.access_time,
-                    onTap: () {
-                      setState(() {
-                        isStartTime = false;
-                        showTimePicker = true;
-                      });
-                    },
-                  ),
-                ),
-              ],
+            TextFormField(
+              controller: selectedTimingController,
+              readOnly: true,
+              validator: (value) {
+                if (value == null || value.isEmpty) {
+                  return 'Please Select Time Slot';
+                }
+                return null;
+              },
+              onTap: () {
+                if (dateTimeController.text.isEmpty) {
+                  HapticFeedback.heavyImpact(); // Simple vibration for error
+                  Fluttertoast.showToast(
+                    msg: "Please select a date first.",
+                    toastLength: Toast.LENGTH_LONG,
+                    gravity: ToastGravity.BOTTOM,
+                    backgroundColor: Colors.red,
+                    textColor: Colors.white,
+                  );
+                  return;
+                }
+                print('TextFormField tapped');
+                final slots = Get.find<BookingController>().startTime;
+                log('Slots: $slots');
+                TimeOfDay? startTime;
+                TimeOfDay? endTime;
+                try {
+                  log("$startTime", name: "fgngjn");
+                  startTime = form['startTime'] != null ? parseTimeOfDay(form['startTime']) : null;
+
+                  endTime = form['endTime'] != null ? parseTimeOfDay(form['endTime']) : null;
+                } catch (e) {
+                  Fluttertoast.showToast(msg: "Invalid time format in previous selection. Please select a new time slot.", toastLength: Toast.LENGTH_LONG);
+                  controller.updatePackageForm(widget.index, 'startTime', '');
+                  controller.updatePackageForm(widget.index, 'endTime', '');
+                  selectedTimingController.text = '';
+                }
+                showTimeSlotSelector(
+                  context: context,
+                  slots: slots,
+                  packageHours: selectedHours.toString(),
+                  index: widget.index,
+                  startTime: startTime,
+                  endTime: endTime,
+                  onSlotSelected: (TimeOfDay? startTime, TimeOfDay? endTime) {
+                    log('Selected: ${startTime?.format(context)} - ${endTime?.format(context)}');
+                    if (startTime != null && endTime != null) {
+                      final formattedTime = "${startTime.format(context)} - ${endTime.format(context)}";
+                      selectedTimingController.text = formattedTime;
+                      controller.updatePackageForm(widget.index, 'startTime', startTime.format(context));
+                      controller.updatePackageForm(widget.index, 'endTime', endTime.format(context));
+                    }
+                  },
+                );
+                log(widget.package["hours"]?.toString() ?? "1");
+              },
+              decoration: CustomDecoration.inputDecoration(label: "Select Time Slot", floating: true, suffix: const Icon(Icons.arrow_drop_down), borderRadius: 6),
             ),
-            const SizedBox(height: 16),
-            if (showTimePicker)
-              CustomTimePicker(
-                isStart: isStartTime,
-                onCancel: () {
-                  setState(() {
-                    if (isStartTime) {
-                      startTimeController.text = "";
-                      controller.updatePackageForm(widget.index, 'startTime', '');
-                    } else {
-                      endTimeController.text = "";
-                      controller.updatePackageForm(widget.index, 'endTime', '');
-                    }
-                    showTimePicker = false;
-                  });
-                },
-                onTimeSelected: (time) {
-                  setState(() {
-                    if (isStartTime) {
-                      startTimeController.text = time;
-                      controller.updatePackageForm(widget.index, 'startTime', time);
-                    } else {
-                      endTimeController.text = time;
-                      controller.updatePackageForm(widget.index, 'endTime', time);
-                    }
-                    showTimePicker = false;
-                  });
-                },
-              ),
             const SizedBox(height: 16),
             Text("Questions", style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w600)),
             const SizedBox(height: 16),
@@ -184,7 +221,7 @@ class _PackageFormCardState extends State<PackageFormCard> {
               title: 'Choose Free Item',
               isSelected: form['freeAddOn'] != null,
               onTap: () async {
-                final packageId = widget.package['packageId'] ?? widget.package['id']; // adjust according to your data
+                final packageId = widget.package['packageId'] ?? widget.package['id'];
                 final result = await Navigator.push(context, getCustomRoute(child: FreeItemsPage(packageId: packageId)));
                 if (result != null) {
                   controller.updatePackageForm(widget.index, 'freeAddOn', result);
@@ -203,7 +240,7 @@ class _PackageFormCardState extends State<PackageFormCard> {
                       Row(
                         children: [
                           IconButton(
-                            icon: Icon(Icons.edit, color: const Color(0xff2864A6)),
+                            icon: const Icon(Icons.edit, color: Color(0xff2864A6)),
                             onPressed: () async {
                               final packageId = widget.package['packageId'] ?? widget.package['id'];
                               final result = await Navigator.push(context, getCustomRoute(child: FreeItemsPage(packageId: packageId)));
@@ -223,10 +260,7 @@ class _PackageFormCardState extends State<PackageFormCard> {
                     ],
                   ),
                   const SizedBox(height: 4),
-                  Text(
-                    form['freeAddOn']['mainTitle'] ?? '', // Dynamic main title
-                    style: theme.textTheme.bodyLarge?.copyWith(fontWeight: FontWeight.w600),
-                  ),
+                  Text(form['freeAddOn']['mainTitle'] ?? '', style: theme.textTheme.bodyLarge?.copyWith(fontWeight: FontWeight.w600)),
                   const SizedBox(height: 8),
                   Container(
                     decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(12), border: Border.all(color: Colors.grey.shade300)),
@@ -271,7 +305,6 @@ class _PackageFormCardState extends State<PackageFormCard> {
                 ],
               ),
             ],
-
             const SizedBox(height: 16),
             _buildExpandableSection(
               title: 'Extra Add-Ons (Extra Charged)',
@@ -285,7 +318,6 @@ class _PackageFormCardState extends State<PackageFormCard> {
                 }
               },
             ),
-
             if (form['extraAddOn'] is List && (form['extraAddOn'] as List).isNotEmpty) ...[
               const SizedBox(height: 12),
               Column(
@@ -298,7 +330,7 @@ class _PackageFormCardState extends State<PackageFormCard> {
                       Row(
                         children: [
                           IconButton(
-                            icon: Icon(Icons.edit, color: const Color(0xff2864A6)),
+                            icon: const Icon(Icons.edit, color: Color(0xff2864A6)),
                             onPressed: () async {
                               final packageId = widget.package['packageId'] ?? widget.package['id'];
                               final studioId = widget.package['studioId'];
@@ -346,7 +378,6 @@ class _PackageFormCardState extends State<PackageFormCard> {
                         );
                       }
                     } else {
-                      // If no image, show placeholder container
                       imageWidget = Container(
                         height: 50,
                         width: 50,
@@ -383,7 +414,6 @@ class _PackageFormCardState extends State<PackageFormCard> {
                 ],
               ),
             ],
-
             const SizedBox(height: 32),
             Row(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -398,7 +428,7 @@ class _PackageFormCardState extends State<PackageFormCard> {
                       border: Border.all(color: form['termsAccepted'] == true ? theme.colorScheme.primary : theme.dividerColor),
                       borderRadius: BorderRadius.circular(4),
                     ),
-                    child: form['termsAccepted'] == true ? Icon(Icons.check, color: Colors.white, size: 14) : null,
+                    child: form['termsAccepted'] == true ? const Icon(Icons.check, color: Colors.white, size: 14) : null,
                   ),
                 ),
                 const SizedBox(width: 12),
@@ -446,10 +476,8 @@ class _PackageFormCardState extends State<PackageFormCard> {
       final type = question['question_type'] ?? 'Text';
       final answer = form['extraAnswers']?[uniqueKey] ?? '';
 
-      // >>> SAFELY GET (or create) THE CONTROLLER <<<
       final ctrl = _extraQuestionControllers.putIfAbsent(uniqueKey, () => TextEditingController());
 
-      // keep in sync
       if (ctrl.text != answer) {
         ctrl.text = answer;
       }
@@ -461,6 +489,12 @@ class _PackageFormCardState extends State<PackageFormCard> {
             labelText: label,
             controller: ctrl,
             readOnly: true,
+            validator: (value) {
+              if (value == null || value.isEmpty) {
+                return 'Please select a date';
+              }
+              return null;
+            },
             prefixIcon: Icons.calendar_today,
             onTap: () async {
               final picked = await showDatePicker(context: context, initialDate: DateTime.now(), firstDate: DateTime(2000), lastDate: DateTime(2100));
@@ -480,7 +514,19 @@ class _PackageFormCardState extends State<PackageFormCard> {
               return Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  CustomTextField(labelText: label, controller: ctrl, readOnly: true, prefixIcon: Icons.access_time, onTap: () => setState(() => showTime = true)),
+                  CustomTextField(
+                    labelText: label,
+                    controller: ctrl,
+                    readOnly: true,
+                    validator: (value) {
+                      if (value == null || value.isEmpty) {
+                        return 'Please select a time';
+                      }
+                      return null;
+                    },
+                    prefixIcon: Icons.access_time,
+                    onTap: () => setState(() => showTime = true),
+                  ),
                   if (showTime)
                     CustomTimePicker(
                       isStart: true,
@@ -497,7 +543,19 @@ class _PackageFormCardState extends State<PackageFormCard> {
           ),
         );
       } else {
-        fields.add(CustomTextField(labelText: label, controller: ctrl, onChanged: (val) => controller.updateExtraAnswer(widget.index, qid, val)));
+        fields.add(
+          CustomTextField(
+            labelText: label,
+            controller: ctrl,
+            validator: (value) {
+              if (value == null || value.isEmpty) {
+                return 'This field is required';
+              }
+              return null;
+            },
+            onChanged: (val) => controller.updateExtraAnswer(widget.index, qid, val),
+          ),
+        );
       }
     }
     return fields;
@@ -522,4 +580,88 @@ class _PackageFormCardState extends State<PackageFormCard> {
       ),
     );
   }
+}
+
+void showSelectedSlotSheet(BuildContext context, Slot selectedSlot) {
+  showModalBottomSheet(
+    context: context,
+    shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(16))),
+    builder:
+        (_) => Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const Text('Selected Slot', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+              const SizedBox(height: 16),
+              Row(
+                children: [
+                  const Icon(Icons.access_time),
+                  const SizedBox(width: 8),
+                  Text('${selectedSlot.startTime} - ${selectedSlot.endTime}', style: const TextStyle(fontSize: 16)),
+                ],
+              ),
+              const SizedBox(height: 16),
+              ElevatedButton.icon(
+                onPressed: () => Navigator.pop(context),
+                icon: const Icon(Icons.check),
+                label: const Text('OK'),
+                style: ElevatedButton.styleFrom(backgroundColor: Colors.green),
+              ),
+            ],
+          ),
+        ),
+  );
+}
+
+TimeOfDay? parseTimeOfDay(String? timeString) {
+  if (timeString == null || timeString.isEmpty) return null;
+  try {
+    // Split the time string into time and period (e.g., "10:00 AM" -> ["10:00", "AM"])
+    final parts = timeString.trim().split(' ');
+    if (parts.length != 2) throw const FormatException('Invalid time format');
+
+    final timeParts = parts[0].split(':');
+    if (timeParts.length < 2) {
+      throw const FormatException('Invalid time format');
+    }
+
+    int hour = int.parse(timeParts[0]);
+    final minute = int.parse(timeParts[1]);
+    final period = parts[1].toUpperCase();
+
+    // Convert to 24-hour format
+    if (period == 'PM' && hour != 12) {
+      hour += 12;
+    } else if (period == 'AM' && hour == 12) {
+      hour = 0;
+    }
+
+    return TimeOfDay(hour: hour, minute: minute);
+  } catch (e) {
+    log('Error parsing time: $timeString, $e');
+    throw const FormatException('Invalid time format');
+  }
+}
+
+void showTimeSlotSelector({
+  required BuildContext context,
+  required List<TimeOfDay?> slots,
+  required String packageHours,
+  required int index,
+  required TimeOfDay? startTime,
+  required TimeOfDay? endTime,
+  required Function(TimeOfDay? startTime, TimeOfDay? endTime) onSlotSelected,
+}) {
+  showModalBottomSheet(
+    context: context,
+    isDismissible: true,
+    enableDrag: true,
+    isScrollControlled: true,
+    shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(20))),
+    backgroundColor: Colors.white,
+    builder: (context) {
+      return TimeSlotSelector(context: context, slots: slots, packageHours: packageHours, index: index, onSlotSelected: onSlotSelected);
+    },
+  );
 }

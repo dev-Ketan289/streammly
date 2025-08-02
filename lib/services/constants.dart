@@ -79,6 +79,9 @@ class AppConstants {
   //Support Ticket
   static const String addSupportTicket = 'api/v1/support-ticket/addsupportticket';
 
+  //Booking
+  static const String storeBooking = 'api/v1/workingtime/get-avilable-slots';
+
   //
   static const double horizontalPadding = 16;
   static const double verticalPadding = 20;

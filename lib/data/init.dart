@@ -14,14 +14,18 @@ import 'package:streammly/data/repository/promo_slider_repo.dart';
 import 'package:streammly/data/repository/quote_repo.dart';
 import 'package:streammly/data/repository/wishlist_repo.dart';
 
+import '../controllers/booking_form_controller.dart';
 import '../controllers/business_setting_controller.dart';
 import '../controllers/category_controller.dart';
 import '../controllers/company_controller.dart';
 import '../controllers/home_screen_controller.dart';
+import '../controllers/package_page_controller.dart';
 import '../controllers/promo_slider_controller.dart';
 import '../controllers/quote_controller.dart';
 import '../services/constants.dart';
 import 'api/api_client.dart';
+import 'repository/booking_repo.dart';
+import 'repository/package_repo.dart';
 
 class Init {
   initialize() async {
@@ -30,12 +34,18 @@ class Init {
 
     try {
       //Repo initialization
-      final String token = sharedPreferences.getString(AppConstants.token) ?? "";
-      final apiClient = ApiClient(appBaseUrl: AppConstants.baseUrl, sharedPreferences: sharedPreferences);
+      final String token =
+          sharedPreferences.getString(AppConstants.token) ?? "";
+      final apiClient = ApiClient(
+        appBaseUrl: AppConstants.baseUrl,
+        sharedPreferences: sharedPreferences,
+      );
       apiClient.updateHeader(token);
       Get.lazyPut(() => apiClient);
 
-      Get.lazyPut(() => AuthRepo(apiClient: Get.find(), sharedPreferences: Get.find()));
+      Get.lazyPut(
+        () => AuthRepo(apiClient: Get.find(), sharedPreferences: Get.find()),
+      );
 
       // Home
       Get.lazyPut(() => CategoryRepo(apiClient: Get.find()));
@@ -61,17 +71,22 @@ class Init {
       Get.lazyPut(() => WishlistRepo(apiClient: Get.find()));
       Get.lazyPut(() => WishlistController(wishlistRepo: Get.find()));
       // Package
-      // Get.lazyPut(() => PackageRepo(apiClient: Get.find()));
-      // Get.lazyPut(() => PackagesController(packageRepo: Get.find()));
+      Get.lazyPut(() => PackageRepo(apiClient: Get.find()));
+      Get.lazyPut(() => PackagesController());
 
       //Business setting
       Get.lazyPut(() => BusinessSettingRepo(apiClient: Get.find()));
-      Get.lazyPut(() => BusinessSettingController(businessSettingRepo: Get.find()));
+      Get.lazyPut(
+        () => BusinessSettingController(businessSettingRepo: Get.find()),
+      );
+
+      // //Booking Slots
+      Get.lazyPut(()=> BookingRepo(apiClient: Get.find()));
+      Get.lazyPut(()=> BookingController(bookingrepo : Get.find()));
 
       // Quote
       Get.lazyPut(() => QuoteRepo(apiClient: Get.find()));
       Get.lazyPut(() => QuoteController(quoteRepo: Get.find()));
-
     } catch (e) {
       log('---- ${e.toString()} ----', name: "ERROR AT initialize()");
     }

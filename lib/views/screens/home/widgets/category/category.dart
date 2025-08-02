@@ -5,6 +5,7 @@ import 'package:streammly/services/theme.dart';
 import 'package:streammly/views/widgets/custom_doodle.dart';
 
 import '../../../../../controllers/category_controller.dart';
+import '../../../../../navigation_flow.dart';
 import '../../../common/images/rounded_image.dart';
 import '../../vendor_locator.dart';
 
@@ -78,8 +79,15 @@ class _CategoryListScreenState extends State<CategoryListScreen> {
 
                 return GestureDetector(
                   onTap: () {
-                    Get.to(() => CompanyLocatorMapScreen(categoryId: cat.id));
+                    final mainState =
+                        context.findAncestorStateOfType<NavigationFlowState>();
+                    // Get.to(() => CompanyLocatorMapScreen(categoryId: cat.id));
+                    mainState?.pushToCurrentTab(
+                      CompanyLocatorMapScreen(categoryId: cat.id),
+                      hideBottomBar: true,
+                    );
                   },
+
                   child: Container(
                     margin: const EdgeInsets.only(bottom: 16),
                     decoration: BoxDecoration(

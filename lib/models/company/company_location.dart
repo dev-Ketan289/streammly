@@ -1,5 +1,7 @@
 import 'package:streammly/services/constants.dart';
 
+import 'speciality_model.dart';
+
 class CompanyLocation {
   // Primary identifiers and location
   final int id;
@@ -41,7 +43,7 @@ class CompanyLocation {
   final CompanyDetails? company;
 
   CompanyLocation({
-    required this.id,
+    required this.id, // studio id
     required this.companyId,
     required this.type,
     required this.name,
@@ -89,20 +91,25 @@ class CompanyLocation {
 
     Map<String, String> extractSpecialityMap(dynamic vendorsubcategory) {
       final Map<String, String> result = {};
+
       if (vendorsubcategory is List) {
         for (var item in vendorsubcategory) {
           final subcategory = item['subcategory'];
           if (subcategory != null && subcategory['specialities'] != null) {
-            for (var speciality in subcategory['specialities']) {
-              final title = speciality['title'];
-              final image = speciality['image'];
-              if (title != null) {
-                result[title] = fullUrl(image);
+            for (var specialityWrapper in subcategory['specialities']) {
+              final speciality = specialityWrapper['speciality'];
+              if (speciality != null) {
+                final title = speciality['title'];
+                final image = speciality['image'];
+                if (title != null) {
+                  result[title] = image != null && image.toString().isNotEmpty ? fullUrl(image) : ""; // fallback
+                }
               }
             }
           }
         }
       }
+
       return result;
     }
 
@@ -133,7 +140,13 @@ class CompanyLocation {
       specialities: specialityMap.keys.toList(),
       specialityTitleToImage: specialityMap,
       studioLocation: json['studiolocation'] != null ? StudioLocation.fromJson(json['studiolocation']) : null,
-      company: json['company'] != null ? CompanyDetails.fromJson(json['company']) : null,
+      company:
+          json['company'] != null
+              ? CompanyDetails.fromJson({
+                ...json['company'],
+                'vendorsubcategory': json['company']['vendorsubcategory'], // pass it in manually
+              })
+              : null,
     );
   }
 }
@@ -219,40 +232,118 @@ class WorkingHour {
 class CompanyDetails {
   final int id;
   final String companyName;
+  final String? companyOwnerName;
+  final String? email;
+  final String? phone;
   final String? logo;
   final String? bannerImage;
   final String? descriptionBackgroundImage;
   final String? description;
   final double? rating;
+  final String? status;
+  final String? companyType;
   final String? categoryName;
-  final int? advanceDayBooking;
+  final int? advanceBookingDaysRaw;
+  final int? advanceAmountPercentageRaw;
+  final List<dynamic>? businessSettings;
+  final List<Speciality> specialities;
 
   CompanyDetails({
     required this.id,
     required this.companyName,
+    this.companyOwnerName,
+    this.email,
+    this.phone,
     this.logo,
     this.bannerImage,
     this.descriptionBackgroundImage,
-    this.advanceDayBooking,
     this.description,
     this.rating,
+    this.status,
+    this.companyType,
     this.categoryName,
+    this.advanceBookingDaysRaw,
+    this.advanceAmountPercentageRaw,
+    this.businessSettings,
+    this.specialities = const [],
   });
 
   factory CompanyDetails.fromJson(Map<String, dynamic> json) {
+    int? parseInt(dynamic val) {
+      if (val == null) return null;
+      if (val is int) return val;
+      return int.tryParse(val.toString());
+    }
+
+    double? parseDouble(dynamic val) {
+      if (val == null) return null;
+      if (val is double) return val;
+      if (val is int) return val.toDouble();
+      return double.tryParse(val.toString());
+    }
+
+    List<Speciality> extractSpecialities(dynamic vendorsubcategoryList) {
+      final List<Speciality> result = [];
+
+      if (vendorsubcategoryList is List) {
+        for (final item in vendorsubcategoryList) {
+          final subcategory = item['subcategory'];
+          if (subcategory is Map && subcategory['specialities'] is List) {
+            for (final specWrapper in subcategory['specialities']) {
+              final spec = specWrapper['speciality'];
+              if (spec is Map<String, dynamic>) {
+                result.add(Speciality.fromJson(spec));
+              }
+            }
+          }
+        }
+      }
+
+      return result;
+    }
+
     return CompanyDetails(
-      id: json['id'],
+      id: parseInt(json['id']) ?? 0,
       companyName: json['company_name'] ?? '',
+      companyOwnerName: json['company_owner_name'],
+      email: json['email'],
+      phone: json['phone'],
       logo: json['logo'],
       bannerImage: json['banner_image'],
       descriptionBackgroundImage: json['description_background_image'],
       description: json['description'],
-      rating: json['rating'] != null ? double.tryParse(json['rating'].toString()) : null,
+      rating: parseDouble(json['rating']),
+      status: json['status'],
+      companyType: json['company_type'],
       categoryName: json['category_title'],
-      advanceDayBooking: int.tryParse(json['advance_day_booking'].toString()) ?? 0,
+      advanceBookingDaysRaw: parseInt(json['advance_booking_days'] ?? json['advance_day_booking']),
+      advanceAmountPercentageRaw: parseInt(json['advance_amount_percentage']),
+      businessSettings: json['get_busniess_setting'],
+      specialities: extractSpecialities(json['vendorsubcategory']),
     );
   }
 
-  String? get fullLogoUrl => logo;
-  String? get fullBannerImageUrl => bannerImage;
+  int get advanceBookingDays {
+    if (advanceBookingDaysRaw != null) return advanceBookingDaysRaw!;
+    if (businessSettings is List) {
+      final match = (businessSettings as List).cast<Map<String, dynamic>>().firstWhere((e) => e['key'] == 'advance_booking_days', orElse: () => {});
+      if (match['value'] != null) {
+        final days = int.tryParse(match['value'].toString());
+        if (days != null) return days;
+      }
+    }
+    return 0;
+  }
+
+  int get advanceAmountPercentage {
+    if (advanceAmountPercentageRaw != null) return advanceAmountPercentageRaw!;
+    if (businessSettings is List) {
+      final match = (businessSettings as List).cast<Map<String, dynamic>>().firstWhere((e) => e['key'] == 'advance_amount_percentage', orElse: () => {});
+      if (match['value'] != null) {
+        final val = int.tryParse(match['value'].toString());
+        if (val != null) return val;
+      }
+    }
+    return 0;
+  }
 }

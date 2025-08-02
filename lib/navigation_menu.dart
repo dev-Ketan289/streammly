@@ -14,7 +14,7 @@ class NavigationMenu extends StatefulWidget {
     super.key,
     this.hiddenIndices = const {},
     this.hideFAB = false,
-  });
+  }); 
 
   @override
   State<NavigationMenu> createState() => _NavigationMenuState();

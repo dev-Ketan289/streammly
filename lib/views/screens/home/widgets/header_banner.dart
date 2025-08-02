@@ -1,4 +1,5 @@
 import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:get/get.dart';
@@ -7,8 +8,10 @@ import 'package:streammly/generated/assets.dart';
 import 'package:streammly/services/theme.dart';
 import 'package:streammly/views/screens/common/enter_location_manually.dart';
 import 'package:streammly/views/screens/profile/drawer.dart';
+
 import '../../../../controllers/location_controller.dart';
 import '../../../../models/banner/banner_item.dart';
+import '../../../../models/company/specialized_in.dart';
 
 class HeaderBanner extends StatefulWidget {
   final List<BannerSlideItem>? slides;
@@ -18,8 +21,7 @@ class HeaderBanner extends StatefulWidget {
   final String? overrideTitle;
   final String? overrideSubtitle;
   final bool showContent;
-
-  final List<String>? specialities;
+  final List<SpecializedItem>? specialized;
 
   const HeaderBanner({
     super.key,
@@ -30,7 +32,7 @@ class HeaderBanner extends StatefulWidget {
     this.overrideTitle,
     this.overrideSubtitle,
     this.showContent = true,
-    this.specialities,
+    this.specialized,
   });
 
   @override
@@ -57,10 +59,7 @@ class _HeaderBannerState extends State<HeaderBanner> {
     if (loopedSlides.isNotEmpty) {
       autoScrollTimer = Timer.periodic(const Duration(seconds: 4), (_) {
         if (pageController.hasClients) {
-          pageController.nextPage(
-            duration: const Duration(milliseconds: 500),
-            curve: Curves.easeInOut,
-          );
+          pageController.nextPage(duration: const Duration(milliseconds: 500), curve: Curves.easeInOut);
         }
       });
     }
@@ -75,6 +74,9 @@ class _HeaderBannerState extends State<HeaderBanner> {
 
   @override
   Widget build(BuildContext context) {
+    // If you really want to debug, add print here:
+    // print("HeaderBanner build, specialized: ${widget.specialized?.map((e) => e.title).toList()}");
+
     final theme = Theme.of(context);
     final hasSlides = loopedSlides.isNotEmpty;
     final currentSlide = hasSlides ? loopedSlides[currentIndex] : null;
@@ -89,25 +91,15 @@ class _HeaderBannerState extends State<HeaderBanner> {
           // Background
           widget.backgroundImage.startsWith("http")
               ? Image.network(
-            widget.backgroundImage,
-            fit: BoxFit.cover,
-            width: double.infinity,
-            height: double.infinity,
-            errorBuilder: (context, error, stackTrace) {
-              return Image.asset(
-                'assets/images/recommended_banner/FocusPointVendor.png',
+                widget.backgroundImage,
                 fit: BoxFit.cover,
                 width: double.infinity,
                 height: double.infinity,
-              );
-            },
-          )
-              : Image.asset(
-            widget.backgroundImage,
-            fit: BoxFit.fill,
-            width: double.infinity,
-            height: double.infinity,
-          ),
+                errorBuilder: (context, error, stackTrace) {
+                  return Image.asset('assets/images/recommended_banner/FocusPointVendor.png', fit: BoxFit.cover, width: double.infinity, height: double.infinity);
+                },
+              )
+              : Image.asset(widget.backgroundImage, fit: BoxFit.cover, width: double.infinity, height: double.infinity),
 
           // Overlay
           Container(color: widget.overlayColor),
@@ -145,17 +137,10 @@ class _HeaderBannerState extends State<HeaderBanner> {
               bottom: 10,
               child: Builder(
                 builder: (context) {
-                  final double vectorImageHeight =
-                      MediaQuery.of(context).size.height * 0.25;
+                  final double vectorImageHeight = MediaQuery.of(context).size.height * 0.25;
                   return currentSlide!.isSvg
-                      ? SvgPicture.network(
-                    currentSlide.vectorImage,
-                    height: vectorImageHeight,
-                  )
-                      : Image.network(
-                    currentSlide.vectorImage,
-                    height: vectorImageHeight,
-                  );
+                      ? SvgPicture.network(currentSlide.vectorImage, height: vectorImageHeight)
+                      : Image.network(currentSlide.vectorImage, height: vectorImageHeight);
                 },
               ),
             ),
@@ -169,41 +154,23 @@ class _HeaderBannerState extends State<HeaderBanner> {
                 children: [
                   // Location Row
                   Obx(
-                        () => GestureDetector(
+                    () => GestureDetector(
                       onTap: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (_) => EnterLocationManuallyScreen(),
-                          ),
-                        );
+                        Navigator.push(context, MaterialPageRoute(builder: (_) => EnterLocationManuallyScreen()));
                       },
                       child: Row(
                         children: [
                           const SizedBox(width: 50),
-                          Icon(Icons.location_on,
-                              color: theme.colorScheme.onPrimary, size: 20),
+                          Icon(Icons.location_on, color: theme.colorScheme.onPrimary, size: 20),
                           const SizedBox(width: 8),
                           Flexible(
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
+                                Text("Current Location", style: theme.textTheme.bodySmall?.copyWith(color: theme.colorScheme.onPrimary, fontWeight: FontWeight.bold, fontSize: 12)),
                                 Text(
-                                  "Current Location",
-                                  style: theme.textTheme.bodySmall?.copyWith(
-                                    color: theme.colorScheme.onPrimary,
-                                    fontWeight: FontWeight.bold,
-                                    fontSize: 12,
-                                  ),
-                                ),
-                                Text(
-                                  locationController.selectedAddress.value.isNotEmpty
-                                      ? locationController.selectedAddress.value
-                                      : "Fetching...",
-                                  style: theme.textTheme.bodySmall?.copyWith(
-                                    color: theme.colorScheme.onPrimary,
-                                    fontSize: 8,
-                                  ),
+                                  locationController.selectedAddress.value.isNotEmpty ? locationController.selectedAddress.value : "Fetching...",
+                                  style: theme.textTheme.bodySmall?.copyWith(color: theme.colorScheme.onPrimary, fontSize: 8),
                                   overflow: TextOverflow.visible,
                                 ),
                               ],
@@ -220,54 +187,34 @@ class _HeaderBannerState extends State<HeaderBanner> {
                       IconButton(
                         icon: SvgPicture.asset(Assets.svgMenu),
                         onPressed: () {
-                          Get.to(
-                                () => const ProfilePage(),
-                            transition: Transition.leftToRight,
-                            duration: const Duration(milliseconds: 800),
-                          );
+                          Get.to(() => const ProfilePage(), transition: Transition.leftToRight, duration: const Duration(milliseconds: 800));
                         },
                       ),
                       const SizedBox(width: 8),
                       Expanded(
                         child: Container(
-                          padding: const EdgeInsets.symmetric(
-                              horizontal: 10, vertical: 5),
+                          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
                           height: 37,
                           decoration: BoxDecoration(
                             color: Colors.transparent,
                             borderRadius: BorderRadius.circular(30),
-                            border: Border.all(
-                              color: theme.colorScheme.onPrimary,
-                              width: 1,
-                            ),
+                            border: Border.all(color: theme.colorScheme.onPrimary, width: 1),
                           ),
                           child: TextField(
                             style: const TextStyle(color: Colors.white),
                             decoration: InputDecoration(
                               hintText: "Search",
-                              hintStyle: GoogleFonts.openSans(
-                                color: theme.colorScheme.onPrimary,
-                                fontSize: 12,
-                              ),
-                              prefixIcon: Icon(
-                                Icons.search,
-                                color: backgroundLight,
-                                size: 24,
-                              ),
+                              hintStyle: GoogleFonts.openSans(color: theme.colorScheme.onPrimary, fontSize: 12),
+                              prefixIcon: Icon(Icons.search, color: backgroundLight, size: 24),
                               border: InputBorder.none,
                               isDense: true,
-                              contentPadding: const EdgeInsets.symmetric(
-                                  horizontal: 16, vertical: 8),
+                              contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                             ),
                           ),
                         ),
                       ),
                       const SizedBox(width: 8),
-                      CircleAvatar(
-                        radius: 16,
-                        backgroundColor: theme.colorScheme.surface,
-                        child: SvgPicture.asset(Assets.svgDiamondhome),
-                      ),
+                      CircleAvatar(radius: 16, backgroundColor: theme.colorScheme.surface, child: SvgPicture.asset(Assets.svgDiamondhome)),
                     ],
                   ),
 
@@ -287,25 +234,15 @@ class _HeaderBannerState extends State<HeaderBanner> {
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
                                   if (title.isNotEmpty)
-                                    Text(
-                                      title,
-                                      style: GoogleFonts.dmSerifDisplay(
-                                        fontSize: 29,
-                                        fontWeight: FontWeight.w700,
-                                        color: theme.colorScheme.onPrimary,
-                                      ),
-                                    ),
+                                    Text(title, style: GoogleFonts.dmSerifDisplay(fontSize: 29, fontWeight: FontWeight.w700, color: theme.colorScheme.onPrimary)),
                                   if (subtitle.isNotEmpty) const SizedBox(height: 6),
                                   if (subtitle.isNotEmpty)
                                     SizedBox(
-                                      height: 45,
+                                      height: 35,
                                       width: 168,
                                       child: Text(
                                         subtitle,
-                                        style: GoogleFonts.dmSerifDisplay(
-                                          color: theme.colorScheme.onPrimary,
-                                          fontSize: 12,
-                                        ),
+                                        style: GoogleFonts.dmSerifDisplay(color: theme.colorScheme.onPrimary, fontSize: 12),
                                         overflow: TextOverflow.visible,
                                         textAlign: TextAlign.left,
                                       ),
@@ -315,69 +252,34 @@ class _HeaderBannerState extends State<HeaderBanner> {
                             ),
 
                           // Specialities Section
-                          if (widget.specialities != null &&
-                              widget.specialities!.isNotEmpty) ...[
+                          // Specialized In Section
+                          if (widget.specialized != null && widget.specialized!.isNotEmpty) ...[
                             Padding(
                               padding: const EdgeInsets.symmetric(horizontal: 16),
                               child: Text(
                                 "Specialized in",
-                                style: theme.textTheme.bodyMedium?.copyWith(
-                                  color: theme.colorScheme.onPrimary,
-                                  fontWeight: FontWeight.w600,
-                                  fontSize: 14,
-                                ),
+                                style: theme.textTheme.bodyLarge?.copyWith(color: theme.colorScheme.onPrimary, fontWeight: FontWeight.bold, fontSize: 14),
                               ),
-
                             ),
-                            const SizedBox(height: 10,),
+                            const SizedBox(height: 5),
                             Padding(
                               padding: const EdgeInsets.symmetric(horizontal: 16),
                               child: Wrap(
-                                spacing: 6,
-                                runSpacing: 6,
+                                spacing: 8,
+                                runSpacing: 8,
                                 children: [
-                                  for (var i = 0;
-                                  i <
-                                      (widget.specialities!.length > 2
-                                          ? 2
-                                          : widget.specialities!.length);
-                                  i++)
-                                    Container(
-                                      padding: const EdgeInsets.symmetric(
-                                          horizontal: 10, vertical: 6),
-                                      decoration: BoxDecoration(
-                                        color: theme.colorScheme.surface,
-                                        borderRadius: BorderRadius.circular(8),
-                                        border: Border.all(
-                                          color: theme.colorScheme.surface.withAlpha(100),
-                                        ),
-                                      ),
-                                      child: Text(
-                                        widget.specialities![i],
-                                        style: theme.textTheme.bodySmall?.copyWith(
-                                          color: Colors.indigo,
-                                          fontSize: 12,
-                                        ),
-                                      ),
+                                  for (int i = 0; i < (widget.specialized!.length > 2 ? 2 : widget.specialized!.length); i++)
+                                    Chip(
+                                      backgroundColor: theme.colorScheme.surface,
+                                      side: BorderSide(color: theme.colorScheme.surface.withAlpha(100)),
+                                      labelPadding: const EdgeInsets.symmetric(horizontal: 8),
+                                      label: Text(widget.specialized![i].title, style: theme.textTheme.bodySmall?.copyWith(color: Colors.indigo, fontSize: 12)),
                                     ),
-                                  if (widget.specialities!.length > 2)
-                                    Container(
-                                      padding: const EdgeInsets.symmetric(
-                                          horizontal: 10, vertical: 6),
-                                      decoration: BoxDecoration(
-                                        color: theme.colorScheme.surface,
-                                        borderRadius: BorderRadius.circular(8),
-                                        border: Border.all(
-                                          color: theme.colorScheme.surface.withAlpha(100),
-                                        ),
-                                      ),
-                                      child: Text(
-                                        "+${widget.specialities!.length - 2} more",
-                                        style: theme.textTheme.bodySmall?.copyWith(
-                                          color: Colors.indigo,
-                                          fontSize: 12,
-                                        ),
-                                      ),
+                                  if (widget.specialized!.length > 2)
+                                    Chip(
+                                      backgroundColor: theme.colorScheme.surface,
+                                      side: BorderSide(color: theme.colorScheme.surface.withAlpha(100)),
+                                      label: Text("+${widget.specialized!.length - 2} more", style: theme.textTheme.bodySmall?.copyWith(color: Colors.indigo, fontSize: 12)),
                                     ),
                                 ],
                               ),

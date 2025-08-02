@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:streammly/navigation_flow.dart';
 import 'package:streammly/services/theme.dart';
 import 'package:streammly/views/screens/vendor/vendoer_detail.dart';
 
@@ -22,7 +23,7 @@ class VendorDescription extends StatelessWidget {
     if (bannerUrl != null && bannerUrl.isNotEmpty && (Uri.tryParse(bannerUrl)?.hasAbsolutePath ?? false)) {
       bannerWidget = Image.network(
         bannerUrl,
-        fit: BoxFit.cover,
+        fit: BoxFit.fitHeight,
         errorBuilder: (context, error, stackTrace) {
           return Image.asset('assets/images/newBorn.jpg', fit: BoxFit.cover);
         },
@@ -137,7 +138,9 @@ class VendorDescription extends StatelessWidget {
                         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                       ),
                       onPressed: () {
-                        Navigator.push(context, MaterialPageRoute(builder: (_) => VendorDetailScreen(company: company)));
+                        final mainState = context.findAncestorStateOfType<NavigationFlowState>();
+                        mainState?.pushToCurrentTab(VendorDetailScreen(studio: company));
+                        // Navigator.push(context, MaterialPageRoute(builder: (_) => VendorDetailScreen(company: company)));
                       },
                       child: Text("Let’s Continue", style: theme.textTheme.bodyLarge?.copyWith(color: Colors.white, fontWeight: FontWeight.bold)),
                     ),
@@ -265,6 +268,7 @@ class VendorDescription extends StatelessWidget {
                     ],
                   ),
                 ),
+
                 const SizedBox(height: 24),
 
                 SizedBox(
@@ -277,7 +281,14 @@ class VendorDescription extends StatelessWidget {
                     ),
                     onPressed: () {
                       Navigator.pop(context);
-                      Navigator.push(context, MaterialPageRoute(builder: (_) => VendorDetailScreen(company: company)));
+                      final mainState = context.findAncestorStateOfType<NavigationFlowState>();
+                      mainState?.pushToCurrentTab(VendorDetailScreen(studio: company), hideBottomBar: true);
+                      // Navigator.push(
+                      //   context,
+                      //   MaterialPageRoute(
+                      //     builder: (_) => VendorDetailScreen(company: company),
+                      //   ),
+                      // );
                     },
                     child: const Text("Let’s Continue", style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
                   ),

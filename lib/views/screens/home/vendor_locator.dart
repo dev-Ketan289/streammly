@@ -9,6 +9,7 @@ import 'package:flutter/rendering.dart';
 import 'package:get/get.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:permission_handler/permission_handler.dart';
+import 'package:streammly/navigation_flow.dart';
 import 'package:streammly/services/theme.dart';
 
 import '../../../controllers/category_controller.dart';
@@ -375,21 +376,29 @@ class _CompanyLocatorMapScreenState extends State<CompanyLocatorMapScreen> {
                     child: Column(
                       children: [
                         // Page indicator
-                        Container(
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: List.generate(
-                              controller.companies.length,
-                              (index) => AnimatedContainer(
-                                duration: const Duration(milliseconds: 200),
-                                width: _currentPageIndex == index ? 12 : 8,
-                                height: _currentPageIndex == index ? 12 : 8,
-                                margin: const EdgeInsets.symmetric(horizontal: 4),
-                                decoration: BoxDecoration(shape: BoxShape.circle, color: _currentPageIndex == index ? Colors.blue : Colors.grey.withValues(alpha: 0.5)),
-                              ),
-                            ),
-                          ),
-                        ),
+                        // Container(
+                        //   child: Row(
+                        //     mainAxisAlignment: MainAxisAlignment.center,
+                        //     children: List.generate(
+                        //       controller.companies.length,
+                        //       (index) => AnimatedContainer(
+                        //         duration: const Duration(milliseconds: 200),
+                        //         width: _currentPageIndex == index ? 12 : 8,
+                        //         height: _currentPageIndex == index ? 12 : 8,
+                        //         margin: const EdgeInsets.symmetric(
+                        //           horizontal: 4,
+                        //         ),
+                        //         decoration: BoxDecoration(
+                        //           shape: BoxShape.circle,
+                        //           color:
+                        //               _currentPageIndex == index
+                        //                   ? Colors.blue
+                        //                   : Colors.grey.withValues(alpha: 0.5),
+                        //         ),
+                        //       ),
+                        //     ),
+                        //   ),
+                        // ),
 
                         // Company cards slider
                         Expanded(
@@ -408,8 +417,10 @@ class _CompanyLocatorMapScreenState extends State<CompanyLocatorMapScreen> {
                                   return Container(
                                     child: GestureDetector(
                                       onTap: () async {
-                                        await controller.fetchCompanyById(company.id);
-                                        Get.to(() => VendorDescription(company: company));
+                                        await controller.fetchCompanyById(company.companyId);
+                                        final mainState = context.findAncestorStateOfType<NavigationFlowState>();
+                                        mainState?.pushToCurrentTab(VendorDescription(company: company), hideBottomBar: true);
+                                        // Get.to(() => VendorDescription(company: company));
                                       },
                                       child: VendorInfoCard(
                                         logoImage: company.company?.logo ?? '',

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:streammly/navigation_flow.dart';
 import 'package:streammly/navigation_menu.dart';
 import 'package:streammly/views/screens/auth_screens/create_user.dart';
 
@@ -30,11 +31,11 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
       if (authController.userProfile == null || (authController.userProfile!.name ?? '').isEmpty || (authController.userProfile!.email ?? '').isEmpty) {
         // New user: show profile form
         Get.off(() => ProfileFormScreen());
-      } else if (redirectTo == 'GetQuoteScreen') {
+      } else if (redirectTo == '/getQuote') {
         Get.offNamed('/getQuote', arguments: formData);
       } else {
         // Default: go to main navigation
-        Get.off(() => const NavigationMenu());
+        Get.off(() =>  NavigationFlow());
       }
     });
   }

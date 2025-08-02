@@ -44,7 +44,7 @@ class PackageModel {
       id: json['id'],
       studioId: json['studio_id'],
       title: json['title'] ?? '',
-      typeId: json['type_id'] ?? '',
+      typeId: int.tryParse(json['type_id'].toString()) ?? 0,
       type: json['type'] ?? '',
       packageType: json['package_type'] ?? '',
       subTitle: json['sub_title'] ?? '',
@@ -64,15 +64,17 @@ class PackageModel {
 }
 
 class Variation {
+  final int id;
   final String duration;
   final String durationType;
   final String amount;
   final String? extraDurationCharge;
 
-  Variation({required this.duration, required this.durationType, required this.amount, this.extraDurationCharge});
+  Variation({required this.id, required this.duration, required this.durationType, required this.amount, this.extraDurationCharge});
 
   factory Variation.fromJson(Map<String, dynamic> json) {
     return Variation(
+      id: json['id'],
       duration: json['duration']?.toString() ?? '',
       durationType: json['duration_type']?.toString() ?? '',
       amount: json['amount']?.toString() ?? '',
