@@ -36,6 +36,7 @@ class BookingRepo {
         bookingData,
         headers: {
           'Authorization': 'Bearer $token',
+          'Accept': 'application/json',
           'Content-Type': 'application/json',  // ensure content type if required
         },
       );

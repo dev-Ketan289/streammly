@@ -1,5 +1,4 @@
 import 'dart:developer';
-
 import 'package:dotted_border/dotted_border.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
@@ -10,7 +9,6 @@ import 'package:streammly/models/package/slots_model.dart';
 import 'package:streammly/services/input_decoration.dart';
 import 'package:streammly/views/screens/package/booking/widgets/custom_time_picker.dart';
 import 'package:streammly/views/screens/package/booking/widgets/time_slot_select.dart';
-
 import '../../../../../controllers/booking_form_controller.dart';
 import '../../../../../services/route_helper.dart';
 import '../../../common/widgets/custom_textfield.dart' show CustomTextField;
@@ -220,8 +218,12 @@ class _PackageFormCardState extends State<PackageFormCard> {
                 Fluttertoast.showToast(
                     msg: "Invalid time format in previous selection. Please select a new time slot.",
                     toastLength: Toast.LENGTH_LONG);
-                controller.updatePackageForm(widget.index, 'startTime', '');
-                controller.updatePackageForm(widget.index, 'endTime', '');
+                final formattedStart = controller.cleanTimeString(startTime?.format(context));
+                final formattedEnd = controller.cleanTimeString(endTime?.format(context));
+
+                controller.updatePackageForm(widget.index, 'startTime', formattedStart);
+                controller.updatePackageForm(widget.index, 'endTime', formattedEnd);
+
                 selectedTimingController.text = '';
               }
               showTimeSlotSelector(
@@ -236,8 +238,12 @@ class _PackageFormCardState extends State<PackageFormCard> {
                   if (startTime != null && endTime != null) {
                     final formattedTime = "${startTime.format(context)} - ${endTime.format(context)}";
                     selectedTimingController.text = formattedTime;
+
+                    // Update form fields
                     controller.updatePackageForm(widget.index, 'startTime', startTime.format(context));
                     controller.updatePackageForm(widget.index, 'endTime', endTime.format(context));
+
+
                   }
                 },
               );

@@ -102,7 +102,7 @@ class PackagesBottomBar extends StatelessWidget {
                     return {...pkg, 'companyLocation': matchedLocation};
                   }).toList();
 
-                  log(enrichedPackages.firstOrNull.toString(), name: "SelectedPackageWithCompanyLocation");
+                  // log(enrichedPackages.firstOrNull.toString(), name: "SelectedPackageWithCompanyLocation");
 
                   mainState?.pushToCurrentTab(
                     BookingPage(packages: enrichedPackages, companyLocations: companyLocations),

@@ -71,8 +71,6 @@ class PackagesController extends GetxController {
         body: jsonEncode({"company_id": companyId, "subcategory_id": subCategoryId, "sub_vertical_id": subVerticalId, 'studio_id': studioId}),
       );
 
-      log(subVerticalId.toString(), name: "lkjfds");
-      log(response.body, name: "lkjfds");
       if (response.statusCode == 200) {
         final jsonBody = json.decode(response.body);
         final List data = jsonBody["data"] ?? [];
@@ -82,11 +80,16 @@ class PackagesController extends GetxController {
           final List<dynamic>? variations = pkg["packagevariations"];
           final firstVariation = (variations != null && variations.isNotEmpty) ? variations[0] : null;
 
-          final List<String> hours = variations != null ? variations.map<String>((v) => getDurationLabel(v)).toList() : ["1hr", "2hr", "3hr"];
+          final List<String> hours = variations != null
+              ? variations.map<String>((v) => getDurationLabel(v)).toList()
+              : ["1hr", "2hr", "3hr"];
 
-          final priceMap = {for (var v in variations ?? []) getDurationLabel(v): int.tryParse(v["amount"]?.toString() ?? "0") ?? 0};
+          final priceMap = {
+            for (var v in variations ?? []) getDurationLabel(v): int.tryParse(v["amount"]?.toString() ?? "0") ?? 0
+          };
 
           return {
+            'id': pkg['id'],  // <-- Add id here properly
             "title": pkg["title"] ?? "",
             "type": pkg["type"] ?? "N/A",
             "typeId": pkg['type_id'],
@@ -100,8 +103,8 @@ class PackagesController extends GetxController {
             "specialOffer": (pkg["status"] ?? "").toString().toLowerCase() == "active",
             "packageIndex": data.indexOf(pkg),
             "extraQuestions": pkg["packageextra_questions"] ?? [],
-            "packageId": pkg["id"] ?? 0,
-            "companyId": companyId,
+            "packagevariations": variations ?? [],  // <-- This is important
+            'companyId': companyId,
           };
         }).toList();
 
@@ -111,7 +114,6 @@ class PackagesController extends GetxController {
           selectedHours[i] = {packages[i]["hours"].first};
           expandedStates[i] = false;
         }
-        log(packages.toString(), name: "lkjfds");
       } else {
         Get.snackbar("Error", "Failed to fetch packages");
       }
@@ -250,33 +252,52 @@ class PackagesController extends GetxController {
 
   void _addPackageForBilling(int index) {
     final pkg = packages[index];
+
+    final List<dynamic> variations = pkg["packagevariations"] ?? [];
     final selectedHoursForPackage = selectedHours[index] ?? {pkg["hours"].first};
     final selectedHour = selectedHoursForPackage.first;
     final priceMap = pkg["priceMap"] as Map<String, int>;
 
-    final List<dynamic> variations = pkg["packagevariations"] ?? [];
-    final matchedVariation = variations.firstWhere((v) => getDurationLabel(v) == selectedHour, orElse: () => null);
+// Utility function as you have:
+    String getDurationLabel(dynamic variation) {
+      final duration = variation["duration"]?.toString() ?? "";
+      final type = (variation["duration_type"] ?? "").toString().toLowerCase();
+      if (type.contains("minute")) return "${duration}min";
+      if (type.contains("hour")) return "${duration}hr";
+      return duration;
+    }
+
+// Match the correct variation by selected hour
+    final matchedVariation = variations.firstWhere(
+          (v) => getDurationLabel(v) == selectedHour,
+      orElse: () => variations.isNotEmpty ? variations[0] : null,
+    );
 
     final variationId = matchedVariation != null ? matchedVariation["id"] : null;
 
+// ✅ Prepare correct billing package map
     final billingPackage = {
       ...pkg,
       'selectedHours': selectedHoursForPackage.toList(),
+      'package_id': pkg['id'],  // <-- Correct Package ID
       'packageIndex': index,
       'finalPrice': priceMap[selectedHour] ?? pkg["price"],
       'studio_id': studioId,
       'company_id': companyId,
       'subCategory': subCategoryId,
       'sub_vertical_id': subVerticalId,
-      "type_id": pkg['typeId'] is int ? pkg['typeId'] : int.tryParse(pkg['type_id']?.toString() ?? "0") ?? 0,
+      'type_id': pkg['typeId'] is int ? pkg['typeId'] : int.tryParse(pkg['type_id']?.toString() ?? "0") ?? 0,
       'type': pkg['type'],
-      'variationId': variationId,
+      'package_variation_id': variationId,  // <-- Correct Variation ID
       'selectedHour': selectedHour,
       'advanceBookingDays': companyLocation?.company?.advanceBookingDays ?? 0,
       'companyLocation': companyLocation,
     };
 
+    log("Adding package for billing: package_id=${billingPackage['package_id']}, package_variation_id=${billingPackage['package_variation_id']}");
+
     selectedPackagesForBilling.add(billingPackage);
+
   }
 
   void toggleHour(int packageIndex, String hour) {

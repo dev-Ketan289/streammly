@@ -1,6 +1,5 @@
 import 'dart:convert';
 import 'dart:developer';
-
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -44,7 +43,6 @@ class BookingController extends GetxController {
     autofillFromUserProfile();
   }
 
-  /// Autofill user info from AuthController
   void autofillFromUserProfile() {
     try {
       final userProfile = authController.userProfile;
@@ -59,15 +57,14 @@ class BookingController extends GetxController {
     }
   }
 
-  /// Initialize packages data and forms
   void initSelectedPackages(List<Map<String, dynamic>> packages, List<dynamic> locations) {
     companyLocations = locations;
-
     WidgetsBinding.instance.addPostFrameCallback((_) {
       selectedPackages = List<Map<String, dynamic>>.from(packages);
       packagePrices = List<int>.generate(
         packages.length,
-            (index) => int.tryParse(packages[index]['packagevariations']?[0]?['amount']?.toString() ?? '0') ?? 0,
+            (index) =>
+        int.tryParse(packages[index]['packagevariations']?[0]?['amount']?.toString() ?? '0') ?? 0,
       );
       showPackageDetails = List<bool>.filled(packages.length, false);
 
@@ -75,7 +72,7 @@ class BookingController extends GetxController {
         final package = packages[i];
         final packageTitle = package['title'] ?? '';
         final now = TimeOfDay.now();
-        final formattedTime = formatTimeOfDay(now);
+        final formattedTime = cleanTimeString(formatTimeOfDay(now));
         Map<String, String> extraAnswers = {};
         final extraQuestions = package['extraQuestions'] ?? package['packageextra_questions'] ?? [];
         for (var question in extraQuestions) {
@@ -111,7 +108,8 @@ class BookingController extends GetxController {
   String convertToBackendTimeFormat(String? timeStr) {
     if (timeStr == null || timeStr.isEmpty) return "";
     try {
-      final dateTime = DateFormat.jm().parse(timeStr);
+      final cleanedTime = cleanTimeString(timeStr);
+      final dateTime = DateFormat.jm().parse(cleanedTime);
       return DateFormat("HH:mm:ss").format(dateTime);
     } catch (e) {
       return "";
@@ -121,8 +119,8 @@ class BookingController extends GetxController {
   String calculateTotalHours(String? startTime, String? endTime) {
     if (startTime == null || endTime == null) return "0";
     try {
-      final start = DateFormat.jm().parse(startTime);
-      final end = DateFormat.jm().parse(endTime);
+      final start = DateFormat.jm().parse(cleanTimeString(startTime));
+      final end = DateFormat.jm().parse(cleanTimeString(endTime));
       final duration = end.difference(start);
       final hours = duration.inMinutes / 60;
       return hours.toStringAsFixed(1);
@@ -175,6 +173,12 @@ class BookingController extends GetxController {
 
   void updatePackageForm(int index, String field, dynamic value) {
     final data = packageFormsData[index] ?? {};
+
+    // Always clean time strings before storing in forms
+    if (field == 'startTime' || field == 'endTime') {
+      value = cleanTimeString(value?.toString() ?? '');
+    }
+
     data[field] = value;
     packageFormsData[index] = data;
     update();
@@ -235,11 +239,74 @@ class BookingController extends GetxController {
     update();
   }
 
-// Utility to clean possible invisible spaces in the time string
   String cleanTimeString(String? time) {
     if (time == null) return '';
-    // Replace non-breaking space or unusual spaces with normal space, then trim
-    return time.replaceAll(RegExp(r'\s+'), ' ').trim();
+
+    // Remove invisible unicode spaces
+    String cleaned = time.replaceAll(RegExp(r'[\u00A0\u202F\u2007\u2060]'), ' ');
+
+    // Collapse multiple spaces into one
+    cleaned = cleaned.replaceAll(RegExp(r'\s+'), ' ').trim();
+
+    // Manual Split to enforce valid format
+    List<String> parts = cleaned.split(' ');
+    if (parts.length >= 2) {
+      final timePart = parts[0].trim();  // hh:mm
+      final periodPart = parts[1].toUpperCase();  // AM/PM
+
+      // Validate Time Format (basic check)
+      if (RegExp(r'^\d{1,2}:\d{2}$').hasMatch(timePart) && (periodPart == 'AM' || periodPart == 'PM')) {
+        return '$timePart $periodPart';
+      }
+    }
+
+    return cleaned; // fallback return
+  }
+
+  String convertToApiTimeString(String timeStr) {
+    if (timeStr.isEmpty) return '';
+
+    try {
+      // Clean invisible spaces and weird unicode
+      String cleaned = timeStr.replaceAll(RegExp(r'[\u00A0\u202F\u2007\u2060]'), ' ');
+      cleaned = cleaned.replaceAll(RegExp(r'\s+'), ' ').trim();
+
+      log("Cleaned Time String: '$cleaned'");
+
+      // Manual Split
+      final parts = cleaned.split(' ');
+      if (parts.length != 2) {
+        log("Invalid time format after split: '$cleaned'");
+        return '';
+      }
+
+      final timePart = parts[0];  // '10:00'
+      final periodPart = parts[1].toUpperCase();  // 'AM' or 'PM'
+
+      // Validate timePart
+      if (!RegExp(r'^\d{1,2}:\d{2}$').hasMatch(timePart)) {
+        log("Invalid timePart format: '$timePart'");
+        return '';
+      }
+
+      if (periodPart != 'AM' && periodPart != 'PM') {
+        log("Invalid periodPart: '$periodPart'");
+        return '';
+      }
+
+      final reconstructed = '$timePart $periodPart';
+
+      log("Reconstructed Time: '$reconstructed'");
+
+      final dateTime = DateFormat('h:mm a').parse(reconstructed);  // Strict 12-hour parsing
+      final apiTime = DateFormat('HH:mm:ss').format(dateTime);
+
+      log("Final API Time: $apiTime");
+      return apiTime;
+    } catch (e, stack) {
+      log("Error parsing time '$timeStr' -> $e\n$stack");
+      return '';
+    }
   }
 
   bool canSubmit() {
@@ -253,10 +320,6 @@ class BookingController extends GetxController {
     }
     if (personalInfo['email']?.isEmpty ?? true) {
       debugPrint("Validation fail: Email is empty");
-      return false;
-    }
-    if (!acceptTerms) {
-      debugPrint("Validation fail: Global terms not accepted");
       return false;
     }
 
@@ -280,8 +343,37 @@ class BookingController extends GetxController {
       }
 
       try {
-        final start = DateFormat.jm().parse(cleanTimeString(form['startTime']));
-        final end = DateFormat.jm().parse(cleanTimeString(form['endTime']));
+        final rawStart = form['startTime'];
+        final rawEnd = form['endTime'];
+        final cleanedStart = cleanTimeString(rawStart);
+        final cleanedEnd = cleanTimeString(rawEnd);
+
+        debugPrint("---- PACKAGE $i ----");
+        debugPrint("Raw Start Time: '$rawStart'  -> Runes: ${rawStart.runes.toList()}");
+        debugPrint("Cleaned Start Time: '$cleanedStart'  -> Runes: ${cleanedStart.runes.toList()}");
+
+        debugPrint("Raw End Time: '$rawEnd'  -> Runes: ${rawEnd.runes.toList()}");
+        debugPrint("Cleaned End Time: '$cleanedEnd'  -> Runes: ${cleanedEnd.runes.toList()}");
+
+        DateTime? safeParseTime(String? time) {
+          if (time == null || time.isEmpty) return null;
+          try {
+            String normalized = cleanTimeString(time);
+            return DateFormat('h:mm a').parse(normalized);
+          } catch (e, stack) {
+            log("Failed to parse time: $time | Error: $e\nStackTrace: $stack");
+            return null;
+          }
+        }
+
+        final start = safeParseTime(rawStart);
+        final end = safeParseTime(rawEnd);
+
+        if (start == null || end == null) {
+          debugPrint("Validation fail: Time parsing error for package $i");
+          return false;
+        }
+
         if (end.isBefore(start)) {
           debugPrint("Validation fail: End time is before start time for package $i");
           return false;
@@ -316,18 +408,17 @@ class BookingController extends GetxController {
         return false;
       }
     }
+
     debugPrint("All validations passed");
     return true;
   }
 
-  /// Package extra answers serialization
   String extractExtraQuestionsAsString(Map<String, dynamic> form) {
     final extraAnswers = Map<String, String>.from(form['extraAnswers'] ?? {});
     if (extraAnswers.isEmpty) return '[]';
     return jsonEncode(extraAnswers);
   }
 
-  /// Calculate wallet usage for payment
   int calculateWalletUsage(num payableAmount) {
     final walletBalance = authController.userProfile?.wallet ?? 0;
     final int payable = payableAmount.toInt();
@@ -335,7 +426,20 @@ class BookingController extends GetxController {
     return payable <= walletBal ? payable : walletBal;
   }
 
-  /// Calculate total addon price
+  // Added method that was missing in your original postBooking payload preparation
+  num calculateWalletUsageForPackage(Map<String, dynamic> package) {
+    final walletBalanceNum = authController.userProfile?.wallet ?? 0;
+    final walletBalance = walletBalanceNum is int ? walletBalanceNum : walletBalanceNum.toInt();
+    final packagePayableAmount = int.tryParse(package['packagevariations']?[0]?['amount']?.toString() ?? '0') ?? 0;
+    return walletBalance >= packagePayableAmount ? packagePayableAmount : walletBalance;
+  }
+
+  int getWalletBalance() {
+    final walletValue = authController.userProfile?.wallet;
+    if (walletValue == null) return 0;
+    return walletValue.toInt();
+  }
+
   int totalExtraAddOnPrice() {
     int total = 0;
     for (final form in packageFormsData.values) {
@@ -347,17 +451,40 @@ class BookingController extends GetxController {
     return total;
   }
 
-  /// Calculate total payable amount (package prices + addons)
   int totalPayableAmount() {
     final packageTotal = packagePrices.fold(0, (sum, p) => sum + p);
     final addonsTotal = totalExtraAddOnPrice();
     return packageTotal + addonsTotal;
   }
 
-  /// Submit booking to backend
+
+
+  // New method: check wallet sufficiency before booking
+  bool canBookWithWallet() {
+    final walletBalance = getWalletBalance();
+    final payable = totalPayableAmount();
+    if (walletBalance < payable) {
+      Get.snackbar(
+        'Insufficient Wallet Balance',
+        'Your wallet balance ($walletBalance₹) is insufficient. Total amount required: $payable₹.',
+        snackPosition: SnackPosition.BOTTOM,
+        backgroundColor: Colors.redAccent,
+        colorText: Colors.white,
+      );
+      return false;
+    }
+    return true;
+  }
+
   Future<void> submitBooking() async {
+
     if (!canSubmit()) {
       Get.snackbar("Error", "Please fill all required fields and accept terms");
+      return;
+    }
+
+    if (!canBookWithWallet()) {
+      // Wallet insufficient snackbar shown in canBookWithWallet
       return;
     }
 
@@ -366,53 +493,116 @@ class BookingController extends GetxController {
 
     try {
       final userId = authController.userProfile?.id ?? 0;
-      final package = selectedPackages.first;
-      final form = packageFormsData[0] ?? {};
-      final variations = package['packagevariations'] as List<dynamic>? ?? [];
-      final variation = variations.isNotEmpty ? variations[0] : {};
-
-      final payableAmount = totalPayableAmount();
-      final walletUsed = calculateWalletUsage(payableAmount);
-
-      final payload = {
-        "app_user_id": userId,
-        "company_id": package['company_id'] ?? 0,
-        "studio_id": package['studio_id'] ?? 0,
-        "package_id": package['id'] ?? 0,
-        "package_variation_id": variation['id'] ?? 0,
-        "total_hours": calculateTotalHours(form['startTime'], form['endTime']),
-        "name": personalInfo['name'] ?? '',
-        "mobile": personalInfo['mobile'] ?? '',
-        "alternate_mobile": alternateMobiles.isNotEmpty ? alternateMobiles.join(",") : '',
-        "email": personalInfo['email'] ?? '',
-        "address": form['address'] ?? '',
-        "date_of_shoot": form['date'] ?? '',
-        "start_time": convertToBackendTimeFormat(form['startTime']),
-        "end_time": convertToBackendTimeFormat(form['endTime']),
-        "extra_questions": extractExtraQuestionsAsString(form),
-        "terms_accepted": form['termsAccepted'] ?? false,
-        "free_add_on": form['freeAddOn'] ?? {},
-        "extra_add_on": form['extraAddOn'] ?? [],
-        "wallet_used": walletUsed,
-      };
-
-      final response = await bookingrepo.placeBooking(payload);
-      if (response != null && response.isSuccess) {
-        await authController.fetchUserProfile(); // Refresh wallet balance after booking
-        Get.offAll(() => ThanksForBookingPage());
-      } else {
-        Get.snackbar("Error", response?.message ?? "Booking failed");
+      if (userId == 0) {
+        Get.snackbar("Error", "User not logged in");
+        return;
       }
-    } catch (e) {
-      log("Booking submission error: $e");
-      Get.snackbar("Error", "Something went wrong during booking");
+
+      // Calculate total_hours = sum of all packages' hours
+      double totalHours = 0;
+      for (int i = 0; i < selectedPackages.length; i++) {
+        final form = packageFormsData[i] ?? {};
+        final startTime = convertToApiTimeString(form['startTime'] ?? '');
+        final endTime = convertToApiTimeString(form['endTime'] ?? '');
+        if (startTime.isNotEmpty && endTime.isNotEmpty) {
+          final startDT = DateFormat('HH:mm').parse(startTime);
+          final endDT = DateFormat('HH:mm').parse(endTime);
+          final durationMinutes = endDT.difference(startDT).inMinutes;
+          if (durationMinutes > 0) {
+            totalHours += durationMinutes / 60;
+          }
+        }
+      }
+
+      for (int i = 0; i < selectedPackages.length; i++) {
+        final package = selectedPackages[i];
+        final form = packageFormsData[i] ?? {};
+
+        final startTimeStr = convertToApiTimeString(form['startTime'] ?? '');
+        final endTimeStr = convertToApiTimeString(form['endTime'] ?? '');
+
+        String dateOfShoot = form['date'] ?? '';
+        try {
+          final dateParsed = DateFormat('yyyy-MM-dd').parse(dateOfShoot);
+          dateOfShoot = DateFormat('dd-MM-yyyy').format(dateParsed);
+        } catch (_) {
+          // Use as-is if format unknown
+        }
+
+        final int packageHours = (() {
+          if (startTimeStr.isEmpty || endTimeStr.isEmpty) return 0;
+          try {
+            final startDT = DateFormat('HH:mm').parse(startTimeStr);
+            final endDT = DateFormat('HH:mm').parse(endTimeStr);
+            final diff = endDT.difference(startDT).inMinutes;
+            return diff > 0 ? (diff / 60).ceil() : 0;
+          } catch (_) {
+            return 0;
+          }
+        })();
+
+        final walletUsed = (calculateWalletUsageForPackage(package) > 0) ? 'yes' : 'no';
+
+        final payload = {
+          "app_user_id": userId,
+          "company_id": package['company_id'] ?? 1,
+          "studio_id": package['studio_id'] ?? 1,
+          "package_id": package['id'] ?? 0,  // IMPORTANT: Set valid package_id
+          "package_variation_id": package['packagevariations']?[0]?['id'] ?? 0,  // IMPORTANT: Set valid variation_id
+          "total_hours": packageHours, // Send per package hours here (or totalHours if backend expects that)
+          "name": personalInfo['name'] ?? '',
+          "mobile": personalInfo['mobile'] ?? '',
+          "alternate_mobile": alternateMobiles.isNotEmpty ? alternateMobiles.join(",") : '',
+          "email": personalInfo['email'] ?? '',
+          "address": form['address'] ?? '',
+          "date_of_shoot": dateOfShoot,
+          "start_time": startTimeStr,
+          "end_time": endTimeStr,
+          "extra_questions": extractExtraQuestionsAsString(form),
+          "terms_accepted": form['termsAccepted'] ?? false,
+          "free_add_on": form['freeAddOn'] ?? {},
+          "extra_add_on": form['extraAddOn'] ?? [],
+          "wallet_used": walletUsed,
+        };
+
+        log("[submitBooking] Payload for packageId=${package['id']}: $payload");
+        log('Form Data for package $i: ${jsonEncode(form)}');
+        log('Extracted startTimeStr: $startTimeStr');
+        log('Extracted endTimeStr: $endTimeStr');
+        log("Final Start Time (API format): $startTimeStr");  // Should print like '10:00:00'
+        log("Final End Time (API format): $endTimeStr");
+        log("Form startTime Raw: '${form['startTime']}'");
+        log("Form endTime Raw: '${form['endTime']}'");
+        log("Extracted startTimeStr: $startTimeStr");
+        log("Extracted endTimeStr: $endTimeStr");
+// Should print like '13:00:00'
+
+
+
+        final ResponseModel? response = await bookingrepo.placeBooking(payload);
+
+        if (response == null || !response.isSuccess) {
+          Get.snackbar("Booking Failed", response?.message ?? "Booking failed for package ${package['title']}");
+          isLoading = false;
+          update();
+          return; // Stop further submission on failure
+        }
+      }
+
+      // Refresh profile and wallet after all bookings
+      await authController.fetchUserProfile();
+
+      // Navigate to thank you page after successful booking
+      Get.offAll(() => ThanksForBookingPage());
+    } catch (e, stack) {
+      log("submitBooking error: $e\n$stack");
+      Get.snackbar("Error", "Something went wrong during booking submission");
     } finally {
       isLoading = false;
       update();
     }
   }
 
-  /// Fetch available slots API (unchanged)
   List<Slot> timeSlots = [];
   List<TimeOfDay?> startTime = [];
 
@@ -439,7 +629,7 @@ class BookingController extends GetxController {
         timeSlots = (response.body["data"]["open_hours"] as List).map((e) => Slot.fromJson(e)).toList();
         for (var i = 0; i < timeSlots.length; i++) {
           startTime.add(timeSlots[i].startTime);
-          if (i == timeSlots.length -1) {
+          if (i == timeSlots.length - 1) {
             startTime.add(timeSlots[i].endTime);
           }
         }

@@ -95,8 +95,9 @@ class _TimeSlotSelectorState extends State<TimeSlotSelector> {
           tempStartTime = first;
           tempEndTime = second;
           errorMessage = null;
-          widget.onSlotSelected(tempStartTime, tempEndTime);
         });
+        // Update Controller's Data Immediately
+        widget.onSlotSelected(tempStartTime, tempEndTime);
       }
     } else {
       setState(() {
@@ -146,9 +147,9 @@ class _TimeSlotSelectorState extends State<TimeSlotSelector> {
                             final isSelected = timeSlot == tempStartTime || timeSlot == tempEndTime;
                             final isInRange =
                                 tempStartTime != null &&
-                                tempEndTime != null &&
-                                TimeCalculations.isTimeBeforeOrEqual(timeSlot, tempEndTime!) &&
-                                TimeCalculations.isTimeAfterOrEqual(timeSlot, tempStartTime!);
+                                    tempEndTime != null &&
+                                    TimeCalculations.isTimeBeforeOrEqual(timeSlot, tempEndTime!) &&
+                                    TimeCalculations.isTimeAfterOrEqual(timeSlot, tempStartTime!);
 
                             return GestureDetector(
                               onTap: () => onTimeSlotTap(timeSlot),
@@ -156,11 +157,11 @@ class _TimeSlotSelectorState extends State<TimeSlotSelector> {
                                 decoration: BoxDecoration(
                                   borderRadius: BorderRadius.circular(20),
                                   color:
-                                      isSelected
-                                          ? primaryColor
-                                          : isInRange
-                                          ? Colors.blue[100]
-                                          : Colors.grey.shade300,
+                                  isSelected
+                                      ? primaryColor
+                                      : isInRange
+                                      ? Colors.blue[100]
+                                      : Colors.grey.shade300,
                                   border: Border.all(color: isSelected ? Colors.blue.shade100 : Colors.grey.shade300, width: isSelected ? 4.0 : 2.0),
                                 ),
                                 child: Center(
@@ -256,12 +257,12 @@ class _TimeSlotSelectorState extends State<TimeSlotSelector> {
                   const SizedBox(height: 20),
                   ElevatedButton(
                     onPressed:
-                        tempStartTime != null && tempEndTime != null
-                            ? () {
-                              widget.onSlotSelected(tempStartTime, tempEndTime);
-                              Navigator.pop(context);
-                            }
-                            : null,
+                    tempStartTime != null && tempEndTime != null
+                        ? () {
+                      widget.onSlotSelected(tempStartTime, tempEndTime);  // Redundant, but kept for UI confirmation flow
+                      Navigator.pop(context);
+                    }
+                        : null,
                     style: ElevatedButton.styleFrom(
                       fixedSize: const Size(300, 50),
                       backgroundColor: tempStartTime != null && tempEndTime != null ? primaryColor : Colors.grey.shade400,

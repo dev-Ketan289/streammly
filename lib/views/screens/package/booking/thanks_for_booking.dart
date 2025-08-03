@@ -19,7 +19,18 @@ class ThanksForBookingPage extends StatelessWidget {
           padding: const EdgeInsets.all(45.0),
           child: Column(
             children: [
-              Center(child: Text('Thanks for Booking', style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold, color: theme.primaryColor))),
+              Center(
+                child: Text(
+                  'Thanks for Booking',
+                  style: theme.textTheme.titleMedium?.copyWith(
+                    fontWeight: FontWeight.bold,
+                    color: theme.primaryColor,
+                  ),
+                  maxLines: 1, // Prevent overflow
+                  overflow: TextOverflow.ellipsis,
+                  softWrap: false,
+                ),
+              ),
               const SizedBox(height: 20),
               Expanded(
                 child: SingleChildScrollView(
@@ -30,61 +41,95 @@ class ThanksForBookingPage extends StatelessWidget {
                         decoration: BoxDecoration(
                           color: theme.colorScheme.surface,
                           borderRadius: BorderRadius.circular(12),
-                          boxShadow: [BoxShadow(color: theme.shadowColor.withValues(alpha: 0.1), spreadRadius: 2, blurRadius: 5, offset: const Offset(0, 3))],
+                          boxShadow: [
+                            BoxShadow(
+                              color: theme.shadowColor.withAlpha(25),
+                              spreadRadius: 2,
+                              blurRadius: 5,
+                              offset: const Offset(0, 3),
+                            ),
+                          ],
                         ),
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Center(
-                              child: Column(
-                                children: [
-                                  Container(
-                                    height: 132,
-                                    width: 327,
-                                    decoration: BoxDecoration(color: theme.primaryColor.withValues(alpha: 0.05), borderRadius: BorderRadius.circular(12)),
-                                    child: Image.asset('assets/images/Thumb.gif', height: 300),
-                                  ),
-                                ],
+                              child: Container(
+                                height: 132,
+                                width: 327,
+                                decoration: BoxDecoration(
+                                  color: theme.primaryColor.withAlpha(13),
+                                  borderRadius: BorderRadius.circular(12),
+                                ),
+                                child: Image.asset(
+                                  'assets/images/Thumb.gif',
+                                  height: 300,
+                                  fit: BoxFit.contain,
+                                ),
                               ),
                             ),
                             const SizedBox(height: 20),
-                            Text('Shoot Details', style: theme.textTheme.titleSmall?.copyWith(fontWeight: FontWeight.bold)),
+                            Text(
+                              'Shoot Details',
+                              style: theme.textTheme.titleSmall?.copyWith(
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
                             const SizedBox(height: 10),
 
-                            // Dynamic package prices
-                            Obx(
-                              () => Column(
-                                children: List.generate(formController.selectedPackages.length, (index) {
-                                  final package = formController.selectedPackages[index];
-                                  final price = package['price']?.toString() ?? '0';
-                                  return _buildShootDetailRow(context, package['title'], 'Rs. $price');
-                                }),
-                              ),
+                            GetBuilder<BookingController>(
+                              builder: (controller) {
+                                return Column(
+                                  children: List.generate(
+                                    controller.selectedPackages.length,
+                                        (index) {
+                                      final package = controller.selectedPackages[index];
+                                      final priceStr = (package['price'] ?? '0').toString();
+                                      return _buildShootDetailRow(
+                                        context,
+                                        package['title'] ?? 'Package',
+                                        'Rs. $priceStr',
+                                      );
+                                    },
+                                  ),
+                                );
+                              },
                             ),
 
                             _buildShootDetailRow(context, 'Addon Price', 'Rs. 0'),
                             _buildShootDetailRow(context, 'Promo Discount', 'Rs. 0'),
                             const Divider(),
 
-                            Obx(() {
-                              double total = 0;
-                              for (var pkg in formController.selectedPackages) {
-                                total += double.tryParse(pkg['price']?.toString() ?? '0') ?? 0;
-                              }
-                              return _buildShootDetailRow(context, 'Total Payment', 'Rs. ${total.toStringAsFixed(0)}', isBold: true);
-                            }),
+                            GetBuilder<BookingController>(
+                              builder: (controller) {
+                                double total = 0;
+                                for (var pkg in controller.selectedPackages) {
+                                  total += double.tryParse(pkg['price']?.toString() ?? '0') ?? 0;
+                                }
+                                return _buildShootDetailRow(
+                                  context,
+                                  'Total Payment',
+                                  'Rs. ${total.toStringAsFixed(0)}',
+                                  isBold: true,
+                                );
+                              },
+                            ),
                           ],
                         ),
                       ),
 
-                      // Dynamic Package Cards
-                      Obx(
-                        () => Column(
-                          children: List.generate(
-                            formController.selectedPackages.length,
-                            (index) => Padding(padding: const EdgeInsets.symmetric(vertical: 8), child: PackageCard(index: index)),
-                          ),
-                        ),
+                      GetBuilder<BookingController>(
+                        builder: (controller) {
+                          return Column(
+                            children: List.generate(
+                              controller.selectedPackages.length,
+                                  (index) => Padding(
+                                padding: const EdgeInsets.symmetric(vertical: 8),
+                                child: PackageCard(index: index),
+                              ),
+                            ),
+                          );
+                        },
                       ),
                     ],
                   ),
@@ -104,11 +149,22 @@ class ThanksForBookingPage extends StatelessWidget {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          Text(label, style: theme.textTheme.bodyLarge?.copyWith(fontWeight: isBold ? FontWeight.bold : FontWeight.normal)),
+          Flexible(
+            child: Text(
+              label,
+              style: theme.textTheme.bodyLarge?.copyWith(
+                fontWeight: isBold ? FontWeight.bold : FontWeight.normal,
+              ),
+              overflow: TextOverflow.ellipsis,
+              maxLines: 1,
+            ),
+          ),
           Text(
             value,
             style: theme.textTheme.bodyLarge?.copyWith(
-              color: isBold ? theme.primaryColor : theme.textTheme.bodyLarge?.color?.withValues(alpha: 0.6),
+              color: isBold
+                  ? theme.primaryColor
+                  : theme.textTheme.bodyLarge?.color?.withAlpha((0.6 * 255).toInt()),
               fontWeight: isBold ? FontWeight.bold : FontWeight.normal,
             ),
           ),

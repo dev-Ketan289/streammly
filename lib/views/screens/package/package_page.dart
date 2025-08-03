@@ -30,6 +30,7 @@ class PackagesPage extends StatelessWidget {
 
     // Only call .initialize() once to avoid refetch on every rebuild
     WidgetsBinding.instance.addPostFrameCallback((_) {
+      
       debugPrint('[PACKAGES PAGE] companyId: $companyId');
       debugPrint('[PACKAGES PAGE] studioId: $studioId');
       debugPrint('[PACKAGES PAGE] subCategoryId: $subCategoryId');
