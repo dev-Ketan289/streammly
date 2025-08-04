@@ -1,17 +1,20 @@
-import 'dart:developer';
-
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:streammly/navigation_flow.dart';
 import 'package:streammly/services/theme.dart';
 
+import '../../../../controllers/auth_controller.dart';
 import '../../../../controllers/package_page_controller.dart';
 import '../booking/booking_page.dart';
 
 class PackagesBottomBar extends StatelessWidget {
   final PackagesController controller;
   final List<dynamic> companyLocations;
-  const PackagesBottomBar({super.key, required this.controller, required this.companyLocations});
+  const PackagesBottomBar({
+    super.key,
+    required this.controller,
+    required this.companyLocations,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -61,22 +64,26 @@ class PackagesBottomBar extends StatelessWidget {
                       const SizedBox(height: 8),
                       Wrap(
                         spacing: 4,
-                        children: selectedPackages.map((pkg) {
-                          return Container(
-                            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                            decoration: BoxDecoration(
-                              color: primaryColor.withAlpha(25),
-                              borderRadius: BorderRadius.circular(12),
-                            ),
-                            child: Text(
-                              "${pkg['title']} (${pkg['selectedHours'].join(', ')})",
-                              style: theme.textTheme.bodySmall?.copyWith(
-                                color: primaryColor,
-                                fontWeight: FontWeight.w500,
-                              ),
-                            ),
-                          );
-                        }).toList(),
+                        children:
+                            selectedPackages.map((pkg) {
+                              return Container(
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 8,
+                                  vertical: 4,
+                                ),
+                                decoration: BoxDecoration(
+                                  color: primaryColor.withAlpha(25),
+                                  borderRadius: BorderRadius.circular(12),
+                                ),
+                                child: Text(
+                                  "${pkg['title']} (${pkg['selectedHours'].join(', ')})",
+                                  style: theme.textTheme.bodySmall?.copyWith(
+                                    color: primaryColor,
+                                    fontWeight: FontWeight.w500,
+                                  ),
+                                ),
+                              );
+                            }).toList(),
                       ),
                     ],
                   ),
@@ -85,30 +92,90 @@ class PackagesBottomBar extends StatelessWidget {
               ElevatedButton(
                 style: ElevatedButton.styleFrom(
                   minimumSize: const Size(double.infinity, 50),
-                  backgroundColor: selectedPackages.isEmpty ? theme.disabledColor : primaryColor,
+                  backgroundColor:
+                      selectedPackages.isEmpty
+                          ? theme.disabledColor
+                          : primaryColor,
                   foregroundColor: Colors.white,
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(8),
+                  ),
                 ),
-                onPressed: selectedPackages.isEmpty
-                    ? null
-                    : () {
-                  final mainState = context.findAncestorStateOfType<NavigationFlowState>();
+                onPressed:
+                    selectedPackages.isEmpty
+                        ? null
+                        : () async {
+                          final authController = Get.find<AuthController>();
+                          if (!authController.isLoggedIn()) {
+                            final confirmed = await showDialog<bool>(
+                              context: context,
+                              barrierDismissible: false,
+                              builder: (context) {
+                                return AlertDialog(
+                                  title: const Text('Login Required'),
+                                  content: const Text(
+                                    'You need to be logged in to continue. Do you want to login now?',
+                                  ),
+                                  actions: [
+                                    TextButton(
+                                      onPressed:
+                                          () =>
+                                              Navigator.of(context).pop(false),
+                                      child: const Text('Cancel'),
+                                    ),
+                                    ElevatedButton(
+                                      onPressed:
+                                          () => Navigator.of(context).pop(true),
+                                      child: const Text('Login'),
+                                    ),
+                                  ],
+                                );
+                              },
+                            );
 
-                  /// 💡 Attach correct companyLocation to each selected package
-                  final enrichedPackages = selectedPackages.map((pkg) {
-                    final matchedLocation = companyLocations.firstWhereOrNull(
-                          (loc) => loc['id'] == pkg['company_location_id'] || loc.id == pkg['company_location_id'], // if object
-                    );
-                    return {...pkg, 'companyLocation': matchedLocation};
-                  }).toList();
+                            if (confirmed != true) {
+                              // User cancelled, do nothing
+                              return;
+                            }
 
-                  // log(enrichedPackages.firstOrNull.toString(), name: "SelectedPackageWithCompanyLocation");
+                            // User confirmed, navigate to login screen
+                            Get.toNamed(
+                              '/login',
+                            ); // replace with your login route
+                            return;
+                          }
 
-                  mainState?.pushToCurrentTab(
-                    BookingPage(packages: enrichedPackages, companyLocations: companyLocations),
-                    hideBottomBar: true,
-                  );
-                },
+                          final mainState =
+                              context
+                                  .findAncestorStateOfType<
+                                    NavigationFlowState
+                                  >();
+
+                          // Attach correct companyLocation to each selected package
+                          final enrichedPackages =
+                              selectedPackages.map((pkg) {
+                                final matchedLocation = companyLocations
+                                    .firstWhereOrNull(
+                                      (loc) =>
+                                          loc['id'] ==
+                                              pkg['company_location_id'] ||
+                                          loc.id == pkg['company_location_id'],
+                                    );
+                                return {
+                                  ...pkg,
+                                  'companyLocation': matchedLocation,
+                                };
+                              }).toList();
+
+                          mainState?.pushToCurrentTab(
+                            BookingPage(
+                              packages: enrichedPackages,
+                              companyLocations: companyLocations,
+                            ),
+                            hideBottomBar: true,
+                          );
+                        },
+
                 child: Text(
                   selectedPackages.isEmpty
                       ? "Select packages to continue"
