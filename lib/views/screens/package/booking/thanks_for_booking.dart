@@ -1,11 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:streammly/controllers/booking_form_controller.dart';
+import 'package:streammly/controllers/package_page_controller.dart';
 import 'package:streammly/views/screens/package/booking/components/package_card.dart';
 import 'package:streammly/views/widgets/custom_doodle.dart';
 
 class ThanksForBookingPage extends StatelessWidget {
   final BookingController formController = Get.find<BookingController>();
+  final PackagesController packagesController = Get.find<PackagesController>();
 
   ThanksForBookingPage({super.key});
 
@@ -26,7 +28,7 @@ class ThanksForBookingPage extends StatelessWidget {
                     fontWeight: FontWeight.bold,
                     color: theme.primaryColor,
                   ),
-                  maxLines: 1, // Prevent overflow
+                  maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                   softWrap: false,
                 ),
@@ -79,12 +81,17 @@ class ThanksForBookingPage extends StatelessWidget {
 
                             GetBuilder<BookingController>(
                               builder: (controller) {
+                                final billingPackages =
+                                    packagesController
+                                        .getSelectedPackagesForBilling();
                                 return Column(
                                   children: List.generate(
-                                    controller.selectedPackages.length,
-                                        (index) {
-                                      final package = controller.selectedPackages[index];
-                                      final priceStr = (package['price'] ?? '0').toString();
+                                    billingPackages.length,
+                                    (index) {
+                                      final package = billingPackages[index];
+                                      final priceStr =
+                                          (package['finalPrice'] ?? 0)
+                                              .toString();
                                       return _buildShootDetailRow(
                                         context,
                                         package['title'] ?? 'Package',
@@ -96,15 +103,28 @@ class ThanksForBookingPage extends StatelessWidget {
                               },
                             ),
 
-                            _buildShootDetailRow(context, 'Addon Price', 'Rs. 0'),
-                            _buildShootDetailRow(context, 'Promo Discount', 'Rs. 0'),
+                            _buildShootDetailRow(
+                              context,
+                              'Addon Price',
+                              'Rs. 0',
+                            ),
+                            _buildShootDetailRow(
+                              context,
+                              'Promo Discount',
+                              'Rs. 0',
+                            ),
                             const Divider(),
 
                             GetBuilder<BookingController>(
                               builder: (controller) {
                                 double total = 0;
-                                for (var pkg in controller.selectedPackages) {
-                                  total += double.tryParse(pkg['price']?.toString() ?? '0') ?? 0;
+                                final billingPackages =
+                                    packagesController
+                                        .getSelectedPackagesForBilling();
+                                for (var pkg in billingPackages) {
+                                  total +=
+                                      (pkg['finalPrice'] as num?)?.toDouble() ??
+                                      0;
                                 }
                                 return _buildShootDetailRow(
                                   context,
@@ -123,8 +143,10 @@ class ThanksForBookingPage extends StatelessWidget {
                           return Column(
                             children: List.generate(
                               controller.selectedPackages.length,
-                                  (index) => Padding(
-                                padding: const EdgeInsets.symmetric(vertical: 8),
+                              (index) => Padding(
+                                padding: const EdgeInsets.symmetric(
+                                  vertical: 8,
+                                ),
                                 child: PackageCard(index: index),
                               ),
                             ),
@@ -142,7 +164,12 @@ class ThanksForBookingPage extends StatelessWidget {
     );
   }
 
-  Widget _buildShootDetailRow(BuildContext context, String label, String value, {bool isBold = false}) {
+  Widget _buildShootDetailRow(
+    BuildContext context,
+    String label,
+    String value, {
+    bool isBold = false,
+  }) {
     final theme = Theme.of(context);
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 4),
@@ -162,9 +189,12 @@ class ThanksForBookingPage extends StatelessWidget {
           Text(
             value,
             style: theme.textTheme.bodyLarge?.copyWith(
-              color: isBold
-                  ? theme.primaryColor
-                  : theme.textTheme.bodyLarge?.color?.withAlpha((0.6 * 255).toInt()),
+              color:
+                  isBold
+                      ? theme.primaryColor
+                      : theme.textTheme.bodyLarge?.color?.withAlpha(
+                        (0.6 * 255).toInt(),
+                      ),
               fontWeight: isBold ? FontWeight.bold : FontWeight.normal,
             ),
           ),
