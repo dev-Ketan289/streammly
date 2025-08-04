@@ -24,7 +24,10 @@ class OtpController extends GetxController implements GetxService {
 
   Timer? _timer;
 
-  Future<ResponseModel> verifyOtp({required String phone, required String otp}) async {
+  Future<ResponseModel> verifyOtp({
+    required String phone,
+    required String otp,
+  }) async {
     isLoading = true;
     update();
     ResponseModel responseModel;
@@ -42,15 +45,22 @@ class OtpController extends GetxController implements GetxService {
     try {
       String deviceId = await Get.find<AuthController>().getOrCreateDeviceId();
 
-      Response response = await authRepo.verifyOtp(phone: phone, otp: otp, deviceId: deviceId);
+      Response response = await authRepo.verifyOtp(
+        phone: phone,
+        otp: otp,
+        deviceId: deviceId,
+      );
 
-      if (response.statusCode == 200 && response.body['data']['token'] != null) {
+      if (response.statusCode == 200 &&
+          response.body['data']['token'] != null) {
         Get.find<AuthController>().setUserToken(response.body['data']['token']);
         Get.find<AuthController>().loginMethod = 'phone';
 
         await Get.find<AuthController>().fetchUserProfile();
 
-        if (Get.find<AuthController>().userProfile == null || Get.find<AuthController>().userProfile!.name == null || Get.find<AuthController>().userProfile!.email == null) {
+        if (Get.find<AuthController>().userProfile == null ||
+            Get.find<AuthController>().userProfile!.name == null ||
+            Get.find<AuthController>().userProfile!.email == null) {
           Get.offAll(() => ProfileFormScreen());
         } else {
           Get.offAll(() => const WelcomeScreen());
@@ -126,10 +136,16 @@ class OtpController extends GetxController implements GetxService {
     }
 
     try {
-      final url = Uri.parse("https://admin.streammly.com/api/v1/user/auth/generateOtp");
-      // final url = Uri.parse("http://192.168.1.113:8000/api/v1/user/auth/generateOtp");
+      // final url = Uri.parse("https://admin.streammly.com/api/v1/user/auth/generateOtp");
+      final url = Uri.parse(
+        "http://192.168.1.113:8000/api/v1/user/auth/generateOtp",
+      );
 
-      final response = await http.post(url, headers: {'Content-Type': 'application/json'}, body: jsonEncode({"phone": phone}));
+      final response = await http.post(
+        url,
+        headers: {'Content-Type': 'application/json'},
+        body: jsonEncode({"phone": phone}),
+      );
 
       final responseBody = jsonDecode(response.body);
 
@@ -146,7 +162,9 @@ class OtpController extends GetxController implements GetxService {
           Fluttertoast.showToast(msg: "OTP format error");
         }
       } else {
-        Fluttertoast.showToast(msg: responseBody['message'] ?? "Could not resend OTP");
+        Fluttertoast.showToast(
+          msg: responseBody['message'] ?? "Could not resend OTP",
+        );
       }
     } catch (e) {
       Fluttertoast.showToast(msg: "Could not connect to server");

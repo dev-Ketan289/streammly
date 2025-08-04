@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'dart:developer';
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -23,7 +24,11 @@ class BookingController extends GetxController {
   List<Map<String, dynamic>> selectedPackages = [];
   bool isLoading = false;
 
-  final Map<String, String> personalInfo = {'name': '', 'mobile': '', 'email': ''};
+  final Map<String, String> personalInfo = {
+    'name': '',
+    'mobile': '',
+    'email': '',
+  };
   final List<String> alternateMobiles = [];
   final List<String> alternateEmails = [];
   final Map<int, Map<String, dynamic>> packageFormsData = {};
@@ -57,14 +62,21 @@ class BookingController extends GetxController {
     }
   }
 
-  void initSelectedPackages(List<Map<String, dynamic>> packages, List<dynamic> locations) {
+  void initSelectedPackages(
+    List<Map<String, dynamic>> packages,
+    List<dynamic> locations,
+  ) {
     companyLocations = locations;
     WidgetsBinding.instance.addPostFrameCallback((_) {
       selectedPackages = List<Map<String, dynamic>>.from(packages);
       packagePrices = List<int>.generate(
         packages.length,
-            (index) =>
-        int.tryParse(packages[index]['packagevariations']?[0]?['amount']?.toString() ?? '0') ?? 0,
+        (index) =>
+            int.tryParse(
+              packages[index]['packagevariations']?[0]?['amount']?.toString() ??
+                  '0',
+            ) ??
+            0,
       );
       showPackageDetails = List<bool>.filled(packages.length, false);
 
@@ -74,7 +86,10 @@ class BookingController extends GetxController {
         final now = TimeOfDay.now();
         final formattedTime = cleanTimeString(formatTimeOfDay(now));
         Map<String, String> extraAnswers = {};
-        final extraQuestions = package['extraQuestions'] ?? package['packageextra_questions'] ?? [];
+        final extraQuestions =
+            package['extraQuestions'] ??
+            package['packageextra_questions'] ??
+            [];
         for (var question in extraQuestions) {
           extraAnswers["${i}_${question['id']}"] = '';
         }
@@ -202,11 +217,14 @@ class BookingController extends GetxController {
   }
 
   Future<String> selectDate(int index, BuildContext context) async {
-    final companyLocation = companyLocations.isNotEmpty ? companyLocations[index] : null;
+    final companyLocation =
+        companyLocations.isNotEmpty ? companyLocations[index] : null;
     final int advanceBlock = (companyLocation?.studio?.advanceDayBooking ?? 0);
 
     final DateTime now = DateTime.now();
-    final DateTime firstAvailableDate = now.add(Duration(days: advanceBlock + 1));
+    final DateTime firstAvailableDate = now.add(
+      Duration(days: advanceBlock + 1),
+    );
 
     final picked = await showDatePicker(
       context: context,
@@ -217,7 +235,8 @@ class BookingController extends GetxController {
 
     String formatted = "";
     if (picked != null) {
-      formatted = "${picked.day.toString().padLeft(2, '0')}-${picked.month.toString().padLeft(2, '0')}-${picked.year}";
+      formatted =
+          "${picked.day.toString().padLeft(2, '0')}-${picked.month.toString().padLeft(2, '0')}-${picked.year}";
       updatePackageForm(index, 'date', formatted);
     }
     return formatted;
@@ -243,7 +262,10 @@ class BookingController extends GetxController {
     if (time == null) return '';
 
     // Remove invisible unicode spaces
-    String cleaned = time.replaceAll(RegExp(r'[\u00A0\u202F\u2007\u2060]'), ' ');
+    String cleaned = time.replaceAll(
+      RegExp(r'[\u00A0\u202F\u2007\u2060]'),
+      ' ',
+    );
 
     // Collapse multiple spaces into one
     cleaned = cleaned.replaceAll(RegExp(r'\s+'), ' ').trim();
@@ -251,11 +273,12 @@ class BookingController extends GetxController {
     // Manual Split to enforce valid format
     List<String> parts = cleaned.split(' ');
     if (parts.length >= 2) {
-      final timePart = parts[0].trim();  // hh:mm
-      final periodPart = parts[1].toUpperCase();  // AM/PM
+      final timePart = parts[0].trim(); // hh:mm
+      final periodPart = parts[1].toUpperCase(); // AM/PM
 
       // Validate Time Format (basic check)
-      if (RegExp(r'^\d{1,2}:\d{2}$').hasMatch(timePart) && (periodPart == 'AM' || periodPart == 'PM')) {
+      if (RegExp(r'^\d{1,2}:\d{2}$').hasMatch(timePart) &&
+          (periodPart == 'AM' || periodPart == 'PM')) {
         return '$timePart $periodPart';
       }
     }
@@ -268,7 +291,10 @@ class BookingController extends GetxController {
 
     try {
       // Clean invisible spaces and weird unicode
-      String cleaned = timeStr.replaceAll(RegExp(r'[\u00A0\u202F\u2007\u2060]'), ' ');
+      String cleaned = timeStr.replaceAll(
+        RegExp(r'[\u00A0\u202F\u2007\u2060]'),
+        ' ',
+      );
       cleaned = cleaned.replaceAll(RegExp(r'\s+'), ' ').trim();
 
       log("Cleaned Time String: '$cleaned'");
@@ -280,8 +306,8 @@ class BookingController extends GetxController {
         return '';
       }
 
-      final timePart = parts[0];  // '10:00'
-      final periodPart = parts[1].toUpperCase();  // 'AM' or 'PM'
+      final timePart = parts[0]; // '10:00'
+      final periodPart = parts[1].toUpperCase(); // 'AM' or 'PM'
 
       // Validate timePart
       if (!RegExp(r'^\d{1,2}:\d{2}$').hasMatch(timePart)) {
@@ -298,7 +324,9 @@ class BookingController extends GetxController {
 
       log("Reconstructed Time: '$reconstructed'");
 
-      final dateTime = DateFormat('h:mm a').parse(reconstructed);  // Strict 12-hour parsing
+      final dateTime = DateFormat(
+        'h:mm a',
+      ).parse(reconstructed); // Strict 12-hour parsing
       final apiTime = DateFormat('HH:mm:ss').format(dateTime);
 
       log("Final API Time: $apiTime");
@@ -349,11 +377,19 @@ class BookingController extends GetxController {
         final cleanedEnd = cleanTimeString(rawEnd);
 
         debugPrint("---- PACKAGE $i ----");
-        debugPrint("Raw Start Time: '$rawStart'  -> Runes: ${rawStart.runes.toList()}");
-        debugPrint("Cleaned Start Time: '$cleanedStart'  -> Runes: ${cleanedStart.runes.toList()}");
+        debugPrint(
+          "Raw Start Time: '$rawStart'  -> Runes: ${rawStart.runes.toList()}",
+        );
+        debugPrint(
+          "Cleaned Start Time: '$cleanedStart'  -> Runes: ${cleanedStart.runes.toList()}",
+        );
 
-        debugPrint("Raw End Time: '$rawEnd'  -> Runes: ${rawEnd.runes.toList()}");
-        debugPrint("Cleaned End Time: '$cleanedEnd'  -> Runes: ${cleanedEnd.runes.toList()}");
+        debugPrint(
+          "Raw End Time: '$rawEnd'  -> Runes: ${rawEnd.runes.toList()}",
+        );
+        debugPrint(
+          "Cleaned End Time: '$cleanedEnd'  -> Runes: ${cleanedEnd.runes.toList()}",
+        );
 
         DateTime? safeParseTime(String? time) {
           if (time == null || time.isEmpty) return null;
@@ -375,7 +411,9 @@ class BookingController extends GetxController {
         }
 
         if (end.isBefore(start)) {
-          debugPrint("Validation fail: End time is before start time for package $i");
+          debugPrint(
+            "Validation fail: End time is before start time for package $i",
+          );
           return false;
         }
       } catch (e) {
@@ -383,28 +421,19 @@ class BookingController extends GetxController {
         return false;
       }
 
-      final packageTitle = form['package_title'] ?? selectedPackages[i]['title'] ?? '';
-      if (packageTitle == 'Cuteness' && (form['babyInfo'] == null || (form['babyInfo'] as String).isEmpty)) {
+      final packageTitle =
+          form['package_title'] ?? selectedPackages[i]['title'] ?? '';
+      if (packageTitle == 'Cuteness' &&
+          (form['babyInfo'] == null || (form['babyInfo'] as String).isEmpty)) {
         debugPrint("Validation fail: Baby info missing for package $i");
-        return false;
-      }
-      if (packageTitle == 'Moments' && (form['theme'] == null || (form['theme'] as String).isEmpty)) {
-        debugPrint("Validation fail: Theme missing for package $i");
-        return false;
-      }
-      if (packageTitle == 'Wonders' && (form['locationPreference'] == null || (form['locationPreference'] as String).isEmpty)) {
-        debugPrint("Validation fail: Location preference missing for package $i");
-        return false;
-      }
-
-      if (!(form['termsAccepted'] ?? false)) {
-        debugPrint("Validation fail: Terms not accepted for package $i");
         return false;
       }
 
       final answers = Map<String, String>.from(form['extraAnswers'] ?? {});
       if (answers.values.any((value) => value.trim().isEmpty)) {
-        debugPrint("Validation fail: Some extra answers are empty for package $i");
+        debugPrint(
+          "Validation fail: Some extra answers are empty for package $i",
+        );
         return false;
       }
     }
@@ -429,9 +458,16 @@ class BookingController extends GetxController {
   // Added method that was missing in your original postBooking payload preparation
   num calculateWalletUsageForPackage(Map<String, dynamic> package) {
     final walletBalanceNum = authController.userProfile?.wallet ?? 0;
-    final walletBalance = walletBalanceNum is int ? walletBalanceNum : walletBalanceNum.toInt();
-    final packagePayableAmount = int.tryParse(package['packagevariations']?[0]?['amount']?.toString() ?? '0') ?? 0;
-    return walletBalance >= packagePayableAmount ? packagePayableAmount : walletBalance;
+    final walletBalance =
+        walletBalanceNum is int ? walletBalanceNum : walletBalanceNum.toInt();
+    final packagePayableAmount =
+        int.tryParse(
+          package['packagevariations']?[0]?['amount']?.toString() ?? '0',
+        ) ??
+        0;
+    return walletBalance >= packagePayableAmount
+        ? packagePayableAmount
+        : walletBalance;
   }
 
   int getWalletBalance() {
@@ -457,8 +493,6 @@ class BookingController extends GetxController {
     return packageTotal + addonsTotal;
   }
 
-
-
   // New method: check wallet sufficiency before booking
   bool canBookWithWallet() {
     final walletBalance = getWalletBalance();
@@ -477,7 +511,6 @@ class BookingController extends GetxController {
   }
 
   Future<void> submitBooking() async {
-
     if (!canSubmit()) {
       Get.snackbar("Error", "Please fill all required fields and accept terms");
       return;
@@ -529,30 +562,36 @@ class BookingController extends GetxController {
           // Use as-is if format unknown
         }
 
-        final int packageHours = (() {
-          if (startTimeStr.isEmpty || endTimeStr.isEmpty) return 0;
-          try {
-            final startDT = DateFormat('HH:mm').parse(startTimeStr);
-            final endDT = DateFormat('HH:mm').parse(endTimeStr);
-            final diff = endDT.difference(startDT).inMinutes;
-            return diff > 0 ? (diff / 60).ceil() : 0;
-          } catch (_) {
-            return 0;
-          }
-        })();
+        final int packageHours =
+            (() {
+              if (startTimeStr.isEmpty || endTimeStr.isEmpty) return 0;
+              try {
+                final startDT = DateFormat('HH:mm').parse(startTimeStr);
+                final endDT = DateFormat('HH:mm').parse(endTimeStr);
+                final diff = endDT.difference(startDT).inMinutes;
+                return diff > 0 ? (diff / 60).ceil() : 0;
+              } catch (_) {
+                return 0;
+              }
+            })();
 
-        final walletUsed = (calculateWalletUsageForPackage(package) > 0) ? 'yes' : 'no';
+        final walletUsed =
+            (calculateWalletUsageForPackage(package) > 0) ? 'yes' : 'no';
 
         final payload = {
           "app_user_id": userId,
           "company_id": package['company_id'] ?? 1,
           "studio_id": package['studio_id'] ?? 1,
-          "package_id": package['id'] ?? 0,  // IMPORTANT: Set valid package_id
-          "package_variation_id": package['packagevariations']?[0]?['id'] ?? 0,  // IMPORTANT: Set valid variation_id
-          "total_hours": packageHours, // Send per package hours here (or totalHours if backend expects that)
+          "package_id": package['id'] ?? 0, // IMPORTANT: Set valid package_id
+          "package_variation_id":
+              package['packagevariations']?[0]?['id'] ??
+              0, // IMPORTANT: Set valid variation_id
+          "total_hours":
+              packageHours, // Send per package hours here (or totalHours if backend expects that)
           "name": personalInfo['name'] ?? '',
           "mobile": personalInfo['mobile'] ?? '',
-          "alternate_mobile": alternateMobiles.isNotEmpty ? alternateMobiles.join(",") : '',
+          "alternate_mobile":
+              alternateMobiles.isNotEmpty ? alternateMobiles.join(",") : '',
           "email": personalInfo['email'] ?? '',
           "address": form['address'] ?? '',
           "date_of_shoot": dateOfShoot,
@@ -569,20 +608,24 @@ class BookingController extends GetxController {
         log('Form Data for package $i: ${jsonEncode(form)}');
         log('Extracted startTimeStr: $startTimeStr');
         log('Extracted endTimeStr: $endTimeStr');
-        log("Final Start Time (API format): $startTimeStr");  // Should print like '10:00:00'
+        log(
+          "Final Start Time (API format): $startTimeStr",
+        ); // Should print like '10:00:00'
         log("Final End Time (API format): $endTimeStr");
         log("Form startTime Raw: '${form['startTime']}'");
         log("Form endTime Raw: '${form['endTime']}'");
         log("Extracted startTimeStr: $startTimeStr");
         log("Extracted endTimeStr: $endTimeStr");
-// Should print like '13:00:00'
-
-
+        // Should print like '13:00:00'
 
         final ResponseModel? response = await bookingrepo.placeBooking(payload);
 
         if (response == null || !response.isSuccess) {
-          Get.snackbar("Booking Failed", response?.message ?? "Booking failed for package ${package['title']}");
+          Get.snackbar(
+            "Booking Failed",
+            response?.message ??
+                "Booking failed for package ${package['title']}",
+          );
           isLoading = false;
           update();
           return; // Stop further submission on failure
@@ -626,7 +669,10 @@ class BookingController extends GetxController {
       );
       log("Slots response: ${response.bodyString}");
       if (response.statusCode == 200) {
-        timeSlots = (response.body["data"]["open_hours"] as List).map((e) => Slot.fromJson(e)).toList();
+        timeSlots =
+            (response.body["data"]["open_hours"] as List)
+                .map((e) => Slot.fromJson(e))
+                .toList();
         for (var i = 0; i < timeSlots.length; i++) {
           startTime.add(timeSlots[i].startTime);
           if (i == timeSlots.length - 1) {
