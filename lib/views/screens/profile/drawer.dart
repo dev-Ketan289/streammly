@@ -4,31 +4,29 @@ import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:get/get.dart';
-
 import 'package:streammly/controllers/auth_controller.dart'; // Added
 import 'package:streammly/generated/assets.dart';
 import 'package:streammly/services/route_helper.dart';
-import 'package:streammly/views/screens/package/booking/bookings.dart';
+import 'package:streammly/views/screens/package/booking/my_bookings.dart';
 import 'package:streammly/views/screens/profile/about_page.dart';
 import 'package:streammly/views/screens/profile/components/profile_section_widget.dart';
+import 'package:streammly/views/screens/profile/faq_page.dart';
+import 'package:streammly/views/screens/profile/invoice_screen.dart';
 import 'package:streammly/views/screens/profile/language_preferences.dart';
 import 'package:streammly/views/screens/profile/linked_pages.dart';
+import 'package:streammly/views/screens/profile/my_wallet.dart';
 import 'package:streammly/views/screens/profile/offers_page.dart';
 import 'package:streammly/views/screens/profile/profile_screen.dart';
-import 'package:streammly/views/screens/profile/settings.dart';
-import 'package:streammly/views/screens/profile/faq_page.dart';
-
-import 'package:streammly/views/screens/profile/invoice_screen.dart';
-import 'package:streammly/views/screens/profile/my_wallet.dart';
-import 'package:streammly/views/screens/wishlist/wishlistpage.dart';
-import 'notifications_page.dart';
 import 'package:streammly/views/screens/profile/rate_your_experience.dart';
 import 'package:streammly/views/screens/profile/refer_and_earn.dart';
+import 'package:streammly/views/screens/profile/settings.dart';
 import 'package:streammly/views/screens/profile/support_screen.dart';
+import 'package:streammly/views/screens/wishlist/wishlistpage.dart';
 
 import 'chatbot_page.dart';
 import 'components/profile_item_widget.dart';
 import 'components/transcation_histroy_screen.dart';
+import 'notifications_page.dart';
 
 class ProfilePage extends StatefulWidget {
   const ProfilePage({super.key});
@@ -203,9 +201,13 @@ class _ProfilePageState extends State<ProfilePage> {
             icon: SvgPicture.asset(Assets.svgMybookings, height: 26, width: 26),
             title: "My Bookings",
             onTap: () {
-              Navigator.push(context, getCustomRoute(child: Bookings()));
+              Navigator.of(context).pop(); // Close the drawer
+              Future.delayed(Duration(milliseconds: 300), () {
+                Get.to(() => Bookings());
+              });
             },
           ),
+
           ProfileItemWidget(
             icon: SvgPicture.asset(
               Assets.svgCancellation,

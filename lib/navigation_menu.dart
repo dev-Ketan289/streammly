@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:get/get.dart';
 import 'package:streammly/generated/assets.dart';
 import 'package:streammly/services/custom_exit_dailogue.dart';
 import 'package:streammly/views/screens/home/home_screen.dart';
-import 'package:streammly/views/screens/package/booking/bookings.dart';
-import 'package:flutter/services.dart';
+import 'package:streammly/views/screens/package/booking/my_bookings.dart';
 
 class NavigationMenu extends StatefulWidget {
   final Set<int> hiddenIndices;
@@ -14,7 +14,7 @@ class NavigationMenu extends StatefulWidget {
     super.key,
     this.hiddenIndices = const {},
     this.hideFAB = false,
-  }); 
+  });
 
   @override
   State<NavigationMenu> createState() => _NavigationMenuState();
@@ -237,7 +237,7 @@ class NavigationController extends GetxController {
     () => const HomeScreen(),
     () => const Center(child: Text('Shop Screen Coming Soon')),
     () => const Center(child: Text('Cart Screen Coming Soon')),
-    () => const Bookings(),
+    () => Bookings(),
     () => const Center(child: Text('More Screen Coming Soon')),
     // () => const CategoryListScreen(),
   ];
@@ -372,7 +372,6 @@ class NavigationHelper {
     );
   }
 }
-
 
 // Widget _buildTabNavigator(int index ,Widget child){
 //   return Offstage(

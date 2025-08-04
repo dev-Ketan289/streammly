@@ -19,7 +19,9 @@ class BookingController extends GetxController {
   final BookingRepo bookingrepo;
 
   BookingController({required this.bookingrepo});
-
+  List<dynamic> upcomingBookings = [];
+  List<dynamic> cancelledBookings = [];
+  List<dynamic> completedBookings = [];
   int currentPage = 0;
   List<Map<String, dynamic>> selectedPackages = [];
   List<dynamic> thankYouData = [];
@@ -671,5 +673,53 @@ class BookingController extends GetxController {
     isLoading = false;
     update();
     return responseModel;
+  }
+
+  Future<void> fetchBookings() async {
+    isLoading = true;
+    update();
+
+    try {
+      final response = await bookingrepo.getUserBookings();
+      if (response != null && response['success'] == true) {
+        final allBookings = response['data'] as List<dynamic>? ?? [];
+        final now = DateTime.now();
+
+        upcomingBookings =
+            allBookings.where((booking) {
+              final shootDate = DateTime.tryParse(
+                booking['date_of_shoot'] ?? '',
+              );
+              final status = (booking['status'] ?? '').toString().toLowerCase();
+              return shootDate != null &&
+                  (shootDate.isAtSameMomentAs(now) || shootDate.isAfter(now)) &&
+                  status == 'pending';
+            }).toList();
+
+        cancelledBookings =
+            allBookings.where((booking) {
+              return (booking['status'] ?? '').toString().toLowerCase() ==
+                  'cancelled';
+            }).toList();
+
+        completedBookings =
+            allBookings.where((booking) {
+              return (booking['status'] ?? '').toString().toLowerCase() ==
+                      'completed' ||
+                  (booking['shoot_done'] == true);
+            }).toList();
+      } else {
+        upcomingBookings = [];
+        cancelledBookings = [];
+        completedBookings = [];
+      }
+    } catch (e) {
+      upcomingBookings = [];
+      cancelledBookings = [];
+      completedBookings = [];
+    } finally {
+      isLoading = false;
+      update();
+    }
   }
 }

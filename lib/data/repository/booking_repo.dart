@@ -57,4 +57,28 @@ class BookingRepo {
       return null;
     }
   }
+
+  Future<Map<String, dynamic>?> getUserBookings() async {
+    try {
+      final token = Get.find<AuthController>().getUserToken();
+      final response = await apiClient.getData(
+        'api/v1/booking/my-bookings',
+        headers: {
+          'Authorization': 'Bearer $token',
+          'Accept': 'application/json',
+        },
+      );
+
+      if (response.statusCode == 200) {
+        if (response.body is Map<String, dynamic>) {
+          return Map<String, dynamic>.from(response.body);
+        } else if (response.bodyString != null) {
+          return jsonDecode(response.bodyString!);
+        }
+      }
+      return null;
+    } catch (e) {
+      return null;
+    }
+  }
 }
