@@ -568,8 +568,33 @@ class BookingSummaryPage extends StatelessWidget {
       margin: const EdgeInsets.only(top: 16),
       child: ElevatedButton(
         onPressed: () async {
-          await controller
-              .submitBooking(); // Call submitBooking to post to backend and handle wallet payment
+          final confirmed = await showDialog<bool>(
+            context: context,
+            barrierDismissible: false,
+            builder: (context) {
+              return AlertDialog(
+                title: const Text('Confirm Payment'),
+                content: const Text(
+                  'Are you sure you want to proceed with the payment?',
+                ),
+                actions: [
+                  TextButton(
+                    onPressed: () => Navigator.of(context).pop(false), // Cancel
+                    child: const Text('Cancel'),
+                  ),
+                  ElevatedButton(
+                    onPressed: () => Navigator.of(context).pop(true), // Confirm
+                    child: const Text('Confirm'),
+                  ),
+                ],
+              );
+            },
+          );
+
+          if (confirmed == true) {
+            await controller.submitBooking(); // Proceed to payment
+          }
+          // else do nothing if cancelled
         },
         style: ElevatedButton.styleFrom(
           backgroundColor: Theme.of(context).primaryColor,

@@ -53,6 +53,14 @@ class PackagesController extends GetxController {
     this.subCategoryId = subCategoryId;
     this.subVerticalId = subVerticalId;
     this.studioId = studioId;
+
+    // Rest The Package page
+    selectedPackageIndices.clear();
+    selectedPackagesForBilling.clear();
+    selectedFreeItem.clear();
+    selectedExtraAddons.clear();
+    expandedStates.clear();
+    selectedHours.clear();
     fetchPackages();
   }
 

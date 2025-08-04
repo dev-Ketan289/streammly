@@ -9,11 +9,21 @@ class PackageCard extends StatelessWidget {
   PackageCard({super.key, required this.index});
 
   String getBookingId() {
+    if (formController.thankYouData.isNotEmpty &&
+        formController.thankYouData.length > index) {
+      return formController.thankYouData[index]['booking_id']?.toString() ?? '';
+    }
+    // fallback if no data available yet
     return 'BKEIAP${DateTime.now().millisecondsSinceEpoch.toString().substring(5)}';
   }
 
   String getOtp() {
-    return '39068'; // Replace with dynamic OTP if available from backend
+    if (formController.thankYouData.isNotEmpty &&
+        formController.thankYouData.length > index) {
+      return formController.thankYouData[index]['otp']?.toString() ?? '';
+    }
+    // fallback OTP (should be replaced by real OTP)
+    return '----';
   }
 
   @override
@@ -26,7 +36,7 @@ class PackageCard extends StatelessWidget {
 
         return Container(
           decoration: BoxDecoration(
-            color: Colors.white.withOpacity(0.9),
+            color: Colors.white.withValues(alpha: 0.9),
             borderRadius: BorderRadius.circular(12),
           ),
           padding: const EdgeInsets.all(16),
@@ -45,35 +55,46 @@ class PackageCard extends StatelessWidget {
                           const Text(
                             'Booking Id: ',
                             style: TextStyle(
-                                fontSize: 14,
-                                color: Colors.black,
-                                fontWeight: FontWeight.bold),
+                              fontSize: 14,
+                              color: Colors.black,
+                              fontWeight: FontWeight.bold,
+                            ),
                           ),
                           Text(
                             getBookingId(),
-                            style: const TextStyle(fontSize: 14, color: Colors.black),
+                            style: const TextStyle(
+                              fontSize: 14,
+                              color: Colors.black,
+                            ),
                           ),
                         ],
                       ),
                       Container(
                         margin: const EdgeInsets.only(top: 4),
-                        padding:
-                        const EdgeInsets.symmetric(horizontal: 4, vertical: 2),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 4,
+                          vertical: 2,
+                        ),
                         decoration: BoxDecoration(
-                            color: const Color(0xFFE3E7FF).withAlpha(102),
-                            borderRadius: BorderRadius.circular(8)),
+                          color: const Color(0xFFE3E7FF).withAlpha(102),
+                          borderRadius: BorderRadius.circular(8),
+                        ),
                         child: Row(
                           children: [
                             const Text(
                               'OTP: ',
                               style: TextStyle(
-                                  fontSize: 14,
-                                  color: Colors.black,
-                                  fontWeight: FontWeight.bold),
+                                fontSize: 14,
+                                color: Colors.black,
+                                fontWeight: FontWeight.bold,
+                              ),
                             ),
                             Text(
                               getOtp(),
-                              style: const TextStyle(fontSize: 14, color: Colors.black),
+                              style: const TextStyle(
+                                fontSize: 14,
+                                color: Colors.black,
+                              ),
                             ),
                           ],
                         ),
@@ -87,7 +108,10 @@ class PackageCard extends StatelessWidget {
               Text(
                 packageTitle,
                 style: const TextStyle(
-                    fontSize: 20, fontWeight: FontWeight.bold, color: Colors.black87),
+                  fontSize: 20,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.black87,
+                ),
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
               ),
@@ -99,22 +123,30 @@ class PackageCard extends StatelessWidget {
               // Shoot Location
               const Text(
                 'Shoot Location',
-                style:
-                TextStyle(fontSize: 16, fontWeight: FontWeight.w600, color: Colors.black87),
+                style: TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.w600,
+                  color: Colors.black87,
+                ),
               ),
               Text(
                 package['address'] ??
                     '1st Floor, Hiren Industrial Estate, 104 & 105 - B, Mogul Ln, Mahim West, Maharashtra 400016.',
-                style: const TextStyle(fontSize: 14, color: Colors.black54, height: 1.4),
+                style: const TextStyle(
+                  fontSize: 14,
+                  color: Colors.black54,
+                  height: 1.4,
+                ),
               ),
               const SizedBox(height: 16),
               // Date and Timing Row
               Container(
                 padding: const EdgeInsets.all(12),
                 decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(8),
-                    border: Border.all(color: const Color(0xFFE9ECEF))),
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(8),
+                  border: Border.all(color: const Color(0xFFE9ECEF)),
+                ),
                 child: Row(
                   children: [
                     Expanded(
@@ -124,13 +156,19 @@ class PackageCard extends StatelessWidget {
                           const Text(
                             'Date of Shoot',
                             style: TextStyle(
-                                fontSize: 12, color: Colors.grey, fontWeight: FontWeight.w500),
+                              fontSize: 12,
+                              color: Colors.grey,
+                              fontWeight: FontWeight.w500,
+                            ),
                           ),
                           const SizedBox(height: 4),
                           Text(
                             form['date']?.toString() ?? 'Not set',
                             style: const TextStyle(
-                                fontSize: 14, color: Colors.grey, fontWeight: FontWeight.w500),
+                              fontSize: 14,
+                              color: Colors.grey,
+                              fontWeight: FontWeight.w500,
+                            ),
                           ),
                         ],
                       ),
@@ -149,13 +187,19 @@ class PackageCard extends StatelessWidget {
                           const Text(
                             'Timing',
                             style: TextStyle(
-                                fontSize: 12, color: Colors.grey, fontWeight: FontWeight.w500),
+                              fontSize: 12,
+                              color: Colors.grey,
+                              fontWeight: FontWeight.w500,
+                            ),
                           ),
                           const SizedBox(height: 4),
                           Text(
                             '${form['startTime']?.toString() ?? 'Not set'} - ${form['endTime']?.toString() ?? 'Not set'}',
                             style: const TextStyle(
-                                fontSize: 14, color: Colors.grey, fontWeight: FontWeight.w500),
+                              fontSize: 14,
+                              color: Colors.grey,
+                              fontWeight: FontWeight.w500,
+                            ),
                           ),
                         ],
                       ),

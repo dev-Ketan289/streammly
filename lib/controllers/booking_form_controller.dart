@@ -22,6 +22,8 @@ class BookingController extends GetxController {
 
   int currentPage = 0;
   List<Map<String, dynamic>> selectedPackages = [];
+  List<dynamic> thankYouData = [];
+
   bool isLoading = false;
 
   final Map<String, String> personalInfo = {
@@ -517,8 +519,7 @@ class BookingController extends GetxController {
     }
 
     if (!canBookWithWallet()) {
-      // Wallet insufficient snackbar shown in canBookWithWallet
-      return;
+      return; // Wallet insufficiency snackbar shown in canBookWithWallet
     }
 
     isLoading = true;
@@ -531,111 +532,90 @@ class BookingController extends GetxController {
         return;
       }
 
-      // Calculate total_hours = sum of all packages' hours
-      double totalHours = 0;
-      for (int i = 0; i < selectedPackages.length; i++) {
-        final form = packageFormsData[i] ?? {};
-        final startTime = convertToApiTimeString(form['startTime'] ?? '');
-        final endTime = convertToApiTimeString(form['endTime'] ?? '');
-        if (startTime.isNotEmpty && endTime.isNotEmpty) {
-          final startDT = DateFormat('HH:mm').parse(startTime);
-          final endDT = DateFormat('HH:mm').parse(endTime);
-          final durationMinutes = endDT.difference(startDT).inMinutes;
-          if (durationMinutes > 0) {
-            totalHours += durationMinutes / 60;
-          }
-        }
-      }
+      final List<Map<String, dynamic>> bookingsPayload = [];
 
       for (int i = 0; i < selectedPackages.length; i++) {
         final package = selectedPackages[i];
         final form = packageFormsData[i] ?? {};
 
-        final startTimeStr = convertToApiTimeString(form['startTime'] ?? '');
-        final endTimeStr = convertToApiTimeString(form['endTime'] ?? '');
+        final startTimeStr = form['startTime'] ?? '';
+        final endTimeStr = form['endTime'] ?? '';
+        final dateOfShoot = form['date'] ?? '';
 
-        String dateOfShoot = form['date'] ?? '';
-        try {
-          final dateParsed = DateFormat('yyyy-MM-dd').parse(dateOfShoot);
-          dateOfShoot = DateFormat('dd-MM-yyyy').format(dateParsed);
-        } catch (_) {
-          // Use as-is if format unknown
-        }
-
-        final int packageHours =
+        final totalHours =
             (() {
-              if (startTimeStr.isEmpty || endTimeStr.isEmpty) return 0;
+              final startApiTime = convertToApiTimeString(startTimeStr);
+              final endApiTime = convertToApiTimeString(endTimeStr);
+              if (startApiTime.isEmpty || endApiTime.isEmpty) return 0;
+
               try {
-                final startDT = DateFormat('HH:mm').parse(startTimeStr);
-                final endDT = DateFormat('HH:mm').parse(endTimeStr);
-                final diff = endDT.difference(startDT).inMinutes;
-                return diff > 0 ? (diff / 60).ceil() : 0;
+                final startDT = DateFormat('HH:mm:ss').parse(startApiTime);
+                final endDT = DateFormat('HH:mm:ss').parse(endApiTime);
+                final diff = endDT.difference(startDT).inHours;
+                return diff > 0 ? diff : 0;
               } catch (_) {
                 return 0;
               }
             })();
 
-        final walletUsed =
-            (calculateWalletUsageForPackage(package) > 0) ? 'yes' : 'no';
-
-        final payload = {
-          "app_user_id": userId,
-          "company_id": package['company_id'] ?? 1,
-          "studio_id": package['studio_id'] ?? 1,
-          "package_id": package['id'] ?? 0, // IMPORTANT: Set valid package_id
-          "package_variation_id":
-              package['packagevariations']?[0]?['id'] ??
-              0, // IMPORTANT: Set valid variation_id
-          "total_hours":
-              packageHours, // Send per package hours here (or totalHours if backend expects that)
-          "name": personalInfo['name'] ?? '',
-          "mobile": personalInfo['mobile'] ?? '',
-          "alternate_mobile":
-              alternateMobiles.isNotEmpty ? alternateMobiles.join(",") : '',
-          "email": personalInfo['email'] ?? '',
+        bookingsPayload.add({
+          "package_id": package['id'] ?? 0,
+          "package_variation_id": package['packagevariations']?[0]?['id'] ?? 0,
           "address": form['address'] ?? '',
+          "free_addons":
+              form['freeAddOn'] != null && (form['freeAddOn'] as Map).isNotEmpty
+                  ? [form['freeAddOn']['id']]
+                  : [],
+          "paid_addons":
+              (form['extraAddOn'] as List<dynamic>? ?? [])
+                  .map((addon) => addon['id'])
+                  .toList(),
+          "extra_question": extractExtraQuestionsAsString(form),
           "date_of_shoot": dateOfShoot,
           "start_time": startTimeStr,
           "end_time": endTimeStr,
-          "extra_questions": extractExtraQuestionsAsString(form),
-          "terms_accepted": form['termsAccepted'] ?? false,
-          "free_add_on": form['freeAddOn'] ?? {},
-          "extra_add_on": form['extraAddOn'] ?? [],
-          "wallet_used": walletUsed,
-        };
-
-        log("[submitBooking] Payload for packageId=${package['id']}: $payload");
-        log('Form Data for package $i: ${jsonEncode(form)}');
-        log('Extracted startTimeStr: $startTimeStr');
-        log('Extracted endTimeStr: $endTimeStr');
-        log(
-          "Final Start Time (API format): $startTimeStr",
-        ); // Should print like '10:00:00'
-        log("Final End Time (API format): $endTimeStr");
-        log("Form startTime Raw: '${form['startTime']}'");
-        log("Form endTime Raw: '${form['endTime']}'");
-        log("Extracted startTimeStr: $startTimeStr");
-        log("Extracted endTimeStr: $endTimeStr");
-        // Should print like '13:00:00'
-
-        final ResponseModel? response = await bookingrepo.placeBooking(payload);
-
-        if (response == null || !response.isSuccess) {
-          Get.snackbar(
-            "Booking Failed",
-            response?.message ??
-                "Booking failed for package ${package['title']}",
-          );
-          isLoading = false;
-          update();
-          return; // Stop further submission on failure
-        }
+          "total_hours": totalHours,
+        });
       }
 
-      // Refresh profile and wallet after all bookings
-      await authController.fetchUserProfile();
+      final payload = {
+        "company_id":
+            selectedPackages.isNotEmpty
+                ? selectedPackages[0]['company_id'] ?? 0
+                : 0,
+        "name": personalInfo['name'] ?? '',
+        "mobile": personalInfo['mobile'] ?? '',
+        "alternate_mobile":
+            alternateMobiles.isNotEmpty ? alternateMobiles.join(",") : '',
+        "wallet_used": 'yes', // or 'no' depending on your logic
+        "studio_id":
+            selectedPackages.isNotEmpty
+                ? selectedPackages[0]['studio_id'] ?? 0
+                : 0,
+        "bookings": bookingsPayload,
+      };
 
-      // Navigate to thank you page after successful booking
+      log("[submitBooking] Full payload: $payload");
+
+      final responseBody = await bookingrepo.placeBatchBooking(payload);
+
+      if (responseBody == null || responseBody['success'] != true) {
+        Get.snackbar(
+          "Booking Failed",
+          responseBody?['message'] ?? "Booking failed",
+        );
+        isLoading = false;
+        update();
+        return;
+      }
+
+      thankYouData = responseBody['thankyouPage'] ?? [];
+
+      await authController.fetchUserProfile();
+      Get.offAll(() => ThanksForBookingPage());
+
+      // Refresh profile/wallet and navigate on success
+      await authController.fetchUserProfile();
       Get.offAll(() => ThanksForBookingPage());
     } catch (e, stack) {
       log("submitBooking error: $e\n$stack");
