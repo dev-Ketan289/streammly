@@ -410,9 +410,12 @@ class _CompanyLocatorMapScreenState extends State<CompanyLocatorMapScreen> {
           } else if (isFilterSelected) {
             return FilterCompanyListScreen(
               onTap: () {
-                isFilterSelected = false;
-                _loadData();
-              },
+    setState(() {
+      isFilterSelected = false;
+    });
+    _loadData(); // Only if _loadData doesn't contain setState itself
+  
+},
             );
           }
 

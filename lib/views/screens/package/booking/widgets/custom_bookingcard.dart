@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+  import 'package:flutter/material.dart';
 import 'package:streammly/services/theme.dart';
 
 class CustomBookingcard extends StatelessWidget {
@@ -16,6 +16,8 @@ class CustomBookingcard extends StatelessWidget {
   final String? topActionLabel;
   final VoidCallback? onTopAction;
   final String leftActionLabel;
+  final VoidCallback? onLeftAction;
+  final VoidCallback? onViewReceipt;
 
   const CustomBookingcard({
     required this.bookingId,
@@ -31,7 +33,10 @@ class CustomBookingcard extends StatelessWidget {
     this.showActionButtons = true,
     this.topActionLabel,
     this.onTopAction,
-    this.leftActionLabel = 'View Details',
+    required this.leftActionLabel,
+    this.onLeftAction,
+    this.onViewReceipt,
+    super.key,
   });
 
   @override
@@ -65,9 +70,9 @@ class CustomBookingcard extends StatelessWidget {
               onTopAction: onTopAction,
             ),
             const SizedBox(height: 8),
-            _OtpSection(otp: otp, theme: theme),
+            OtpSection(otp: otp, theme: theme),
             const SizedBox(height: 10),
-            _TitleSection(title: title, type: type, theme: theme),
+            TitleSection(title: title, type: type, theme: theme),
             const SizedBox(height: 10),
             _LocationSection(location: location, theme: theme),
             const SizedBox(height: 25),
@@ -86,7 +91,12 @@ class CustomBookingcard extends StatelessWidget {
             ],
             if (showActionButtons) ...[
               const SizedBox(height: 30),
-              _ActionButtons(theme: theme, leftActionLabel: leftActionLabel),
+              _ActionButtons(
+                theme: theme,
+                leftActionLabel: leftActionLabel,
+                onLeftAction: onLeftAction,
+                onViewReceipt: onViewReceipt,
+              ),
             ],
           ],
         ),
@@ -170,10 +180,10 @@ class _HeaderSection extends StatelessWidget {
   }
 }
 
-class _OtpSection extends StatelessWidget {
+class OtpSection extends StatelessWidget {
   final String otp;
   final ThemeData theme;
-  const _OtpSection({required this.otp, required this.theme});
+  const OtpSection({super.key, required this.otp, required this.theme});
 
   @override
   Widget build(BuildContext context) {
@@ -213,11 +223,11 @@ class _OtpSection extends StatelessWidget {
   }
 }
 
-class _TitleSection extends StatelessWidget {
+class TitleSection extends StatelessWidget {
   final String title;
   final String type;
   final ThemeData theme;
-  const _TitleSection({
+  const TitleSection({
     required this.title,
     required this.type,
     required this.theme,
@@ -368,9 +378,14 @@ class _DateTimeSection extends StatelessWidget {
 class _ActionButtons extends StatelessWidget {
   final ThemeData theme;
   final String leftActionLabel;
+  final VoidCallback? onLeftAction;
+  final VoidCallback? onViewReceipt;
+
   const _ActionButtons({
     required this.theme,
-    this.leftActionLabel = 'View Details',
+    required this.leftActionLabel,
+    this.onLeftAction,
+    this.onViewReceipt,
   });
 
   @override
@@ -381,7 +396,7 @@ class _ActionButtons extends StatelessWidget {
           child: SizedBox(
             height: 39,
             child: OutlinedButton(
-              onPressed: () {},
+              onPressed: onLeftAction,
               style: OutlinedButton.styleFrom(
                 side: BorderSide(color: primaryColor),
                 shape: RoundedRectangleBorder(
@@ -404,7 +419,7 @@ class _ActionButtons extends StatelessWidget {
           child: SizedBox(
             height: 39,
             child: ElevatedButton(
-              onPressed: () {},
+              onPressed: onViewReceipt,
               style: ElevatedButton.styleFrom(
                 backgroundColor: primaryColor,
                 shape: RoundedRectangleBorder(

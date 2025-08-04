@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:streammly/services/theme.dart';
+import 'package:streammly/views/screens/package/booking/widgets/booking_details.dart';
 import 'package:streammly/views/screens/package/booking/widgets/custom_bookingcard.dart';
 import 'package:streammly/views/widgets/custom_doodle.dart';
 
@@ -38,8 +39,8 @@ class Bookings extends StatelessWidget {
       time: '12.00 PM - 01:00 PM',
     ),
     BookingInfo(
-      bookingId: 'BKEIAP4514578541258442',
-      otp: '390668',
+      bookingId: 'BKEIAP4514578541258443',
+      otp: '390669',
       title: 'Moments',
       type: 'HomeShoot',
       location:
@@ -74,13 +75,17 @@ class Bookings extends StatelessWidget {
   ];
 
   Widget _buildBookingList(
+    BuildContext context,
     List<BookingInfo> bookings, {
     String? status,
     Color? statusColor,
     bool showReschedule = true,
     bool showActionButtons = true,
     String? topActionLabel,
-    String leftActionLabel = 'View Details',
+    required String leftActionLabel,
+    void Function(BookingInfo)? onTopAction,
+    void Function(BookingInfo)? onLeftAction,
+    void Function(BookingInfo)? onViewReceipt,
   }) {
     return ListView.separated(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 16),
@@ -101,9 +106,50 @@ class Bookings extends StatelessWidget {
           showReschedule: showReschedule,
           showActionButtons: showActionButtons,
           topActionLabel: topActionLabel,
+          onTopAction: onTopAction != null ? () => onTopAction(booking) : null,
           leftActionLabel: leftActionLabel,
+          onLeftAction:
+              onLeftAction != null ? () => onLeftAction(booking) : null,
+          onViewReceipt:
+              onViewReceipt != null ? () => onViewReceipt(booking) : null,
         );
       },
+    );
+  }
+
+  void _onRescheduleTap(BuildContext context, BookingInfo booking) {
+    // Placeholder for reschedule logic
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text('Rescheduling booking: ${booking.title}')),
+    );
+  }
+
+  void _onViewDetailsTap(BuildContext context, BookingInfo booking) {
+    // Navigate to BookingDetailsPage with the specific booking
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder:
+            (context) => BookingDetailsPage(
+              booking: booking,
+              status: 'Upcoming', // Status for Upcoming tab
+              statusColor: Colors.green, // Optional: color for status
+            ),
+      ),
+    );
+  }
+
+  void _onReorderTap(BuildContext context, BookingInfo booking) {
+    // Placeholder for reorder logic
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text('Reordering booking: ${booking.title}')),
+    );
+  }
+
+  void _onViewReceiptTap(BuildContext context, BookingInfo booking) {
+    // Placeholder for view receipt logic
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text('Viewing receipt for: ${booking.title}')),
     );
   }
 
@@ -154,18 +200,35 @@ class Bookings extends StatelessWidget {
           ),
           body: TabBarView(
             children: [
-              _buildBookingList(upcomingBookings, topActionLabel: 'Reschedule'),
+              // Upcoming Bookings
               _buildBookingList(
+                context,
                 upcomingBookings,
+                topActionLabel: 'Reschedule',
+                leftActionLabel: 'View Details',
+                onTopAction: (booking) => _onRescheduleTap(context, booking),
+                onLeftAction: (booking) => _onViewDetailsTap(context, booking),
+                onViewReceipt: (booking) => _onViewReceiptTap(context, booking),
+              ),
+              // Cancelled Bookings
+              _buildBookingList(
+                context,
+                cancelledBookings,
                 status: 'Cancelled',
                 statusColor: Colors.red,
                 showReschedule: false,
                 showActionButtons: false,
+                leftActionLabel: '',
               ),
+              // Completed Bookings
               _buildBookingList(
-                upcomingBookings,
+                context,
+                completedBookings,
                 topActionLabel: 'Reorder',
                 leftActionLabel: 'Reorder',
+                onTopAction: (booking) => _onReorderTap(context, booking),
+                onLeftAction: (booking) => _onReorderTap(context, booking),
+                onViewReceipt: (booking) => _onViewReceiptTap(context, booking),
               ),
             ],
           ),

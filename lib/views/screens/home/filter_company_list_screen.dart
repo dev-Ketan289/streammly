@@ -123,8 +123,14 @@ class _FilterCompanyListScreenState extends State<FilterCompanyListScreen> {
                             setState(() {
                               if (selectedCategory == category.title) {
                                 selectedCategory = null;
+                                Get.find<CompanyController>().setCategoryId(
+                                  0,
+                                ); // Clear category ID
                               } else {
                                 selectedCategory = category.title;
+                                Get.find<CompanyController>().setCategoryId(
+                                  category.id,
+                                ); // Set category ID
                               }
                             });
                           },
@@ -154,15 +160,9 @@ class _FilterCompanyListScreenState extends State<FilterCompanyListScreen> {
                             );
                             final companyController =
                                 Get.find<CompanyController>();
-                            final category = categoryController.categories
-                                .firstWhereOrNull(
-                                  (c) => c.title == selectedCategory,
-                                );
-                            if (category != null) {
-                              await companyController.fetchCompaniesByCategory(
-                                category.id,
-                              );
-                            }
+                            await companyController.fetchCompaniesByCategory(
+                              companyController.selectedCategoryId,
+                            );
                             if (widget.onTap != null) widget.onTap!();
                           },
                   child: Container(
