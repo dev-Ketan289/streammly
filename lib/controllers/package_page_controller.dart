@@ -43,7 +43,12 @@ class PackagesController extends GetxController {
   late int subVerticalId;
   late int studioId;
 
-  void initialize({required int companyId, required int subCategoryId, required int subVerticalId, required int studioId}) {
+  void initialize({
+    required int companyId,
+    required int subCategoryId,
+    required int subVerticalId,
+    required int studioId,
+  }) {
     this.companyId = companyId;
     this.subCategoryId = subCategoryId;
     this.subVerticalId = subVerticalId;
@@ -66,47 +71,71 @@ class PackagesController extends GetxController {
 
     try {
       final response = await http.post(
-        Uri.parse("https://admin.streammly.com/api/v1/package/getpackages"),
+        // Uri.parse("https://admin.streammly.com/api/v1/package/getpackages"),
+        Uri.parse("http://192.168.1.113:8000/api/v1/package/getpackages"),
         headers: {"Content-Type": "application/json"},
-        body: jsonEncode({"company_id": companyId, "subcategory_id": subCategoryId, "sub_vertical_id": subVerticalId, 'studio_id': studioId}),
+        body: jsonEncode({
+          "company_id": companyId,
+          "subcategory_id": subCategoryId,
+          "sub_vertical_id": subVerticalId,
+          'studio_id': studioId,
+        }),
       );
 
       if (response.statusCode == 200) {
         final jsonBody = json.decode(response.body);
         final List data = jsonBody["data"] ?? [];
-        final filteredData = data.where((pkg) => pkg['sub_vertical_id'].toString() == subVerticalId.toString() || subVerticalId == 0).toList();
+        final filteredData =
+            data
+                .where(
+                  (pkg) =>
+                      pkg['sub_vertical_id'].toString() ==
+                          subVerticalId.toString() ||
+                      subVerticalId == 0,
+                )
+                .toList();
 
-        packages = filteredData.map<Map<String, dynamic>>((pkg) {
-          final List<dynamic>? variations = pkg["packagevariations"];
-          final firstVariation = (variations != null && variations.isNotEmpty) ? variations[0] : null;
+        packages =
+            filteredData.map<Map<String, dynamic>>((pkg) {
+              final List<dynamic>? variations = pkg["packagevariations"];
+              final firstVariation =
+                  (variations != null && variations.isNotEmpty)
+                      ? variations[0]
+                      : null;
 
-          final List<String> hours = variations != null
-              ? variations.map<String>((v) => getDurationLabel(v)).toList()
-              : ["1hr", "2hr", "3hr"];
+              final List<String> hours =
+                  variations != null
+                      ? variations
+                          .map<String>((v) => getDurationLabel(v))
+                          .toList()
+                      : ["1hr", "2hr", "3hr"];
 
-          final priceMap = {
-            for (var v in variations ?? []) getDurationLabel(v): int.tryParse(v["amount"]?.toString() ?? "0") ?? 0
-          };
+              final priceMap = {
+                for (var v in variations ?? [])
+                  getDurationLabel(v):
+                      int.tryParse(v["amount"]?.toString() ?? "0") ?? 0,
+              };
 
-          return {
-            'id': pkg['id'],  // <-- Add id here properly
-            "title": pkg["title"] ?? "",
-            "type": pkg["type"] ?? "N/A",
-            "typeId": pkg['type_id'],
-            "price": priceMap[getDurationLabel(firstVariation ?? {})] ?? 0,
-            "priceMap": priceMap,
-            "hours": hours,
-            "highlight": pkg["short_description"] ?? "",
-            "shortDescription": pkg["long_description"] ?? "",
-            "fullDescription": pkg["long_description"] ?? "",
-            "termsAndCondition": pkg["terms_and_condition"] ?? "",
-            "specialOffer": (pkg["status"] ?? "").toString().toLowerCase() == "active",
-            "packageIndex": data.indexOf(pkg),
-            "extraQuestions": pkg["packageextra_questions"] ?? [],
-            "packagevariations": variations ?? [],  // <-- This is important
-            'companyId': companyId,
-          };
-        }).toList();
+              return {
+                'id': pkg['id'], // <-- Add id here properly
+                "title": pkg["title"] ?? "",
+                "type": pkg["type"] ?? "N/A",
+                "typeId": pkg['type_id'],
+                "price": priceMap[getDurationLabel(firstVariation ?? {})] ?? 0,
+                "priceMap": priceMap,
+                "hours": hours,
+                "highlight": pkg["short_description"] ?? "",
+                "shortDescription": pkg["long_description"] ?? "",
+                "fullDescription": pkg["long_description"] ?? "",
+                "termsAndCondition": pkg["terms_and_condition"] ?? "",
+                "specialOffer":
+                    (pkg["status"] ?? "").toString().toLowerCase() == "active",
+                "packageIndex": data.indexOf(pkg),
+                "extraQuestions": pkg["packageextra_questions"] ?? [],
+                "packagevariations": variations ?? [], // <-- This is important
+                'companyId': companyId,
+              };
+            }).toList();
 
         expandedStates = {};
         selectedHours = {};
@@ -137,15 +166,24 @@ class PackagesController extends GetxController {
     update();
 
     try {
-      final url = Uri.parse('https://admin.streammly.com/api/v1/package/getfreeadons/?package_id=$packageId');
+      final url = Uri.parse(
+        // 'https://admin.streammly.com/api/v1/package/getfreeadons/?package_id=$packageId',
+        'http://192.168.1.113:8000/api/v1/package/getfreeadons/?package_id=$packageId',
+      );
 
-      final res = await http.get(url, headers: {"Content-Type": "application/json"});
+      final res = await http.get(
+        url,
+        headers: {"Content-Type": "application/json"},
+      );
 
       if (res.statusCode == 200) {
         final Map<String, dynamic> body = json.decode(res.body);
         freeAddOnResponse = FreeAddOnResponse.fromJson(body);
       } else {
-        Get.snackbar("Error", "Unable to fetch free add ons (${res.statusCode})");
+        Get.snackbar(
+          "Error",
+          "Unable to fetch free add ons (${res.statusCode})",
+        );
       }
     } catch (e) {
       Get.snackbar("Error", "Exception: $e");
@@ -165,11 +203,20 @@ class PackagesController extends GetxController {
     selectedPaidAddOnIndex = -1;
     update();
     try {
-      final url = Uri.parse('https://admin.streammly.com/api/v1/package/getpaidadons/?package_id=$packageId&studio_id=$studioId');
-      final res = await http.get(url, headers: {"Content-Type": "application/json"});
+      final url = Uri.parse(
+        // 'https://admin.streammly.com/api/v1/package/getpaidadons/?package_id=$packageId&studio_id=$studioId',
+        'http://192.168.1.113:8000/api/v1/package/getpaidadons/?package_id=$packageId&studio_id=$studioId',
+      );
+      final res = await http.get(
+        url,
+        headers: {"Content-Type": "application/json"},
+      );
       if (res.statusCode == 200) {
         final Map<String, dynamic> body = json.decode(res.body);
-        paidAddOnResponse = PaidAddOnResponse.fromJson(body, studioId: studioId);
+        paidAddOnResponse = PaidAddOnResponse.fromJson(
+          body,
+          studioId: studioId,
+        );
       }
     } catch (e) {}
     isFetchingPaidAddOns = false;
@@ -182,7 +229,9 @@ class PackagesController extends GetxController {
   }
 
   PaidAddOn? get selectedPaidAddOn {
-    if (selectedPaidAddOnIndex >= 0 && paidAddOnResponse != null && selectedPaidAddOnIndex < paidAddOnResponse!.addons.length) {
+    if (selectedPaidAddOnIndex >= 0 &&
+        paidAddOnResponse != null &&
+        selectedPaidAddOnIndex < paidAddOnResponse!.addons.length) {
       return paidAddOnResponse!.addons[selectedPaidAddOnIndex];
     }
     return null;
@@ -194,7 +243,9 @@ class PackagesController extends GetxController {
   }
 
   FreeAddOn? get selectedFreeAddOn {
-    if (selectedFreeAddOnIndex >= 0 && freeAddOnResponse != null && selectedFreeAddOnIndex < freeAddOnResponse!.addons.length) {
+    if (selectedFreeAddOnIndex >= 0 &&
+        freeAddOnResponse != null &&
+        selectedFreeAddOnIndex < freeAddOnResponse!.addons.length) {
       return freeAddOnResponse!.addons[selectedFreeAddOnIndex];
     }
     return null;
@@ -242,7 +293,9 @@ class PackagesController extends GetxController {
   void togglePackageSelection(int index) {
     if (selectedPackageIndices.contains(index)) {
       selectedPackageIndices.remove(index);
-      selectedPackagesForBilling.removeWhere((pkg) => pkg['packageIndex'] == index);
+      selectedPackagesForBilling.removeWhere(
+        (pkg) => pkg['packageIndex'] == index,
+      );
     } else {
       selectedPackageIndices.add(index);
       _addPackageForBilling(index);
@@ -254,11 +307,12 @@ class PackagesController extends GetxController {
     final pkg = packages[index];
 
     final List<dynamic> variations = pkg["packagevariations"] ?? [];
-    final selectedHoursForPackage = selectedHours[index] ?? {pkg["hours"].first};
+    final selectedHoursForPackage =
+        selectedHours[index] ?? {pkg["hours"].first};
     final selectedHour = selectedHoursForPackage.first;
     final priceMap = pkg["priceMap"] as Map<String, int>;
 
-// Utility function as you have:
+    // Utility function as you have:
     String getDurationLabel(dynamic variation) {
       final duration = variation["duration"]?.toString() ?? "";
       final type = (variation["duration_type"] ?? "").toString().toLowerCase();
@@ -267,43 +321,50 @@ class PackagesController extends GetxController {
       return duration;
     }
 
-// Match the correct variation by selected hour
+    // Match the correct variation by selected hour
     final matchedVariation = variations.firstWhere(
-          (v) => getDurationLabel(v) == selectedHour,
+      (v) => getDurationLabel(v) == selectedHour,
       orElse: () => variations.isNotEmpty ? variations[0] : null,
     );
 
-    final variationId = matchedVariation != null ? matchedVariation["id"] : null;
+    final variationId =
+        matchedVariation != null ? matchedVariation["id"] : null;
 
-// ✅ Prepare correct billing package map
+    // Prepare correct billing package map
     final billingPackage = {
       ...pkg,
       'selectedHours': selectedHoursForPackage.toList(),
-      'package_id': pkg['id'],  // <-- Correct Package ID
+      'package_id': pkg['id'], // <-- Correct Package ID
       'packageIndex': index,
       'finalPrice': priceMap[selectedHour] ?? pkg["price"],
       'studio_id': studioId,
       'company_id': companyId,
       'subCategory': subCategoryId,
       'sub_vertical_id': subVerticalId,
-      'type_id': pkg['typeId'] is int ? pkg['typeId'] : int.tryParse(pkg['type_id']?.toString() ?? "0") ?? 0,
+      'type_id':
+          pkg['typeId'] is int
+              ? pkg['typeId']
+              : int.tryParse(pkg['type_id']?.toString() ?? "0") ?? 0,
       'type': pkg['type'],
-      'package_variation_id': variationId,  // <-- Correct Variation ID
+      'package_variation_id': variationId, // <-- Correct Variation ID
       'selectedHour': selectedHour,
       'advanceBookingDays': companyLocation?.company?.advanceBookingDays ?? 0,
       'companyLocation': companyLocation,
     };
 
-    log("Adding package for billing: package_id=${billingPackage['package_id']}, package_variation_id=${billingPackage['package_variation_id']}");
+    log(
+      "Adding package for billing: package_id=${billingPackage['package_id']}, package_variation_id=${billingPackage['package_variation_id']}",
+    );
 
     selectedPackagesForBilling.add(billingPackage);
-
   }
 
   void toggleHour(int packageIndex, String hour) {
     selectedHours[packageIndex] = {hour};
     if (selectedPackageIndices.contains(packageIndex)) {
-      selectedPackagesForBilling.removeWhere((pkg) => pkg['packageIndex'] == packageIndex);
+      selectedPackagesForBilling.removeWhere(
+        (pkg) => pkg['packageIndex'] == packageIndex,
+      );
       _addPackageForBilling(packageIndex);
     }
     update();
@@ -313,9 +374,16 @@ class PackagesController extends GetxController {
     return List<Map<String, dynamic>>.from(selectedPackagesForBilling);
   }
 
-  double get packageTotal => selectedPackagesForBilling.fold(0.0, (sum, pkg) => sum + (pkg['finalPrice'] as num).toDouble());
-  double get totalExtraAddOnPrice => selectedExtraAddons.fold(0.0, (sum, addon) => sum + (addon['price'] as num).toDouble());
-  double _exclusiveFromInclusive(double inclusive) => inclusive * (100 / (100 + gstPercentage));
+  double get packageTotal => selectedPackagesForBilling.fold(
+    0.0,
+    (sum, pkg) => sum + (pkg['finalPrice'] as num).toDouble(),
+  );
+  double get totalExtraAddOnPrice => selectedExtraAddons.fold(
+    0.0,
+    (sum, addon) => sum + (addon['price'] as num).toDouble(),
+  );
+  double _exclusiveFromInclusive(double inclusive) =>
+      inclusive * (100 / (100 + gstPercentage));
   double get packageBaseTotal => _exclusiveFromInclusive(packageTotal);
   double get addonBaseTotal => _exclusiveFromInclusive(totalExtraAddOnPrice);
   double get subtotal => packageBaseTotal + addonBaseTotal;
@@ -327,7 +395,10 @@ class PackagesController extends GetxController {
   }
 
   int getTotalPrice() {
-    return selectedPackagesForBilling.fold(0, (sum, pkg) => sum + (pkg['finalPrice'] as int));
+    return selectedPackagesForBilling.fold(
+      0,
+      (sum, pkg) => sum + (pkg['finalPrice'] as int),
+    );
   }
 
   int getSelectedPackageCount() {
@@ -361,7 +432,9 @@ class PackagesController extends GetxController {
 
   void removePackageFromSelection(int index) {
     selectedPackageIndices.remove(index);
-    selectedPackagesForBilling.removeWhere((pkg) => pkg['packageIndex'] == index);
+    selectedPackagesForBilling.removeWhere(
+      (pkg) => pkg['packageIndex'] == index,
+    );
     update();
   }
 
@@ -389,7 +462,9 @@ class PackagesController extends GetxController {
 
   void updatePackagePricing(int packageIndex) {
     if (selectedPackageIndices.contains(packageIndex)) {
-      selectedPackagesForBilling.removeWhere((pkg) => pkg['packageIndex'] == packageIndex);
+      selectedPackagesForBilling.removeWhere(
+        (pkg) => pkg['packageIndex'] == packageIndex,
+      );
       _addPackageForBilling(packageIndex);
       update();
     }
@@ -397,28 +472,43 @@ class PackagesController extends GetxController {
 
   Future<void> fetchPopularPackages() async {
     try {
-      final response = await http.get(Uri.parse("https://admin.streammly.com/api/v1/package/getpopularpackages"), headers: {"Content-Type": "application/json"});
+      final response = await http.get(
+        Uri.parse(
+          // "https://admin.streammly.com/api/v1/package/getpopularpackages",
+          "http://192.168.1.113:8000/api/v1/package/getpopularpackages",
+        ),
+        headers: {"Content-Type": "application/json"},
+      );
       if (response.statusCode == 200) {
         final jsonBody = json.decode(response.body);
         final List data = jsonBody["data"] ?? [];
 
-        popularPackagesList = data.map<Map<String, dynamic>>((pkg) {
-          final List<dynamic>? variations = pkg["packagevariations"];
-          final firstVariation = (variations != null && variations.isNotEmpty) ? variations[0] : null;
+        popularPackagesList =
+            data.map<Map<String, dynamic>>((pkg) {
+              final List<dynamic>? variations = pkg["packagevariations"];
+              final firstVariation =
+                  (variations != null && variations.isNotEmpty)
+                      ? variations[0]
+                      : null;
 
-          return {
-            "title": pkg["title"] ?? "",
-            "type": pkg["type"] ?? "N/A",
-            "price": int.tryParse(firstVariation?["amount"]?.toString() ?? "0") ?? 0,
-            "shortDescription": pkg["short_description"] ?? "",
-            "highlight": pkg["fullDescription"] ?? "",
-            "packageIndex": data.indexOf(pkg),
-            "image":
-            (pkg["image_upload"] != null && pkg["image_upload"].isNotEmpty)
-                ? 'https://admin.streammly.com/${pkg["image_upload"]}'
-                : 'assets/images/category/vendor_category/Baby.jpg',
-          };
-        }).toList();
+              return {
+                "title": pkg["title"] ?? "",
+                "type": pkg["type"] ?? "N/A",
+                "price":
+                    int.tryParse(
+                      firstVariation?["amount"]?.toString() ?? "0",
+                    ) ??
+                    0,
+                "shortDescription": pkg["short_description"] ?? "",
+                "highlight": pkg["fullDescription"] ?? "",
+                "packageIndex": data.indexOf(pkg),
+                "image":
+                    (pkg["image_upload"] != null &&
+                            pkg["image_upload"].isNotEmpty)
+                        ? 'https://admin.streammly.com/${pkg["image_upload"]}'
+                        : 'assets/images/category/vendor_category/Baby.jpg',
+              };
+            }).toList();
         update();
       } else {
         Get.snackbar("Error", "Failed to fetch popular packages");

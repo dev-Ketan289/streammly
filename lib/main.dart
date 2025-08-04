@@ -1,16 +1,16 @@
-import 'dart:developer';
-
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
-import 'package:get/get.dart'; 
+import 'package:get/get.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:streammly/controllers/home_screen_controller.dart';
+import 'package:streammly/controllers/promo_slider_controller.dart';
 import 'package:streammly/data/api/api_client.dart';
 import 'package:streammly/data/init.dart';
 import 'package:streammly/data/repository/business_settings_repo.dart';
 import 'package:streammly/data/repository/category_repo.dart';
 import 'package:streammly/data/repository/company_repo.dart';
 import 'package:streammly/data/repository/header_repo.dart';
+import 'package:streammly/data/repository/promo_slider_repo.dart';
 import 'package:streammly/navigation_flow.dart';
 import 'package:streammly/services/constants.dart';
 import 'package:streammly/services/theme.dart';
@@ -57,6 +57,16 @@ void main() async {
     ),
     permanent: true,
   );
+  Get.put(
+    PromoSliderController(
+      promoSliderRepo: PromoSliderRepo(
+        apiClient: ApiClient(
+          appBaseUrl: AppConstants.baseUrl,
+          sharedPreferences: Get.find(),
+        ),
+      ),
+    ),
+  );
   Get.put(LocationController(), permanent: true);
   Get.put(
     CategoryController(
@@ -86,8 +96,8 @@ void main() async {
 
   runApp(StreammlyApp());
 }
-   final GlobalKey<NavigatorState> subnavigator =
-      GlobalKey<NavigatorState>();
+
+final GlobalKey<NavigatorState> subnavigator = GlobalKey<NavigatorState>();
 Future<void> requestPermissions() async {
   // Request SMS permission
   await Permission.sms.request();
