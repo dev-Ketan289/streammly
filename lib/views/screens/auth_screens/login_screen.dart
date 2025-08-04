@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -22,6 +24,7 @@ class _LoginScreenState extends State<LoginScreen> {
 
   @override
   Widget build(BuildContext context) {
+
     final theme = Theme.of(context);
 
     return Scaffold(
@@ -122,7 +125,6 @@ class _LoginScreenState extends State<LoginScreen> {
                                                 final loginArgs = Get.arguments;
                                                 final redirectTo = loginArgs?['redirectTo'];
                                                 final formData = loginArgs?['formData'];
-
                                                 Get.off(() => const WelcomeScreen(), arguments: {'redirectTo': redirectTo, 'formData': formData});
                                               }
                                             },

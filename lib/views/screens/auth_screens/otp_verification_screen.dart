@@ -1,3 +1,6 @@
+
+import 'dart:developer';
+
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -176,10 +179,11 @@ class _OtpScreenState extends State<OtpScreen> {
                                           .verifyOtp(phone: phone, otp: otpTextController.text)
                                           .then((value) {
                                         if (value.isSuccess) {
+                                          
                                           final loginArgs = Get.arguments;
                                           final redirectTo = loginArgs?['redirectTo'];
                                           final formData = loginArgs?['formData'];
-
+                                          log(redirectTo, name: "fjfufu" );
                                           Get.off(() => const WelcomeScreen(), arguments: {
                                             'redirectTo': redirectTo,
                                             'formData': formData,

@@ -1,7 +1,9 @@
+import 'dart:developer';
+
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:streammly/controllers/quote_controller.dart';
 import 'package:streammly/navigation_flow.dart';
-import 'package:streammly/navigation_menu.dart';
 import 'package:streammly/views/screens/auth_screens/create_user.dart';
 
 import '../../../controllers/auth_controller.dart';
@@ -27,15 +29,17 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
       final args = Get.arguments ?? {};
       final redirectTo = args['redirectTo'];
       final formData = args['formData'];
-
-      if (authController.userProfile == null || (authController.userProfile!.name ?? '').isEmpty || (authController.userProfile!.email ?? '').isEmpty) {
+      log((Get.find<QuoteController>().companyId != null).toString());
+      if (authController.userProfile == null ||
+          (authController.userProfile!.name ?? '').isEmpty ||
+          (authController.userProfile!.email ?? '').isEmpty) {
         // New user: show profile form
         Get.off(() => ProfileFormScreen());
-      } else if (redirectTo == '/getQuote') {
+      } else if (Get.find<QuoteController>().companyId != null) {
         Get.offNamed('/getQuote', arguments: formData);
       } else {
         // Default: go to main navigation
-        Get.off(() =>  NavigationFlow());
+        Get.off(() => NavigationFlow());
       }
     });
   }
@@ -62,7 +66,12 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
                       Center(
                         child: Text(
                           'STREAMMLY',
-                          style: themeData.textTheme.headlineSmall!.copyWith(fontFamily: 'CinzelDecorative', fontSize: 28, fontWeight: FontWeight.bold, color: theme.primaryColor),
+                          style: themeData.textTheme.headlineSmall!.copyWith(
+                            fontFamily: 'CinzelDecorative',
+                            fontSize: 28,
+                            fontWeight: FontWeight.bold,
+                            color: theme.primaryColor,
+                          ),
                         ),
                       ),
                       const SizedBox(height: 30),
@@ -71,11 +80,27 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
                           child: Column(
                             mainAxisSize: MainAxisSize.min,
                             children: [
-                              Image.asset('assets/images/Thumb.gif', height: 240),
+                              Image.asset(
+                                'assets/images/Thumb.gif',
+                                height: 240,
+                              ),
                               const SizedBox(height: 40),
-                              Text("You're in!", style: textTheme.titleLarge!.copyWith(fontWeight: FontWeight.bold, color: colorScheme.primary), textAlign: TextAlign.center),
+                              Text(
+                                "You're in!",
+                                style: textTheme.titleLarge!.copyWith(
+                                  fontWeight: FontWeight.bold,
+                                  color: colorScheme.primary,
+                                ),
+                                textAlign: TextAlign.center,
+                              ),
                               const SizedBox(height: 8),
-                              Text("Welcome to Streammly", style: textTheme.titleMedium!.copyWith(color: colorScheme.primary), textAlign: TextAlign.center),
+                              Text(
+                                "Welcome to Streammly",
+                                style: textTheme.titleMedium!.copyWith(
+                                  color: colorScheme.primary,
+                                ),
+                                textAlign: TextAlign.center,
+                              ),
                             ],
                           ),
                         ),
