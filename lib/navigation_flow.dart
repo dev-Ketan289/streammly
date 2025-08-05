@@ -245,6 +245,15 @@ class NavigationFlowState extends State<NavigationFlow> {
       ),
     );
   }
+
+  void switchToTab(int index) {
+    setState(() {
+      _currentIndex = index;
+      _navigationHistory.clear();
+      _navigationHistory.add(index);
+      navigatorKeys[index].currentState?.popUntil((route) => route.isFirst);
+    });
+  }
 }
 
 class MoreScreen extends StatelessWidget {

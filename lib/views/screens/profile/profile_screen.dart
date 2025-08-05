@@ -105,8 +105,18 @@ class _ProfileScreenState extends State<ProfileScreen> {
       backgroundColor: Colors.grey[100],
       appBar: AppBar(
         backgroundColor: Colors.transparent,
-        leading: IconButton(icon: const Icon(Icons.arrow_back_ios_new, color: Colors.white), onPressed: () => Get.back()),
-        title: const Text('Your Profile', style: TextStyle(color: Colors.white, fontSize: 20, fontWeight: FontWeight.bold)),
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back_ios_new, color: Colors.white),
+          onPressed: () => Get.back(),
+        ),
+        title: const Text(
+          'Your Profile',
+          style: TextStyle(
+            color: Colors.white,
+            fontSize: 20,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
         centerTitle: true,
       ),
       body: SingleChildScrollView(
@@ -116,8 +126,18 @@ class _ProfileScreenState extends State<ProfileScreen> {
               clipBehavior: Clip.none,
               children: [
                 _coverImage != null
-                    ? Image.file(_coverImage!, height: 260, width: double.infinity, fit: BoxFit.cover)
-                    : Image.asset(_coverImage?.path ?? Assets.imagesDemoprofile, height: 260, width: double.infinity, fit: BoxFit.cover),
+                    ? Image.file(
+                      _coverImage!,
+                      height: 260,
+                      width: double.infinity,
+                      fit: BoxFit.cover,
+                    )
+                    : Image.asset(
+                      _coverImage?.path ?? Assets.imagesDemoprofile,
+                      height: 260,
+                      width: double.infinity,
+                      fit: BoxFit.cover,
+                    ),
                 Positioned(
                   bottom: -50,
                   left: 16,
@@ -125,20 +145,45 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     children: [
                       Container(
                         padding: const EdgeInsets.all(2),
-                        decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(100)),
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(100),
+                        ),
                         child: CircleAvatar(
                           radius: 50,
-                          backgroundImage: _profileImage != null ? FileImage(_profileImage!) : const AssetImage(Assets.imagesEllipse) as ImageProvider,
+                          backgroundImage:
+                              _profileImage != null
+                                  ? FileImage(_profileImage!)
+                                  : (authController.userProfile?.profileImage !=
+                                          null &&
+                                      authController
+                                          .userProfile!
+                                          .profileImage!
+                                          .isNotEmpty)
+                                  ? NetworkImage(
+                                    authController.userProfile!.profileImage!,
+                                  )
+                                  : const AssetImage(Assets.imagesEllipse)
+                                      as ImageProvider,
                         ),
                       ),
                       Positioned(
                         right: 10,
                         child: GestureDetector(
-                          onTap: () => _showImageSourceDialog(true), // Update profile image
+                          onTap:
+                              () => _showImageSourceDialog(
+                                true,
+                              ), // Update profile image
                           child: Container(
                             padding: const EdgeInsets.all(2),
-                            decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(100)),
-                            child: CircleAvatar(radius: 12, backgroundImage: AssetImage(Assets.imagesEdit)),
+                            decoration: BoxDecoration(
+                              color: Colors.white,
+                              borderRadius: BorderRadius.circular(100),
+                            ),
+                            child: CircleAvatar(
+                              radius: 12,
+                              backgroundImage: AssetImage(Assets.imagesEdit),
+                            ),
                           ),
                         ),
                       ),
@@ -149,13 +194,22 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   right: 20,
                   bottom: -20,
                   child: GestureDetector(
-                    onTap: () => _showImageSourceDialog(false), // Update banner image
+                    onTap:
+                        () => _showImageSourceDialog(
+                          false,
+                        ), // Update banner image
                     child: Container(
                       padding: const EdgeInsets.all(10),
-                      decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(100)),
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(100),
+                      ),
                       child: Row(
                         children: [
-                          Text('Update cover image', style: TextStyle(color: Color(0xFF2864A6))),
+                          Text(
+                            'Update cover image',
+                            style: TextStyle(color: Color(0xFF2864A6)),
+                          ),
                           const SizedBox(width: 4),
                           Image.asset(Assets.imagesEdit, width: 20, height: 20),
                         ],
@@ -169,19 +223,41 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text('Linked Accounts', style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold)),
+                      Text(
+                        'Linked Accounts',
+                        style: TextStyle(
+                          color: Colors.black,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
                       // Use flutter_svg to display SVG assets
                       // Make sure to import: import 'package:flutter_svg/flutter_svg.dart';
                       Row(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          SvgPicture.asset(Assets.svgGoogle, width: 40, height: 40),
+                          SvgPicture.asset(
+                            Assets.svgGoogle,
+                            width: 40,
+                            height: 40,
+                          ),
                           // SizedBox(width: 10),
-                          SvgPicture.asset(Assets.svgInstagram, width: 40, height: 40),
+                          SvgPicture.asset(
+                            Assets.svgInstagram,
+                            width: 40,
+                            height: 40,
+                          ),
                           // SizedBox(width: 10),
-                          SvgPicture.asset(Assets.svgFacebook, width: 40, height: 40),
+                          SvgPicture.asset(
+                            Assets.svgFacebook,
+                            width: 40,
+                            height: 40,
+                          ),
                           // SizedBox(width: 10),
-                          SvgPicture.asset(Assets.svgGmail, width: 40, height: 40),
+                          SvgPicture.asset(
+                            Assets.svgGmail,
+                            width: 40,
+                            height: 40,
+                          ),
                           // SizedBox(width: 10),
                           Icon(Icons.add, size: 40),
                         ],
@@ -196,16 +272,29 @@ class _ProfileScreenState extends State<ProfileScreen> {
               child: Container(
                 margin: const EdgeInsets.all(16),
                 padding: const EdgeInsets.all(16),
-                decoration: BoxDecoration(border: Border.all(color: Colors.grey.shade300), borderRadius: BorderRadius.circular(20)),
+                decoration: BoxDecoration(
+                  border: Border.all(color: Colors.grey.shade300),
+                  borderRadius: BorderRadius.circular(20),
+                ),
                 width: 400,
                 child: Form(
                   key: _formKey,
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      const Text("Personal Info", style: TextStyle(color: Colors.black, fontSize: 16, fontWeight: FontWeight.bold)),
+                      const Text(
+                        "Personal Info",
+                        style: TextStyle(
+                          color: Colors.black,
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
                       const SizedBox(height: 4),
-                      const Text("You can change your personal settings here.", style: TextStyle(color: Colors.black)),
+                      const Text(
+                        "You can change your personal settings here.",
+                        style: TextStyle(color: Colors.black),
+                      ),
                       const SizedBox(height: 16),
 
                       /// Username
@@ -227,8 +316,17 @@ class _ProfileScreenState extends State<ProfileScreen> {
                           Container(
                             height: 50,
                             padding: const EdgeInsets.symmetric(horizontal: 8),
-                            decoration: BoxDecoration(border: Border.all(color: Colors.grey.shade400), borderRadius: BorderRadius.circular(8)),
-                            child: const Row(children: [Text('🇮🇳'), SizedBox(width: 4), Text('(+91)')]),
+                            decoration: BoxDecoration(
+                              border: Border.all(color: Colors.grey.shade400),
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                            child: const Row(
+                              children: [
+                                Text('🇮🇳'),
+                                SizedBox(width: 4),
+                                Text('(+91)'),
+                              ],
+                            ),
                           ),
                           const SizedBox(width: 8),
                           Expanded(
@@ -239,7 +337,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
                               validator: (value) {
                                 if (value == null || value.trim().isEmpty) {
                                   return 'Mobile number is required';
-                                } else if (!RegExp(r'^[0-9]{10}$').hasMatch(value)) {
+                                } else if (!RegExp(
+                                  r'^[0-9]{10}$',
+                                ).hasMatch(value)) {
                                   return 'Enter a valid 10-digit mobile number';
                                 }
                                 return null;
@@ -258,7 +358,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
                         validator: (value) {
                           if (value == null || value.trim().isEmpty) {
                             return 'Email is required';
-                          } else if (!RegExp(r'^[\w-.]+@([\w-]+\.)+[\w-]{2,4}$').hasMatch(value)) {
+                          } else if (!RegExp(
+                            r'^[\w-.]+@([\w-]+\.)+[\w-]{2,4}$',
+                          ).hasMatch(value)) {
                             return 'Enter a valid email';
                           }
                           return null;
@@ -273,9 +375,15 @@ class _ProfileScreenState extends State<ProfileScreen> {
                         readOnly: true,
                         onTap: () async {
                           FocusScope.of(context).requestFocus(FocusNode());
-                          final date = await showDatePicker(context: context, initialDate: DateTime(2000), firstDate: DateTime(1900), lastDate: DateTime.now());
+                          final date = await showDatePicker(
+                            context: context,
+                            initialDate: DateTime(2000),
+                            firstDate: DateTime(1900),
+                            lastDate: DateTime.now(),
+                          );
                           if (date != null) {
-                            _dobController.text = "${date.day}/${date.month}/${date.year}";
+                            _dobController.text =
+                                "${date.day}/${date.month}/${date.year}";
                           }
                         },
                         validator: (value) {
@@ -292,9 +400,20 @@ class _ProfileScreenState extends State<ProfileScreen> {
                         value: _selectedGender,
                         decoration: InputDecoration(
                           hintText: 'Enter Gender',
-                          border: OutlineInputBorder(borderSide: BorderSide(color: Color(0xFFABB0B5)), borderRadius: BorderRadius.circular(10)),
+                          border: OutlineInputBorder(
+                            borderSide: BorderSide(color: Color(0xFFABB0B5)),
+                            borderRadius: BorderRadius.circular(10),
+                          ),
                         ),
-                        items: ['male', 'female', 'other'].map((gender) => DropdownMenuItem(value: gender, child: Text(gender))).toList(),
+                        items:
+                            ['male', 'female', 'other']
+                                .map(
+                                  (gender) => DropdownMenuItem(
+                                    value: gender,
+                                    child: Text(gender),
+                                  ),
+                                )
+                                .toList(),
                         onChanged: (value) {
                           setState(() {
                             _selectedGender = value;
@@ -314,27 +433,46 @@ class _ProfileScreenState extends State<ProfileScreen> {
                         width: double.infinity,
                         height: 48,
                         child: ElevatedButton(
-                          style: ElevatedButton.styleFrom(backgroundColor: Colors.blue.shade700, shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10))),
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Colors.blue.shade700,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(10),
+                            ),
+                          ),
                           onPressed: () {
                             if (_formKey.currentState!.validate()) {
-                              // All fields are valid — perform submission
+                              // All fields are valid — perform submission with image files
                               authController
-                                  .updateUserProfile(
+                                  .updateFullUserProfile(
                                     name: _usernameController.text,
                                     email: _emailController.text,
                                     phone: _mobileController.text,
                                     dob: _dobController.text,
                                     gender: _selectedGender,
+                                    profileImage: _profileImage,
+                                    coverImage: _coverImage,
                                   )
                                   .then((value) {
                                     if (value?.isSuccess ?? false) {
                                       Get.back();
-                                      Get.snackbar("Success", "Profile updated successfully");
+                                      Get.snackbar(
+                                        "Success",
+                                        "Profile updated successfully",
+                                      );
+                                    } else {
+                                      Get.snackbar(
+                                        "Error",
+                                        value?.message ??
+                                            "Failed to update profile",
+                                      );
                                     }
                                   });
                             }
                           },
-                          child: const Text('Update Profile', style: TextStyle(color: Colors.white)),
+                          child: const Text(
+                            'Update Profile',
+                            style: TextStyle(color: Colors.white),
+                          ),
                         ),
                       ),
                       const SizedBox(height: 20),
@@ -342,9 +480,17 @@ class _ProfileScreenState extends State<ProfileScreen> {
                         width: double.infinity,
                         height: 48,
                         child: ElevatedButton(
-                          style: ElevatedButton.styleFrom(backgroundColor: Colors.blue.shade700, shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10))),
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Colors.blue.shade700,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(10),
+                            ),
+                          ),
                           onPressed: () {},
-                          child: const Text('Saved Address', style: TextStyle(color: Colors.white)),
+                          child: const Text(
+                            'Saved Address',
+                            style: TextStyle(color: Colors.white),
+                          ),
                         ),
                       ),
                     ],

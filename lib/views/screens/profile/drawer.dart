@@ -104,11 +104,20 @@ class _ProfilePageState extends State<ProfilePage> {
               child: Row(
                 children: [
                   CircleAvatar(
-                    radius: screenWidth * 0.06, // Responsive radius
-                    backgroundImage: const AssetImage(
-                      '',
-                    ), // You can update later with profile image
+                    radius: screenWidth * 0.06,
+                    backgroundImage:
+                        authController.userProfile?.profileImage != null &&
+                                authController
+                                    .userProfile!
+                                    .profileImage!
+                                    .isNotEmpty
+                            ? NetworkImage(
+                              authController.userProfile!.profileImage!,
+                            )
+                            : const AssetImage(Assets.imagesEllipse)
+                                as ImageProvider,
                   ),
+
                   SizedBox(width: screenWidth * 0.04),
                   Expanded(
                     child: GetBuilder<AuthController>(

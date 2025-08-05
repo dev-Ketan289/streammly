@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:streammly/controllers/home_screen_controller.dart';
+import 'package:streammly/controllers/package_page_controller.dart';
 import 'package:streammly/controllers/promo_slider_controller.dart';
 import 'package:streammly/data/api/api_client.dart';
 import 'package:streammly/data/init.dart';
@@ -90,6 +91,7 @@ void main() async {
     ),
     permanent: true,
   );
+  Get.put(PackagesController());
 
   // Ask permissions (optional before launch)
   await requestPermissions();

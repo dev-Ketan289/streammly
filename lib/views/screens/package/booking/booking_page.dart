@@ -12,6 +12,7 @@ import 'package:streammly/views/screens/package/booking/widgets/booking_personal
 import 'package:streammly/views/widgets/custom_doodle.dart';
 
 import '../../../../controllers/booking_form_controller.dart';
+import '../../../../navigation_flow.dart';
 
 class BookingPage extends StatelessWidget {
   final List<Map<String, dynamic>> packages;
@@ -53,7 +54,10 @@ class BookingPage extends StatelessWidget {
               if (controller.selectedPackages.isNotEmpty) {
                 return Text(
                   "Booking",
-                  style: Theme.of(context).textTheme.titleLarge?.copyWith(color:Theme.of(context).colorScheme.primary, fontWeight: FontWeight.w600)
+                  style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                    color: Theme.of(context).colorScheme.primary,
+                    fontWeight: FontWeight.w600,
+                  ),
                 );
               } else {
                 return const Text(
@@ -76,9 +80,7 @@ class BookingPage extends StatelessWidget {
           builder: (_) {
             // If no packages yet, display empty widget/loader or placeholder
             if (controller.selectedPackages.isEmpty) {
-              return const Center(
-                child: CircularProgressIndicator(),
-              );
+              return const Center(child: CircularProgressIndicator());
             }
 
             final currentPage = controller.currentPage;
@@ -86,7 +88,9 @@ class BookingPage extends StatelessWidget {
 
             // Make sure currentPage is within valid bounds
             final safePageIndex =
-            (currentPage >= 0 && currentPage < packagesLength) ? currentPage : 0;
+                (currentPage >= 0 && currentPage < packagesLength)
+                    ? currentPage
+                    : 0;
 
             return Column(
               children: [
@@ -114,11 +118,14 @@ class BookingPage extends StatelessWidget {
                                     controller.update();
                                   },
                                   style: ElevatedButton.styleFrom(
-                                    backgroundColor: isSelected
-                                        ? const Color(0xFF4A6CF7)
-                                        : Colors.grey.shade100,
+                                    backgroundColor:
+                                        isSelected
+                                            ? const Color(0xFF4A6CF7)
+                                            : Colors.grey.shade100,
                                     foregroundColor:
-                                    isSelected ? Colors.white : Colors.black87,
+                                        isSelected
+                                            ? Colors.white
+                                            : Colors.black87,
                                     padding: const EdgeInsets.symmetric(
                                       horizontal: 20,
                                       vertical: 12,
@@ -130,20 +137,28 @@ class BookingPage extends StatelessWidget {
                                         topRight: Radius.circular(10),
                                       ),
                                       side: BorderSide(
-                                        color: isSelected
-                                            ? const Color.fromARGB(255, 0, 51, 255)
-                                            : Colors.grey.shade300,
+                                        color:
+                                            isSelected
+                                                ? const Color.fromARGB(
+                                                  255,
+                                                  0,
+                                                  51,
+                                                  255,
+                                                )
+                                                : Colors.grey.shade300,
                                       ),
                                     ),
                                   ),
                                   child: Text(
-                                    controller.selectedPackages[index]['title'] ??
+                                    controller
+                                            .selectedPackages[index]['title'] ??
                                         'Package ${index + 1}',
                                     style: TextStyle(
                                       fontSize: 14,
-                                      fontWeight: isSelected
-                                          ? FontWeight.w600
-                                          : FontWeight.w500,
+                                      fontWeight:
+                                          isSelected
+                                              ? FontWeight.w600
+                                              : FontWeight.w500,
                                     ),
                                   ),
                                 );
@@ -180,14 +195,20 @@ class BookingPage extends StatelessWidget {
                     width: double.infinity,
                     child: ElevatedButton(
                       onPressed: () {
-                        final controller = Get.find<BookingController>();  // get existing controller
+                        final controller = Get.find<BookingController>();
 
-                        // Validate required fields and terms acceptance
                         if (controller.canSubmit()) {
-                          // Proceed to booking summary page
-                          Get.to(() => BookingSummaryPage());
+                          final mainState =
+                              context
+                                  .findAncestorStateOfType<
+                                    NavigationFlowState
+                                  >();
+
+                          mainState?.pushToCurrentTab(
+                            BookingSummaryPage(),
+                            hideBottomBar: true,
+                          );
                         } else {
-                          // Show error snackbar or dialog to fill missing fields
                           Get.snackbar(
                             'Incomplete Details',
                             'Please fill all required fields and accept terms and conditions before continuing.',
@@ -206,7 +227,11 @@ class BookingPage extends StatelessWidget {
                       ),
                       child: const Text(
                         "Let's Continue",
-                        style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600, color: Colors.white),
+                        style: TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.w600,
+                          color: Colors.white,
+                        ),
                       ),
                     ),
                   ),

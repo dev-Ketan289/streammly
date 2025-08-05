@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:streammly/services/theme.dart';
-import 'package:streammly/views/screens/package/booking/my_bookings.dart';
 import 'package:streammly/views/screens/package/booking/widgets/custom_bookingcard.dart';
 import 'package:streammly/views/widgets/custom_doodle.dart';
+
+import '../../../../../models/booking/booking_info_model.dart';
 
 // --- Addons Model ---
 class BookingAddOn {

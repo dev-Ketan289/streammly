@@ -361,7 +361,7 @@ class PackagesController extends GetxController {
     };
 
     log(
-      "Adding package for billing: package_id=${billingPackage['package_id']}, package_variation_id=${billingPackage['package_variation_id']}",
+      "Adding package for billing: advanceBookingDays=${billingPackage['advanceBookingDays']}, package_variation_id=${billingPackage['package_variation_id']}",
     );
 
     selectedPackagesForBilling.add(billingPackage);

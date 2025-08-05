@@ -54,8 +54,6 @@ class _HomeHeaderBannerState extends State<HomeHeaderBanner> {
           // Optionally log or ignore
         }
       });
-
-
     }
   }
 
@@ -287,7 +285,7 @@ class _HomeHeaderBannerState extends State<HomeHeaderBanner> {
                                           crossAxisAlignment:
                                               CrossAxisAlignment.start,
                                           mainAxisAlignment:
-                                              MainAxisAlignment.center,
+                                              MainAxisAlignment.start,
                                           children: [
                                             SizedBox(
                                               height: 30,
@@ -300,12 +298,12 @@ class _HomeHeaderBannerState extends State<HomeHeaderBanner> {
                                                     ),
                                               ),
                                             ),
-                                            const SizedBox(height: 3),
+                                            const SizedBox(height: 6),
                                             if (item.description.isNotEmpty)
                                               Text(
                                                 item.description,
                                                 style: GoogleFonts.openSans(
-                                                  fontSize: 13,
+                                                  fontSize: 11,
                                                   color: Colors.white70,
                                                 ),
                                               ),
@@ -324,10 +322,8 @@ class _HomeHeaderBannerState extends State<HomeHeaderBanner> {
                                 right: 10,
                                 bottom: 0,
                                 child: SizedBox(
-                                  height:
-                                      203,
-                                  width:
-                                      163,// bigger than card to float above
+                                  height: 203,
+                                  width: 163, // bigger than card to float above
                                   child:
                                       item.vectorImage.isNotEmpty
                                           ? (item.isSvg
@@ -387,8 +383,8 @@ class _HomeHeaderBannerState extends State<HomeHeaderBanner> {
                             color:
                                 isActive
                                     ? theme.colorScheme.primary
-                                    : theme.colorScheme.primary.withValues(alpha:
-                                      0.3,
+                                    : theme.colorScheme.primary.withValues(
+                                      alpha: 0.3,
                                     ),
                           ),
                         );

@@ -13,15 +13,17 @@ import 'package:streammly/models/response/response_model.dart';
 import 'package:streammly/views/screens/package/booking/booking_page.dart';
 import 'package:streammly/views/screens/package/booking/thanks_for_booking.dart';
 
+import '../models/booking/booking_info_model.dart';
+
 class BookingController extends GetxController {
   final AuthController authController = Get.find();
   final PackagesController packagesController = Get.find();
   final BookingRepo bookingrepo;
 
   BookingController({required this.bookingrepo});
-  List<dynamic> upcomingBookings = [];
-  List<dynamic> cancelledBookings = [];
-  List<dynamic> completedBookings = [];
+  List<BookingInfo> upcomingBookings = [];
+  List<BookingInfo> cancelledBookings = [];
+  List<BookingInfo> completedBookings = [];
   int currentPage = 0;
   List<Map<String, dynamic>> selectedPackages = [];
   List<dynamic> thankYouData = [];
@@ -50,6 +52,7 @@ class BookingController extends GetxController {
   void onInit() {
     super.onInit();
     autofillFromUserProfile();
+    fetchBookings();
   }
 
   void autofillFromUserProfile() {
@@ -618,8 +621,8 @@ class BookingController extends GetxController {
       Get.offAll(() => ThanksForBookingPage());
 
       // Refresh profile/wallet and navigate on success
-      await authController.fetchUserProfile();
-      Get.offAll(() => ThanksForBookingPage());
+      // await authController.fetchUserProfile();
+      // Get.offAll(() => ThanksForBookingPage());
     } catch (e, stack) {
       log("submitBooking error: $e\n$stack");
       Get.snackbar("Error", "Something went wrong during booking submission");
@@ -695,7 +698,8 @@ class BookingController extends GetxController {
         final allBookings = response['data'] as List<dynamic>? ?? [];
         final now = DateTime.now();
 
-        upcomingBookings =
+        // Filter raw bookings by your logic
+        final upcomingRaw =
             allBookings.where((booking) {
               final shootDate = DateTime.tryParse(
                 booking['date_of_shoot'] ?? '',
@@ -706,18 +710,32 @@ class BookingController extends GetxController {
                   status == 'pending';
             }).toList();
 
-        cancelledBookings =
+        final cancelledRaw =
             allBookings.where((booking) {
               return (booking['status'] ?? '').toString().toLowerCase() ==
                   'cancelled';
             }).toList();
 
-        completedBookings =
+        final completedRaw =
             allBookings.where((booking) {
               return (booking['status'] ?? '').toString().toLowerCase() ==
                       'completed' ||
                   (booking['shoot_done'] == true);
             }).toList();
+
+        // Map filtered raw data to typed BookingInfo list
+        upcomingBookings =
+            upcomingRaw
+                .map((b) => BookingInfo.fromJson(b as Map<String, dynamic>))
+                .toList();
+        cancelledBookings =
+            cancelledRaw
+                .map((b) => BookingInfo.fromJson(b as Map<String, dynamic>))
+                .toList();
+        completedBookings =
+            completedRaw
+                .map((b) => BookingInfo.fromJson(b as Map<String, dynamic>))
+                .toList();
       } else {
         upcomingBookings = [];
         cancelledBookings = [];
@@ -727,6 +745,7 @@ class BookingController extends GetxController {
       upcomingBookings = [];
       cancelledBookings = [];
       completedBookings = [];
+      // You can log or handle error here as needed
     } finally {
       isLoading = false;
       update();
