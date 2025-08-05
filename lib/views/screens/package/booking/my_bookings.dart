@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:intl/intl.dart';
 import 'package:streammly/data/repository/booking_repo.dart';
 import 'package:streammly/services/theme.dart';
 import 'package:streammly/views/screens/package/booking/widgets/booking_details.dart';
@@ -9,26 +8,7 @@ import 'package:streammly/views/widgets/custom_doodle.dart';
 
 import '../../../../controllers/auth_controller.dart';
 import '../../../../controllers/booking_form_controller.dart';
-
-class BookingInfo {
-  final String bookingId;
-  final String otp;
-  final String title;
-  final String type;
-  final String location;
-  final String date;
-  final String time;
-
-  const BookingInfo({
-    required this.bookingId,
-    required this.otp,
-    required this.title,
-    required this.type,
-    required this.location,
-    required this.date,
-    required this.time,
-  });
-}
+import '../../../../models/booking/booking_info_model.dart';
 
 class Bookings extends StatelessWidget {
   Bookings({super.key});
@@ -39,33 +19,13 @@ class Bookings extends StatelessWidget {
 
   final AuthController authController = Get.find();
 
-  BookingInfo _mapToBookingInfo(dynamic booking) {
-    final dateFormat = DateFormat('EEE, d MMM yyyy');
-    final time =
-        (booking['start_time'] ?? '') + " - " + (booking['end_time'] ?? '');
-
-    String formattedDate = '';
-    try {
-      final parsedDate = DateTime.parse(booking['date_of_shoot']);
-      formattedDate = dateFormat.format(parsedDate);
-    } catch (_) {}
-
-    return BookingInfo(
-      bookingId: booking['order_uid'] ?? '',
-      otp: booking['otp'] ?? '',
-      title: booking['package']?['title'] ?? '',
-      type: booking['type'] ?? '',
-      location: booking['location']?['address'] ?? 'No location',
-      date: formattedDate,
-      time: time,
-    );
-  }
+  // Removed _mapToBookingInfo() method here
 
   @override
   Widget build(BuildContext context) {
-    // Check login status
+    // DO NOT CALL fetchBookings HERE!
+
     if (!authController.isLoggedIn()) {
-      // Show welcome screen with login/signup button
       return Center(
         child: Padding(
           padding: const EdgeInsets.all(32.0),
@@ -87,8 +47,7 @@ class Bookings extends StatelessWidget {
               const SizedBox(height: 40),
               ElevatedButton(
                 onPressed: () {
-                  // Navigate to your login route
-                  Get.toNamed('/login'); // Change route as per your app
+                  Get.toNamed('/login');
                 },
                 style: ElevatedButton.styleFrom(
                   padding: const EdgeInsets.symmetric(
@@ -110,22 +69,16 @@ class Bookings extends StatelessWidget {
       );
     }
 
-    // User is logged in, show bookings
-
-    controller.fetchBookings();
-
     return GetBuilder<BookingController>(
       builder: (controller) {
         if (controller.isLoading) {
           return const Center(child: CircularProgressIndicator());
         }
 
-        final upcoming =
-            controller.upcomingBookings.map(_mapToBookingInfo).toList();
-        final cancelled =
-            controller.cancelledBookings.map(_mapToBookingInfo).toList();
-        final completed =
-            controller.completedBookings.map(_mapToBookingInfo).toList();
+        // Use BookingInfo objects directly from controller (no mapping now)
+        final upcoming = controller.upcomingBookings;
+        final cancelled = controller.cancelledBookings;
+        final completed = controller.completedBookings;
 
         return DefaultTabController(
           length: 3,
@@ -135,14 +88,6 @@ class Bookings extends StatelessWidget {
               appBar: AppBar(
                 backgroundColor: Colors.transparent,
                 elevation: 0,
-                // leading: IconButton(
-                //   icon: const Icon(
-                //     Icons.arrow_back_ios_new,
-                //     color: Colors.grey,
-                //     size: 20,
-                //   ),
-                //   onPressed: () => Navigator.of(context).pop(),
-                // ),
                 centerTitle: true,
                 title: Text(
                   'My Bookings',
@@ -226,7 +171,6 @@ class Bookings extends StatelessWidget {
     void Function(BookingInfo)? onViewReceipt,
   }) {
     if (bookings.isEmpty) {
-      // Show "No bookings found" message instead of list
       return Center(
         child: Text(
           'No bookings found',
