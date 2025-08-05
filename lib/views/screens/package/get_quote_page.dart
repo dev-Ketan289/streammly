@@ -133,11 +133,11 @@ class _GetQuoteScreenState extends State<GetQuoteScreen> {
           arguments: {
             'redirectTo': '/getQuote',
             'formData': {
-              'companyId': widget.companyId,
-              'subCategoryId': widget.subCategoryId,
-              'subVerticalId': widget.subVerticalId,
-              'subCategoryTitle': widget.subCategoryTitle,
-              'subVerticalTitle': widget.subVerticalTitle,
+              'companyId': quoteController.companyId,
+              'subCategoryId': quoteController.subCategoryId,
+              'subVerticalId': quoteController.subVerticalId,
+              'subCategoryTitle': quoteController.subCategoryTitle,
+              'subVerticalTitle': quoteController.subVerticalTitle,
               'name': quoteController.nameController.text,
               'mobile': quoteController.mobileController.text,
               'email': quoteController.emailController.text,
@@ -155,10 +155,9 @@ class _GetQuoteScreenState extends State<GetQuoteScreen> {
     }
     log("x");
     quoteController.submitQuote(
-      
-      companyId: widget.companyId ?? 0,
-      subCategoryId: widget.subCategoryId ?? 0,
-      subVerticalId: widget.subVerticalId ?? 0,
+      companyId: (quoteController.companyId is int) ? quoteController.companyId as int : 0,
+      subCategoryId: (quoteController.subCategoryId is int) ? quoteController.subCategoryId as int : 0,
+      subVerticalId: (quoteController.subVerticalId is int) ? quoteController.subVerticalId as int : 0,
       userName: quoteController.nameController.text,
       phone: quoteController.mobileController.text,
       email: quoteController.emailController.text,
@@ -169,7 +168,7 @@ class _GetQuoteScreenState extends State<GetQuoteScreen> {
       favorableStartTime: quoteController.favStartTime!,
       favorableEndTime: quoteController.favEndTime!,
       requirement: quoteController.requirementsController.text,
-      shootType: "${widget.subCategoryTitle} / ${widget.subVerticalTitle}",
+      shootType: "${quoteController.subCategoryTitle} / ${quoteController.subVerticalTitle}",
     );
   }
 
@@ -203,7 +202,7 @@ class _GetQuoteScreenState extends State<GetQuoteScreen> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    "${widget.subCategoryTitle} / ${widget.subVerticalTitle}",
+                    "${controller.subCategoryTitle} / ${controller.subVerticalTitle}",
                     style: Theme.of(context).textTheme.labelLarge?.copyWith(
                       color: const Color(0xFF2864A6),
                       fontWeight: FontWeight.bold,
@@ -251,7 +250,7 @@ class _GetQuoteScreenState extends State<GetQuoteScreen> {
                           onTap: () {
                             controller.isStartTime = true;
                             controller.showTimePicker = true;
-                            quoteController.update();
+                            controller.update();
                           },
                         ),
                       ),
@@ -264,7 +263,7 @@ class _GetQuoteScreenState extends State<GetQuoteScreen> {
                           onTap: () {
                             controller.isStartTime = false;
                             controller.showTimePicker = true;
-                            quoteController.update();
+                            controller.update();
                           },
                         ),
                       ),
