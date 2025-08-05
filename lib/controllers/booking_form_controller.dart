@@ -631,6 +631,7 @@ class BookingController extends GetxController {
 
   List<Slot> timeSlots = [];
   List<TimeOfDay?> startTime = [];
+  int bufferTime = 0;
 
   Future<ResponseModel?> fetchAvailableSlots({
   required String companyId,
@@ -652,15 +653,21 @@ class BookingController extends GetxController {
     );
     log("Slots response: ${response.bodyString}", name: "fetchAvailableSlots");
     if (response.statusCode == 200) {
+      
       final openHours = response.body["data"]["open_hours"] as List;
       log("Open hours: $openHours", name: "fetchAvailableSlots");
+      bufferTime =int.tryParse( response.body["data"]["studio_location"]["buffer_time"]??"0")??0;
       timeSlots = openHours.map((e) => Slot.fromJson(e)).toList();
+      
       for (var i = 0; i < timeSlots.length; i++) {
         startTime.add(timeSlots[i].startTime);
         if (i == timeSlots.length - 1 && timeSlots[i].endTime != null) {
           startTime.add(timeSlots[i].endTime); // Include endTime of last slot
           log("Last slot endTime: ${timeSlots[i].endTime!.format(Get.context!)}", name: "fetchAvailableSlots");
         }
+      }
+      if(timeSlots.isNotEmpty){
+        timeSlots.add(Slot(booked: timeSlots[timeSlots.length-1].booked, breakTime: timeSlots[timeSlots.length-1].breakTime, blockHome: timeSlots[timeSlots.length-1].blockHome, blockIndoor: timeSlots[timeSlots.length-1].blockIndoor, blockOutdoor: timeSlots[timeSlots.length-1].blockOutdoor,startTime: timeSlots[timeSlots.length-1].endTime,endTime: timeSlots[timeSlots.length-1].endTime,));
       }
       responseModel = ResponseModel(true, "Slots fetched successfully");
     } else {

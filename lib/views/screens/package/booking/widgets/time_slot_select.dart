@@ -206,70 +206,9 @@ class _TimeSlotSelectorState extends State<TimeSlotSelector> {
                                 crossAxisSpacing: 12,
                                 childAspectRatio: 1.2,
                               ),
-                          itemCount:widget.slots.isEmpty?0: widget.slots.length +1 ,
+                          itemCount: widget.slots.length ,
                           itemBuilder: (context, slotIndex) {
-                         
-                            if(slotIndex==widget.slots.length){
-                              
-                                final isSelected =
-                                widget.slots[slotIndex-1].endTime == tempStartTime ||
-                                widget.slots[slotIndex-1].endTime == tempEndTime;
-                                 final isInRange =
-                                tempStartTime != null &&
-                                tempEndTime != null &&
-                                TimeCalculations.isTimeBeforeOrEqual(
-                                  widget.slots[slotIndex-1].endTime!,
-                                  tempStartTime!,
-                                ) &&
-                                TimeCalculations.isTimeAfterOrEqual(
-                                  widget.slots[slotIndex-1].endTime!,
-                                  tempEndTime!,
-                                );
-                              return GestureDetector(
-                              onTap: widget.slots[slotIndex - 1].isAvailable
-                                  ? () => onTimeSlotTap(widget.slots[slotIndex - 1])
-                                  : null, // Disable tap for unavailable slots
-                              child: Container(
-                                decoration: BoxDecoration(
-                                  borderRadius: BorderRadius.circular(20),
-                                  color:
-                                      widget.slots[slotIndex-1].isAvailable
-                                          ? (isSelected
-                                              ? primaryColor
-                                              : isInRange
-                                              ? Colors.blue[100]
-                                              : Colors.grey.shade300)
-                                          : Colors
-                                              .grey
-                                              .shade600, // Grey out unavailable slots
-                                  border: Border.all(
-                                    color:
-                                        isSelected
-                                            ? Colors.blue.shade100
-                                            : Colors.grey.shade300,
-                                    width: isSelected ? 4.0 : 2.0,
-                                  ),
-                                ),
-                                child: Center(
-                                  child: Text(
-                                    widget.slots[slotIndex-1].endTime!.format(context),
-                                    style: TextStyle(
-                                      color:
-                                          widget.slots[slotIndex-1].isAvailable
-                                              ? (isInRange
-                                                  ? Colors.white
-                                                  : Colors.black87)
-                                              : Colors
-                                                  .white54, // Dim text for unavailable slots
-                                      fontWeight: FontWeight.w500,
-                                      fontSize: 12,
-                                    ),
-                                  ),
-                                ),
-                              ),
-                            );
-                            }
-                               final slot = widget.slots[slotIndex];
+                            final slot = widget.slots[slotIndex];
                             if (slot.startTime == null)
                               return const SizedBox.shrink();
                             final isSelected =
@@ -287,6 +226,7 @@ class _TimeSlotSelectorState extends State<TimeSlotSelector> {
                                   tempStartTime!,
                                 );
                             log(slot.isAvailable.toString());
+                            
                             return GestureDetector(
                               onTap:
                                   slot.isAvailable
