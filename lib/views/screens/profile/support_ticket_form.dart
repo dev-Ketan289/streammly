@@ -1,4 +1,3 @@
-import 'dart:convert';
 import 'dart:io';
 
 import 'package:file_picker/file_picker.dart';
@@ -7,10 +6,12 @@ import 'package:get/get.dart';
 import 'package:http/http.dart' as http;
 
 import '../../../controllers/auth_controller.dart';
+import '../../../models/booking/booking_info_model.dart';
 import '../../../services/constants.dart';
 
 class SupportTicketFormPage extends StatefulWidget {
-  const SupportTicketFormPage({super.key});
+  final List<BookingInfo> bookings;
+  const SupportTicketFormPage({super.key, required this.bookings});
 
   @override
   State<SupportTicketFormPage> createState() => _SupportTicketFormPageState();
@@ -61,14 +62,14 @@ class _SupportTicketFormPageState extends State<SupportTicketFormPage> {
       return;
     }
 
-    final uri = Uri.parse('${AppConstants.baseUrl}${AppConstants.addSupportTicket}');
-
-
+    final uri = Uri.parse(
+      '${AppConstants.baseUrl}${AppConstants.addSupportTicket}',
+    );
 
     final request =
         http.MultipartRequest('POST', uri)
           ..headers['Authorization'] = 'Bearer $token'
-          ..fields['booking_id'] = '1'
+          ..fields['booking_id'] = selectedBooking ?? ''
           ..fields['title'] = titleController.text
           ..fields['description'] = descriptionController.text;
 
@@ -93,7 +94,7 @@ class _SupportTicketFormPageState extends State<SupportTicketFormPage> {
       debugPrint("Response: ${response.body}");
 
       if (response.statusCode == 200) {
-        final resBody = json.decode(response.body);
+        // final resBody = json.decode(response.body);
 
         if (context.mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
@@ -166,32 +167,31 @@ class _SupportTicketFormPageState extends State<SupportTicketFormPage> {
                   ),
                 ),
                 const SizedBox(height: 8),
-                DropdownButtonFormField<String>(
-                  value: selectedBooking,
-                  items:
-                      ['Booking #1234', 'Booking #5678']
-                          .map(
-                            (booking) => DropdownMenuItem(
-                              value: booking,
-                              child: Text(booking, style: textTheme.bodyMedium),
-                            ),
-                          )
-                          .toList(),
-                  onChanged: (value) => setState(() => selectedBooking = value),
-                  decoration: InputDecoration(
-                    filled: true,
-                    fillColor: Colors.white,
-                    hintText: 'Select Booking',
-                    hintStyle: textTheme.bodyMedium?.copyWith(
-                      color: Colors.grey,
-                    ),
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(12),
-                      borderSide: BorderSide.none,
-                    ),
-                    contentPadding: const EdgeInsets.symmetric(
-                      horizontal: 16,
-                      vertical: 14,
+                GestureDetector(
+                  onTap: () => _openBookingSelector(context),
+                  child: AbsorbPointer(
+                    child: TextFormField(
+                      controller: TextEditingController(
+                        text: selectedBooking ?? '',
+                      ),
+                      style: textTheme.bodyMedium,
+                      decoration: InputDecoration(
+                        filled: true,
+                        fillColor: Colors.white,
+                        hintText: 'Select Booking',
+                        hintStyle: textTheme.bodyMedium?.copyWith(
+                          color: Colors.grey,
+                        ),
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(12),
+                          borderSide: BorderSide.none,
+                        ),
+                        suffixIcon: const Icon(Icons.arrow_drop_down),
+                        contentPadding: const EdgeInsets.symmetric(
+                          horizontal: 16,
+                          vertical: 14,
+                        ),
+                      ),
                     ),
                   ),
                 ),
@@ -392,6 +392,35 @@ class _SupportTicketFormPageState extends State<SupportTicketFormPage> {
           ),
         ),
       ),
+    );
+  }
+
+  void _openBookingSelector(BuildContext context) {
+    showModalBottomSheet(
+      context: context,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
+      ),
+      builder: (_) {
+        return ListView(
+          shrinkWrap: true,
+          children:
+              widget.bookings.map((booking) {
+                return ListTile(
+                  title: Text(
+                    booking.bookingId,
+                    style: const TextStyle(fontWeight: FontWeight.w500),
+                  ),
+                  onTap: () {
+                    setState(() {
+                      selectedBooking = booking.bookingId;
+                    });
+                    Navigator.pop(context);
+                  },
+                );
+              }).toList(),
+        );
+      },
     );
   }
 }

@@ -5,8 +5,13 @@ import 'package:streammly/controllers/package_page_controller.dart';
 import 'package:streammly/views/screens/package/booking/components/package_card.dart';
 import 'package:streammly/views/widgets/custom_doodle.dart';
 
+import '../../../../data/repository/booking_repo.dart';
+import '../../../../navigation_flow.dart';
+
 class ThanksForBookingPage extends StatelessWidget {
-  final BookingController formController = Get.find<BookingController>();
+  final BookingController formController = Get.put(
+    BookingController(bookingrepo: BookingRepo(apiClient: Get.find())),
+  );
   final PackagesController packagesController = Get.find<PackagesController>();
 
   ThanksForBookingPage({super.key});
@@ -152,6 +157,27 @@ class ThanksForBookingPage extends StatelessWidget {
                             ),
                           );
                         },
+                      ),
+
+                      const SizedBox(height: 24),
+
+                      ElevatedButton(
+                        onPressed: () {
+                          Get.offAll(() => NavigationFlow(), arguments: 3);
+                        },
+                        style: ElevatedButton.styleFrom(
+                          minimumSize: Size(double.infinity, 48),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                        ),
+                        child: const Text(
+                          'Go to My Bookings',
+                          style: TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
                       ),
                     ],
                   ),
