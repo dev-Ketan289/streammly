@@ -1,5 +1,8 @@
+import 'dart:developer';
+
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:streammly/models/company/company_location.dart';
 import 'package:streammly/services/theme.dart';
 import 'package:streammly/views/screens/package/widgets/package header.dart';
 import 'package:streammly/views/screens/package/widgets/package_bottom_summary.dart';
@@ -13,6 +16,7 @@ import '../../../controllers/package_page_controller.dart';
 class PackagesPage extends StatelessWidget {
   final int companyId;
   final int subCategoryId;
+  final CompanyLocation? companyLocation;
   final int subVerticalId;
   final int studioId;
 
@@ -21,7 +25,7 @@ class PackagesPage extends StatelessWidget {
     required this.companyId,
     required this.subCategoryId,
     required this.subVerticalId,
-    required this.studioId,
+    required this.studioId, required this.companyLocation,
   });
 
   @override
@@ -31,10 +35,10 @@ class PackagesPage extends StatelessWidget {
     // Only call .initialize() once to avoid refetch on every rebuild
     WidgetsBinding.instance.addPostFrameCallback((_) {
       
-      debugPrint('[PACKAGES PAGE] companyId: $companyId');
-      debugPrint('[PACKAGES PAGE] studioId: $studioId');
-      debugPrint('[PACKAGES PAGE] subCategoryId: $subCategoryId');
-      debugPrint('[PACKAGES PAGE] subVerticalId: $subVerticalId');
+      log('[PACKAGES PAGE] companyId: $companyId');
+      log('[PACKAGES PAGE] studioId: $studioId');
+      log('[PACKAGES PAGE] subCategoryId: $subCategoryId');
+      log('[PACKAGES PAGE] subVerticalId: $subVerticalId');
       controller.initialize(
         companyId: companyId,
         subCategoryId: subCategoryId,
@@ -98,7 +102,7 @@ class PackagesPage extends StatelessWidget {
         ),
         bottomNavigationBar: GetBuilder<PackagesController>(
           builder: (controller) =>
-              PackagesBottomBar(controller: controller, companyLocations: []),
+              PackagesBottomBar(controller: controller, companyLocations: [],companyLocation: companyLocation,),
         ),
       ),
     );

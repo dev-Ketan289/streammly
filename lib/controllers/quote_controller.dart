@@ -23,10 +23,10 @@ class QuoteController extends GetxController implements GetxService {
   final TextEditingController dateController = TextEditingController();
 
   DateTime selectedDate = DateTime.now();
-  String? startTime;
-  String? endTime;
-  String? favStartTime;
-  String? favEndTime;
+String? startTime = "9:00 AM"; // Default value
+  String? endTime = "5:00 PM"; // Default value
+  String? favStartTime = "9:00 AM"; // Default value
+  String? favEndTime = "5:00 PM"; 
 
   bool showTimePicker = false;
   bool showFavTimePicker = false;

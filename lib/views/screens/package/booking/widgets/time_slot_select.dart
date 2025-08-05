@@ -1,11 +1,14 @@
+import 'dart:developer';
+
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:streammly/controllers/booking_form_controller.dart';
+import 'package:streammly/models/package/slots_model.dart';
 import 'package:streammly/services/theme.dart';
 
 class TimeSlotSelector extends StatefulWidget {
   final BuildContext context;
-  final List<TimeOfDay?> slots;
+  final List<Slot> slots;
   final String packageHours;
   final int index;
   final TimeOfDay? startTime;
@@ -49,10 +52,33 @@ class _TimeSlotSelectorState extends State<TimeSlotSelector> {
       tempStartTime = widget.startTime;
       tempEndTime = widget.endTime;
       maxDurationInMinutes = convertTimeToMinutes(widget.packageHours);
+      log("Available slots: ${widget.slots.map((s) => '${s.startTime?.format(context)} - ${s.endTime?.format(context)}').toList()}", name: "TimeSlotSelector");
     });
   }
 
-  void onTimeSlotTap(TimeOfDay timeSlot) {
+  bool areIntermediateSlotsAvailable(TimeOfDay start, TimeOfDay end) {
+    final startIndex = widget.slots.indexWhere(
+      (slot) => slot.startTime == start,
+    );
+    final endIndex = widget.slots.indexWhere((slot) => slot.startTime == end);
+    if (startIndex == -1 || endIndex == -1 || startIndex >= endIndex)
+      return false;
+    return widget.slots
+        .sublist(startIndex, endIndex + 1)
+        .every((slot) => slot.isAvailable);
+  }
+
+  void onTimeSlotTap(Slot slot) {
+    log(slot.toString(), name: 'slot');
+    log(slot.isAvailable.toString(), name: 'available');
+    if (!slot.isAvailable) {
+      setState(() {
+        errorMessage = "This slot is unavailable.";
+      });
+      return;
+    }
+   TimeOfDay timeSlot = slot.startTime!; // Use startTime for start selection
+    TimeOfDay? endTimeSlot = slot.endTime; // Use startTime from Slot
     setState(() {
       errorMessage = null;
     });
@@ -77,18 +103,38 @@ class _TimeSlotSelectorState extends State<TimeSlotSelector> {
         second = temp;
       }
 
-      final duration = int.parse(TimeCalculations.calculateDuration(first, second));
+      final duration = int.parse(
+        TimeCalculations.calculateDuration(first, second),
+      );
+      if (duration == maxDurationInMinutes) {
+        if (!areIntermediateSlotsAvailable(first, second)) {
+          setState(() {
+            tempStartTime = null;
+            tempEndTime = null;
+            errorMessage = "Selected time range includes unavailable slots.";
+          });
+          return;
+        }
+        setState(() {
+          tempStartTime = first;
+          tempEndTime = second;
+          errorMessage = null;
+        });
+        widget.onSlotSelected(tempStartTime, tempEndTime);
+      }
       if (duration > maxDurationInMinutes) {
         setState(() {
           tempStartTime = null;
           tempEndTime = null;
-          errorMessage = "Selected duration exceeds package limit (${_formatDuration(maxDurationInMinutes)}).";
+          errorMessage =
+              "Selected duration exceeds package limit (${_formatDuration(maxDurationInMinutes)}).";
         });
       } else if (duration < maxDurationInMinutes) {
         setState(() {
           tempStartTime = null;
           tempEndTime = null;
-          errorMessage = "Please select a minimum of ${_formatDuration(maxDurationInMinutes)}.";
+          errorMessage =
+              "Please select a minimum of ${_formatDuration(maxDurationInMinutes)}.";
         });
       } else {
         setState(() {
@@ -96,7 +142,6 @@ class _TimeSlotSelectorState extends State<TimeSlotSelector> {
           tempEndTime = second;
           errorMessage = null;
         });
-        // Update Controller's Data Immediately
         widget.onSlotSelected(tempStartTime, tempEndTime);
       }
     } else {
@@ -122,7 +167,12 @@ class _TimeSlotSelectorState extends State<TimeSlotSelector> {
       child: GetBuilder<BookingController>(
         builder: (bookingController) {
           if (bookingController.startTime.isEmpty) {
-            return const Center(child: Text('No time slots available for the selected date.', style: TextStyle(fontSize: 16, color: Colors.grey)));
+            return const Center(
+              child: Text(
+                'No time slots available for the selected date.',
+                style: TextStyle(fontSize: 16, color: Colors.grey),
+              ),
+            );
           }
           return StatefulBuilder(
             builder: (context, setState) {
@@ -130,44 +180,153 @@ class _TimeSlotSelectorState extends State<TimeSlotSelector> {
                 children: [
                   const Padding(
                     padding: EdgeInsets.symmetric(vertical: 16.0),
-                    child: Text('Select Time Slot', textAlign: TextAlign.center, style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
+                    child: Text(
+                      'Select Time Slot',
+                      textAlign: TextAlign.center,
+                      style: TextStyle(
+                        fontSize: 20,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
                   ),
                   if (bookingController.isLoading)
-                    const Padding(padding: EdgeInsets.all(80), child: Center(child: CircularProgressIndicator()))
+                    const Padding(
+                      padding: EdgeInsets.all(80),
+                      child: Center(child: CircularProgressIndicator()),
+                    )
                   else
                     Expanded(
                       child: Padding(
                         padding: const EdgeInsets.all(16.0),
                         child: GridView.builder(
-                          gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount: 4, mainAxisSpacing: 12, crossAxisSpacing: 12, childAspectRatio: 1.2),
-                          itemCount: widget.slots.length,
+                          gridDelegate:
+                              const SliverGridDelegateWithFixedCrossAxisCount(
+                                crossAxisCount: 4,
+                                mainAxisSpacing: 12,
+                                crossAxisSpacing: 12,
+                                childAspectRatio: 1.2,
+                              ),
+                          itemCount:widget.slots.isEmpty?0: widget.slots.length +1 ,
                           itemBuilder: (context, slotIndex) {
-                            final timeSlot = widget.slots[slotIndex];
-                            if (timeSlot == null) return const SizedBox.shrink();
-                            final isSelected = timeSlot == tempStartTime || timeSlot == tempEndTime;
-                            final isInRange =
+                         
+                            if(slotIndex==widget.slots.length){
+                              
+                                final isSelected =
+                                widget.slots[slotIndex-1].endTime == tempStartTime ||
+                                widget.slots[slotIndex-1].endTime == tempEndTime;
+                                 final isInRange =
                                 tempStartTime != null &&
-                                    tempEndTime != null &&
-                                    TimeCalculations.isTimeBeforeOrEqual(timeSlot, tempEndTime!) &&
-                                    TimeCalculations.isTimeAfterOrEqual(timeSlot, tempStartTime!);
-
-                            return GestureDetector(
-                              onTap: () => onTimeSlotTap(timeSlot),
+                                tempEndTime != null &&
+                                TimeCalculations.isTimeBeforeOrEqual(
+                                  widget.slots[slotIndex-1].endTime!,
+                                  tempStartTime!,
+                                ) &&
+                                TimeCalculations.isTimeAfterOrEqual(
+                                  widget.slots[slotIndex-1].endTime!,
+                                  tempEndTime!,
+                                );
+                              return GestureDetector(
+                              onTap: widget.slots[slotIndex - 1].isAvailable
+                                  ? () => onTimeSlotTap(widget.slots[slotIndex - 1])
+                                  : null, // Disable tap for unavailable slots
                               child: Container(
                                 decoration: BoxDecoration(
                                   borderRadius: BorderRadius.circular(20),
                                   color:
-                                  isSelected
-                                      ? primaryColor
-                                      : isInRange
-                                      ? Colors.blue[100]
-                                      : Colors.grey.shade300,
-                                  border: Border.all(color: isSelected ? Colors.blue.shade100 : Colors.grey.shade300, width: isSelected ? 4.0 : 2.0),
+                                      widget.slots[slotIndex-1].isAvailable
+                                          ? (isSelected
+                                              ? primaryColor
+                                              : isInRange
+                                              ? Colors.blue[100]
+                                              : Colors.grey.shade300)
+                                          : Colors
+                                              .grey
+                                              .shade600, // Grey out unavailable slots
+                                  border: Border.all(
+                                    color:
+                                        isSelected
+                                            ? Colors.blue.shade100
+                                            : Colors.grey.shade300,
+                                    width: isSelected ? 4.0 : 2.0,
+                                  ),
                                 ),
                                 child: Center(
                                   child: Text(
-                                    timeSlot.format(context),
-                                    style: TextStyle(color: isSelected ? Colors.white : Colors.black87, fontWeight: FontWeight.w500, fontSize: 12),
+                                    widget.slots[slotIndex-1].endTime!.format(context),
+                                    style: TextStyle(
+                                      color:
+                                          widget.slots[slotIndex-1].isAvailable
+                                              ? (isInRange
+                                                  ? Colors.white
+                                                  : Colors.black87)
+                                              : Colors
+                                                  .white54, // Dim text for unavailable slots
+                                      fontWeight: FontWeight.w500,
+                                      fontSize: 12,
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            );
+                            }
+                               final slot = widget.slots[slotIndex];
+                            if (slot.startTime == null)
+                              return const SizedBox.shrink();
+                            final isSelected =
+                                slot.startTime == tempStartTime ||
+                                slot.startTime == tempEndTime;
+                            final isInRange =
+                                tempStartTime != null &&
+                                tempEndTime != null &&
+                                TimeCalculations.isTimeBeforeOrEqual(
+                                  slot.startTime!,
+                                  tempEndTime!,
+                                ) &&
+                                TimeCalculations.isTimeAfterOrEqual(
+                                  slot.startTime!,
+                                  tempStartTime!,
+                                );
+                            log(slot.isAvailable.toString());
+                            return GestureDetector(
+                              onTap:
+                                  slot.isAvailable
+                                      ? () => onTimeSlotTap(slot)
+                                      : null, // Disable tap for unavailable slots
+                              child: Container(
+                                decoration: BoxDecoration(
+                                  borderRadius: BorderRadius.circular(20),
+                                  color:
+                                      slot.isAvailable
+                                          ? (isSelected
+                                              ? primaryColor
+                                              : isInRange
+                                              ? Colors.blue[100]
+                                              : Colors.grey.shade300)
+                                          : Colors
+                                              .grey
+                                              .shade600, // Grey out unavailable slots
+                                  border: Border.all(
+                                    color:
+                                        isSelected
+                                            ? Colors.blue.shade100
+                                            : Colors.grey.shade300,
+                                    width: isSelected ? 4.0 : 2.0,
+                                  ),
+                                ),
+                                child: Center(
+                                  child: Text(
+                                    slot.startTime!.format(context),
+                                    style: TextStyle(
+                                      color:
+                                          slot.isAvailable
+                                              ? (isSelected
+                                                  ? Colors.white
+                                                  : Colors.black87)
+                                              : Colors
+                                                  .white54, // Dim text for unavailable slots
+                                      fontWeight: FontWeight.w500,
+                                      fontSize: 12,
+                                    ),
                                   ),
                                 ),
                               ),
@@ -183,9 +342,15 @@ class _TimeSlotSelectorState extends State<TimeSlotSelector> {
                         children: [
                           Expanded(
                             child: Container(
-                              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 5),
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 16,
+                                vertical: 5,
+                              ),
                               decoration: BoxDecoration(
-                                color: tempStartTime != null ? Colors.blue[50] : Colors.white,
+                                color:
+                                    tempStartTime != null
+                                        ? Colors.blue[50]
+                                        : Colors.white,
                                 border: Border.all(color: Colors.blue),
                                 borderRadius: BorderRadius.circular(10),
                               ),
@@ -195,14 +360,27 @@ class _TimeSlotSelectorState extends State<TimeSlotSelector> {
                                     "START TIME",
                                     style: Theme.of(
                                       context,
-                                    ).textTheme.labelLarge?.copyWith(color: tempStartTime != null ? Colors.blue[700] : Colors.grey, fontWeight: FontWeight.bold),
+                                    ).textTheme.labelLarge?.copyWith(
+                                      color:
+                                          tempStartTime != null
+                                              ? Colors.blue[700]
+                                              : Colors.grey,
+                                      fontWeight: FontWeight.bold,
+                                    ),
                                   ),
                                   const Divider(),
                                   Text(
-                                    tempStartTime?.format(context) ?? 'Select start time',
+                                    tempStartTime?.format(context) ??
+                                        'Select start time',
                                     style: Theme.of(
                                       context,
-                                    ).textTheme.labelLarge?.copyWith(color: tempStartTime != null ? Colors.black87 : Colors.grey, fontWeight: FontWeight.bold),
+                                    ).textTheme.labelLarge?.copyWith(
+                                      color:
+                                          tempStartTime != null
+                                              ? Colors.black87
+                                              : Colors.grey,
+                                      fontWeight: FontWeight.bold,
+                                    ),
                                   ),
                                 ],
                               ),
@@ -211,9 +389,15 @@ class _TimeSlotSelectorState extends State<TimeSlotSelector> {
                           const SizedBox(width: 15),
                           Expanded(
                             child: Container(
-                              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 5),
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 16,
+                                vertical: 5,
+                              ),
                               decoration: BoxDecoration(
-                                color: tempEndTime != null ? Colors.blue[50] : Colors.white,
+                                color:
+                                    tempEndTime != null
+                                        ? Colors.blue[50]
+                                        : Colors.white,
                                 border: Border.all(color: Colors.blue),
                                 borderRadius: BorderRadius.circular(10),
                               ),
@@ -223,12 +407,27 @@ class _TimeSlotSelectorState extends State<TimeSlotSelector> {
                                     "END TIME",
                                     style: Theme.of(
                                       context,
-                                    ).textTheme.labelLarge?.copyWith(color: tempEndTime != null ? Colors.blue[700] : Colors.grey, fontWeight: FontWeight.bold),
+                                    ).textTheme.labelLarge?.copyWith(
+                                      color:
+                                          tempEndTime != null
+                                              ? Colors.blue[700]
+                                              : Colors.grey,
+                                      fontWeight: FontWeight.bold,
+                                    ),
                                   ),
                                   const Divider(),
                                   Text(
-                                    tempEndTime?.format(context) ?? 'Select end time',
-                                    style: Theme.of(context).textTheme.labelLarge?.copyWith(color: tempEndTime != null ? Colors.black87 : Colors.grey, fontWeight: FontWeight.bold),
+                                    tempEndTime?.format(context) ??
+                                        'Select end time',
+                                    style: Theme.of(
+                                      context,
+                                    ).textTheme.labelLarge?.copyWith(
+                                      color:
+                                          tempEndTime != null
+                                              ? Colors.black87
+                                              : Colors.grey,
+                                      fontWeight: FontWeight.bold,
+                                    ),
                                   ),
                                 ],
                               ),
@@ -241,33 +440,61 @@ class _TimeSlotSelectorState extends State<TimeSlotSelector> {
                     Container(
                       width: 100,
                       margin: const EdgeInsets.only(top: 20),
-                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
-                      decoration: BoxDecoration(color: Colors.black, borderRadius: BorderRadius.circular(10)),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 10,
+                        vertical: 8,
+                      ),
+                      decoration: BoxDecoration(
+                        color: Colors.black,
+                        borderRadius: BorderRadius.circular(10),
+                      ),
                       child: Text(
-                        _formatDuration(int.parse(TimeCalculations.calculateDuration(tempStartTime!, tempEndTime!))),
-                        style: Theme.of(context).textTheme.labelLarge?.copyWith(color: Colors.white),
+                        _formatDuration(
+                          int.parse(
+                            TimeCalculations.calculateDuration(
+                              tempStartTime!,
+                              tempEndTime!,
+                            ),
+                          ),
+                        ),
+                        style: Theme.of(
+                          context,
+                        ).textTheme.labelLarge?.copyWith(color: Colors.white),
                         textAlign: TextAlign.center,
                       ),
                     ),
                   if (errorMessage != null)
                     Padding(
-                      padding: const EdgeInsets.only(top: 16, left: 16, right: 16),
-                      child: Text(errorMessage!, style: const TextStyle(color: Colors.red, fontSize: 14), textAlign: TextAlign.center),
+                      padding: const EdgeInsets.only(
+                        top: 16,
+                        left: 16,
+                        right: 16,
+                      ),
+                      child: Text(
+                        errorMessage!,
+                        style: const TextStyle(color: Colors.red, fontSize: 14),
+                        textAlign: TextAlign.center,
+                      ),
                     ),
                   const SizedBox(height: 20),
                   ElevatedButton(
                     onPressed:
-                    tempStartTime != null && tempEndTime != null
-                        ? () {
-                      widget.onSlotSelected(tempStartTime, tempEndTime);  // Redundant, but kept for UI confirmation flow
-                      Navigator.pop(context);
-                    }
-                        : null,
+                        tempStartTime != null && tempEndTime != null
+                            ? () {
+                              widget.onSlotSelected(tempStartTime, tempEndTime);
+                              Navigator.pop(context);
+                            }
+                            : null,
                     style: ElevatedButton.styleFrom(
                       fixedSize: const Size(300, 50),
-                      backgroundColor: tempStartTime != null && tempEndTime != null ? primaryColor : Colors.grey.shade400,
+                      backgroundColor:
+                          tempStartTime != null && tempEndTime != null
+                              ? primaryColor
+                              : Colors.grey.shade400,
                       foregroundColor: Colors.white,
-                      shape: const ContinuousRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(15))),
+                      shape: const ContinuousRectangleBorder(
+                        borderRadius: BorderRadius.all(Radius.circular(15)),
+                      ),
                     ),
                     child: const Text('Confirm'),
                   ),
@@ -284,33 +511,26 @@ class _TimeSlotSelectorState extends State<TimeSlotSelector> {
 
 class TimeCalculations {
   static String calculateDuration(TimeOfDay startTime, TimeOfDay endTime) {
-    final startMinutes = startTime.hour * 60 + startTime.minute;
-    final endMinutes = endTime.hour * 60 + endTime.minute;
-    final durationMinutes = endMinutes - startMinutes;
+    int startMinutes = startTime.hour * 60 + startTime.minute;
+    int endMinutes = endTime.hour * 60 + endTime.minute;
+    int durationMinutes = endMinutes - startMinutes;
+    if (durationMinutes < 0) {
+      durationMinutes += 24 * 60; // Handle cross-day duration
+    }
     return durationMinutes.toString();
   }
 
   static bool isTimeAfterOrEqual(TimeOfDay time, TimeOfDay reference) {
-    return time.hour > reference.hour || (time.hour == reference.hour && time.minute >= reference.minute);
+    return time.hour > reference.hour ||
+        (time.hour == reference.hour && time.minute >= reference.minute);
   }
 
   static bool isTimeBeforeOrEqual(TimeOfDay time, TimeOfDay reference) {
-    return time.hour < reference.hour || (time.hour == reference.hour && time.minute <= reference.minute);
+    return time.hour < reference.hour ||
+        (time.hour == reference.hour && time.minute <= reference.minute);
   }
 }
 
-List<TimeOfDay?> convertSlots(List<dynamic> apiSlots) {
-  return apiSlots.map((slot) {
-    if (slot['startTime'] != null) {
-      final parts = slot['startTime'].split(':');
-      if (parts.length >= 2) {
-        final hour = int.tryParse(parts[0]);
-        final minute = int.tryParse(parts[1]);
-        if (hour != null && minute != null) {
-          return TimeOfDay(hour: hour, minute: minute);
-        }
-      }
-    }
-    return null;
-  }).toList();
+List<Slot> convertSlots(List<dynamic> apiSlots) {
+  return apiSlots.map((slot) => Slot.fromJson(slot)).toList();
 }

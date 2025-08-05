@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:streammly/models/company/company_location.dart';
 import 'package:streammly/navigation_flow.dart';
 import 'package:streammly/services/theme.dart';
 
@@ -9,11 +10,12 @@ import '../booking/booking_page.dart';
 
 class PackagesBottomBar extends StatelessWidget {
   final PackagesController controller;
+  final CompanyLocation? companyLocation;
   final List<dynamic> companyLocations;
   const PackagesBottomBar({
     super.key,
     required this.controller,
-    required this.companyLocations,
+    required this.companyLocations,required this.companyLocation,
   });
 
   @override
@@ -171,6 +173,7 @@ class PackagesBottomBar extends StatelessWidget {
                             BookingPage(
                               packages: enrichedPackages,
                               companyLocations: companyLocations,
+                              companyLocation: companyLocation,
                             ),
                             hideBottomBar: true,
                           );

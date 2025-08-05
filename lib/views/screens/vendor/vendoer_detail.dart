@@ -77,21 +77,21 @@ class _VendorDetailScreenState extends State<VendorDetailScreen> {
                   builder: (controller) {
                     final subs = controller.subCategories;
 
-                    if (subs.isEmpty) {
-                      return CategoryScroller(
-                        categories: [
-                          CategoryItem(
-                            label: 'Baby Shoot',
-                            imagePath: 'assets/images/category/vendor_category/img.png',
-                            onTap: () => Get.to(VendorGroup(studio: widget.studio, subCategoryId: 2)),
-                          ),
-                          CategoryItem(label: 'Wedding Shoot', imagePath: 'assets/images/category/vendor_category/img.png', onTap: () {}),
-                          CategoryItem(label: 'Portfolio Shoot', imagePath: 'assets/images/category/vendor_category/img.png', onTap: () {}),
-                          CategoryItem(label: 'Maternity Shoot', imagePath: 'assets/images/category/vendor_category/img.png', onTap: () {}),
-                          CategoryItem(label: 'Family Function', imagePath: 'assets/images/category/vendor_category/img.png', onTap: () {}),
-                        ],
-                      );
-                    }
+                    // if (subs.isEmpty) {
+                    //   return CategoryScroller(
+                    //     categories: [
+                    //       CategoryItem(
+                    //         label: 'Baby Shoot',
+                    //         imagePath: 'assets/images/category/vendor_category/img.png',
+                    //         onTap: () => Get.to(VendorGroup(studio: widget.studio, subCategoryId: 2)),
+                    //       ),
+                    //       CategoryItem(label: 'Wedding Shoot', imagePath: 'assets/images/category/vendor_category/img.png', onTap: () {}),
+                    //       CategoryItem(label: 'Portfolio Shoot', imagePath: 'assets/images/category/vendor_category/img.png', onTap: () {}),
+                    //       CategoryItem(label: 'Maternity Shoot', imagePath: 'assets/images/category/vendor_category/img.png', onTap: () {}),
+                    //       CategoryItem(label: 'Family Function', imagePath: 'assets/images/category/vendor_category/img.png', onTap: () {}),
+                    //     ],
+                    //   );
+                    // }
 
                     return CategoryScroller(
                       categories:
