@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:developer';
+import 'dart:io';
 
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
@@ -34,7 +35,10 @@ class AuthController extends GetxController implements GetxService {
     ResponseModel? responseModel;
     try {
       Response response = await authRepo.getUserProfile();
-      log(response.bodyString ?? "", name: "***** Response in fetchUserProfile () ******");
+      log(
+        response.bodyString ?? "",
+        name: "***** Response in fetchUserProfile () ******",
+      );
       if (response.statusCode == 200 && response.body['data'] != null) {
         userProfile = UserProfile.fromJson(response.body['data']);
 
@@ -46,7 +50,10 @@ class AuthController extends GetxController implements GetxService {
           emailController.text = userProfile!.email!;
         }
 
-        responseModel = ResponseModel(true, "User profile fetched successfully");
+        responseModel = ResponseModel(
+          true,
+          "User profile fetched successfully",
+        );
       } else {
         responseModel = ResponseModel(false, "Failed to fetch user profile");
       }
@@ -59,23 +66,44 @@ class AuthController extends GetxController implements GetxService {
     return responseModel;
   }
 
-  Future<ResponseModel?> updateUserProfile({required String name, required String email, String? dob, String? gender, required String phone}) async {
+  Future<ResponseModel?> updateFullUserProfile({
+    required String name,
+    required String email,
+    String? dob,
+    String? gender,
+    required String phone,
+    File? profileImage,
+    File? coverImage,
+  }) async {
     isLoading = true;
     update();
+
     ResponseModel? responseModel;
+
     try {
-      Response response = await authRepo.updateUserProfile(name: name, email: email, dob: dob, gender: gender, phone: phone);
-      log("${response.bodyString}", name: "***** Response in updateUserProfile () ******");
-      if (response.statusCode == 200) {
-        fetchUserProfile();
-        responseModel = ResponseModel(true, "User profile updated successfully");
+      Response response = await authRepo.updateFullUserProfile(
+        name: name,
+        email: email,
+        dob: dob,
+        gender: gender,
+        phone: phone,
+        profileImage: profileImage,
+        coverImage: coverImage,
+      );
+
+      if (response.statusCode == 200 && response.body['success'] == true) {
+        userProfile = UserProfile.fromJson(response.body['data']);
+        responseModel = ResponseModel(true, "Profile updated successfully");
       } else {
-        responseModel = ResponseModel(false, "Failed to update user profile");
+        responseModel = ResponseModel(
+          false,
+          response.body['message'] ?? "Failed to update profile",
+        );
       }
     } catch (e) {
-      responseModel = ResponseModel(false, "Error in update user profile");
-      log(e.toString(), name: "***** Error in updateUserProfile () ******");
+      responseModel = ResponseModel(false, "Something went wrong");
     }
+
     isLoading = false;
     update();
     return responseModel;
@@ -118,13 +146,15 @@ class AuthController extends GetxController implements GetxService {
         return null;
       }
 
-      final GoogleSignInAuthentication googleAuth = await googleUser.authentication;
+      final GoogleSignInAuthentication googleAuth =
+          await googleUser.authentication;
       final credential = GoogleAuthProvider.credential(
         accessToken: googleAuth.accessToken,
         idToken: googleAuth.idToken,
       );
 
-      final UserCredential userCredential = await FirebaseAuth.instance.signInWithCredential(credential);
+      final UserCredential userCredential = await FirebaseAuth.instance
+          .signInWithCredential(credential);
       final User? firebaseUser = userCredential.user;
       final firebaseIdToken = await userCredential.user?.getIdToken();
 
@@ -155,7 +185,9 @@ class AuthController extends GetxController implements GetxService {
         // NEW: Check for redirection target
         final args = Get.arguments as Map<String, dynamic>?;
 
-        if (userProfile == null || userProfile!.name == null || userProfile!.email == null) {
+        if (userProfile == null ||
+            userProfile!.name == null ||
+            userProfile!.email == null) {
           Get.offAll(() => ProfileFormScreen());
         } else {
           if (args != null && args['returnTo'] == 'quote') {

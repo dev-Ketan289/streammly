@@ -50,7 +50,8 @@ class _ProfileFormScreenState extends State<ProfileFormScreen> {
       lastDate: DateTime.now(),
     );
     if (picked != null) {
-      dobController.text = "${picked.year.toString().padLeft(4, '0')}-${picked.month.toString().padLeft(2, '0')}-${picked.day.toString().padLeft(2, '0')}";
+      dobController.text =
+          "${picked.year.toString().padLeft(4, '0')}-${picked.month.toString().padLeft(2, '0')}-${picked.day.toString().padLeft(2, '0')}";
     }
   }
 
@@ -70,7 +71,7 @@ class _ProfileFormScreenState extends State<ProfileFormScreen> {
     });
 
     try {
-      final response = await authController.updateUserProfile(
+      final response = await authController.updateFullUserProfile(
         name: name,
         email: email,
         dob: dob.isEmpty ? null : dob,
@@ -112,7 +113,9 @@ class _ProfileFormScreenState extends State<ProfileFormScreen> {
             child: Card(
               elevation: 6,
               margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 24),
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(20),
+              ),
               child: Padding(
                 padding: const EdgeInsets.all(24.0),
                 child: Column(
@@ -126,7 +129,9 @@ class _ProfileFormScreenState extends State<ProfileFormScreen> {
                         prefixIcon: const Icon(Icons.person_outline),
                         filled: true,
                         fillColor: Colors.white,
-                        border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
                       ),
                     ),
                     const SizedBox(height: 16),
@@ -138,8 +143,13 @@ class _ProfileFormScreenState extends State<ProfileFormScreen> {
                         labelText: "Email *",
                         prefixIcon: const Icon(Icons.email_outlined),
                         filled: true,
-                        fillColor: authController.isGoogleLogin() ? Colors.grey[100] : Colors.white,
-                        border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                        fillColor:
+                            authController.isGoogleLogin()
+                                ? Colors.grey[100]
+                                : Colors.white,
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
                       ),
                     ),
                     const SizedBox(height: 16),
@@ -151,8 +161,13 @@ class _ProfileFormScreenState extends State<ProfileFormScreen> {
                         labelText: "Phone *",
                         prefixIcon: const Icon(Icons.phone_outlined),
                         filled: true,
-                        fillColor: authController.isPhoneLogin() ? Colors.grey[100] : Colors.white,
-                        border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                        fillColor:
+                            authController.isPhoneLogin()
+                                ? Colors.grey[100]
+                                : Colors.white,
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
                       ),
                     ),
                     const SizedBox(height: 16),
@@ -168,7 +183,9 @@ class _ProfileFormScreenState extends State<ProfileFormScreen> {
                             prefixIcon: const Icon(Icons.cake_outlined),
                             filled: true,
                             fillColor: Colors.white,
-                            border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(12),
+                            ),
                           ),
                         ),
                       ),
@@ -186,11 +203,16 @@ class _ProfileFormScreenState extends State<ProfileFormScreen> {
                         prefixIcon: const Icon(Icons.wc_outlined),
                         filled: true,
                         fillColor: Colors.white,
-                        border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
                       ),
                       items: const [
                         DropdownMenuItem(value: "male", child: Text("Male")),
-                        DropdownMenuItem(value: "female", child: Text("Female")),
+                        DropdownMenuItem(
+                          value: "female",
+                          child: Text("Female"),
+                        ),
                         DropdownMenuItem(value: "other", child: Text("Other")),
                       ],
                     ),
@@ -201,13 +223,29 @@ class _ProfileFormScreenState extends State<ProfileFormScreen> {
                       child: ElevatedButton(
                         style: ElevatedButton.styleFrom(
                           backgroundColor: Theme.of(context).primaryColor,
-                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                          textStyle: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          textStyle: const TextStyle(
+                            fontSize: 18,
+                            fontWeight: FontWeight.bold,
+                          ),
                         ),
                         onPressed: isLoading ? null : saveProfile,
-                        child: isLoading
-                            ? const SizedBox(width: 24, height: 24, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white))
-                            : const Text("Save Profile", style: TextStyle(color: Colors.white)),
+                        child:
+                            isLoading
+                                ? const SizedBox(
+                                  width: 24,
+                                  height: 24,
+                                  child: CircularProgressIndicator(
+                                    strokeWidth: 2,
+                                    color: Colors.white,
+                                  ),
+                                )
+                                : const Text(
+                                  "Save Profile",
+                                  style: TextStyle(color: Colors.white),
+                                ),
                       ),
                     ),
                   ],
