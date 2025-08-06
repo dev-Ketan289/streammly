@@ -18,10 +18,12 @@ class CompanyBusinessSettingsController extends GetxController {
     super.onInit();
     // Placeholder companyId - replace with actual logic to get companyId (e.g., from user session)
     fetchCompanyBusinessSettings("default_company_id");
+    update();
   }
 
   Future<ResponseModel?> fetchCompanyBusinessSettings(String companyId) async {
     isLoading = true;
+    settings= null;
     update();
     ResponseModel? responseModel;
     try {

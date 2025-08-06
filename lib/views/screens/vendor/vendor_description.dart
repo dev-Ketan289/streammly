@@ -1,3 +1,6 @@
+
+import 'dart:developer';
+
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:streammly/controllers/company_business_settings_controller.dart';
@@ -271,6 +274,7 @@ class _VendorDescriptionState extends State<VendorDescription> {
     BuildContext context,
     CompanyLocation company,
     int companyId,
+    
   ) {
     final theme = Theme.of(context);
     final screenWidth = MediaQuery.of(context).size.width;
@@ -284,6 +288,7 @@ class _VendorDescriptionState extends State<VendorDescription> {
         controller.settings!.companyId != companyId.toString()) {
       controller.fetchCompanyBusinessSettings(companyId.toString());
     }
+    log(companyId.toString(), name: 'companyid');
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
@@ -404,8 +409,13 @@ class _VendorDescriptionState extends State<VendorDescription> {
 
                 GetBuilder<CompanyBusinessSettingsController>(
                   builder: (companyBusinessSettingsController) {
-                    if (companyBusinessSettingsController.isLoading) {
+                    if (companyBusinessSettingsController.isLoading ) {
+                      companyBusinessSettingsController.dayTimeSlots.isEmpty;
                       return SizedBox.shrink();
+                    }
+                    if(companyBusinessSettingsController.dayTimeSlots.isEmpty){
+                      companyBusinessSettingsController.dayTimeSlots.clear();
+                      return Text("No Opening Hours Data");
                     }
                     return Column(
                       children: [
@@ -473,9 +483,11 @@ class _VendorDescriptionState extends State<VendorDescription> {
                             );
                           },
                         ),
+                        
                       ],
                     );
                   },
+                  
                 ),
                 const SizedBox(height: 20),
 
