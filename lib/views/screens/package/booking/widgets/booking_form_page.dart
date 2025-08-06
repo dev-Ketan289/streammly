@@ -267,6 +267,7 @@ class _PackageFormCardState extends State<PackageFormCard> {
               }
               log('TextFormField tapped');
               final slots = controller.timeSlots;
+              final buffer = controller.bufferTime;
               log('Slots: $slots');
               TimeOfDay? startTime;
               TimeOfDay? endTime;
@@ -309,6 +310,7 @@ class _PackageFormCardState extends State<PackageFormCard> {
               showTimeSlotSelector(
                 context: context,
                 slots: slots,
+                buffer: buffer,
                 packageHours: selectedHours.toString(),
                 index: widget.index,
                 startTime: startTime,
@@ -1015,6 +1017,7 @@ TimeOfDay? parseTimeOfDay(String? timeString) {
 void showTimeSlotSelector({
   required BuildContext context,
   required List<Slot> slots,
+  required int buffer,
   required String packageHours,
   required int index,
   required TimeOfDay? startTime,
@@ -1033,6 +1036,7 @@ void showTimeSlotSelector({
     builder: (context) {
       return TimeSlotSelector(
         context: context,
+        bufferTime : buffer,
         slots: slots,
         packageHours: packageHours,
         index: index,
