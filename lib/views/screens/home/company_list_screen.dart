@@ -65,7 +65,7 @@ class _CompanyListScreenState extends State<CompanyListScreen> {
                       context.findAncestorStateOfType<NavigationFlowState>();
                   // Get.to(() => CompanyLocatorMapScreen(categoryId: cat.id));
                   mainState?.pushToCurrentTab(
-                    VendorDescription(company: company),
+                    VendorDescription(company: company, companyId: company.companyId,),
                     hideBottomBar: true,
                   );
                 },

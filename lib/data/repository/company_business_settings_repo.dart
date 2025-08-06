@@ -7,7 +7,10 @@ class CompanyBusinessSettingsRepo {
 
   CompanyBusinessSettingsRepo({required this.apiClient});
 
-  Future<Response> getCompanyBusinessSettings() async {
-    return await apiClient.getData(AppConstants.getCompanyBusinessSettings);
+  Future<Response> getCompanyBusinessSettings(String companyId) async {
+    return await apiClient.postData(
+      AppConstants.getCompanyBusinessSettings,
+      {"company_id": companyId},
+    );
   }
 }

@@ -514,7 +514,7 @@ class _CompanyLocatorMapScreenState extends State<CompanyLocatorMapScreen> {
                                                     >();
                                             mainState?.pushToCurrentTab(
                                               VendorDescription(
-                                                company: company,
+                                                company: company, companyId: company.companyId,
                                               ),
                                               hideBottomBar: true,
                                             );
