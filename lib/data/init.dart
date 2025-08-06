@@ -3,11 +3,13 @@ import 'dart:developer';
 import 'package:get/get.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:streammly/controllers/auth_controller.dart';
+import 'package:streammly/controllers/company_business_settings_controller.dart';
 import 'package:streammly/controllers/otp_controller.dart';
 import 'package:streammly/controllers/wishlist_controller.dart';
 import 'package:streammly/data/repository/auth_repo.dart';
 import 'package:streammly/data/repository/business_settings_repo.dart';
 import 'package:streammly/data/repository/category_repo.dart';
+import 'package:streammly/data/repository/company_business_settings_repo.dart';
 import 'package:streammly/data/repository/company_repo.dart';
 import 'package:streammly/data/repository/header_repo.dart';
 import 'package:streammly/data/repository/promo_slider_repo.dart';
@@ -67,6 +69,9 @@ class Init {
       Get.lazyPut(() => CompanyRepo(apiClient: Get.find()));
       Get.lazyPut(() => CompanyController(companyRepo: Get.find()));
 
+      //company business settings
+      Get.lazyPut(() => CompanyBusinessSettingsRepo(apiClient: Get.find()));
+      Get.lazyPut(()=> CompanyBusinessSettingsController(companyBusinessSettingsRepo: Get.find()));
       //Wishlist
       Get.lazyPut(() => WishlistRepo(apiClient: Get.find()));
       Get.lazyPut(() => WishlistController(wishlistRepo: Get.find()));
