@@ -1,3 +1,6 @@
+
+import 'dart:developer';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart'; // Use flutter_svg for SVG images
 import 'package:get/get.dart';
@@ -290,11 +293,11 @@ class _VendorGroupState extends State<VendorGroup> {
                   iconColor: Colors.amber,
                   onTap: () {
                     Navigator.pop(context);
-                    print('[Packages] companyId: ${widget.studio.companyId} | subCategoryId: $subCategoryId | subVerticalId: $subVerticalId | studioId: ${widget.studio.id}');
+                    log('[Packages] companyId: ${widget.studio.companyId} | subCategoryId: $subCategoryId | subVerticalId: $subVerticalId | studioId: ${widget.studio.id}');
 
                     final mainState = context.findAncestorStateOfType<NavigationFlowState>();
                     mainState?.pushToCurrentTab(
-                      PackagesPage(companyId: widget.studio.companyId, subCategoryId: subCategoryId, subVerticalId: subVerticalId, studioId: widget.studio.id),
+                      PackagesPage(companyId: widget.studio.companyId, subCategoryId: subCategoryId, subVerticalId: subVerticalId, studioId: widget.studio.id,companyLocation:widget.studio ,),
                       hideBottomBar: true,
                     );
 

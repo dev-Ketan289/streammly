@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:streammly/data/api/api_client.dart';
 import 'package:streammly/data/repository/booking_repo.dart';
+import 'package:streammly/models/company/company_location.dart';
 import 'package:streammly/services/constants.dart';
 import 'package:streammly/views/screens/package/booking/booking_summary.dart';
 import 'package:streammly/views/screens/package/booking/widgets/booking_form_page.dart';
@@ -16,14 +17,17 @@ import '../../../../navigation_flow.dart';
 class BookingPage extends StatelessWidget {
   final List<Map<String, dynamic>> packages;
   final List<dynamic> companyLocations;
+  final CompanyLocation? companyLocation;
   const BookingPage({
     super.key,
     required this.packages,
-    required this.companyLocations,
+    required this.companyLocations,required this.companyLocation,
+
   });
 
   @override
   Widget build(BuildContext context) {
+    log(companyLocation.toString(), name: 'companylocation');
     log(packages.toString());
     final controller = Get.put(
       BookingController(
