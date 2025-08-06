@@ -284,16 +284,13 @@ class _TimeSlotSelectorState extends State<TimeSlotSelector> {
                                               ? primaryColor
                                               : isInRange
                                               ? Colors.blue[100]
-                                              : Colors.white)
+                                              : Colors.grey.shade300)
                                           : Colors.grey.shade600,
                                   border: Border.all(
                                     color:
-                                        !slot.isAvailable ||
-                                                isUnavailableDueToBuffer
-                                            ? Colors
-                                                .red // Blocked Slots → Red Border
-                                            : Colors
-                                                .green, // Available Slots → Green Border
+                                        isSelected
+                                            ? Colors.blue.shade100
+                                            : Colors.grey.shade300,
                                     width: isSelected ? 4.0 : 2.0,
                                   ),
                                 ),
@@ -308,8 +305,8 @@ class _TimeSlotSelectorState extends State<TimeSlotSelector> {
                                                   ? Colors.white
                                                   : Colors.black87)
                                               : Colors.white54,
-                                      fontWeight: FontWeight.w600,
-                                      fontSize: 14,
+                                      fontWeight: FontWeight.w500,
+                                      fontSize: 12,
                                     ),
                                   ),
                                 ),
