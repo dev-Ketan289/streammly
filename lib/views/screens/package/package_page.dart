@@ -25,8 +25,7 @@ class PackagesPage extends StatelessWidget {
     required this.companyId,
     required this.subCategoryId,
     required this.subVerticalId,
-    required this.studioId,
-    required this.companyLocation,
+    required this.studioId, required this.companyLocation,
   });
 
   @override
@@ -35,6 +34,7 @@ class PackagesPage extends StatelessWidget {
 
     // Only call .initialize() once to avoid refetch on every rebuild
     WidgetsBinding.instance.addPostFrameCallback((_) {
+      
       log('[PACKAGES PAGE] companyId: $companyId');
       log('[PACKAGES PAGE] studioId: $studioId');
       log('[PACKAGES PAGE] subCategoryId: $subCategoryId');
@@ -76,12 +76,11 @@ class PackagesPage extends StatelessWidget {
           actions: [
             IconButton(
               icon: Icon(Icons.filter_alt, color: primaryColor),
-              onPressed:
-                  () => Get.bottomSheet(
-                    const FilterPage(),
-                    isScrollControlled: true,
-                  ),
-            ),
+              onPressed: () => Get.bottomSheet(
+                const FilterPage(),
+                isScrollControlled: true,
+              ),
+            )
           ],
         ),
         body: GetBuilder<PackagesController>(
@@ -93,22 +92,25 @@ class PackagesPage extends StatelessWidget {
               children: [
                 PackagesHeader(controller: controller),
                 Expanded(
-                  child:
-                      controller.isGridView
-                          ? PackagesGridView(controller: controller)
-                          : PackagesListView(controller: controller),
+                  child: controller.isGridView
+                      ? PackagesGridView(controller: controller)
+                      : PackagesListView(controller: controller),
                 ),
               ],
             );
           },
         ),
         bottomNavigationBar: GetBuilder<PackagesController>(
-          builder:
-              (controller) => PackagesBottomBar(
-                controller: controller,
-                companyLocations: [],
-                companyLocation: companyLocation,
-              ),
+          builder: (controller) {
+            // Log the companyId for debugging
+            log(companyId.toString(), name: "packagebottom");
+            return PackagesBottomBar(
+              controller: controller,
+              companyLocations: [],
+              companyLocation: companyLocation,
+              companyId: companyId,
+            );
+          },
         ),
       ),
     );

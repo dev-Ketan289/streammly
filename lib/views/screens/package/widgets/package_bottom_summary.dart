@@ -6,18 +6,17 @@ import 'package:streammly/services/theme.dart';
 
 import '../../../../controllers/auth_controller.dart';
 import '../../../../controllers/package_page_controller.dart';
-import '../../../../services/custom_error_widget.dart';
 import '../booking/booking_page.dart';
 
 class PackagesBottomBar extends StatelessWidget {
   final PackagesController controller;
   final CompanyLocation? companyLocation;
   final List<dynamic> companyLocations;
+  final int companyId;
   const PackagesBottomBar({
     super.key,
     required this.controller,
-    required this.companyLocations,
-    required this.companyLocation,
+    required this.companyLocations,required this.companyLocation, required this.companyId,
   });
 
   @override
@@ -111,33 +110,51 @@ class PackagesBottomBar extends StatelessWidget {
                         : () async {
                           final authController = Get.find<AuthController>();
                           if (!authController.isLoggedIn()) {
-                            // Navigate to custom full-screen error page
-                            Get.to(
-                              () => CustomErrorWidget(
-                                imagePath: 'assets/images/access_denied.png',
-                                title: 'Access Denied',
-                                subtitle:
-                                    'You don’t have permission to access this page',
-                                primaryButtonText: 'Go Home',
-                                onPrimaryPressed: () {
-                                  Get.offAllNamed('/home');
-                                },
-                                secondaryButtonText: 'Login',
-                                onSecondaryPressed: () {
-                                  Get.toNamed('/login');
-                                },
-                              ),
+                            final confirmed = await showDialog<bool>(
+                              context: context,
+                              barrierDismissible: false,
+                              builder: (context) {
+                                return AlertDialog(
+                                  title: const Text('Login Required'),
+                                  content: const Text(
+                                    'You need to be logged in to continue. Do you want to login now?',
+                                  ),
+                                  actions: [
+                                    TextButton(
+                                      onPressed:
+                                          () =>
+                                              Navigator.of(context).pop(false),
+                                      child: const Text('Cancel'),
+                                    ),
+                                    ElevatedButton(
+                                      onPressed:
+                                          () => Navigator.of(context).pop(true),
+                                      child: const Text('Login'),
+                                    ),
+                                  ],
+                                );
+                              },
                             );
+
+                            if (confirmed != true) {
+                              // User cancelled, do nothing
+                              return;
+                            }
+
+                            // User confirmed, navigate to login screen
+                            Get.toNamed(
+                              '/login',
+                            ); // replace with your login route
                             return;
                           }
 
-                          // Proceed to Booking Page flow as before
                           final mainState =
                               context
                                   .findAncestorStateOfType<
                                     NavigationFlowState
                                   >();
 
+                          // Attach correct companyLocation to each selected package
                           final enrichedPackages =
                               selectedPackages.map((pkg) {
                                 final matchedLocation = companyLocations
@@ -157,7 +174,7 @@ class PackagesBottomBar extends StatelessWidget {
                             BookingPage(
                               packages: enrichedPackages,
                               companyLocations: companyLocations,
-                              companyLocation: companyLocation,
+                              companyLocation: companyLocation, companyId: companyId,
                             ),
                             hideBottomBar: true,
                           );
