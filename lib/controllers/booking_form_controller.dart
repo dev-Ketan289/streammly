@@ -35,7 +35,7 @@ class BookingController extends GetxController {
     'mobile': '',
     'email': '',
   };
-  final List<String> alternateMobiles = [];
+  final List<String> alternateMobiles = [''];
   final List<String> alternateEmails = [];
   final Map<int, Map<String, dynamic>> packageFormsData = {};
 
@@ -51,6 +51,9 @@ class BookingController extends GetxController {
   @override
   void onInit() {
     super.onInit();
+    if (alternateMobiles.isEmpty) {
+      alternateMobiles.add('');
+    }
     autofillFromUserProfile();
     fetchBookings();
   }
@@ -114,7 +117,9 @@ class BookingController extends GetxController {
           'extraAddOn': <Map<String, dynamic>>[],
           'termsAccepted': false,
           'extraAnswers': extraAnswers,
-          'advanceBookingDays': int.tryParse(package['advanceBookingDays']?.toString() ?? '0') ?? 1,
+          'advanceBookingDays':
+              int.tryParse(package['advanceBookingDays']?.toString() ?? '0') ??
+              1,
         };
       }
       update();
@@ -155,7 +160,13 @@ class BookingController extends GetxController {
   void editPackage(int index) {
     currentPage = index;
     update();
-    Get.to(() => BookingPage(packages: [], companyLocations: [],companyLocation: null,));
+    Get.to(
+      () => BookingPage(
+        packages: [],
+        companyLocations: [],
+        companyLocation: null,
+      ),
+    );
   }
 
   void toggleDetails(int index) {
@@ -176,7 +187,7 @@ class BookingController extends GetxController {
   }
 
   void removeAlternateMobile(int index) {
-    if (index < alternateMobiles.length) {
+    if (alternateMobiles.length > 1 && index > 0) {
       alternateMobiles.removeAt(index);
       update();
     }
@@ -637,56 +648,78 @@ class BookingController extends GetxController {
   int bufferTime = 0;
 
   Future<ResponseModel?> fetchAvailableSlots({
-  required String companyId,
-  required String date,
-  required String studioId,
-  required String typeId,
-}) async {
-  isLoading = true;
-  timeSlots = [];
-  startTime = [];
-  update();
-  ResponseModel? responseModel;
-  try {
-    Response response = await bookingrepo.fetchAvailableSlots(
-      companyId: companyId,
-      date: date,
-      studioId: studioId,
-      typeId: typeId,
-    );
-    log("Slots response: ${response.bodyString}", name: "fetchAvailableSlots");
-    if (response.statusCode == 200) {
-      
-      final openHours = response.body["data"]["open_hours"] as List;
-      log("Open hours: $openHours", name: "fetchAvailableSlots");
-      bufferTime =int.tryParse( response.body["data"]["studio_location"]["buffer_time"]??"0")??0;
-      timeSlots = openHours.map((e) => Slot.fromJson(e)).toList();
-      
-      for (var i = 0; i < timeSlots.length; i++) {
-        startTime.add(timeSlots[i].startTime);
-        if (i == timeSlots.length - 1 && timeSlots[i].endTime != null) {
-          startTime.add(timeSlots[i].endTime); // Include endTime of last slot
-          log("Last slot endTime: ${timeSlots[i].endTime!.format(Get.context!)}", name: "fetchAvailableSlots");
+    required String companyId,
+    required String date,
+    required String studioId,
+    required String typeId,
+  }) async {
+    isLoading = true;
+    timeSlots = [];
+    startTime = [];
+    update();
+    ResponseModel? responseModel;
+    try {
+      Response response = await bookingrepo.fetchAvailableSlots(
+        companyId: companyId,
+        date: date,
+        studioId: studioId,
+        typeId: typeId,
+      );
+      log(
+        "Slots response: ${response.bodyString}",
+        name: "fetchAvailableSlots",
+      );
+      if (response.statusCode == 200) {
+        final openHours = response.body["data"]["open_hours"] as List;
+        log("Open hours: $openHours", name: "fetchAvailableSlots");
+        bufferTime =
+            int.tryParse(
+              response.body["data"]["studio_location"]["buffer_time"] ?? "0",
+            ) ??
+            0;
+        timeSlots = openHours.map((e) => Slot.fromJson(e)).toList();
+
+        for (var i = 0; i < timeSlots.length; i++) {
+          startTime.add(timeSlots[i].startTime);
+          if (i == timeSlots.length - 1 && timeSlots[i].endTime != null) {
+            startTime.add(timeSlots[i].endTime); // Include endTime of last slot
+            log(
+              "Last slot endTime: ${timeSlots[i].endTime!.format(Get.context!)}",
+              name: "fetchAvailableSlots",
+            );
+          }
         }
+        if (timeSlots.isNotEmpty) {
+          timeSlots.add(
+            Slot(
+              booked: timeSlots[timeSlots.length - 1].booked,
+              breakTime: timeSlots[timeSlots.length - 1].breakTime,
+              blockHome: timeSlots[timeSlots.length - 1].blockHome,
+              blockIndoor: timeSlots[timeSlots.length - 1].blockIndoor,
+              blockOutdoor: timeSlots[timeSlots.length - 1].blockOutdoor,
+              startTime: timeSlots[timeSlots.length - 1].endTime,
+              endTime: timeSlots[timeSlots.length - 1].endTime,
+            ),
+          );
+        }
+        responseModel = ResponseModel(true, "Slots fetched successfully");
+      } else {
+        timeSlots.clear();
+        responseModel = ResponseModel(
+          false,
+          "Failed to fetch slots: ${response.statusText}",
+        );
+        Get.snackbar("Error", "Failed to fetch slots: ${response.statusText}");
       }
-      if(timeSlots.isNotEmpty){
-        timeSlots.add(Slot(booked: timeSlots[timeSlots.length-1].booked, breakTime: timeSlots[timeSlots.length-1].breakTime, blockHome: timeSlots[timeSlots.length-1].blockHome, blockIndoor: timeSlots[timeSlots.length-1].blockIndoor, blockOutdoor: timeSlots[timeSlots.length-1].blockOutdoor,startTime: timeSlots[timeSlots.length-1].endTime,endTime: timeSlots[timeSlots.length-1].endTime,));
-      }
-      responseModel = ResponseModel(true, "Slots fetched successfully");
-    } else {
-      timeSlots.clear();
-      responseModel = ResponseModel(false, "Failed to fetch slots: ${response.statusText}");
-      Get.snackbar("Error", "Failed to fetch slots: ${response.statusText}");
+    } catch (e) {
+      responseModel = ResponseModel(false, "Error fetching slots: $e");
+      Get.snackbar("Error", "Unable to fetch slots. Please try again later.");
+      log(e.toString(), name: "fetchAvailableSlots");
     }
-  } catch (e) {
-    responseModel = ResponseModel(false, "Error fetching slots: $e");
-    Get.snackbar("Error", "Unable to fetch slots. Please try again later.");
-    log(e.toString(), name: "fetchAvailableSlots");
+    isLoading = false;
+    update();
+    return responseModel;
   }
-  isLoading = false;
-  update();
-  return responseModel;
-}
 
   Future<void> fetchBookings() async {
     isLoading = true;

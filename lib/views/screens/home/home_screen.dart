@@ -179,30 +179,36 @@ class _HomeScreenState extends State<HomeScreen> {
                     GetBuilder<BookingController>(
                       builder: (bookingCtrl) {
                         if (bookingCtrl.isLoading) {
-                          // Show shimmer or placeholder while loading
-                          return Container(
-                            margin: const EdgeInsets.symmetric(horizontal: 16),
-                            height: 150,
-                            decoration: BoxDecoration(
-                              color: Colors.grey[300],
-                              borderRadius: BorderRadius.circular(16),
-                            ),
+                          // Show shimmer while loading
+                          return Column(
+                            children: [
+                              Container(
+                                margin: const EdgeInsets.symmetric(
+                                  horizontal: 16,
+                                ),
+                                height: 150,
+                                decoration: BoxDecoration(
+                                  color: Colors.grey[300],
+                                  borderRadius: BorderRadius.circular(16),
+                                ),
+                              ),
+                              const SizedBox(height: 24),
+                            ],
                           );
-                        } else if (bookingCtrl.upcomingBookings.isEmpty) {
-                          // No upcoming bookings
-                          return Container(
-                            margin: const EdgeInsets.symmetric(horizontal: 16),
-                            child: const Text(
-                              "No Upcoming Bookings",
-                              style: TextStyle(fontSize: 14),
-                            ),
+                        } else if (bookingCtrl.upcomingBookings.isNotEmpty) {
+                          // Show Upcoming Booking Card with spacing
+                          return Column(
+                            children: [
+                              UpcomingBookingCard(
+                                key: const ValueKey('upcoming_offer_card'),
+                                booking: bookingCtrl.upcomingBookings.first,
+                              ),
+                              const SizedBox(height: 24),
+                            ],
                           );
                         } else {
-                          // Pass first upcoming booking to the card
-                          return UpcomingBookingCard(
-                            key: const ValueKey('upcoming_offer_card'),
-                            booking: bookingCtrl.upcomingBookings.first,
-                          );
+                          // No booking — return empty (no gap)
+                          return const SizedBox.shrink();
                         }
                       },
                     ),

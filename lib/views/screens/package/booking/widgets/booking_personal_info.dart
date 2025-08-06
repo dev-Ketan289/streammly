@@ -58,7 +58,7 @@ class PersonalInfoSection extends StatelessWidget {
             CustomTextField(
               initialValue: controller.personalInfo['mobile'] ?? '',
               labelText: "Number",
-              hintText: '+91 8545254789',
+              hintText: '8545254789',
               keyboardType: TextInputType.phone,
               onChanged: (val) => controller.updatePersonalInfo('mobile', val),
               validator: (value) {
@@ -89,52 +89,60 @@ class PersonalInfoSection extends StatelessWidget {
 
             // Alternate Mobile Numbers
             Column(
-              children: controller.alternateMobiles.asMap().entries.map((entry) {
-                final index = entry.key;
-                final val = entry.value;
-                return Padding(
-                  padding: const EdgeInsets.only(bottom: 12),
-                  child: Row(
-                    children: [
-                      Expanded(
-                        child: CustomTextField(
-                          initialValue: val, // plain String now
-                          hintText: 'Alternate Mobile No',
-                          keyboardType: TextInputType.phone,
-                          onChanged: (v) {
-                            controller.alternateMobiles[index] = v;
-                            controller.update();
-                          },
-                          validator: (value) {
-                            if (value != null && value.isNotEmpty) {
-                              if (!RegExp(r'^\+?\d{10,12}$').hasMatch(value)) {
-                                return 'Please enter a valid mobile number';
-                              }
-                            }
-                            return null;
-                          },
-                        ),
-                      ),
-                      const SizedBox(width: 8),
-                      GestureDetector(
-                        onTap: () => controller.removeAlternateMobile(index),
-                        child: Container(
-                          padding: const EdgeInsets.all(8),
-                          decoration: BoxDecoration(
-                            color: theme.colorScheme.error.withValues(alpha: 0.1),
-                            borderRadius: BorderRadius.circular(6),
+              children:
+                  controller.alternateMobiles.asMap().entries.map((entry) {
+                    final index = entry.key;
+                    final val = entry.value;
+                    return Padding(
+                      padding: const EdgeInsets.only(bottom: 12),
+                      child: Row(
+                        children: [
+                          Expanded(
+                            child: CustomTextField(
+                              initialValue: val,
+                              hintText: 'Alternate Mobile No',
+                              keyboardType: TextInputType.phone,
+                              onChanged: (v) {
+                                controller.alternateMobiles[index] = v;
+                                controller.update();
+                              },
+                              validator: (value) {
+                                if (value == null || value.isEmpty) {
+                                  if (index == 0)
+                                    return 'This alternate mobile is required';
+                                  // Optional for extras
+                                } else if (!RegExp(
+                                  r'^\+?\d{10,12}$',
+                                ).hasMatch(value)) {
+                                  return 'Please enter a valid mobile number';
+                                }
+                                return null;
+                              },
+                            ),
                           ),
-                          child: Icon(
-                            Icons.close,
-                            color: theme.colorScheme.error,
-                            size: 18,
-                          ),
-                        ),
+                          const SizedBox(width: 8),
+                          // Remove icon only for extras (i > 0)
+                          if (index > 0)
+                            GestureDetector(
+                              onTap:
+                                  () => controller.removeAlternateMobile(index),
+                              child: Container(
+                                padding: const EdgeInsets.all(8),
+                                decoration: BoxDecoration(
+                                  color: theme.colorScheme.error.withAlpha(25),
+                                  borderRadius: BorderRadius.circular(6),
+                                ),
+                                child: Icon(
+                                  Icons.close,
+                                  color: theme.colorScheme.error,
+                                  size: 18,
+                                ),
+                              ),
+                            ),
+                        ],
                       ),
-                    ],
-                  ),
-                );
-              }).toList(),
+                    );
+                  }).toList(),
             ),
 
             // Email Section
@@ -157,7 +165,9 @@ class PersonalInfoSection extends StatelessWidget {
                 if (value == null || value.isEmpty) {
                   return 'Please enter your email';
                 }
-                if (!RegExp(r'^[\w-.]+@([\w-]+\.)+[\w-]{2,4}$').hasMatch(value)) {
+                if (!RegExp(
+                  r'^[\w-.]+@([\w-]+\.)+[\w-]{2,4}$',
+                ).hasMatch(value)) {
                   return 'Please enter a valid email';
                 }
                 return null;
@@ -181,52 +191,57 @@ class PersonalInfoSection extends StatelessWidget {
 
             // Alternate Email Addresses
             Column(
-              children: controller.alternateEmails.asMap().entries.map((entry) {
-                final index = entry.key;
-                final val = entry.value;
-                return Padding(
-                  padding: const EdgeInsets.only(bottom: 12),
-                  child: Row(
-                    children: [
-                      Expanded(
-                        child: CustomTextField(
-                          initialValue: val,
-                          hintText: 'Alternate Mail ID',
-                          keyboardType: TextInputType.emailAddress,
-                          onChanged: (v) {
-                            controller.alternateEmails[index] = v;
-                            controller.update();
-                          },
-                          validator: (value) {
-                            if (value != null && value.isNotEmpty) {
-                              if (!RegExp(r'^[\w-.]+@([\w-]+\.)+[\w-]{2,4}$').hasMatch(value)) {
-                                return 'Please enter a valid email';
-                              }
-                            }
-                            return null;
-                          },
-                        ),
-                      ),
-                      const SizedBox(width: 12),
-                      GestureDetector(
-                        onTap: () => controller.removeAlternateEmail(index),
-                        child: Container(
-                          padding: const EdgeInsets.all(8),
-                          decoration: BoxDecoration(
-                            color: theme.colorScheme.error.withValues(alpha: 0.1),
-                            borderRadius: BorderRadius.circular(6),
+              children:
+                  controller.alternateEmails.asMap().entries.map((entry) {
+                    final index = entry.key;
+                    final val = entry.value;
+                    return Padding(
+                      padding: const EdgeInsets.only(bottom: 12),
+                      child: Row(
+                        children: [
+                          Expanded(
+                            child: CustomTextField(
+                              initialValue: val,
+                              hintText: 'Alternate Mail ID',
+                              keyboardType: TextInputType.emailAddress,
+                              onChanged: (v) {
+                                controller.alternateEmails[index] = v;
+                                controller.update();
+                              },
+                              validator: (value) {
+                                if (value != null && value.isNotEmpty) {
+                                  if (!RegExp(
+                                    r'^[\w-.]+@([\w-]+\.)+[\w-]{2,4}$',
+                                  ).hasMatch(value)) {
+                                    return 'Please enter a valid email';
+                                  }
+                                }
+                                return null;
+                              },
+                            ),
                           ),
-                          child: Icon(
-                            Icons.close,
-                            color: theme.colorScheme.error,
-                            size: 18,
+                          const SizedBox(width: 12),
+                          GestureDetector(
+                            onTap: () => controller.removeAlternateEmail(index),
+                            child: Container(
+                              padding: const EdgeInsets.all(8),
+                              decoration: BoxDecoration(
+                                color: theme.colorScheme.error.withValues(
+                                  alpha: 0.1,
+                                ),
+                                borderRadius: BorderRadius.circular(6),
+                              ),
+                              child: Icon(
+                                Icons.close,
+                                color: theme.colorScheme.error,
+                                size: 18,
+                              ),
+                            ),
                           ),
-                        ),
+                        ],
                       ),
-                    ],
-                  ),
-                );
-              }).toList(),
+                    );
+                  }).toList(),
             ),
           ],
         );
