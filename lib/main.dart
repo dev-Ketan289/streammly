@@ -1,5 +1,6 @@
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:streammly/controllers/home_screen_controller.dart';
@@ -29,7 +30,11 @@ import 'views/screens/splash_screen/splash_screen.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  SystemChrome.setEnabledSystemUIMode(
+    SystemUiMode.manual,
 
+    overlays: [SystemUiOverlay.top],
+  );
   // Initialize Firebase
   await Firebase.initializeApp();
 
