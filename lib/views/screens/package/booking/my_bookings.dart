@@ -10,8 +10,8 @@ import '../../../../controllers/auth_controller.dart';
 import '../../../../controllers/booking_form_controller.dart';
 import '../../../../models/booking/booking_info_model.dart';
 
-class Bookings extends StatelessWidget {
-  Bookings({super.key});
+class MyBookings extends StatelessWidget {
+  MyBookings({super.key});
 
   final BookingController controller = Get.put(
     BookingController(bookingrepo: BookingRepo(apiClient: Get.find())),

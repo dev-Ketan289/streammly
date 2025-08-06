@@ -210,9 +210,9 @@ class _ProfilePageState extends State<ProfilePage> {
             icon: SvgPicture.asset(Assets.svgMybookings, height: 26, width: 26),
             title: "My Bookings",
             onTap: () {
-              Navigator.of(context).pop(); // Close the drawer
+              // Navigator.of(context).pop(); // Close the drawer
               Future.delayed(Duration(milliseconds: 300), () {
-                Get.to(() => Bookings());
+                Get.to(() => MyBookings());
               });
             },
           ),

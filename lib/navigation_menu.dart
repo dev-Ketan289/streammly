@@ -237,7 +237,7 @@ class NavigationController extends GetxController {
     () => const HomeScreen(),
     () => const Center(child: Text('Shop Screen Coming Soon')),
     () => const Center(child: Text('Cart Screen Coming Soon')),
-    () => Bookings(),
+    () => MyBookings(),
     () => const Center(child: Text('More Screen Coming Soon')),
     // () => const CategoryListScreen(),
   ];

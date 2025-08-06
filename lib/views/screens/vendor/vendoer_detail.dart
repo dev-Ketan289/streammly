@@ -59,8 +59,11 @@ class _VendorDetailScreenState extends State<VendorDetailScreen> {
                     return HeaderBanner(
                       height: screenWidth * 0.7,
                       backgroundImage:
-                          (widget.studio.company?.bannerImage?.isNotEmpty == true)
-                              ? resolveImageUrl(widget.studio.company?.bannerImage)
+                          (widget.studio.company?.bannerImage?.isNotEmpty ==
+                                  true)
+                              ? resolveImageUrl(
+                                widget.studio.company?.bannerImage,
+                              )
                               : 'assets/images/recommended_banner/FocusPointVendor.png',
                       overlayColor: primaryColor.withValues(alpha: 0.6),
                       overrideTitle: widget.studio.company?.companyName,
@@ -82,13 +85,40 @@ class _VendorDetailScreenState extends State<VendorDetailScreen> {
                         categories: [
                           CategoryItem(
                             label: 'Baby Shoot',
-                            imagePath: 'assets/images/category/vendor_category/img.png',
-                            onTap: () => Get.to(VendorGroup(studio: widget.studio, subCategoryId: 2)),
+                            imagePath:
+                                'assets/images/category/vendor_category/img.png',
+                            onTap:
+                                () => Get.to(
+                                  VendorGroup(
+                                    studio: widget.studio,
+                                    subCategoryId: 2,
+                                  ),
+                                ),
                           ),
-                          CategoryItem(label: 'Wedding Shoot', imagePath: 'assets/images/category/vendor_category/img.png', onTap: () {}),
-                          CategoryItem(label: 'Portfolio Shoot', imagePath: 'assets/images/category/vendor_category/img.png', onTap: () {}),
-                          CategoryItem(label: 'Maternity Shoot', imagePath: 'assets/images/category/vendor_category/img.png', onTap: () {}),
-                          CategoryItem(label: 'Family Function', imagePath: 'assets/images/category/vendor_category/img.png', onTap: () {}),
+                          CategoryItem(
+                            label: 'Wedding Shoot',
+                            imagePath:
+                                'assets/images/category/vendor_category/img.png',
+                            onTap: () {},
+                          ),
+                          CategoryItem(
+                            label: 'Portfolio Shoot',
+                            imagePath:
+                                'assets/images/category/vendor_category/img.png',
+                            onTap: () {},
+                          ),
+                          CategoryItem(
+                            label: 'Maternity Shoot',
+                            imagePath:
+                                'assets/images/category/vendor_category/img.png',
+                            onTap: () {},
+                          ),
+                          CategoryItem(
+                            label: 'Family Function',
+                            imagePath:
+                                'assets/images/category/vendor_category/img.png',
+                            onTap: () {},
+                          ),
                         ],
                       );
                     }
@@ -100,8 +130,18 @@ class _VendorDetailScreenState extends State<VendorDetailScreen> {
                               label: sub.title,
                               imagePath: resolveImageUrl(sub.image),
                               onTap: () {
-                                final mainState = context.findAncestorStateOfType<NavigationFlowState>();
-                                mainState?.pushToCurrentTab(VendorGroup(studio: widget.studio, subCategoryId: sub.id), hideBottomBar: false);
+                                final mainState =
+                                    context
+                                        .findAncestorStateOfType<
+                                          NavigationFlowState
+                                        >();
+                                mainState?.pushToCurrentTab(
+                                  VendorGroup(
+                                    studio: widget.studio,
+                                    subCategoryId: sub.id,
+                                  ),
+                                  hideBottomBar: false,
+                                );
                               },
                             );
                           }).toList(),
@@ -113,18 +153,39 @@ class _VendorDetailScreenState extends State<VendorDetailScreen> {
 
                 /// ---- Reviews ----
                 Padding(
-                  padding: EdgeInsets.symmetric(horizontal: horizontalPadding, vertical: screenWidth * 0.03),
+                  padding: EdgeInsets.symmetric(
+                    horizontal: horizontalPadding,
+                    vertical: screenWidth * 0.03,
+                  ),
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      Text("Reviews", style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold, color: primaryColor, fontSize: 14)),
+                      Text(
+                        "Reviews",
+                        style: theme.textTheme.titleMedium?.copyWith(
+                          fontWeight: FontWeight.bold,
+                          color: primaryColor,
+                          fontSize: 14,
+                        ),
+                      ),
                       SizedBox(width: 10),
                       InkWell(
                         onTap: () {},
                         child: Row(
                           children: [
-                            Text("See All", style: theme.textTheme.bodySmall?.copyWith(color: Colors.grey, fontSize: 12, fontWeight: FontWeight.w500)),
-                            Icon(Icons.arrow_right, size: 24, color: Colors.grey),
+                            Text(
+                              "See All",
+                              style: theme.textTheme.bodySmall?.copyWith(
+                                color: Colors.grey,
+                                fontSize: 12,
+                                fontWeight: FontWeight.w500,
+                              ),
+                            ),
+                            Icon(
+                              Icons.arrow_right,
+                              size: 24,
+                              color: Colors.grey,
+                            ),
                           ],
                         ),
                       ),
@@ -140,19 +201,22 @@ class _VendorDetailScreenState extends State<VendorDetailScreen> {
                       ReviewCard(
                         name: "Sarah M.",
                         dateTime: "05 April 2025 10:18 AM",
-                        review: "Amazing experience! The team at FocusPoint Studios captured every moment perfectly.",
+                        review:
+                            "Amazing experience! The team at FocusPoint Studios captured every moment perfectly.",
                         rating: 5,
                       ),
                       ReviewCard(
                         name: "Jason & Emily T.",
                         dateTime: "08 April 2025 10:20 AM",
-                        review: "Great service and stunning photos! FocusPoint Studios made our special day unforgettable",
+                        review:
+                            "Great service and stunning photos! FocusPoint Studios made our special day unforgettable",
                         rating: 5,
                       ),
                       ReviewCard(
                         name: "Ravi K.",
                         dateTime: "09 April 2025 09:45 AM",
-                        review: "Highly recommend FocusPoint Studios! They were professional, and delivered quality.",
+                        review:
+                            "Highly recommend FocusPoint Studios! They were professional, and delivered quality.",
                         rating: 5,
                       ),
                     ],
@@ -167,8 +231,16 @@ class _VendorDetailScreenState extends State<VendorDetailScreen> {
                   onSeeAll: () {},
                   isPopular: true,
                   packages: [
-                    {"image": "assets/images/category/vendor_category/Baby.jpg", "label": "Album"},
-                    {"image": "assets/images/category/vendor_category/Baby.jpg", "label": "Frame"},
+                    {
+                      "image":
+                          "assets/images/category/vendor_category/Baby.jpg",
+                      "label": "Album",
+                    },
+                    {
+                      "image":
+                          "assets/images/category/vendor_category/Baby.jpg",
+                      "label": "Frame",
+                    },
                   ],
                 ),
 
@@ -177,8 +249,18 @@ class _VendorDetailScreenState extends State<VendorDetailScreen> {
                   onSeeAll: () {},
                   isPopular: false,
                   packages: [
-                    {"image": "assets/images/category/vendor_category/Baby.jpg", "label": "XYZ Packages", "price": "Rs. 2000/-"},
-                    {"image": "assets/images/category/vendor_category/Baby.jpg", "label": "XYZ Packages", "price": "Rs. 2000/-"},
+                    {
+                      "image":
+                          "assets/images/category/vendor_category/Baby.jpg",
+                      "label": "XYZ Packages",
+                      "price": "Rs. 2000/-",
+                    },
+                    {
+                      "image":
+                          "assets/images/category/vendor_category/Baby.jpg",
+                      "label": "XYZ Packages",
+                      "price": "Rs. 2000/-",
+                    },
                   ],
                 ),
               ],

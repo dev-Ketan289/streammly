@@ -107,7 +107,7 @@ class NavigationFlowState extends State<NavigationFlow> {
             _buildOffstageNavigator(0, HomeScreen()),
             _buildOffstageNavigator(1, ShopScreen()),
             _buildOffstageNavigator(2, CartScreen()),
-            _buildOffstageNavigator(3, Bookings()),
+            _buildOffstageNavigator(3, MyBookings()),
             _buildOffstageNavigator(4, MoreScreen()),
           ],
         ),
