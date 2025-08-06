@@ -574,7 +574,7 @@ class _VendorDescriptionState extends State<VendorDescription> {
                               .findAncestorStateOfType<NavigationFlowState>();
                       mainState?.pushToCurrentTab(
                         VendorDetailScreen(studio: company),
-                        hideBottomBar: true,
+                        hideBottomBar: false,
                       );
                       // Navigator.push(
                       //   context,

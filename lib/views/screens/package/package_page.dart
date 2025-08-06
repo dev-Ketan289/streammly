@@ -101,8 +101,16 @@ class PackagesPage extends StatelessWidget {
           },
         ),
         bottomNavigationBar: GetBuilder<PackagesController>(
-          builder: (controller) =>
-              PackagesBottomBar(controller: controller, companyLocations: [],companyLocation: companyLocation,),
+          builder: (controller) {
+            // Log the companyId for debugging
+            log(companyId.toString(), name: "packagebottom");
+            return PackagesBottomBar(
+              controller: controller,
+              companyLocations: [],
+              companyLocation: companyLocation,
+              companyId: companyId,
+            );
+          },
         ),
       ),
     );

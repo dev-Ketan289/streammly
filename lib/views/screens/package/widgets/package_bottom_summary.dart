@@ -12,10 +12,11 @@ class PackagesBottomBar extends StatelessWidget {
   final PackagesController controller;
   final CompanyLocation? companyLocation;
   final List<dynamic> companyLocations;
+  final int companyId;
   const PackagesBottomBar({
     super.key,
     required this.controller,
-    required this.companyLocations,required this.companyLocation,
+    required this.companyLocations,required this.companyLocation, required this.companyId,
   });
 
   @override
@@ -173,7 +174,7 @@ class PackagesBottomBar extends StatelessWidget {
                             BookingPage(
                               packages: enrichedPackages,
                               companyLocations: companyLocations,
-                              companyLocation: companyLocation,
+                              companyLocation: companyLocation, companyId: companyId,
                             ),
                             hideBottomBar: true,
                           );

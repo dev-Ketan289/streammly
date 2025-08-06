@@ -18,10 +18,12 @@ class BookingPage extends StatelessWidget {
   final List<Map<String, dynamic>> packages;
   final List<dynamic> companyLocations;
   final CompanyLocation? companyLocation;
+    final int companyId;
+
   const BookingPage({
     super.key,
     required this.packages,
-    required this.companyLocations,required this.companyLocation,
+    required this.companyLocations,required this.companyLocation, required this.companyId,
 
   });
 
@@ -170,7 +172,7 @@ class BookingPage extends StatelessWidget {
                         // Active Form
                         PackageFormCard(
                           index: safePageIndex,
-                          package: controller.selectedPackages[safePageIndex],
+                          package: controller.selectedPackages[safePageIndex], companyId: companyId,
                         ),
                       ],
                     ),

@@ -12,6 +12,7 @@ class CompanyBusinessSettingsController extends GetxController {
 
   CompanyBusinessSettings? settings;
   bool isLoading = true;
+  int? advanceBookingDays;
 
   @override
   void onInit() {
@@ -24,6 +25,7 @@ class CompanyBusinessSettingsController extends GetxController {
   Future<ResponseModel?> fetchCompanyBusinessSettings(String companyId) async {
     isLoading = true;
     settings= null;
+    advanceBookingDays = null;
     update();
     ResponseModel? responseModel;
     try {
@@ -34,7 +36,9 @@ class CompanyBusinessSettingsController extends GetxController {
       );
       if (response.statusCode == 200 && response.body['data'] != null) {
         settings = CompanyBusinessSettings.fromJson(response.body['data']);
-        log('Parsed working schedule: ${settings?.workingShedule}', name: "***** Parsed Data ******");
+        advanceBookingDays = int.tryParse(settings!.advanceBookingDays ?? '');
+        log('Parsed working schedule: $advanceBookingDays', name: "***** advanced Data ******");
+        log('Parsed advance booking : ${settings?.workingShedule}', name: "***** Parsed Data ******");
         try {
           log('Parsed working days: ${settings?.getDayTimeSlots()}', name: "***** Parsed Data ******");
         } catch (e) {

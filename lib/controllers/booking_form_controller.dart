@@ -155,7 +155,7 @@ class BookingController extends GetxController {
   void editPackage(int index) {
     currentPage = index;
     update();
-    Get.to(() => BookingPage(packages: [], companyLocations: [],companyLocation: null,));
+    Get.to(() => BookingPage(packages: [], companyLocations: [],companyLocation: null, companyId: 0,));
   }
 
   void toggleDetails(int index) {

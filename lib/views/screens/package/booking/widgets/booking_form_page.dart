@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:get/get.dart';
+import 'package:streammly/controllers/company_business_settings_controller.dart';
 import 'package:streammly/models/package/slots_model.dart';
 import 'package:streammly/services/input_decoration.dart';
 import 'package:streammly/views/screens/package/booking/widgets/custom_time_picker.dart';
@@ -18,11 +19,13 @@ import 'free_add_on.dart';
 class PackageFormCard extends StatefulWidget {
   final int index;
   final Map<String, dynamic> package;
+  final int companyId;
 
   const PackageFormCard({
     super.key,
     required this.index,
     required this.package,
+    required this.companyId,
   });
 
   @override
@@ -35,14 +38,18 @@ class _PackageFormCardState extends State<PackageFormCard> {
   late TextEditingController endTimeController;
   late TextEditingController dateTimeController;
   late TextEditingController selectedTimingController;
+
   bool isStartTime = true;
   bool showTimePicker = false;
 
   final Map<String, TextEditingController> _extraQuestionControllers = {};
+  late CompanyBusinessSettingsController companyBusinessSettings;
 
   @override
   void initState() {
     super.initState();
+      companyBusinessSettings = Get.find<CompanyBusinessSettingsController>();
+  _fetchBusinessSettings(); // async logic here
     final controller = Get.find<BookingController>();
     final form = controller.packageFormsData[widget.index] ?? {};
 
@@ -78,6 +85,17 @@ class _PackageFormCardState extends State<PackageFormCard> {
       );
     }
   }
+  
+void _fetchBusinessSettings() async {
+  await companyBusinessSettings
+      .fetchCompanyBusinessSettings(widget.companyId.toString()).then((value){
+        log(companyBusinessSettings.settings?.toJson().toString()??"",name: 'availabbbble');
+      });
+
+  
+
+  // log(available.toString(), name: 'availabbbble');
+}
 
   @override
   void dispose() {
@@ -164,15 +182,19 @@ class _PackageFormCardState extends State<PackageFormCard> {
               return null;
             },
             onTap: () async {
+              log(companyBusinessSettings.settings?.advanceBookingDays?.toString() ?? 'null');
               final int advanceBookingDays =
-                  widget.package['advanceBookingDays'] ?? 1;
+                  (companyBusinessSettings.settings?.advanceBookingDays is int)
+                      ? companyBusinessSettings.settings!.advanceBookingDays as int
+                      : int.tryParse(companyBusinessSettings.settings?.advanceBookingDays?.toString() ?? '') ?? 1;
+
               log(advanceBookingDays.toString(), name: "wjkdfn");
               // Blocked dates (today + next 'n' days)
               final List<DateTime> blockedDates = List.generate(
                 advanceBookingDays + 1,
                 (i) => DateTime.now().add(Duration(days: i)),
               );
-              log(blockedDates.toString());
+              log(blockedDates.toString(), name: 'blockeddates');
               // Log blocked dates
               for (var date in blockedDates) {
                 final formatted =
@@ -1036,7 +1058,7 @@ void showTimeSlotSelector({
     builder: (context) {
       return TimeSlotSelector(
         context: context,
-        bufferTime : buffer,
+        bufferTime: buffer,
         slots: slots,
         packageHours: packageHours,
         index: index,
