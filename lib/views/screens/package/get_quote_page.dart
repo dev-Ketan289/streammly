@@ -1,5 +1,3 @@
-import 'dart:developer';
-
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
@@ -10,7 +8,7 @@ import 'package:streammly/views/widgets/custom_doodle.dart';
 
 import '../../../controllers/auth_controller.dart';
 import '../../../controllers/quote_controller.dart';
-import '../../../services/custom_error_widget.dart';
+import '../../../services/custom_error_pop_widget.dart';
 import '../auth_screens/login_screen.dart';
 import '../package/booking/widgets/custom_time_picker.dart';
 
@@ -105,45 +103,44 @@ class _GetQuoteScreenState extends State<GetQuoteScreen> {
     }
 
     if (!authController.isLoggedIn()) {
-      await Get.to(
-        () => CustomErrorWidget(
-          imagePath: 'assets/images/access_denied.png',
-          title: 'Login Required',
-          subtitle: 'You need to login to submit this quote.',
-          primaryButtonText: 'Continue as Guest',
-          onPrimaryPressed: () {
-            Get.back(result: false);
-          },
-          secondaryButtonText: 'Login',
-          onSecondaryPressed: () {
-            Get.off(
-              () => const LoginScreen(),
-              arguments: {
-                'redirectTo': '/getQuote',
-                'formData': {
-                  'companyId': quoteController.companyId,
-                  'subCategoryId': quoteController.subCategoryId,
-                  'subVerticalId': quoteController.subVerticalId,
-                  'subCategoryTitle': quoteController.subCategoryTitle,
-                  'subVerticalTitle': quoteController.subVerticalTitle,
-                  'name': quoteController.nameController.text,
-                  'mobile': quoteController.mobileController.text,
-                  'email': quoteController.emailController.text,
-                  'requirements': quoteController.requirementsController.text,
-                  'date': quoteController.dateController.text,
-                  'startTime': quoteController.startTime,
-                  'endTime': quoteController.endTime,
-                  'favStartTime': quoteController.favStartTime,
-                  'favEndTime': quoteController.favEndTime,
-                },
+      await CommonPopupDialog.show(
+        context,
+        imagePath: 'assets/images/access_denied.png',
+        title: 'Login Required',
+        message: 'You need to login to submit this quote.',
+        primaryBtnText: 'Cancel',
+        onPrimaryPressed: () {},
+        secondaryBtnText: 'Login',
+        onSecondaryPressed: () {
+          Navigator.of(context).pop(); // Close dialog first
+          Get.off(
+            () => const LoginScreen(),
+            arguments: {
+              'redirectTo': '/getQuote',
+              'formData': {
+                'companyId': quoteController.companyId,
+                'subCategoryId': quoteController.subCategoryId,
+                'subVerticalId': quoteController.subVerticalId,
+                'subCategoryTitle': quoteController.subCategoryTitle,
+                'subVerticalTitle': quoteController.subVerticalTitle,
+                'name': quoteController.nameController.text,
+                'mobile': quoteController.mobileController.text,
+                'email': quoteController.emailController.text,
+                'requirements': quoteController.requirementsController.text,
+                'date': quoteController.dateController.text,
+                'startTime': quoteController.startTime,
+                'endTime': quoteController.endTime,
+                'favStartTime': quoteController.favStartTime,
+                'favEndTime': quoteController.favEndTime,
               },
-            );
-          },
-        ),
+            },
+          );
+        },
       );
       return;
     }
-    log("x");
+
+    // If logged in, proceed to submit
     quoteController.submitQuote(
       companyId:
           (quoteController.companyId is int)

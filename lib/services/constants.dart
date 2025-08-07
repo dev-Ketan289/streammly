@@ -75,6 +75,7 @@ class AppConstants {
 
   // Package
   static const String getPackagesUrl = "api/v1/package/getpackages";
+  static const String getFreeAddonsPath = 'api/v1/package/getfreeadons/';
 
   // Business Setting
   static const String businessSettingUri = "api/v1/basic/getbusinesssettings";

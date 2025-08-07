@@ -175,7 +175,7 @@ class _HomeScreenState extends State<HomeScreen> {
                           key: const ValueKey('home_header_banner'),
                           slides: slides,
                         ),
-                    const SizedBox(height: 24),
+                    const SizedBox(height: 20),
                     GetBuilder<BookingController>(
                       builder: (bookingCtrl) {
                         if (bookingCtrl.isLoading) {
@@ -203,7 +203,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                 key: const ValueKey('upcoming_offer_card'),
                                 booking: bookingCtrl.upcomingBookings.first,
                               ),
-                              const SizedBox(height: 24),
+                              const SizedBox(height: 5),
                             ],
                           );
                         } else {
@@ -213,7 +213,7 @@ class _HomeScreenState extends State<HomeScreen> {
                       },
                     ),
 
-                    const SizedBox(height: 24),
+                    const SizedBox(height: 5),
                     isCategoryLoading
                         ? _shimmerCategoryScroller()
                         : CategoryScroller(
@@ -229,9 +229,9 @@ class _HomeScreenState extends State<HomeScreen> {
                           },
                           categories: convertToCategoryItems(categoryModels),
                         ),
-                    const SizedBox(height: 24),
+                    const SizedBox(height: 5),
                     PageNav(key: const ValueKey('page_nav')),
-                    const SizedBox(height: 24),
+                    const SizedBox(height: 5),
 
                     // RECOMMENDED LIST shimmer and list
                     GetBuilder<HomeController>(
@@ -253,12 +253,12 @@ class _HomeScreenState extends State<HomeScreen> {
                       },
                     ),
 
-                    const SizedBox(height: 24),
+                    const SizedBox(height: 8),
                     ExploreUs(
                       key: const ValueKey('explore_us'),
                       vendorIds: ([1]),
                     ),
-                    const SizedBox(height: 26),
+                    const SizedBox(height: 8),
                     PromoSlider(key: const ValueKey('promo_slider')),
                     const SizedBox(height: 35),
                   ],

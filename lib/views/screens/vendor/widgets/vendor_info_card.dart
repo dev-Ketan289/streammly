@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:streammly/controllers/wishlist_controller.dart';
-import 'package:streammly/models/category/category_model.dart';
 import 'package:streammly/models/vendors/recommanded_vendors.dart';
 import 'package:streammly/services/custom_image.dart';
 import 'package:streammly/services/theme.dart';
@@ -112,7 +111,7 @@ class _VendorInfoCardState extends State<VendorInfoCard> {
               margin: EdgeInsets.all(imageMargin),
               child: ClipRRect(
                 borderRadius: BorderRadius.circular(16),
-                child: CustomImage(path: widget.logoImage, fit: BoxFit.cover),
+                child: CustomImage(path: widget.logoImage, fit: BoxFit.fill),
                 // child: Image.network(
                 //   widget.logoImage,
                 //   fit: BoxFit.cover,
@@ -180,7 +179,7 @@ class _VendorInfoCardState extends State<VendorInfoCard> {
                 margin: EdgeInsets.all(imageMargin),
                 child: ClipRRect(
                   borderRadius: BorderRadius.circular(16),
-                  child: CustomImage(path: widget.logoImage, fit: BoxFit.fill),
+                  child: CustomImage(path: widget.logoImage, fit: BoxFit.cover),
                   // child: Image.network(
                   //   widget.logoImage,
                   //   fit: BoxFit.fill,
@@ -268,7 +267,7 @@ class _VendorInfoCardState extends State<VendorInfoCard> {
           Text(
             "${widget.estimatedTime} • ${widget.distanceKm}",
             style: TextStyle(
-              fontSize: isSmallScreen ? 7 : 7,
+              fontSize: isSmallScreen ? 15 : 8.9,
               color: Colors.black,
             ),
             overflow: TextOverflow.visible,
@@ -349,7 +348,7 @@ class _VendorInfoCardState extends State<VendorInfoCard> {
 
     return Text(
       _stripHtml(widget.description),
-      style: TextStyle(fontSize: isSmallScreen ? 8 : 8, color: Colors.grey),
+      style: TextStyle(fontSize: isSmallScreen ? 12 : 12, color: Colors.grey),
       maxLines: 2,
       overflow: TextOverflow.visible,
     );

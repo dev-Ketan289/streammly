@@ -10,6 +10,7 @@ import 'package:streammly/data/repository/auth_repo.dart';
 import 'package:streammly/models/response/response_model.dart';
 import 'package:streammly/views/screens/auth_screens/welcome.dart';
 
+import '../services/constants.dart';
 import '../views/screens/auth_screens/create_user.dart';
 import 'auth_controller.dart';
 
@@ -136,11 +137,8 @@ class OtpController extends GetxController implements GetxService {
     }
 
     try {
-      // final url = Uri.parse(
-      //   "https://admin.streammly.com/api/v1/user/auth/generateOtp",
-      // );
       final url = Uri.parse(
-        "http://192.168.1.113:8000/api/v1/user/auth/generateOtp",
+        "${AppConstants.baseUrl}api/v1/user/auth/generateOtp",
       );
 
       final response = await http.post(

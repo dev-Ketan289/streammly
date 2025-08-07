@@ -437,7 +437,7 @@ class _CompanyLocatorMapScreenState extends State<CompanyLocatorMapScreen> {
                     (controller) => _mapController.complete(controller),
                 markers: _customMarkers,
                 myLocationEnabled: true,
-                myLocationButtonEnabled: false,
+                myLocationButtonEnabled: true,
                 onTap: (_) => controller.clearSelectedCompany(),
               ),
 
@@ -514,7 +514,8 @@ class _CompanyLocatorMapScreenState extends State<CompanyLocatorMapScreen> {
                                                     >();
                                             mainState?.pushToCurrentTab(
                                               VendorDescription(
-                                                company: company, companyId: company.companyId,
+                                                company: company,
+                                                companyId: company.companyId,
                                               ),
                                               hideBottomBar: true,
                                             );
