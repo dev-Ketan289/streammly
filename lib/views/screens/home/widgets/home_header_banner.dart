@@ -144,7 +144,7 @@ class _HomeHeaderBannerState extends State<HomeHeaderBanner> {
                     Get.to(
                       () => const ProfilePage(),
                       transition: Transition.leftToRight,
-                      duration: const Duration(milliseconds: 800),
+                      duration: const Duration(milliseconds: 450),
                     );
                   },
                 ),

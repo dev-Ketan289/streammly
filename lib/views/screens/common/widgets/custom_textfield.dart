@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
 class CustomTextField extends StatelessWidget {
   final String? labelText;
@@ -12,6 +13,9 @@ class CustomTextField extends StatelessWidget {
   final String? Function(String?)? validator;
   final bool readOnly;
   final TextInputType keyboardType;
+  final List<TextInputFormatter>? inputFormatters;
+
+  final int? maxLength; // <-- Add this line
 
   const CustomTextField({
     super.key,
@@ -26,6 +30,8 @@ class CustomTextField extends StatelessWidget {
     this.keyboardType = TextInputType.text,
     this.onTap,
     this.controller,
+    this.maxLength,
+    this.inputFormatters,
   });
 
   @override
@@ -39,20 +45,40 @@ class CustomTextField extends StatelessWidget {
       validator: validator,
       readOnly: readOnly,
       keyboardType: keyboardType,
+      maxLength: maxLength, // <-- Add this line
       decoration: InputDecoration(
         labelText: labelText,
         hintText: hintText,
-        prefixIcon: prefixIcon != null ? Icon(prefixIcon, color: Colors.grey, size: 20) : null,
+        prefixIcon:
+            prefixIcon != null
+                ? Icon(prefixIcon, color: Colors.grey, size: 20)
+                : null,
         border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
-        focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(8), borderSide: BorderSide(color: const Color(0xFF4A6CF7), width: 2)),
-        enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(8), borderSide: BorderSide(color: Colors.grey.shade200)),
-        errorBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(8), borderSide: const BorderSide(color: Colors.red)),
-        focusedErrorBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(8), borderSide: const BorderSide(color: Colors.red, width: 2)),
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(8),
+          borderSide: BorderSide(color: const Color(0xFF4A6CF7), width: 2),
+        ),
+        enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(8),
+          borderSide: BorderSide(color: Colors.grey.shade200),
+        ),
+        errorBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(8),
+          borderSide: const BorderSide(color: Colors.red),
+        ),
+        focusedErrorBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(8),
+          borderSide: const BorderSide(color: Colors.red, width: 2),
+        ),
         filled: true,
         fillColor: Colors.grey.shade50,
-        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+        contentPadding: const EdgeInsets.symmetric(
+          horizontal: 16,
+          vertical: 14,
+        ),
         labelStyle: const TextStyle(color: Colors.grey, fontSize: 12),
         hintStyle: const TextStyle(color: Colors.grey, fontSize: 16),
+        counterText: "", // Optional: Hides character count display
       ),
       style: const TextStyle(fontSize: 16, color: Colors.black87),
     );
