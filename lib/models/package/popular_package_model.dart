@@ -29,7 +29,8 @@ class PopularPackage {
       description: json['short_description'] ?? json['long_description'],
       image:
           (json['image_upload'] != null && json['image_upload'] != '')
-              ? 'https://admin.streammly.com/${json["image_upload"]}'
+              ? 'http://192.168.1.113:8000/${json["image_upload"]}' 
+              // ? 'https://admin.streammly.com/${json["image_upload"]}'
               : 'assets/images/category/vendor_category/Baby.jpg',
       variations: variations,
       extraQuestions: json['packageextra_questions'] ?? [],

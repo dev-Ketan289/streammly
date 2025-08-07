@@ -21,7 +21,7 @@ class CustomImage extends StatelessWidget {
   final Function()? onTap;
   final bool viewFullScreen;
   final double radius;
-  const CustomImage({
+  const CustomImage( {
     Key? key,
     required this.path,
     this.height,

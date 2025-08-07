@@ -1,12 +1,13 @@
-
 import 'dart:developer';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart'; // Use flutter_svg for SVG images
 import 'package:get/get.dart';
 import 'package:streammly/controllers/company_controller.dart';
+import 'package:streammly/controllers/company_specialities_controller.dart';
 import 'package:streammly/generated/assets.dart';
 import 'package:streammly/navigation_flow.dart';
+import 'package:streammly/services/custom_image.dart';
 import 'package:streammly/services/theme.dart';
 import 'package:streammly/views/widgets/custom_doodle.dart';
 
@@ -27,6 +28,7 @@ class VendorGroup extends StatefulWidget {
 
 class _VendorGroupState extends State<VendorGroup> {
   late CompanyController controller;
+  late CompanySpecialitiesController specialitiesController;
   int selectedSubCategoryId = -1;
   List<String> splitWords(String title) {
     return title.trim().split(RegExp(r'\s+')).take(3).toList();
@@ -54,9 +56,10 @@ class _VendorGroupState extends State<VendorGroup> {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final screenWidth = MediaQuery.of(context).size.width;
-
+    log(selectedSubCategoryId.toString(), name: "selectedsubcate");
     return Scaffold(
       backgroundColor: theme.scaffoldBackgroundColor,
+
       body: CustomBackground(
         child: SafeArea(
           child: Column(
@@ -230,6 +233,8 @@ class _VendorGroupState extends State<VendorGroup> {
 
   void _showShootOptionsBottomSheet(BuildContext context, String shootTitle, int subVerticalId, int companyId, int subCategoryId) {
     final theme = Theme.of(context);
+    specialitiesController = Get.find<CompanySpecialitiesController>();
+    specialitiesController.getCompanySpecialities(subCategoryId.toString());
     showModalBottomSheet(
       context: context,
       shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(16))),
@@ -238,6 +243,7 @@ class _VendorGroupState extends State<VendorGroup> {
           child: Padding(
             padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
             child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
               mainAxisSize: MainAxisSize.min,
               children: [
                 Container(
@@ -297,7 +303,13 @@ class _VendorGroupState extends State<VendorGroup> {
 
                     final mainState = context.findAncestorStateOfType<NavigationFlowState>();
                     mainState?.pushToCurrentTab(
-                      PackagesPage(companyId: widget.studio.companyId, subCategoryId: subCategoryId, subVerticalId: subVerticalId, studioId: widget.studio.id,companyLocation:widget.studio ,),
+                      PackagesPage(
+                        companyId: widget.studio.companyId,
+                        subCategoryId: subCategoryId,
+                        subVerticalId: subVerticalId,
+                        studioId: widget.studio.id,
+                        companyLocation: widget.studio,
+                      ),
                       hideBottomBar: true,
                     );
 
@@ -323,90 +335,123 @@ class _VendorGroupState extends State<VendorGroup> {
                   ],
                 ),
                 const SizedBox(height: 16),
-                Wrap(
-                  spacing: 16,
-                  runSpacing: 12,
-                  alignment: WrapAlignment.center,
-                  children: () {
-                    final maxToShow = 3;
-                    final specs = widget.studio.specialities;
-                    final total = specs.length;
-                    final shown = specs.take(maxToShow).toList();
-                    final remaining = total - maxToShow;
-                    print("Specialities List: ${widget.studio.specialities}");
-
-                    List<Widget> widgets = [];
-
-                    for (int i = 0; i < shown.length; i++) {
-                      final title = shown[i];
-                      final imageUrl = resolveImageUrl(widget.studio.getSpecialityImage(title));
-                      final isSvg = (imageUrl.isNotEmpty && imageUrl.toLowerCase().endsWith('.svg'));
-                      final words = splitWords(title);
-
-                      widgets.add(
-                        Column(
-                          children: [
-                            CircleAvatar(
-                              backgroundColor: Theme.of(context).primaryColor.withValues(alpha: 0.1),
-                              radius: 22,
-                              child:
-                                  (imageUrl.isNotEmpty)
-                                      ? (isSvg
-                                          ? SvgPicture.network(
-                                            imageUrl,
-                                            width: 24,
-                                            height: 24,
-                                            placeholderBuilder: (context) => Icon(Icons.star, color: Theme.of(context).primaryColor, size: 20),
-                                          )
-                                          : ClipRRect(
-                                            borderRadius: BorderRadius.circular(20),
-                                            child: Image.network(
-                                              imageUrl,
-                                              width: 24,
-                                              height: 24,
-                                              fit: BoxFit.cover,
-                                              errorBuilder: (context, error, stackTrace) => Icon(Icons.star, color: Theme.of(context).primaryColor, size: 20),
-                                            ),
-                                          ))
-                                      : Icon(Icons.star, color: Theme.of(context).primaryColor, size: 20),
-                            ),
-                            const SizedBox(height: 4),
-                            Column(children: words.map((word) => Text(word, style: const TextStyle(fontSize: 10), textAlign: TextAlign.center)).toList()),
-                          ],
-                        ),
-                      );
+                GetBuilder<CompanySpecialitiesController>(
+                  builder: (specialitiesController) {
+                    if (specialitiesController.isLoading) {
+                      return SizedBox.shrink();
                     }
 
-                    if (remaining > 0) {
-                      widgets.add(
-                        Column(
-                          children: [
-                            CircleAvatar(
-                              backgroundColor: Colors.black.withValues(alpha: 0.1),
-                              radius: 22,
-                              child: Center(
-                                child: Text(
-                                  '+$remaining',
-                                  style: const TextStyle(
-                                    fontWeight: FontWeight.bold,
-                                    fontSize: 14,
-                                    color: Colors.black, // Black color for +N
-                                  ),
-                                  textAlign: TextAlign.center,
-                                ),
-                              ),
-                            ),
-                            const SizedBox(height: 4),
-                            const Text('more', style: TextStyle(fontSize: 10, color: Colors.black87, fontWeight: FontWeight.w500), textAlign: TextAlign.center),
-                          ],
-                        ),
-                      );
-                    }
+                    return Wrap(
+             
+                      children: List.generate(specialitiesController.specialities.length, (index) {
+                        final specialities = specialitiesController.specialities[index];
 
-                    return widgets;
-                  }(),
+                        return Row(
+                     
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Container(
+                              margin: EdgeInsets.symmetric(vertical: 5),
+                              width: 21,
+                              height: 21,
+                              decoration: BoxDecoration(color: Colors.blue, borderRadius: BorderRadius.circular(20)),
+                              child: CustomImage(path: specialities.image ?? ''),
+                            ),
+                            SizedBox(width: 11),
+                            Text(specialities.title ?? '', style: Theme.of(context).textTheme.headlineLarge?.copyWith(fontSize: 9)),
+                            SizedBox(width: 6,)
+                          ],
+                        );
+                      }),
+                    );
+
+                  },
                 ),
-                const SizedBox(height: 16),
+
+                // Wrap(
+                //   spacing: 16,
+                //   runSpacing: 12,
+                //   alignment: WrapAlignment.center,
+                //   children: () {
+                //     final maxToShow = 3;
+                //     final specs = widget.studio.specialities;
+                //     final total = specs.length;
+                //     final shown = specs.take(maxToShow).toList();
+                //     final remaining = total - maxToShow;
+                //     print("Specialities List: ${widget.studio.specialities}");
+
+                //     List<Widget> widgets = [];
+
+                //     for (int i = 0; i < shown.length; i++) {
+                //       final title = shown[i];
+                //       final imageUrl = resolveImageUrl(widget.studio.getSpecialityImage(title));
+                //       final isSvg = (imageUrl.isNotEmpty && imageUrl.toLowerCase().endsWith('.svg'));
+                //       final words = splitWords(title);
+
+                //       widgets.add(
+                //         Column(
+                //           children: [
+                //             CircleAvatar(
+                //               backgroundColor: Theme.of(context).primaryColor.withValues(alpha: 0.1),
+                //               radius: 22,
+                //               child:
+                //                   (imageUrl.isNotEmpty)
+                //                       ? (isSvg
+                //                           ? SvgPicture.network(
+                //                             imageUrl,
+                //                             width: 24,
+                //                             height: 24,
+                //                             placeholderBuilder: (context) => Icon(Icons.star, color: Theme.of(context).primaryColor, size: 20),
+                //                           )
+                //                           : ClipRRect(
+                //                             borderRadius: BorderRadius.circular(20),
+                //                             child: Image.network(
+                //                               imageUrl,
+                //                               width: 24,
+                //                               height: 24,
+                //                               fit: BoxFit.cover,
+                //                               errorBuilder: (context, error, stackTrace) => Icon(Icons.star, color: Theme.of(context).primaryColor, size: 20),
+                //                             ),
+                //                           ))
+                //                       : Icon(Icons.star, color: Theme.of(context).primaryColor, size: 20),
+                //             ),
+                //             const SizedBox(height: 4),
+                //             Column(children: words.map((word) => Text(word, style: const TextStyle(fontSize: 10), textAlign: TextAlign.center)).toList()),
+                //           ],
+                //         ),
+                //       );
+                //     }
+
+                //     if (remaining > 0) {
+                //       widgets.add(
+                //         Column(
+                //           children: [
+                //             CircleAvatar(
+                //               backgroundColor: Colors.black.withValues(alpha: 0.1),
+                //               radius: 22,
+                //               child: Center(
+                //                 child: Text(
+                //                   '+$remaining',
+                //                   style: const TextStyle(
+                //                     fontWeight: FontWeight.bold,
+                //                     fontSize: 14,
+                //                     color: Colors.black, // Black color for +N
+                //                   ),
+                //                   textAlign: TextAlign.center,
+                //                 ),
+                //               ),
+                //             ),
+                //             const SizedBox(height: 4),
+                //             const Text('more', style: TextStyle(fontSize: 10, color: Colors.black87, fontWeight: FontWeight.w500), textAlign: TextAlign.center),
+                //           ],
+                //         ),
+                //       );
+                //     }
+
+                //     return widgets;
+                //   }(),
+                // ),
+                SizedBox(height: 16),
                 SizedBox(
                   width: double.infinity,
                   child: ElevatedButton(

@@ -79,8 +79,8 @@ class PackagesController extends GetxController {
 
     try {
       final response = await http.post(
-        Uri.parse("https://admin.streammly.com/api/v1/package/getpackages"),
-        // Uri.parse("http://192.168.1.113:8000/api/v1/package/getpackages"),
+        // Uri.parse("https://admin.streammly.com/api/v1/package/getpackages"),
+        Uri.parse("http://192.168.1.113:8000/api/v1/package/getpackages"),
         headers: {"Content-Type": "application/json"},
         body: jsonEncode({
           "company_id": companyId,
@@ -175,8 +175,8 @@ class PackagesController extends GetxController {
 
     try {
       final url = Uri.parse(
-        'https://admin.streammly.com/api/v1/package/getfreeadons/?package_id=$packageId',
-        // 'http://192.168.1.113:8000/api/v1/package/getfreeadons/?package_id=$packageId',
+        // 'https://admin.streammly.com/api/v1/package/getfreeadons/?package_id=$packageId',
+        'http://192.168.1.113:8000/api/v1/package/getfreeadons/?package_id=$packageId',
       );
 
       final res = await http.get(
@@ -212,8 +212,8 @@ class PackagesController extends GetxController {
     update();
     try {
       final url = Uri.parse(
-        'https://admin.streammly.com/api/v1/package/getpaidadons/?package_id=$packageId&studio_id=$studioId',
-        // 'http://192.168.1.113:8000/api/v1/package/getpaidadons/?package_id=$packageId&studio_id=$studioId',
+        // 'https://admin.streammly.com/api/v1/package/getpaidadons/?package_id=$packageId&studio_id=$studioId',
+        'http://192.168.1.113:8000/api/v1/package/getpaidadons/?package_id=$packageId&studio_id=$studioId',
       );
       final res = await http.get(
         url,
@@ -482,8 +482,8 @@ class PackagesController extends GetxController {
     try {
       final response = await http.get(
         Uri.parse(
-          "https://admin.streammly.com/api/v1/package/getpopularpackages",
-          // "http://192.168.1.113:8000/api/v1/package/getpopularpackages",
+          // "https://admin.streammly.com/api/v1/package/getpopularpackages",
+          "http://192.168.1.113:8000/api/v1/package/getpopularpackages",
         ),
         headers: {"Content-Type": "application/json"},
       );
@@ -513,8 +513,8 @@ class PackagesController extends GetxController {
                 "image":
                     (pkg["image_upload"] != null &&
                             pkg["image_upload"].isNotEmpty)
-                        ? 'https://admin.streammly.com/${pkg["image_upload"]}'
-                        : 'assets/images/category/vendor_category/Baby.jpg',
+                        // ? 'https://admin.streammly.com/${pkg["image_upload"]}'
+                        // : 'assets/images/category/vendor_category/Baby.jpg',
               };
             }).toList();
         update();
