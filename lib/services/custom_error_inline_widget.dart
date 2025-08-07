@@ -43,9 +43,20 @@ class CommonInlineMessage extends StatelessWidget {
             ElevatedButton(
               onPressed: onPressed,
               style: ElevatedButton.styleFrom(
+                backgroundColor: const Color(0xFF2864A6), // Solid blue fill
+                foregroundColor: Colors.white, // White text
                 minimumSize: const Size.fromHeight(48),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(8),
+                ),
               ),
-              child: Text(btnText),
+
+              child: Text(
+                btnText,
+                style: Theme.of(
+                  context,
+                ).textTheme.labelLarge?.copyWith(color: Colors.white),
+              ),
             ),
           ],
         ),

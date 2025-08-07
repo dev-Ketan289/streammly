@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:streammly/data/repository/booking_repo.dart';
+import 'package:streammly/services/custom_error_inline_widget.dart';
 import 'package:streammly/services/theme.dart';
 import 'package:streammly/views/screens/package/booking/widgets/booking_details.dart';
 import 'package:streammly/views/screens/package/booking/widgets/custom_bookingcard.dart';
@@ -171,13 +172,13 @@ class MyBookings extends StatelessWidget {
     void Function(BookingInfo)? onViewReceipt,
   }) {
     if (bookings.isEmpty) {
-      return Center(
-        child: Text(
-          'No bookings found',
-          style: Theme.of(
-            context,
-          ).textTheme.titleMedium?.copyWith(color: Colors.grey),
-        ),
+      return CommonInlineMessage(
+        imagePath:
+            'assets/images/no_booking.png', // Replace with your actual asset path
+        title: 'No Bookings Yet',
+        btnText: 'Browse Services',
+        onPressed: () {},
+        message: 'You haven’t booked any services yet',
       );
     }
 
