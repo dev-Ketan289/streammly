@@ -33,6 +33,8 @@ class TimeSlotSelector extends StatefulWidget {
 }
 
 class _TimeSlotSelectorState extends State<TimeSlotSelector> {
+    final BookingController controller = Get.find<BookingController>();
+
   TimeOfDay? tempStartTime;
   TimeOfDay? tempEndTime;
   int maxDurationInMinutes = 0;
@@ -214,8 +216,7 @@ class _TimeSlotSelectorState extends State<TimeSlotSelector> {
               ),
             );
           }
-          return StatefulBuilder(
-            builder: (context, setState) {
+        
               return Column(
                 children: [
                   const Padding(
@@ -482,8 +483,8 @@ class _TimeSlotSelectorState extends State<TimeSlotSelector> {
                   const SizedBox(height: 40),
                 ],
               );
-            },
-          );
+            
+          
         },
       ),
     );

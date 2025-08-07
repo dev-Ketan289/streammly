@@ -187,7 +187,7 @@ class _HeaderBannerState extends State<HeaderBanner> {
                       IconButton(
                         icon: SvgPicture.asset(Assets.svgMenu),
                         onPressed: () {
-                          Get.to(() => const ProfilePage(), transition: Transition.leftToRight, duration: const Duration(milliseconds: 800));
+                          Get.to(() => const ProfilePage(), transition: Transition.fadeIn, duration: const Duration(milliseconds: 2000),);
                         },
                       ),
                       const SizedBox(width: 8),
