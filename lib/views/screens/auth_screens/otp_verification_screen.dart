@@ -20,7 +20,7 @@ class OtpScreen extends StatefulWidget {
   State<OtpScreen> createState() => _OtpScreenState();
 }
 
-class _OtpScreenState extends State<OtpScreen> {
+class _OtpScreenState extends State<OtpScreen> with CodeAutoFill {
   String fullNumber = "";
   late String phone;
   final TextEditingController otpTextController = TextEditingController();
@@ -31,6 +31,7 @@ class _OtpScreenState extends State<OtpScreen> {
     phone = Get.find<AuthController>().phoneController.text;
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
+    Get.find<OtpController>().startTimer();
       final String fullPhone = Get.find<AuthController>().phoneController.text;
       phone = fullPhone.replaceAll("+91 ", "");
 
@@ -148,7 +149,10 @@ class _OtpScreenState extends State<OtpScreen> {
                                     const SizedBox(width: 10),
                                     GestureDetector(
                                       onTap: otpController.secondsRemaining == 0
-                                          ? () => otpController.resendOTP(phone)
+                                          ? () {
+                                            Get.find<AuthController>().sendOtp();
+                                            otpController.startTimer();
+                                          }
                                           : null,
                                       child: Text(
                                         "Resend OTP",
@@ -255,5 +259,10 @@ class _OtpScreenState extends State<OtpScreen> {
         ),
       ),
     );
+  }
+  
+  @override
+  void codeUpdated() {
+    otpTextController.text = code??"";
   }
 }

@@ -416,13 +416,7 @@ class _VendorGroupState extends State<VendorGroup> {
                         studioId: widget.studio.id,
                         companyLocation: widget.studio,
                       ),
-                      PackagesPage(
-                        companyId: widget.studio.companyId,
-                        subCategoryId: subCategoryId,
-                        subVerticalId: subVerticalId,
-                        studioId: widget.studio.id,
-                        companyLocation: widget.studio,
-                      ),
+                     
                       hideBottomBar: true,
                     );
 

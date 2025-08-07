@@ -8,6 +8,7 @@ import 'package:fluttertoast/fluttertoast.dart';
 import 'package:get/get.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:sms_autofill/sms_autofill.dart';
 import 'package:streammly/data/repository/auth_repo.dart';
 import 'package:streammly/models/response/response_model.dart';
 import 'package:uuid/uuid.dart';
@@ -118,6 +119,7 @@ class AuthController extends GetxController implements GetxService {
       Response response = await authRepo.sendOtp(phone: phoneController.text);
       if (response.statusCode == 200) {
         loginMethod = 'phone';
+        SmsAutoFill().listenForCode();
         responseModel = ResponseModel(true, "Otp sent successfully");
       } else {
         responseModel = ResponseModel(false, "Failed to send OTP");

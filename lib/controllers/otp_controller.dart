@@ -1,16 +1,13 @@
 import 'dart:async';
-import 'dart:convert';
 import 'dart:developer';
 
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:get/get.dart';
-import 'package:http/http.dart' as http;
 import 'package:streammly/data/repository/auth_repo.dart';
 import 'package:streammly/models/response/response_model.dart';
 import 'package:streammly/views/screens/auth_screens/welcome.dart';
 
-import '../services/constants.dart';
 import '../views/screens/auth_screens/create_user.dart';
 import 'auth_controller.dart';
 
@@ -127,47 +124,4 @@ class OtpController extends GetxController implements GetxService {
     }
   }
 
-  void resendOTP(String phone) async {
-    if (phone == "8111111111") {
-      receivedOTP = "123456";
-      update();
-      startTimer();
-      Fluttertoast.showToast(msg: "Test OTP resent: 123456");
-      return;
-    }
-
-    try {
-      final url = Uri.parse(
-        "${AppConstants.baseUrl}api/v1/user/auth/generateOtp",
-      );
-
-      final response = await http.post(
-        url,
-        headers: {'Content-Type': 'application/json'},
-        body: jsonEncode({"phone": phone}),
-      );
-
-      final responseBody = jsonDecode(response.body);
-
-      if (response.statusCode == 200 && responseBody['success'] == true) {
-        final otpMessage = responseBody['data'] ?? '';
-        final otpCode = RegExp(r'\d{6}').firstMatch(otpMessage)?.group(0) ?? '';
-
-        if (otpCode.isNotEmpty) {
-          receivedOTP = otpCode;
-          update();
-          startTimer();
-          Fluttertoast.showToast(msg: "OTP resent: $otpCode");
-        } else {
-          Fluttertoast.showToast(msg: "OTP format error");
-        }
-      } else {
-        Fluttertoast.showToast(
-          msg: responseBody['message'] ?? "Could not resend OTP",
-        );
-      }
-    } catch (e) {
-      Fluttertoast.showToast(msg: "Could not connect to server");
-    }
-  }
 }

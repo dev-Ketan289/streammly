@@ -3,6 +3,7 @@ import 'dart:io';
 
 import 'package:get/get.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:sms_autofill/sms_autofill.dart';
 import 'package:streammly/data/api/api_client.dart';
 import 'package:streammly/services/constants.dart';
 
@@ -13,7 +14,7 @@ class AuthRepo {
   AuthRepo({required this.sharedPreferences, required this.apiClient});
 
   Future<Response> sendOtp({required String phone}) async {
-    return await apiClient.postData(AppConstants.sendOtp, {"phone": phone});
+    return await apiClient.postData(AppConstants.sendOtp, {"phone": phone,"app_signature":await SmsAutoFill().getAppSignature,});
   }
 
   Future<Response> verifyOtp({
