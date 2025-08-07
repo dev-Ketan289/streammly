@@ -3,6 +3,7 @@ import 'dart:developer';
 
 import 'package:get/get.dart';
 import 'package:http/http.dart' as http;
+import 'package:streammly/services/constants.dart';
 
 import '../models/company/company_location.dart';
 import '../models/package/free_add_on_model.dart';
@@ -79,8 +80,7 @@ class PackagesController extends GetxController {
 
     try {
       final response = await http.post(
-        Uri.parse("https://admin.streammly.com/api/v1/package/getpackages"),
-        // Uri.parse("http://192.168.1.113:8000/api/v1/package/getpackages"),
+        Uri.parse(AppConstants.getPackagesUrl),
         headers: {"Content-Type": "application/json"},
         body: jsonEncode({
           "company_id": companyId,
@@ -175,8 +175,7 @@ class PackagesController extends GetxController {
 
     try {
       final url = Uri.parse(
-        'https://admin.streammly.com/api/v1/package/getfreeadons/?package_id=$packageId',
-        // 'http://192.168.1.113:8000/api/v1/package/getfreeadons/?package_id=$packageId',
+        '${AppConstants.baseUrl}api/v1/package/getfreeadons/?package_id=$packageId',
       );
 
       final res = await http.get(

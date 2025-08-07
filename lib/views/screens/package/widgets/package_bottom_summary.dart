@@ -6,6 +6,7 @@ import 'package:streammly/services/theme.dart';
 
 import '../../../../controllers/auth_controller.dart';
 import '../../../../controllers/package_page_controller.dart';
+import '../../../../services/custom_error_pop_widget.dart';
 import '../booking/booking_page.dart';
 
 class PackagesBottomBar extends StatelessWidget {
@@ -16,7 +17,9 @@ class PackagesBottomBar extends StatelessWidget {
   const PackagesBottomBar({
     super.key,
     required this.controller,
-    required this.companyLocations,required this.companyLocation, required this.companyId,
+    required this.companyLocations,
+    required this.companyLocation,
+    required this.companyId,
   });
 
   @override
@@ -110,29 +113,22 @@ class PackagesBottomBar extends StatelessWidget {
                         : () async {
                           final authController = Get.find<AuthController>();
                           if (!authController.isLoggedIn()) {
-                            final confirmed = await showDialog<bool>(
-                              context: context,
-                              barrierDismissible: false,
-                              builder: (context) {
-                                return AlertDialog(
-                                  title: const Text('Login Required'),
-                                  content: const Text(
-                                    'You need to be logged in to continue. Do you want to login now?',
-                                  ),
-                                  actions: [
-                                    TextButton(
-                                      onPressed:
-                                          () =>
-                                              Navigator.of(context).pop(false),
-                                      child: const Text('Cancel'),
-                                    ),
-                                    ElevatedButton(
-                                      onPressed:
-                                          () => Navigator.of(context).pop(true),
-                                      child: const Text('Login'),
-                                    ),
-                                  ],
-                                );
+                            bool? confirmed;
+
+                            await CommonPopupDialog.show(
+                              context,
+                              imagePath: 'assets/images/access_denied.png',
+                              title: 'Login Required',
+                              message:
+                                  'You need to be logged in to continue. Do you want to login now?',
+                              primaryBtnText: 'Cancel',
+                              onPrimaryPressed: () {
+                                confirmed = false;
+                              },
+                              secondaryBtnText: 'Login',
+                              onSecondaryPressed: () {
+                                confirmed = true;
+                                Navigator.of(context).pop(true);
                               },
                             );
 
@@ -174,7 +170,8 @@ class PackagesBottomBar extends StatelessWidget {
                             BookingPage(
                               packages: enrichedPackages,
                               companyLocations: companyLocations,
-                              companyLocation: companyLocation, companyId: companyId,
+                              companyLocation: companyLocation,
+                              companyId: companyId,
                             ),
                             hideBottomBar: true,
                           );

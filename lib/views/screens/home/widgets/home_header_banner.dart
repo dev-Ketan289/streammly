@@ -352,22 +352,21 @@ class _HomeHeaderBannerState extends State<HomeHeaderBanner> {
                 Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    IconButton(
-                      icon: const Icon(
-                        Icons.arrow_back_ios,
-                        color: Colors.black87,
-                        size: 18,
-                      ),
-                      onPressed: () {
-                        if (pageController.hasClients) {
-                          pageController.previousPage(
-                            duration: const Duration(milliseconds: 300),
-                            curve: Curves.easeInOut,
-                          );
-                        }
-                      },
-                    ),
-
+                    // IconButton(
+                    //   icon: const Icon(
+                    //     Icons.arrow_back_ios,
+                    //     color: Colors.black87,
+                    //     size: 18,
+                    //   ),
+                    //   onPressed: () {
+                    //     if (pageController.hasClients) {
+                    //       pageController.previousPage(
+                    //         duration: const Duration(milliseconds: 300),
+                    //         curve: Curves.easeInOut,
+                    //       );
+                    //     }
+                    //   },
+                    // ),
                     const SizedBox(width: 8),
 
                     Row(
@@ -393,21 +392,21 @@ class _HomeHeaderBannerState extends State<HomeHeaderBanner> {
 
                     const SizedBox(width: 8),
 
-                    IconButton(
-                      icon: const Icon(
-                        Icons.arrow_forward_ios,
-                        color: Colors.black87,
-                        size: 18,
-                      ),
-                      onPressed: () {
-                        if (pageController.hasClients) {
-                          pageController.nextPage(
-                            duration: const Duration(milliseconds: 300),
-                            curve: Curves.easeInOut,
-                          );
-                        }
-                      },
-                    ),
+                    // IconButton(
+                    //   icon: const Icon(
+                    //     Icons.arrow_forward_ios,
+                    //     color: Colors.black87,
+                    //     size: 18,
+                    //   ),
+                    //   onPressed: () {
+                    //     if (pageController.hasClients) {
+                    //       pageController.nextPage(
+                    //         duration: const Duration(milliseconds: 300),
+                    //         curve: Curves.easeInOut,
+                    //       );
+                    //     }
+                    //   },
+                    // ),
                   ],
                 ),
               ],
