@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:get/get.dart';
+import 'package:streammly/controllers/auth_controller.dart';
 
 import '../../../../../controllers/booking_form_controller.dart';
 import '../../../common/widgets/custom_textfield.dart' show CustomTextField;
@@ -9,6 +11,7 @@ class PersonalInfoSection extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    Get.find<AuthController>;
     final theme = Theme.of(context);
     final textColor = theme.colorScheme.onSurface;
     final secondaryTextColor = textColor.withValues(alpha: 0.7);
@@ -60,17 +63,22 @@ class PersonalInfoSection extends StatelessWidget {
               labelText: "Number",
               hintText: '8545254789',
               keyboardType: TextInputType.phone,
+              maxLength: 10, // <--- LIMIT TO 10 CHARACTERS
+              inputFormatters: [
+                FilteringTextInputFormatter.digitsOnly,
+              ], // <--- DIGITS ONLY
               onChanged: (val) => controller.updatePersonalInfo('mobile', val),
               validator: (value) {
                 if (value == null || value.isEmpty) {
                   return 'Please enter your mobile number';
                 }
-                if (!RegExp(r'^\+?\d{10,12}$').hasMatch(value)) {
-                  return 'Please enter a valid mobile number';
+                if (!RegExp(r'^\d{10}$').hasMatch(value)) {
+                  return 'Please enter a valid 10-digit mobile number';
                 }
                 return null;
               },
             ),
+
             Row(
               mainAxisAlignment: MainAxisAlignment.end,
               children: [
@@ -102,19 +110,19 @@ class PersonalInfoSection extends StatelessWidget {
                               initialValue: val,
                               hintText: 'Alternate Mobile No',
                               keyboardType: TextInputType.phone,
+                              maxLength: 10,
+                              inputFormatters: [
+                                FilteringTextInputFormatter.digitsOnly,
+                              ],
                               onChanged: (v) {
                                 controller.alternateMobiles[index] = v;
                                 controller.update();
                               },
                               validator: (value) {
-                                if (value == null || value.isEmpty) {
-                                  if (index == 0)
-                                    return 'This alternate mobile is required';
-                                  // Optional for extras
-                                } else if (!RegExp(
-                                  r'^\+?\d{10,12}$',
-                                ).hasMatch(value)) {
-                                  return 'Please enter a valid mobile number';
+                                if (value != null && value.isNotEmpty) {
+                                  if (!RegExp(r'^\d{10}$').hasMatch(value)) {
+                                    return 'Please enter a valid 10-digit number';
+                                  }
                                 }
                                 return null;
                               },
