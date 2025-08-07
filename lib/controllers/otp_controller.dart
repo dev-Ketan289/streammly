@@ -16,6 +16,12 @@ class OtpController extends GetxController implements GetxService {
   OtpController({required this.authRepo});
 
   int secondsRemaining = 30;
+  String otpCode = "";
+  udpateOtpCode(String otp){
+    if(otpCode != otp ){
+      otpCode = otp ; update();
+    }
+  }
   String receivedOTP = '';
   bool shakeOnError = false;
   bool isLoading = false;
