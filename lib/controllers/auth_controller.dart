@@ -116,9 +116,9 @@ class AuthController extends GetxController implements GetxService {
     update();
     ResponseModel responseModel;
     try {
-       await SmsAutoFill().listenForCode().then((value){
+      await SmsAutoFill().listenForCode().then((value) {
         log("listinnign for code ");
-       });
+      });
       Response response = await authRepo.sendOtp(phone: phoneController.text);
       if (response.statusCode == 200) {
         loginMethod = 'phone';
