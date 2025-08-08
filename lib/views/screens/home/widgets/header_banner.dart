@@ -231,15 +231,11 @@ class _HeaderBannerState extends State<HeaderBanner> {
                       IconButton(
                         icon: SvgPicture.asset(Assets.svgMenu),
                         onPressed: () {
-<<<<<<< HEAD
-                          Get.to(() => const ProfilePage(), transition: Transition.fadeIn, duration: const Duration(milliseconds: 2000),);
-=======
                           Get.to(
                             () => const ProfilePage(),
-                            transition: Transition.leftToRight,
+                            // transition: Transition.fadeIn,
                             duration: const Duration(milliseconds: 300),
                           );
->>>>>>> c023c8ed04a6e4749fc979fab105d594398e9322
                         },
                       ),
                       const SizedBox(width: 8),
