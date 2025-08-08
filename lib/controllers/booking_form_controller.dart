@@ -52,6 +52,7 @@ class BookingController extends GetxController {
   void onInit() {
     super.onInit();
     autofillFromUserProfile();
+    
     fetchBookings();
   }
 
