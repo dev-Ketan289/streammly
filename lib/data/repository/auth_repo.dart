@@ -14,7 +14,10 @@ class AuthRepo {
   AuthRepo({required this.sharedPreferences, required this.apiClient});
 
   Future<Response> sendOtp({required String phone}) async {
-    return await apiClient.postData(AppConstants.sendOtp, {"phone": phone,"app_signature":await SmsAutoFill().getAppSignature,});
+    return await apiClient.postData(AppConstants.sendOtp, {
+      "phone": phone,
+      "app_signature": await SmsAutoFill().getAppSignature,
+    });
   }
 
   Future<Response> verifyOtp({
@@ -51,18 +54,24 @@ class AuthRepo {
     required String phone,
     String? dob,
     String? gender,
+    String? alternatePhone, // Add alternate phone parameter
     File? profileImage,
     File? coverImage,
   }) async {
     // Prepare form fields
     Map<String, String> fields = {'name': name, 'email': email, 'phone': phone};
 
+    // Add optional fields only if they are provided
     if (dob != null) {
       fields['dob'] = dob;
     }
 
     if (gender != null) {
       fields['gender'] = gender;
+    }
+
+    if (alternatePhone != null && alternatePhone.isNotEmpty) {
+      fields['alternate_phone'] = alternatePhone;
     }
 
     // Call the multipart upload API

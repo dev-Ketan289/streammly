@@ -24,6 +24,19 @@ class BookingController extends GetxController {
   AuthController get authController => Get.find<AuthController>();
   PackagesController get packagesController => Get.find<PackagesController>();
 
+  // bool _personalInfoLoading = false;
+  // bool _otpLoading = false;
+  bool _slotsLoading = false;
+  // bool _bookingsLoading = false;
+  // bool _submitLoading = false;
+
+  // Getters for loading states
+  // bool get isPersonalInfoLoading => _personalInfoLoading;
+  // bool get isOtpLoading => _otpLoading;
+  bool get isSlotsLoading => _slotsLoading;
+  // bool get isBookingsLoading => _bookingsLoading;
+  // bool get isSubmitLoading => _submitLoading;
+
   final BookingRepo bookingrepo;
 
   // Text controllers - properly managed lifecycle
@@ -277,7 +290,6 @@ class BookingController extends GetxController {
   }
 
   void verifyAlternateMobileOTP() async {
-    // Removed String otp parameter
     final otp = otpDigits.join('');
     if (otp.isEmpty || otp.length != 6) {
       Get.snackbar('Error', 'Please enter valid 6-digit OTP');
@@ -286,7 +298,7 @@ class BookingController extends GetxController {
 
     try {
       isLoading = true;
-      update();
+      update(['otp_section']);
 
       final mobileNumber = alternateMobiles[0];
 
@@ -302,7 +314,7 @@ class BookingController extends GetxController {
         ),
       );
 
-      final response = await otpController.verifyOtp(
+      final response = await otpController.verifyAlternateMobileOtp(
         phone: mobileNumber,
         otp: otp,
       );
@@ -318,13 +330,8 @@ class BookingController extends GetxController {
           otpDigits[i] = '';
         }
 
-        update();
-        Get.snackbar(
-          'Verified',
-          'Mobile number verified successfully',
-          backgroundColor: Colors.green,
-          colorText: Colors.white,
-        );
+        // NEW: Update profile with verified alternate number
+        await updateAlternateNumberInProfile();
       } else {
         // Clear OTP fields on error
         for (int i = 0; i < otpControllers.length; i++) {
@@ -338,8 +345,6 @@ class BookingController extends GetxController {
           colorText: Colors.white,
         );
       }
-
-      Get.delete<OtpController>();
     } catch (e) {
       // Clear OTP fields on exception
       for (int i = 0; i < otpControllers.length; i++) {
@@ -349,6 +354,62 @@ class BookingController extends GetxController {
       Get.snackbar(
         'Error',
         'Failed to verify OTP. Please try again.',
+        backgroundColor: Colors.red,
+        colorText: Colors.white,
+      );
+    } finally {
+      isLoading = false;
+      update(['otp_section']);
+    }
+  }
+
+  Future<void> updateAlternateNumberInProfile() async {
+    if (!isAlternateMobileVerified ||
+        alternateMobiles.isEmpty ||
+        alternateMobiles[0].isEmpty) {
+      Get.snackbar('Error', 'Alternate number not verified');
+      return;
+    }
+
+    try {
+      isLoading = true;
+      update();
+
+      final userProfile = authController.userProfile;
+      if (userProfile == null) {
+        Get.snackbar('Error', 'User profile not found');
+        return;
+      }
+
+      // Update profile with alternate phone as separate field
+      final response = await authController.updateFullUserProfile(
+        name: userProfile.name ?? '',
+        email: userProfile.email ?? '',
+        phone: userProfile.phone ?? '', // Keep original phone
+        alternatePhone: alternateMobiles[0], // Add verified alternate phone
+        dob: userProfile.dob,
+        gender: userProfile.gender,
+      );
+
+      if (response != null && response.isSuccess) {
+        Get.snackbar(
+          'Success',
+          'Alternate number updated successfully',
+          backgroundColor: Colors.green,
+          colorText: Colors.white,
+        );
+      } else {
+        Get.snackbar(
+          'Error',
+          response?.message ?? 'Failed to update profile',
+          backgroundColor: Colors.red,
+          colorText: Colors.white,
+        );
+      }
+    } catch (e) {
+      Get.snackbar(
+        'Error',
+        'Something went wrong while updating profile',
         backgroundColor: Colors.red,
         colorText: Colors.white,
       );
@@ -468,7 +529,6 @@ class BookingController extends GetxController {
   }
 
   // void addAlternateEmail() {
-  //   // Do nothing or show a message that only one alternate is allowed
   //   Get.snackbar("Info", "Only one alternate email address is allowed.");
   // }
 
@@ -1019,10 +1079,11 @@ class BookingController extends GetxController {
     required String studioId,
     required String typeId,
   }) async {
-    isLoading = true;
+    // Use specific loading flag instead of global isLoading
+    _slotsLoading = true;
     timeSlots.clear();
     startTime.clear();
-    update();
+    update(['slots']); // Only update slots section
 
     ResponseModel? responseModel;
     try {
@@ -1032,59 +1093,86 @@ class BookingController extends GetxController {
         studioId: studioId,
         typeId: typeId,
       );
+
       log(
         "Slots response: ${response.bodyString}",
         name: "fetchAvailableSlots",
       );
+
       if (response.statusCode == 200) {
         final openHours = response.body["data"]["open_hours"] as List;
         log("Open hours: $openHours", name: "fetchAvailableSlots");
+
         bufferTime =
             int.tryParse(
               response.body["data"]["studio_location"]["buffer_time"] ?? "0",
             ) ??
             0;
+
         timeSlots = openHours.map((e) => Slot.fromJson(e)).toList();
 
+        // Build startTime array
         for (var i = 0; i < timeSlots.length; i++) {
           startTime.add(timeSlots[i].startTime);
           if (i == timeSlots.length - 1 && timeSlots[i].endTime != null) {
-            startTime.add(timeSlots[i].endTime); // Include endTime of last slot
+            startTime.add(timeSlots[i].endTime);
             log(
               "Last slot endTime: ${timeSlots[i].endTime!.format(Get.context!)}",
               name: "fetchAvailableSlots",
             );
           }
         }
+
+        // Add final slot if timeSlots is not empty
         if (timeSlots.isNotEmpty) {
+          final lastSlot = timeSlots.last;
           timeSlots.add(
             Slot(
-              booked: timeSlots[timeSlots.length - 1].booked,
-              breakTime: timeSlots[timeSlots.length - 1].breakTime,
-              blockHome: timeSlots[timeSlots.length - 1].blockHome,
-              blockIndoor: timeSlots[timeSlots.length - 1].blockIndoor,
-              blockOutdoor: timeSlots[timeSlots.length - 1].blockOutdoor,
-              startTime: timeSlots[timeSlots.length - 1].endTime,
-              endTime: timeSlots[timeSlots.length - 1].endTime,
+              booked: lastSlot.booked,
+              breakTime: lastSlot.breakTime,
+              blockHome: lastSlot.blockHome,
+              blockIndoor: lastSlot.blockIndoor,
+              blockOutdoor: lastSlot.blockOutdoor,
+              startTime: lastSlot.endTime,
+              endTime: lastSlot.endTime,
             ),
           );
         }
+
         responseModel = ResponseModel(true, "Slots fetched successfully");
       } else {
         timeSlots.clear();
+        startTime.clear();
         responseModel = ResponseModel(
           false,
           "Failed to fetch slots: ${response.statusText}",
         );
-        Get.snackbar("Error", "Failed to fetch slots: ${response.statusText}");
+        // Get.snackbar(
+        //   "Error",
+        //   "Failed to fetch slots: ${response.statusText}",
+        //   snackPosition: SnackPosition.BOTTOM,
+        //   backgroundColor: Colors.redAccent,
+        //   colorText: Colors.white,
+        // );
       }
     } catch (e) {
+      timeSlots.clear();
+      startTime.clear();
       responseModel = ResponseModel(false, "Error fetching slots: $e");
-      Get.snackbar("Error", "Unable to fetch slots. Please try again later.");
+      // Get.snackbar(
+      //   "Error",
+      //   "Unable to fetch slots. Please try again later.",
+      //   snackPosition: SnackPosition.BOTTOM,
+      //   backgroundColor: Colors.redAccent,
+      //   colorText: Colors.white,
+      // );
       log(e.toString(), name: "fetchAvailableSlots");
+    } finally {
+      // Always reset loading state in finally block
+      _slotsLoading = false;
+      update(['slots']); // Only update slots section
     }
-    isLoading = false;
-    update();
+
     return responseModel;
   }
 
