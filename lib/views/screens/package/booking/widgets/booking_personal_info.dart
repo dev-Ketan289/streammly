@@ -1,6 +1,9 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
+import 'package:streammly/services/theme.dart';
 
 import '../../../../../controllers/booking_form_controller.dart';
 
@@ -42,7 +45,6 @@ class PersonalInfoSection extends StatelessWidget {
                   ),
                 ),
                 const SizedBox(width: 8),
-                _verifiedTag(),
               ],
             ),
 
@@ -62,21 +64,8 @@ class PersonalInfoSection extends StatelessWidget {
                 Expanded(
                   child: Stack(
                     children: [
-                      _customEditableField(
-                        initialValue:
-                            controller.alternateMobiles.isNotEmpty
-                                ? controller.alternateMobiles[0]
-                                : '',
-                        hintText: '8545254789',
-                        onChanged: (v) {
-                          if (controller.alternateMobiles.isEmpty) {
-                            controller.alternateMobiles.add(v);
-                          } else {
-                            controller.alternateMobiles[0] = v;
-                          }
-                          controller.update();
-                        },
-                      ),
+                      OTPVerificationWidget(),
+
                       Positioned(
                         left: 14,
                         top: 0,
@@ -97,7 +86,6 @@ class PersonalInfoSection extends StatelessWidget {
                   ),
                 ),
                 const SizedBox(width: 8),
-                _buildVerifyButton(controller, context),
               ],
             ),
 
@@ -119,7 +107,6 @@ class PersonalInfoSection extends StatelessWidget {
                   ),
                 ),
                 const SizedBox(width: 8),
-                _verifiedTag(),
               ],
             ),
           ],
@@ -195,42 +182,101 @@ class PersonalInfoSection extends StatelessWidget {
     required String hintText,
     required Function(String) onChanged,
   }) {
-    return TextField(
-      controller: TextEditingController(text: initialValue),
-      keyboardType: TextInputType.phone,
-      maxLength: 10,
-      style: const TextStyle(
-        fontSize: 14,
-        fontWeight: FontWeight.w500,
-        color: Color(0xFF111827),
-      ),
-      inputFormatters: [FilteringTextInputFormatter.digitsOnly],
-      decoration: InputDecoration(
-        counterText: '',
-        hintText: hintText,
-        hintStyle: const TextStyle(
-          color: Color(0xFF9CA3AF),
-          fontWeight: FontWeight.w500,
-          fontSize: 14,
+    return Stack(
+      children: [
+        // Container placed below TextField
+        Positioned(
+          bottom: 100,
+          left: 10,
+          right: 10,
+          child: Container(
+            width: 377,
+            height: 72,
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(10),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.grey.withOpacity(0.1),
+                  spreadRadius: 1,
+                  blurRadius: 3,
+                  offset: Offset(0, 2),
+                ),
+              ],
+            ),
+          ),
         ),
-        filled: true,
-        fillColor: Colors.white,
-        contentPadding: const EdgeInsets.only(
-          left: 44,
-          right: 12,
-          top: 14,
-          bottom: 14,
+        // TextField
+        TextField(
+          controller: TextEditingController(text: initialValue),
+          keyboardType: TextInputType.phone,
+          maxLength: 10,
+          style: const TextStyle(
+            fontSize: 14,
+            fontWeight: FontWeight.w500,
+            color: Color(0xFF111827),
+          ),
+          inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+          decoration: InputDecoration(
+            counterText: '',
+            hintText: hintText,
+            hintStyle: const TextStyle(
+              color: Color(0xFF9CA3AF),
+              fontWeight: FontWeight.w500,
+              fontSize: 14,
+            ),
+            filled: true,
+            fillColor: Colors.transparent,
+            contentPadding: const EdgeInsets.only(
+              left: 44,
+              right: 80, // Increased to accommodate buttons
+              top: 14,
+              bottom: 14,
+            ),
+            border: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(10),
+              borderSide: const BorderSide(
+                color: Color(0xFFE5E7EB),
+                width: 1.5,
+              ),
+            ),
+            enabledBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(10),
+              borderSide: const BorderSide(
+                color: Color(0xFFE5E7EB),
+                width: 1.5,
+              ),
+            ),
+          ),
+          onChanged: onChanged,
         ),
-        border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(10),
-          borderSide: const BorderSide(color: Color(0xFFE5E7EB), width: 1.5),
+        // Clear Button
+        Positioned(
+          right: 40,
+          top: 0,
+          bottom: 0,
+          child: IconButton(
+            icon: Icon(Icons.clear, color: Color(0xFF9CA3AF), size: 20),
+            onPressed: () {
+              // Clear the text field
+              onChanged('');
+            },
+          ),
         ),
-        enabledBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(10),
-          borderSide: const BorderSide(color: Color(0xFFE5E7EB), width: 1.5),
+        // Confirm Button
+        Positioned(
+          right: 10,
+          top: 0,
+          bottom: 0,
+          child: IconButton(
+            icon: Icon(Icons.check, color: Color(0xFF10B981), size: 20),
+            onPressed: () {
+              // Handle confirm action
+              // You might want to add a callback for confirm action
+            },
+          ),
         ),
-      ),
-      onChanged: onChanged,
+      ],
     );
   }
 
@@ -400,6 +446,162 @@ class PersonalInfoSection extends StatelessWidget {
           ],
         ),
       ],
+    );
+  }
+}
+
+class OTPVerificationWidget extends StatefulWidget {
+  @override
+  _OTPVerificationWidgetState createState() => _OTPVerificationWidgetState();
+}
+
+class _OTPVerificationWidgetState extends State<OTPVerificationWidget> {
+  final TextEditingController _phoneController = TextEditingController(
+    text: '+91 8545254789',
+  );
+  final List<TextEditingController> _otpControllers = List.generate(
+    6,
+    (_) => TextEditingController(),
+  );
+  bool _isVerified = false;
+  int _resendTimer = 30;
+
+  @override
+  void initState() {
+    super.initState();
+    _startTimer();
+  }
+
+  void _startTimer() {
+    const oneSec = Duration(seconds: 1);
+    Timer.periodic(oneSec, (Timer timer) {
+      if (_resendTimer == 0) {
+        timer.cancel();
+      } else {
+        setState(() {
+          _resendTimer--;
+        });
+      }
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      decoration: BoxDecoration(
+        color: Colors.white,
+        border: Border.all(color: Colors.grey),
+        borderRadius: BorderRadius.circular(10),
+      ),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 10),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Stack(
+              alignment: Alignment.centerRight,
+              children: [
+                TextField(
+                  controller: _phoneController,
+                  keyboardType: TextInputType.phone,
+                  decoration: InputDecoration(
+                    label: Text('Alternate Mobile Number'),
+                    hintText: '+91 1234567890',
+                    border: OutlineInputBorder(),
+                    contentPadding: EdgeInsets.symmetric(
+                      vertical: 12,
+                      horizontal: 12,
+                    ),
+                  ),
+                  enabled: !_isVerified,
+                ),
+                Positioned(
+                  right: 8,
+                  child: ElevatedButton(
+                    onPressed:
+                        _isVerified
+                            ? null
+                            : () {
+                              setState(() {
+                                _isVerified = true;
+                              });
+                            },
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: _isVerified ? Colors.green : Colors.blue,
+                      fixedSize: Size(80, 40),
+                    ),
+                    child: Text(
+                      _isVerified ? 'Verified' : 'Send OTP',
+                      style: TextStyle(color: Colors.white, fontSize: 14),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+            SizedBox(height: 12),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              children: List.generate(
+                6,
+                (index) => SizedBox(
+                  width: 32, // Reduced width for smaller OTP fields
+                  child: TextField(
+                    controller: _otpControllers[index],
+                    keyboardType: TextInputType.number,
+                    textAlign: TextAlign.center,
+                    maxLength: 1,
+                    style: TextStyle(fontSize: 14), // Smaller font size
+                    decoration: InputDecoration(
+                      counterText: '',
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(
+                          6,
+                        ), // Smaller border radius
+                      ),
+                      contentPadding: EdgeInsets.symmetric(
+                        vertical: 8, // Reduced padding
+                        horizontal: 4,
+                      ),
+                    ),
+                    inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+                    onChanged: (value) {
+                      if (value.length == 1 && index < 5) {
+                        FocusScope.of(context).nextFocus();
+                      }
+                    },
+                  ),
+                ),
+              ),
+            ),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Icon(Icons.timer, size: 20), // Slightly smaller icon
+                SizedBox(width: 6),
+                Text(
+                  'Resend code in 00:$_resendTimer',
+                  style: TextStyle(fontSize: 10), // Smaller text
+                ),
+                TextButton(
+                  onPressed:
+                      _resendTimer > 0
+                          ? null
+                          : () {
+                            setState(() {
+                              _resendTimer = 30;
+                              _startTimer();
+                            });
+                          },
+                  child: Text(
+                    'Resend OTP',
+                    style: TextStyle(fontSize: 10), // Smaller text
+                  ),
+                ),
+              ],
+            ),
+          ],
+        ),
+      ),
     );
   }
 }
