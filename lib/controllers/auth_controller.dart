@@ -73,6 +73,7 @@ class AuthController extends GetxController implements GetxService {
     String? dob,
     String? gender,
     required String phone,
+    String? alternatePhone, // Add this parameter
     File? profileImage,
     File? coverImage,
   }) async {
@@ -88,6 +89,7 @@ class AuthController extends GetxController implements GetxService {
         dob: dob,
         gender: gender,
         phone: phone,
+        alternatePhone: alternatePhone, // Pass to repo
         profileImage: profileImage,
         coverImage: coverImage,
       );

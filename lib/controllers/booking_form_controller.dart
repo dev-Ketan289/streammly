@@ -314,18 +314,10 @@ class BookingController extends GetxController {
         ),
       );
 
-      // Use the new method (Option 1) or pass shouldNavigate: false (Option 2)
       final response = await otpController.verifyAlternateMobileOtp(
         phone: mobileNumber,
         otp: otp,
       );
-
-      // OR if using Option 2:
-      // final response = await otpController.verifyOtp(
-      //   phone: mobileNumber,
-      //   otp: otp,
-      //   shouldNavigate: false,
-      // );
 
       if (response.isSuccess) {
         _otpTimer?.cancel();
@@ -338,12 +330,8 @@ class BookingController extends GetxController {
           otpDigits[i] = '';
         }
 
-        Get.snackbar(
-          'Verified',
-          'Mobile number verified successfully',
-          backgroundColor: Colors.green,
-          colorText: Colors.white,
-        );
+        // NEW: Update profile with verified alternate number
+        await updateAlternateNumberInProfile();
       } else {
         // Clear OTP fields on error
         for (int i = 0; i < otpControllers.length; i++) {
@@ -357,9 +345,6 @@ class BookingController extends GetxController {
           colorText: Colors.white,
         );
       }
-
-      // Don't delete the controller - let GetX handle lifecycle
-      // Get.delete<OtpController>();
     } catch (e) {
       // Clear OTP fields on exception
       for (int i = 0; i < otpControllers.length; i++) {
@@ -375,6 +360,62 @@ class BookingController extends GetxController {
     } finally {
       isLoading = false;
       update(['otp_section']);
+    }
+  }
+
+  Future<void> updateAlternateNumberInProfile() async {
+    if (!isAlternateMobileVerified ||
+        alternateMobiles.isEmpty ||
+        alternateMobiles[0].isEmpty) {
+      Get.snackbar('Error', 'Alternate number not verified');
+      return;
+    }
+
+    try {
+      isLoading = true;
+      update();
+
+      final userProfile = authController.userProfile;
+      if (userProfile == null) {
+        Get.snackbar('Error', 'User profile not found');
+        return;
+      }
+
+      // Update profile with alternate phone as separate field
+      final response = await authController.updateFullUserProfile(
+        name: userProfile.name ?? '',
+        email: userProfile.email ?? '',
+        phone: userProfile.phone ?? '', // Keep original phone
+        alternatePhone: alternateMobiles[0], // Add verified alternate phone
+        dob: userProfile.dob,
+        gender: userProfile.gender,
+      );
+
+      if (response != null && response.isSuccess) {
+        Get.snackbar(
+          'Success',
+          'Alternate number updated successfully',
+          backgroundColor: Colors.green,
+          colorText: Colors.white,
+        );
+      } else {
+        Get.snackbar(
+          'Error',
+          response?.message ?? 'Failed to update profile',
+          backgroundColor: Colors.red,
+          colorText: Colors.white,
+        );
+      }
+    } catch (e) {
+      Get.snackbar(
+        'Error',
+        'Something went wrong while updating profile',
+        backgroundColor: Colors.red,
+        colorText: Colors.white,
+      );
+    } finally {
+      isLoading = false;
+      update();
     }
   }
 
