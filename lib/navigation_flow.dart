@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_svg/svg.dart';
+import 'package:get/get.dart';
 import 'package:streammly/generated/assets.dart';
 import 'package:streammly/services/coming_soon_page.dart';
 import 'package:streammly/views/screens/home/home_screen.dart';
@@ -9,7 +10,9 @@ import 'package:streammly/views/screens/package/booking/my_bookings.dart';
 import 'services/custom_exit_dailogue.dart';
 
 class NavigationFlow extends StatefulWidget {
-  const NavigationFlow({super.key});
+  const NavigationFlow({super.key, this.initialIndex});
+
+  final int? initialIndex;
 
   @override
   State<NavigationFlow> createState() => NavigationFlowState();
@@ -25,6 +28,26 @@ class NavigationFlowState extends State<NavigationFlow> {
 
   final List<int> _navigationHistory = [0];
   int _currentIndex = 0;
+
+  @override
+  void initState() {
+    super.initState();
+
+    // Handle initialIndex parameter
+    if (widget.initialIndex != null) {
+      _currentIndex = widget.initialIndex!;
+      _navigationHistory.clear();
+      _navigationHistory.add(_currentIndex);
+    }
+
+    // Also handle Get.arguments for backward compatibility
+    final args = Get.arguments;
+    if (args is int) {
+      _currentIndex = args;
+      _navigationHistory.clear();
+      _navigationHistory.add(_currentIndex);
+    }
+  }
 
   void pushToCurrentTab(Widget page, {bool hideBottomBar = false}) {
     bottomBarStack.add(!hideBottomBar);
