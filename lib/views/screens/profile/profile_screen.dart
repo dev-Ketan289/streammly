@@ -6,7 +6,7 @@ import 'package:get/get.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:streammly/controllers/auth_controller.dart';
 import 'package:streammly/generated/assets.dart';
-import 'package:streammly/views/screens/profile/components/custom_textfield.dart';
+import '../common/widgets/custom_textfield.dart';
 
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
@@ -300,7 +300,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       /// Username
                       CustomTextField(
                         controller: _usernameController,
-                        label: 'Username',
+                        labelText: 'Username',
                         validator: (value) {
                           if (value == null || value.trim().isEmpty) {
                             return 'Username is required';
@@ -333,7 +333,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                             child: CustomTextField(
                               controller: _mobileController,
                               keyboardType: TextInputType.phone,
-                              label: 'Enter Mobile no.',
+                              labelText: 'Enter Mobile no.',
                               validator: (value) {
                                 if (value == null || value.trim().isEmpty) {
                                   return 'Mobile number is required';
@@ -354,7 +354,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       CustomTextField(
                         controller: _emailController,
                         keyboardType: TextInputType.emailAddress,
-                        label: 'Enter Email',
+                        labelText: 'Enter Email',
                         validator: (value) {
                           if (value == null || value.trim().isEmpty) {
                             return 'Email is required';
@@ -371,7 +371,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       /// Date of Birth
                       CustomTextField(
                         controller: _dobController,
-                        label: 'Enter Date of Birth',
+                        labelText: 'Enter Date of Birth',
                         readOnly: true,
                         onTap: () async {
                           FocusScope.of(context).requestFocus(FocusNode());

@@ -8,6 +8,7 @@ import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:google_maps_webservice2/places.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import '../views/screens/common/widgets/add_new_address.dart';
 import 'booking_form_controller.dart';
 import 'category_controller.dart';
 import 'company_controller.dart';
@@ -68,6 +69,26 @@ class LocationController extends GetxController {
     }
     update();
   }
+
+  Future<void> updateSavedAddress(String id, AddressModel updated) async {
+    final index = savedAddresses.indexWhere((a) => a.id == id);
+    if (index != -1) {
+      savedAddresses[index] = SavedAddress(
+        id: id,
+        title: savedAddresses[index].title,
+        address:
+        '${updated.line1}, ${updated.line2}, ${updated.city}, ${updated.state}, ${updated.pincode}',
+        lat: savedAddresses[index].lat,
+        lng: savedAddresses[index].lng,
+        type: savedAddresses[index].type,
+        createdAt: savedAddresses[index].createdAt,
+      );
+      await _saveSavedAddresses();
+      update(); // 👈 important so UI refreshes
+      Get.snackbar("Success", "Address updated successfully");
+    }
+  }
+
 
 
 

@@ -7,6 +7,7 @@ import 'package:streammly/services/coming_soon_page.dart';
 import 'package:streammly/views/screens/home/home_screen.dart';
 import 'package:streammly/views/screens/package/booking/my_bookings.dart';
 
+import 'controllers/home_screen_controller.dart';
 import 'services/custom_exit_dailogue.dart';
 
 class NavigationFlow extends StatefulWidget {
@@ -85,11 +86,17 @@ class NavigationFlowState extends State<NavigationFlow> {
 
   void _onTap(int index) {
     if (_currentIndex == index) {
-      // Double-tap detected: go to root of the tapped index and clear history up to that index
+      // Already on the same tab → pop to root
       navigatorKeys[index].currentState?.popUntil((route) => route.isFirst);
+
+      if (index == 0) {
+        // ✅ Refresh Home tab data
+        Get.find<HomeController>().refreshHome();
+      }
+
       setState(() {
         _navigationHistory.clear();
-        _navigationHistory.add(index); // Reset to the tapped index
+        _navigationHistory.add(index);
         _currentIndex = index;
       });
     } else {
@@ -99,6 +106,7 @@ class NavigationFlowState extends State<NavigationFlow> {
       });
     }
   }
+
 
   Widget _buildOffstageNavigator(int index, Widget child) {
     return Offstage(

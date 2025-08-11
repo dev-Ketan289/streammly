@@ -27,36 +27,34 @@ class EnterLocationManuallyScreen extends StatelessWidget {
           return Stack(
             children: [
               /// ---------- MAP BACKGROUND ----------
-              GetBuilder<LocationController>(
-                builder: (_) => GoogleMap(
-                  initialCameraPosition: CameraPosition(
-                    target: LatLng(
+              GoogleMap(
+                initialCameraPosition: CameraPosition(
+                  target: LatLng(
+                    controller.lat,
+                    controller.lng,
+                  ),
+                  zoom: 15,
+                ),
+                onMapCreated: (mapController) {
+                  controller.setMapController(mapController);
+                },
+                onTap: (LatLng position) {
+                  controller.updateLocation(
+                    position.latitude,
+                    position.longitude,
+                  );
+                },
+                markers: {
+                  Marker(
+                    markerId: const MarkerId("selected_location"),
+                    position: LatLng(
                       controller.lat,
                       controller.lng,
                     ),
-                    zoom: 15,
                   ),
-                  onMapCreated: (mapController) {
-                    controller.setMapController(mapController);
-                  },
-                  onTap: (LatLng position) {
-                    controller.updateLocation(
-                      position.latitude,
-                      position.longitude,
-                    );
-                  },
-                  markers: {
-                    Marker(
-                      markerId: const MarkerId("selected_location"),
-                      position: LatLng(
-                        controller.lat,
-                        controller.lng,
-                      ),
-                    ),
-                  },
-                  myLocationEnabled: true,
-                  myLocationButtonEnabled: true,
-                ),
+                },
+                myLocationEnabled: true,
+                myLocationButtonEnabled: true,
               ),
 
               /// ---------- SEARCH BAR ON TOP ----------
@@ -210,12 +208,11 @@ class EnterLocationManuallyScreen extends StatelessWidget {
                           Container(
                             padding: const EdgeInsets.all(12),
                             decoration: BoxDecoration(
-                              color: colorScheme.primary
-                                  .withValues(alpha: 0.1),
+                              color: colorScheme.primary.withValues(alpha: 0.1),
                               borderRadius: BorderRadius.circular(12),
                               border: Border.all(
-                                color: colorScheme.primary
-                                    .withValues(alpha: 0.3),
+                                color:
+                                colorScheme.primary.withValues(alpha: 0.3),
                               ),
                             ),
                             child: Row(
@@ -241,14 +238,11 @@ class EnterLocationManuallyScreen extends StatelessWidget {
                                           fontWeight: FontWeight.w500,
                                         ),
                                       ),
-                                      GetBuilder<LocationController>(
-                                        builder: (_) => Text(
-                                          controller
-                                              .formattedCurrentLocation,
-                                          style: theme.textTheme.bodySmall!
-                                              .copyWith(
-                                              color:
-                                              Colors.grey[600]),
+                                      Text(
+                                        controller.formattedCurrentLocation,
+                                        style:
+                                        theme.textTheme.bodySmall!.copyWith(
+                                          color: Colors.grey[600],
                                         ),
                                       ),
                                     ],
@@ -269,32 +263,60 @@ class EnterLocationManuallyScreen extends StatelessWidget {
                           ),
                           const SizedBox(height: 8),
 
-                          _buildSavedAddressTile(
-                            context,
-                            icon: Icons.home,
-                            title: "Home",
-                            subtitle:
-                            "203/A, Avisha Building, Girgaon, Mumbai",
-                            onTap: () => controller.updateLocation(
-                                18.9547, 72.8156),
-                          ),
-                          _buildSavedAddressTile(
-                            context,
-                            icon: Icons.work,
-                            title: "Work",
-                            subtitle:
-                            "104, Dinkar Co-Op Society, Mahim, Mumbai",
-                            onTap: () => controller.updateLocation(
-                                19.0330, 72.8397),
-                          ),
+                          // ✅ DYNAMIC LIST
+                          ...controller.savedAddresses.map((saved) {
+                            return _buildSavedAddressTile(
+                              context,
+                              icon: saved.type.icon,
+                              title: saved.title,
+                              subtitle: saved.address,
+                              onTap: () => controller.updateLocation(
+                                  saved.lat, saved.lng),
+                              onEdit: () {
+                                Get.to(() => AddressPage(
+                                  mode: AddressPageMode.edit,
+                                  existingAddress: AddressModel(
+                                    line1: saved.address,
+                                    line2: '',
+                                    city: '',
+                                    state: '',
+                                    pincode: '',
+                                    isPrimary: false,
+                                  ),
+                                ))?.then((updated) {
+                                  if (updated is AddressModel) {
+                                    controller.updateSavedAddress(
+                                        saved.id, updated);
+                                  }
+                                });
+                              },
+                            );
+                          }).toList(),
 
                           const SizedBox(height: 8),
 
                           TextButton.icon(
-                            onPressed: () =>
-                                Get.to(() => const AddNewAddressScreen()),
-                            icon: Icon(Icons.add,
-                                color: colorScheme.primary),
+                            onPressed: () {
+                              Get.to(() => AddressPage(
+                                mode: AddressPageMode.add,
+                              ))?.then((updated) {
+                                if (updated is AddressModel) {
+                                  controller.addSavedAddress(SavedAddress(
+                                    id: DateTime.now().millisecondsSinceEpoch
+                                        .toString(),
+                                    title: updated.isPrimary
+                                        ? "Primary"
+                                        : "Custom",
+                                    address:
+                                    '${updated.line1}, ${updated.line2}, ${updated.city}, ${updated.state}, ${updated.pincode}',
+                                    lat: controller.lat,
+                                    lng: controller.lng,
+                                    type: AddressType.other,
+                                  ));
+                                }
+                              });
+                            },
+                            icon: Icon(Icons.add, color: colorScheme.primary),
                             label: Text(
                               "Add New Address",
                               style: theme.textTheme.bodyMedium!.copyWith(
@@ -331,8 +353,7 @@ class EnterLocationManuallyScreen extends StatelessWidget {
                               ),
                               child: Text(
                                 "Confirm Location",
-                                style:
-                                theme.textTheme.bodyLarge!.copyWith(
+                                style: theme.textTheme.bodyLarge!.copyWith(
                                   color: Colors.white,
                                   fontWeight: FontWeight.w500,
                                 ),
@@ -360,6 +381,7 @@ class EnterLocationManuallyScreen extends StatelessWidget {
         required String title,
         required String subtitle,
         required VoidCallback onTap,
+        VoidCallback? onEdit,
       }) {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
@@ -383,13 +405,16 @@ class EnterLocationManuallyScreen extends StatelessWidget {
         ),
         subtitle: Text(
           subtitle,
-          style: theme.textTheme.bodySmall!.copyWith(
-            color: Colors.grey[600],
-          ),
+          style: theme.textTheme.bodySmall!.copyWith(color: Colors.grey[600]),
         ),
         onTap: onTap,
-        shape:
-        RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+        trailing: onEdit != null
+            ? IconButton(
+          icon: const Icon(Icons.edit_location_alt, size: 20),
+          onPressed: onEdit,
+        )
+            : null,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       ),
     );
   }

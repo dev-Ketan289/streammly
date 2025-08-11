@@ -3,6 +3,7 @@ import 'package:get/get.dart';
 import 'package:streammly/data/repository/booking_repo.dart';
 import 'package:streammly/services/custom_error_inline_widget.dart';
 import 'package:streammly/services/theme.dart';
+import 'package:streammly/views/screens/home/home_screen.dart';
 import 'package:streammly/views/screens/package/booking/widgets/booking_details.dart';
 import 'package:streammly/views/screens/package/booking/widgets/custom_bookingcard.dart';
 import 'package:streammly/views/widgets/custom_doodle.dart';
@@ -10,6 +11,7 @@ import 'package:streammly/views/widgets/custom_doodle.dart';
 import '../../../../controllers/auth_controller.dart';
 import '../../../../controllers/booking_form_controller.dart';
 import '../../../../models/booking/booking_info_model.dart';
+import '../../../../navigation_flow.dart';
 
 class MyBookings extends StatelessWidget {
   MyBookings({super.key});
@@ -174,10 +176,13 @@ class MyBookings extends StatelessWidget {
     if (bookings.isEmpty) {
       return CommonInlineMessage(
         imagePath:
-            'assets/images/no_booking.png', // Replace with your actual asset path
+            'assets/images/no_booking.png',
         title: 'No Bookings Yet',
         btnText: 'Browse Services',
-        onPressed: () {},
+        onPressed: () {
+          Get.offAll(() => NavigationFlow(initialIndex: 0));
+
+        },
         message: 'You haven’t booked any services yet',
       );
     }
