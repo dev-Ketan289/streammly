@@ -6,6 +6,7 @@ import 'package:streammly/data/api/api_client.dart';
 import 'package:streammly/data/repository/booking_repo.dart';
 import 'package:streammly/models/company/company_location.dart';
 import 'package:streammly/services/constants.dart';
+import 'package:streammly/services/theme.dart';
 import 'package:streammly/views/screens/package/booking/booking_summary.dart';
 import 'package:streammly/views/screens/package/booking/widgets/booking_form_page.dart';
 import 'package:streammly/views/screens/package/booking/widgets/booking_personal_info.dart';
@@ -137,7 +138,7 @@ class BookingPage extends StatelessWidget {
                                   style: ElevatedButton.styleFrom(
                                     backgroundColor:
                                         isSelected
-                                            ? const Color(0xFF4A6CF7)
+                                            ? primaryColor
                                             : Colors.grey.shade100,
                                     foregroundColor:
                                         isSelected
@@ -156,12 +157,7 @@ class BookingPage extends StatelessWidget {
                                       side: BorderSide(
                                         color:
                                             isSelected
-                                                ? const Color.fromARGB(
-                                                  255,
-                                                  0,
-                                                  51,
-                                                  255,
-                                                )
+                                                ? primaryColor
                                                 : Colors.grey.shade300,
                                       ),
                                     ),

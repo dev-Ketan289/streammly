@@ -163,7 +163,7 @@ class ThanksForBookingPage extends StatelessWidget {
 
                       ElevatedButton(
                         onPressed: () {
-                          Get.offAll(() => NavigationFlow(), arguments: 3);
+                          Get.offAll(() => NavigationFlow(initialIndex: 3));
                         },
                         style: ElevatedButton.styleFrom(
                           minimumSize: Size(double.infinity, 48),

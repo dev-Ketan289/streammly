@@ -56,27 +56,68 @@ class PersonalInfoSection extends StatelessWidget {
               14,
               FontWeight.w500,
             ),
-            const SizedBox(height: 8),
+            // Alternate Mobile No section
             Row(
               children: [
                 Expanded(
                   child: Stack(
                     children: [
-                      _customEditableField(
-                        initialValue:
-                            controller.alternateMobiles.isNotEmpty
-                                ? controller.alternateMobiles[0]
-                                : '',
-                        hintText: '8545254789',
-                        onChanged: (v) {
+                      TextField(
+                        controller:
+                            controller
+                                .alternateMobileController, // ✅ Use dedicated controller
+                        keyboardType: TextInputType.phone,
+                        maxLength: 10,
+                        style: const TextStyle(
+                          fontSize: 14,
+                          fontWeight: FontWeight.w500,
+                          color: Color(0xFF111827),
+                        ),
+                        inputFormatters: [
+                          FilteringTextInputFormatter.digitsOnly,
+                        ],
+                        decoration: InputDecoration(
+                          counterText: '',
+                          hintText: '8545254789',
+                          hintStyle: const TextStyle(
+                            color: Color(0xFF9CA3AF),
+                            fontWeight: FontWeight.w500,
+                            fontSize: 14,
+                          ),
+                          filled: true,
+                          fillColor: Colors.white,
+                          contentPadding: const EdgeInsets.only(
+                            left: 44,
+                            right: 12,
+                            top: 14,
+                            bottom: 14,
+                          ),
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(10),
+                            borderSide: const BorderSide(
+                              color: Color(0xFFE5E7EB),
+                              width: 1.5,
+                            ),
+                          ),
+                          enabledBorder: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(10),
+                            borderSide: const BorderSide(
+                              color: Color(0xFFE5E7EB),
+                              width: 1.5,
+                            ),
+                          ),
+                        ),
+                        onChanged: (value) {
                           if (controller.alternateMobiles.isEmpty) {
-                            controller.alternateMobiles.add(v);
+                            controller.alternateMobiles.add(value);
                           } else {
-                            controller.alternateMobiles[0] = v;
+                            controller.alternateMobiles[0] = value;
                           }
-                          controller.update();
+                          // ✅ Add this to update button state
+                          controller.update(['verify_button']);
                         },
                       ),
+                      // +91 prefix overlay
                       Positioned(
                         left: 14,
                         top: 0,
@@ -97,12 +138,20 @@ class PersonalInfoSection extends StatelessWidget {
                   ),
                 ),
                 const SizedBox(width: 8),
-                _buildVerifyButton(controller, context),
+                GetBuilder<BookingController>(
+                  id: 'verify_button',
+                  builder:
+                      (controller) => _buildVerifyButton(controller, context),
+                ),
               ],
             ),
 
             if (controller.isOTPSent && !controller.isAlternateMobileVerified)
-              _buildOTPVerificationSection(controller),
+              GetBuilder<BookingController>(
+                id: 'otp_section', // ✅ Specific ID for targeted updates
+                builder:
+                    (controller) => _buildOTPVerificationSection(controller),
+              ),
 
             const SizedBox(height: 16),
 
@@ -238,7 +287,7 @@ class PersonalInfoSection extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 3),
       decoration: BoxDecoration(
-        color: const Color(0xFF22C55E).withOpacity(0.1),
+        color: const Color(0xFF22C55E).withValues(alpha: 0.1),
         borderRadius: BorderRadius.circular(6),
         border: Border.all(color: const Color(0xFF22C55E), width: 1),
       ),
@@ -257,10 +306,8 @@ class PersonalInfoSection extends StatelessWidget {
     BookingController controller,
     BuildContext context,
   ) {
-    final alternateNumber =
-        controller.alternateMobiles.isNotEmpty
-            ? controller.alternateMobiles[0]
-            : '';
+    // ✅ Check controller text directly instead of the list
+    final alternateNumber = controller.alternateMobileController.text.trim();
     final isValidNumber = RegExp(r'^\d{10}$').hasMatch(alternateNumber);
 
     if (controller.isAlternateMobileVerified) {
@@ -315,6 +362,7 @@ class PersonalInfoSection extends StatelessWidget {
                 ),
                 child: TextField(
                   controller: controller.otpControllers[index],
+                  focusNode: controller.otpFocusNodes[index],
                   textAlign: TextAlign.center,
                   style: const TextStyle(
                     fontSize: 18,
@@ -330,6 +378,7 @@ class PersonalInfoSection extends StatelessWidget {
                   ),
                   onChanged:
                       (value) => controller.onOTPDigitChanged(index, value),
+                  onTap: () => controller.onOTPFieldTapped(index),
                 ),
               ),
             );
