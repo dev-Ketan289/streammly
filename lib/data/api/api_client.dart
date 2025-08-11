@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'dart:developer';
+import 'dart:io';
 
 import 'package:flutter/foundation.dart';
 import 'package:get/get.dart';
@@ -310,6 +311,56 @@ class ApiClient extends GetConnect implements GetxService {
         level: 1,
       );
       return null;
+    }
+  }
+
+  Future<Response> postMultipartData(
+    String uri,
+    Map<String, String> fields, {
+    File? profileImage,
+    File? coverImage,
+  }) async {
+    try {
+      var url = Uri.parse(baseUrl! + uri);
+      var request = http.MultipartRequest('POST', url);
+
+      // Attach Headers (Token)
+      request.headers['Authorization'] = 'Bearer $token';
+      request.headers['Accept'] = 'application/json';
+
+      // Add form fields
+      request.fields.addAll(fields);
+
+      // Add profile image if available
+      if (profileImage != null) {
+        request.files.add(
+          await http.MultipartFile.fromPath('profile_image', profileImage.path),
+        );
+      }
+
+      // Add cover image if available
+      if (coverImage != null) {
+        request.files.add(
+          await http.MultipartFile.fromPath('cover_image', coverImage.path),
+        );
+      }
+
+      // Send the request
+      var streamedResponse = await request.send();
+      var response = await http.Response.fromStream(streamedResponse);
+
+      log('====> Multipart Response Status: ${response.statusCode}');
+      log('====> Multipart Response Body: ${response.body}');
+
+      // Convert http.Response to GetX Response
+      return Response(
+        statusCode: response.statusCode,
+        bodyString: response.body,
+        body: jsonDecode(response.body),
+      );
+    } catch (e) {
+      log('Error in Multipart Upload: $e');
+      return Response(statusCode: 1, statusText: e.toString());
     }
   }
 }

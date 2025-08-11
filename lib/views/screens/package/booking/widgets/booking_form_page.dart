@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:get/get.dart';
+import 'package:streammly/controllers/company_business_settings_controller.dart';
 import 'package:streammly/models/package/slots_model.dart';
 import 'package:streammly/services/input_decoration.dart';
 import 'package:streammly/views/screens/package/booking/widgets/custom_time_picker.dart';
@@ -18,8 +19,14 @@ import 'free_add_on.dart';
 class PackageFormCard extends StatefulWidget {
   final int index;
   final Map<String, dynamic> package;
+  final int companyId;
 
-  const PackageFormCard({super.key, required this.index, required this.package});
+  const PackageFormCard({
+    super.key,
+    required this.index,
+    required this.package,
+    required this.companyId,
+  });
 
   @override
   State<PackageFormCard> createState() => _PackageFormCardState();
@@ -31,39 +38,64 @@ class _PackageFormCardState extends State<PackageFormCard> {
   late TextEditingController endTimeController;
   late TextEditingController dateTimeController;
   late TextEditingController selectedTimingController;
+
   bool isStartTime = true;
   bool showTimePicker = false;
 
   final Map<String, TextEditingController> _extraQuestionControllers = {};
+  late CompanyBusinessSettingsController companyBusinessSettings;
 
   @override
   void initState() {
     super.initState();
+      companyBusinessSettings = Get.find<CompanyBusinessSettingsController>();
+  _fetchBusinessSettings(); // async logic here
     final controller = Get.find<BookingController>();
     final form = controller.packageFormsData[widget.index] ?? {};
 
     addressController = TextEditingController(text: form['address'] ?? '');
     addressController.addListener(() {
-      controller.updatePackageForm(widget.index, 'address', addressController.text);
+      controller.updatePackageForm(
+        widget.index,
+        'address',
+        addressController.text,
+      );
     });
 
     startTimeController = TextEditingController(text: form['startTime'] ?? '');
     endTimeController = TextEditingController(text: form['endTime'] ?? '');
     dateTimeController = TextEditingController(text: form['date'] ?? '');
     selectedTimingController = TextEditingController(
-        text: form['startTime'] != null && form['endTime'] != null
-            ? "${form['startTime']} - ${form['endTime']}"
-            : '');
+      text:
+          form['startTime'] != null && form['endTime'] != null
+              ? "${form['startTime']} - ${form['endTime']}"
+              : '',
+    );
 
     final extraQuestions =
-        widget.package['extraQuestions'] ?? widget.package['packageextra_questions'] ?? [];
+        widget.package['extraQuestions'] ??
+        widget.package['packageextra_questions'] ??
+        [];
     for (var question in extraQuestions) {
       final qid = question['id'].toString();
       final uniqueKey = "${widget.index}_$qid";
       final answer = form['extraAnswers']?[uniqueKey] ?? '';
-      _extraQuestionControllers[uniqueKey] = TextEditingController(text: answer);
+      _extraQuestionControllers[uniqueKey] = TextEditingController(
+        text: answer,
+      );
     }
   }
+  
+void _fetchBusinessSettings() async {
+  await companyBusinessSettings
+      .fetchCompanyBusinessSettings(widget.companyId.toString()).then((value){
+        log(companyBusinessSettings.settings?.toJson().toString()??"",name: 'availabbbble');
+      });
+
+  
+
+  // log(available.toString(), name: 'availabbbble');
+}
 
   @override
   void dispose() {
@@ -103,20 +135,27 @@ class _PackageFormCardState extends State<PackageFormCard> {
         (form['startTime'] != null && form['endTime'] != null
             ? "${form['startTime']} - ${form['endTime']}"
             : '')) {
-      selectedTimingController.text = form['startTime'] != null && form['endTime'] != null
-          ? "${form['startTime']} - ${form['endTime']}"
-          : '';
+      selectedTimingController.text =
+          form['startTime'] != null && form['endTime'] != null
+              ? "${form['startTime']} - ${form['endTime']}"
+              : '';
     }
 
     return Container(
       padding: const EdgeInsets.all(20),
-      decoration: BoxDecoration(borderRadius: BorderRadius.circular(10), color: Colors.white),
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(10),
+        color: Colors.white,
+      ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
             "$packageTitle Booking Schedule",
-            style: theme.textTheme.titleMedium?.copyWith(fontSize: 18, fontWeight: FontWeight.w600),
+            style: theme.textTheme.titleMedium?.copyWith(
+              fontSize: 18,
+              fontWeight: FontWeight.w600,
+            ),
           ),
           const SizedBox(height: 20),
           CustomTextField(
@@ -143,12 +182,19 @@ class _PackageFormCardState extends State<PackageFormCard> {
               return null;
             },
             onTap: () async {
-              final int advanceBookingDays = widget.package['advanceBookingDays'] ?? 0;
+              log(companyBusinessSettings.settings?.advanceBookingDays?.toString() ?? 'null');
+              final int advanceBookingDays =
+                  (companyBusinessSettings.settings?.advanceBookingDays is int)
+                      ? companyBusinessSettings.settings!.advanceBookingDays as int
+                      : int.tryParse(companyBusinessSettings.settings?.advanceBookingDays?.toString() ?? '') ?? 1;
 
+              log(advanceBookingDays.toString(), name: "wjkdfn");
               // Blocked dates (today + next 'n' days)
-              final List<DateTime> blockedDates =
-              List.generate(advanceBookingDays + 1, (i) => DateTime.now().add(Duration(days: i)));
-
+              final List<DateTime> blockedDates = List.generate(
+                advanceBookingDays + 1,
+                (i) => DateTime.now().add(Duration(days: i)),
+              );
+              log(blockedDates.toString(), name: 'blockeddates');
               // Log blocked dates
               for (var date in blockedDates) {
                 final formatted =
@@ -156,11 +202,20 @@ class _PackageFormCardState extends State<PackageFormCard> {
                 log("Blocked Date: $formatted");
               }
 
-              final DateTime firstAvailableDate = DateTime.now().add(Duration(days: advanceBookingDays + 1));
+              final DateTime firstAvailableDate = DateTime.now().add(
+                Duration(days: advanceBookingDays + 1),
+              );
 
+              log(
+                "First Available Date: ${firstAvailableDate.year}-${firstAvailableDate.month.toString().padLeft(2, '0')}-${firstAvailableDate.day.toString().padLeft(2, '0')}",
+              );
               final selectedDate = await showDatePicker(
-                  context: context, initialDate: firstAvailableDate, firstDate: firstAvailableDate, lastDate: DateTime(2100));
-
+                context: context,
+                initialDate: firstAvailableDate,
+                firstDate: firstAvailableDate,
+                lastDate: DateTime(2100),
+              );
+              log("Selected Date: $selectedDate");
               if (selectedDate != null) {
                 final formatted =
                     "${selectedDate.year}-${selectedDate.month.toString().padLeft(2, '0')}-${selectedDate.day.toString().padLeft(2, '0')}";
@@ -191,6 +246,33 @@ class _PackageFormCardState extends State<PackageFormCard> {
               if (value == null || value.isEmpty) {
                 return 'Please Select Time Slot';
               }
+              final startTime =
+                  form['startTime'] != null
+                      ? parseTimeOfDay(form['startTime'])
+                      : null;
+              final endTime =
+                  form['endTime'] != null
+                      ? parseTimeOfDay(form['endTime'])
+                      : null;
+              if (startTime != null && endTime != null) {
+                final startIndex = controller.timeSlots.indexWhere(
+                  (slot) => slot.startTime == startTime,
+                );
+                final endIndex = controller.timeSlots.indexWhere(
+                  (slot) => slot.startTime == endTime,
+                );
+                if (startIndex == -1 ||
+                    endIndex == -1 ||
+                    startIndex >= endIndex) {
+                  return 'Selected time slot is no longer available';
+                }
+                final isValid = controller.timeSlots
+                    .sublist(startIndex, endIndex + 1)
+                    .every((slot) => slot.isAvailable);
+                if (!isValid) {
+                  return 'Selected time slot is no longer available';
+                }
+              }
               return null;
             },
             onTap: () {
@@ -205,55 +287,95 @@ class _PackageFormCardState extends State<PackageFormCard> {
                 );
                 return;
               }
-              print('TextFormField tapped');
-              final slots = controller.startTime;
+              log('TextFormField tapped');
+              final slots = controller.timeSlots;
+              final buffer = controller.bufferTime;
               log('Slots: $slots');
               TimeOfDay? startTime;
               TimeOfDay? endTime;
               try {
-                startTime = form['startTime'] != null ? parseTimeOfDay(form['startTime']) : null;
+                startTime =
+                    form['startTime'] != null
+                        ? parseTimeOfDay(form['startTime'])
+                        : null;
 
-                endTime = form['endTime'] != null ? parseTimeOfDay(form['endTime']) : null;
+                endTime =
+                    form['endTime'] != null
+                        ? parseTimeOfDay(form['endTime'])
+                        : null;
               } catch (e) {
                 Fluttertoast.showToast(
-                    msg: "Invalid time format in previous selection. Please select a new time slot.",
-                    toastLength: Toast.LENGTH_LONG);
-                final formattedStart = controller.cleanTimeString(startTime?.format(context));
-                final formattedEnd = controller.cleanTimeString(endTime?.format(context));
+                  msg:
+                      "Invalid time format in previous selection. Please select a new time slot.",
+                  toastLength: Toast.LENGTH_LONG,
+                );
+                final formattedStart = controller.cleanTimeString(
+                  startTime?.format(context),
+                );
+                final formattedEnd = controller.cleanTimeString(
+                  endTime?.format(context),
+                );
 
-                controller.updatePackageForm(widget.index, 'startTime', formattedStart);
-                controller.updatePackageForm(widget.index, 'endTime', formattedEnd);
+                controller.updatePackageForm(
+                  widget.index,
+                  'startTime',
+                  formattedStart,
+                );
+                controller.updatePackageForm(
+                  widget.index,
+                  'endTime',
+                  formattedEnd,
+                );
 
                 selectedTimingController.text = '';
               }
               showTimeSlotSelector(
                 context: context,
                 slots: slots,
+                buffer: buffer,
                 packageHours: selectedHours.toString(),
                 index: widget.index,
                 startTime: startTime,
                 endTime: endTime,
                 onSlotSelected: (TimeOfDay? startTime, TimeOfDay? endTime) {
-                  log('Selected: ${startTime?.format(context)} - ${endTime?.format(context)}');
+                  log(
+                    'Selected: ${startTime?.format(context)} - ${endTime?.format(context)}',
+                  );
                   if (startTime != null && endTime != null) {
-                    final formattedTime = "${startTime.format(context)} - ${endTime.format(context)}";
+                    final formattedTime =
+                        "${startTime.format(context)} - ${endTime.format(context)}";
                     selectedTimingController.text = formattedTime;
 
                     // Update form fields
-                    controller.updatePackageForm(widget.index, 'startTime', startTime.format(context));
-                    controller.updatePackageForm(widget.index, 'endTime', endTime.format(context));
-
-
+                    controller.updatePackageForm(
+                      widget.index,
+                      'startTime',
+                      startTime.format(context),
+                    );
+                    controller.updatePackageForm(
+                      widget.index,
+                      'endTime',
+                      endTime.format(context),
+                    );
                   }
                 },
               );
               log(widget.package["hours"]?.toString() ?? "1");
             },
             decoration: CustomDecoration.inputDecoration(
-                label: "Select Time Slot", floating: true, suffix: const Icon(Icons.arrow_drop_down), borderRadius: 6),
+              label: "Select Time Slot",
+              floating: true,
+              suffix: const Icon(Icons.arrow_drop_down),
+              borderRadius: 6,
+            ),
           ),
           const SizedBox(height: 16),
-          Text("Questions", style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w600)),
+          Text(
+            "Questions",
+            style: theme.textTheme.titleMedium?.copyWith(
+              fontWeight: FontWeight.w600,
+            ),
+          ),
           const SizedBox(height: 16),
           ..._buildExtraQuestions(controller),
           const SizedBox(height: 32),
@@ -261,8 +383,12 @@ class _PackageFormCardState extends State<PackageFormCard> {
             title: 'Choose Free Item',
             isSelected: form['freeAddOn'] != null,
             onTap: () async {
-              final packageId = widget.package['packageId'] ?? widget.package['id'];
-              final result = await Navigator.push(context, getCustomRoute(child: FreeItemsPage(packageId: packageId)));
+              final packageId =
+                  widget.package['packageId'] ?? widget.package['id'];
+              final result = await Navigator.push(
+                context,
+                getCustomRoute(child: FreeItemsPage(packageId: packageId)),
+              );
               if (result != null) {
                 controller.updatePackageForm(widget.index, 'freeAddOn', result);
               }
@@ -276,23 +402,49 @@ class _PackageFormCardState extends State<PackageFormCard> {
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    Text('Selected Add-Ons', style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold)),
+                    Text(
+                      'Selected Add-Ons',
+                      style: theme.textTheme.titleMedium?.copyWith(
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
                     Row(
                       children: [
                         IconButton(
-                          icon: const Icon(Icons.edit, color: Color(0xff2864A6)),
+                          icon: const Icon(
+                            Icons.edit,
+                            color: Color(0xff2864A6),
+                          ),
                           onPressed: () async {
-                            final packageId = widget.package['packageId'] ?? widget.package['id'];
-                            final result = await Navigator.push(context, getCustomRoute(child: FreeItemsPage(packageId: packageId)));
+                            final packageId =
+                                widget.package['packageId'] ??
+                                widget.package['id'];
+                            final result = await Navigator.push(
+                              context,
+                              getCustomRoute(
+                                child: FreeItemsPage(packageId: packageId),
+                              ),
+                            );
                             if (result != null) {
-                              controller.updatePackageForm(widget.index, 'freeAddOn', result);
+                              controller.updatePackageForm(
+                                widget.index,
+                                'freeAddOn',
+                                result,
+                              );
                             }
                           },
                         ),
                         IconButton(
-                          icon: Icon(Icons.close, color: theme.colorScheme.error),
+                          icon: Icon(
+                            Icons.close,
+                            color: theme.colorScheme.error,
+                          ),
                           onPressed: () {
-                            controller.updatePackageForm(widget.index, 'freeAddOn', null);
+                            controller.updatePackageForm(
+                              widget.index,
+                              'freeAddOn',
+                              null,
+                            );
                           },
                         ),
                       ],
@@ -300,10 +452,19 @@ class _PackageFormCardState extends State<PackageFormCard> {
                   ],
                 ),
                 const SizedBox(height: 4),
-                Text(form['freeAddOn']['mainTitle'] ?? '', style: theme.textTheme.bodyLarge?.copyWith(fontWeight: FontWeight.w600)),
+                Text(
+                  form['freeAddOn']['mainTitle'] ?? '',
+                  style: theme.textTheme.bodyLarge?.copyWith(
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
                 const SizedBox(height: 8),
                 Container(
-                  decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(12), border: Border.all(color: Colors.grey.shade300)),
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(color: Colors.grey.shade300),
+                  ),
                   padding: const EdgeInsets.all(10),
                   child: Row(
                     children: [
@@ -319,11 +480,21 @@ class _PackageFormCardState extends State<PackageFormCard> {
                                 height: 50,
                                 width: 50,
                                 fit: BoxFit.cover,
-                                errorBuilder: (c, o, e) =>
-                                    Container(height: 50, width: 50, color: Colors.grey[300], child: const Icon(Icons.broken_image)),
+                                errorBuilder:
+                                    (c, o, e) => Container(
+                                      height: 50,
+                                      width: 50,
+                                      color: Colors.grey[300],
+                                      child: const Icon(Icons.broken_image),
+                                    ),
                               );
                             }
-                            return Container(height: 50, width: 50, color: Colors.grey[200], child: const Icon(Icons.image));
+                            return Container(
+                              height: 50,
+                              width: 50,
+                              color: Colors.grey[200],
+                              child: const Icon(Icons.image),
+                            );
                           },
                         ),
                       ),
@@ -332,11 +503,27 @@ class _PackageFormCardState extends State<PackageFormCard> {
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Text(form['freeAddOn']['title'] ?? '', style: theme.textTheme.bodyLarge?.copyWith(fontWeight: FontWeight.bold)),
+                            Text(
+                              form['freeAddOn']['title'] ?? '',
+                              style: theme.textTheme.bodyLarge?.copyWith(
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
                             const SizedBox(height: 2),
-                            Text(form['freeAddOn']['description'] ?? '', style: theme.textTheme.bodySmall?.copyWith(color: Colors.grey)),
+                            Text(
+                              form['freeAddOn']['description'] ?? '',
+                              style: theme.textTheme.bodySmall?.copyWith(
+                                color: Colors.grey,
+                              ),
+                            ),
                             const SizedBox(height: 2),
-                            const Text('Shoot Duration : 1', style: TextStyle(fontSize: 12, color: Colors.grey)),
+                            const Text(
+                              'Shoot Duration : 1',
+                              style: TextStyle(
+                                fontSize: 12,
+                                color: Colors.grey,
+                              ),
+                            ),
                           ],
                         ),
                       ),
@@ -349,17 +536,34 @@ class _PackageFormCardState extends State<PackageFormCard> {
           const SizedBox(height: 16),
           _buildExpandableSection(
             title: 'Extra Add-Ons (Extra Charged)',
-            isSelected: (form['extraAddOn'] is List && (form['extraAddOn'] as List).isNotEmpty),
+            isSelected:
+                (form['extraAddOn'] is List &&
+                    (form['extraAddOn'] as List).isNotEmpty),
             onTap: () async {
-              final packageId = widget.package['packageId'] ?? widget.package['id'];
-              final studioId = widget.package['studioId'] ?? widget.package['studio_id'];
-              final result = await Navigator.push(context, getCustomRoute(child: ExtraAddOnsPage(packageId: packageId, studioId: studioId)));
+              final packageId =
+                  widget.package['packageId'] ?? widget.package['id'];
+              final studioId =
+                  widget.package['studioId'] ?? widget.package['studio_id'];
+              final result = await Navigator.push(
+                context,
+                getCustomRoute(
+                  child: ExtraAddOnsPage(
+                    packageId: packageId,
+                    studioId: studioId,
+                  ),
+                ),
+              );
               if (result != null && result is List) {
-                controller.updatePackageForm(widget.index, 'extraAddOn', result);
+                controller.updatePackageForm(
+                  widget.index,
+                  'extraAddOn',
+                  result,
+                );
               }
             },
           ),
-          if (form['extraAddOn'] is List && (form['extraAddOn'] as List).isNotEmpty) ...[
+          if (form['extraAddOn'] is List &&
+              (form['extraAddOn'] as List).isNotEmpty) ...[
             const SizedBox(height: 12),
             Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -367,24 +571,53 @@ class _PackageFormCardState extends State<PackageFormCard> {
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    Text('Selected Add-Ons', style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold)),
+                    Text(
+                      'Selected Add-Ons',
+                      style: theme.textTheme.titleMedium?.copyWith(
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
                     Row(
                       children: [
                         IconButton(
-                          icon: const Icon(Icons.edit, color: Color(0xff2864A6)),
+                          icon: const Icon(
+                            Icons.edit,
+                            color: Color(0xff2864A6),
+                          ),
                           onPressed: () async {
-                            final packageId = widget.package['packageId'] ?? widget.package['id'];
+                            final packageId =
+                                widget.package['packageId'] ??
+                                widget.package['id'];
                             final studioId = widget.package['studioId'];
-                            final result = await Navigator.push(context, getCustomRoute(child: ExtraAddOnsPage(packageId: packageId, studioId: studioId)));
+                            final result = await Navigator.push(
+                              context,
+                              getCustomRoute(
+                                child: ExtraAddOnsPage(
+                                  packageId: packageId,
+                                  studioId: studioId,
+                                ),
+                              ),
+                            );
                             if (result != null && result is List) {
-                              controller.updatePackageForm(widget.index, 'extraAddOn', result);
+                              controller.updatePackageForm(
+                                widget.index,
+                                'extraAddOn',
+                                result,
+                              );
                             }
                           },
                         ),
                         IconButton(
-                          icon: Icon(Icons.close, color: theme.colorScheme.error),
+                          icon: Icon(
+                            Icons.close,
+                            color: theme.colorScheme.error,
+                          ),
                           onPressed: () {
-                            controller.updatePackageForm(widget.index, 'extraAddOn', []);
+                            controller.updatePackageForm(
+                              widget.index,
+                              'extraAddOn',
+                              [],
+                            );
                           },
                         ),
                       ],
@@ -392,7 +625,12 @@ class _PackageFormCardState extends State<PackageFormCard> {
                   ],
                 ),
                 const SizedBox(height: 4),
-                Text(form['extraAddOnMainTitle'] ?? 'Extra Add-Ons', style: theme.textTheme.bodyLarge?.copyWith(fontWeight: FontWeight.w600)),
+                Text(
+                  form['extraAddOnMainTitle'] ?? 'Extra Add-Ons',
+                  style: theme.textTheme.bodyLarge?.copyWith(
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
                 const SizedBox(height: 8),
                 ...form['extraAddOn'].map<Widget>((item) {
                   final String? imageUrl = item['image'];
@@ -406,8 +644,13 @@ class _PackageFormCardState extends State<PackageFormCard> {
                         height: 50,
                         width: 50,
                         fit: BoxFit.cover,
-                        errorBuilder: (context, error, stackTrace) =>
-                            Container(height: 50, width: 50, color: Colors.grey.shade300, child: const Icon(Icons.broken_image)),
+                        errorBuilder:
+                            (context, error, stackTrace) => Container(
+                              height: 50,
+                              width: 50,
+                              color: Colors.grey.shade300,
+                              child: const Icon(Icons.broken_image),
+                            ),
                       );
                     } else {
                       final fullUrl = imageUrl;
@@ -416,38 +659,74 @@ class _PackageFormCardState extends State<PackageFormCard> {
                         height: 50,
                         width: 50,
                         fit: BoxFit.cover,
-                        errorBuilder: (context, error, stackTrace) =>
-                            Container(height: 50, width: 50, color: Colors.grey.shade300, child: const Icon(Icons.broken_image)),
+                        errorBuilder:
+                            (context, error, stackTrace) => Container(
+                              height: 50,
+                              width: 50,
+                              color: Colors.grey.shade300,
+                              child: const Icon(Icons.broken_image),
+                            ),
                       );
                     }
                   } else {
                     imageWidget = Container(
                       height: 50,
                       width: 50,
-                      decoration: BoxDecoration(color: theme.colorScheme.surface, borderRadius: BorderRadius.circular(8)),
+                      decoration: BoxDecoration(
+                        color: theme.colorScheme.surface,
+                        borderRadius: BorderRadius.circular(8),
+                      ),
                       child: const Icon(Icons.image, color: Colors.grey),
                     );
                   }
 
                   return Container(
                     margin: const EdgeInsets.only(bottom: 10),
-                    decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(12), border: Border.all(color: Colors.grey.shade300)),
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(12),
+                      border: Border.all(color: Colors.grey.shade300),
+                    ),
                     padding: const EdgeInsets.all(10),
                     child: Row(
                       children: [
-                        ClipRRect(borderRadius: BorderRadius.circular(8), child: imageWidget),
+                        ClipRRect(
+                          borderRadius: BorderRadius.circular(8),
+                          child: imageWidget,
+                        ),
                         const SizedBox(width: 12),
                         Expanded(
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              Text(item['title'] ?? '', style: theme.textTheme.bodyLarge?.copyWith(fontWeight: FontWeight.bold)),
+                              Text(
+                                item['title'] ?? '',
+                                style: theme.textTheme.bodyLarge?.copyWith(
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
                               const SizedBox(height: 2),
-                              Text(item['description'] ?? '', style: theme.textTheme.bodySmall?.copyWith(color: Colors.grey)),
+                              Text(
+                                item['description'] ?? '',
+                                style: theme.textTheme.bodySmall?.copyWith(
+                                  color: Colors.grey,
+                                ),
+                              ),
                               const SizedBox(height: 2),
-                              Text('Shoot Duration : ${item['duration'] ?? 1}', style: const TextStyle(fontSize: 12, color: Colors.grey)),
+                              Text(
+                                'Shoot Duration : ${item['duration'] ?? 1}',
+                                style: const TextStyle(
+                                  fontSize: 12,
+                                  color: Colors.grey,
+                                ),
+                              ),
                               if (item['price'] != null)
-                                Text('Price: Rs ${item['price']}', style: theme.textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.bold)),
+                                Text(
+                                  'Price: Rs ${item['price']}',
+                                  style: theme.textTheme.bodyMedium?.copyWith(
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
                             ],
                           ),
                         ),
@@ -468,11 +747,26 @@ class _PackageFormCardState extends State<PackageFormCard> {
                   width: 20,
                   height: 20,
                   decoration: BoxDecoration(
-                    color: form['termsAccepted'] == true ? theme.colorScheme.primary : Colors.white,
-                    border: Border.all(color: form['termsAccepted'] == true ? theme.colorScheme.primary : theme.dividerColor),
+                    color:
+                        form['termsAccepted'] == true
+                            ? theme.colorScheme.primary
+                            : Colors.white,
+                    border: Border.all(
+                      color:
+                          form['termsAccepted'] == true
+                              ? theme.colorScheme.primary
+                              : theme.dividerColor,
+                    ),
                     borderRadius: BorderRadius.circular(4),
                   ),
-                  child: form['termsAccepted'] == true ? const Icon(Icons.check, color: Colors.white, size: 14) : null,
+                  child:
+                      form['termsAccepted'] == true
+                          ? const Icon(
+                            Icons.check,
+                            color: Colors.white,
+                            size: 14,
+                          )
+                          : null,
                 ),
               ),
               const SizedBox(width: 12),
@@ -484,17 +778,32 @@ class _PackageFormCardState extends State<PackageFormCard> {
                       const TextSpan(text: 'I accept the '),
                       TextSpan(
                         text: 'Terms and Conditions',
-                        style: TextStyle(color: theme.colorScheme.primary, decoration: TextDecoration.underline),
-                        recognizer: TapGestureRecognizer()
-                          ..onTap = () {
-                            Get.defaultDialog(
-                              title: 'Terms and Conditions',
-                              content: SingleChildScrollView(child: Text(widget.package['termsAndCondition'] ?? 'No terms found.')),
-                            );
-                          },
+                        style: TextStyle(
+                          color: theme.colorScheme.primary,
+                          decoration: TextDecoration.underline,
+                        ),
+                        recognizer:
+                            TapGestureRecognizer()
+                              ..onTap = () {
+                                Get.defaultDialog(
+                                  title: 'Terms and Conditions',
+                                  content: SingleChildScrollView(
+                                    child: Text(
+                                      widget.package['termsAndCondition'] ??
+                                          'No terms found.',
+                                    ),
+                                  ),
+                                );
+                              },
                       ),
                       const TextSpan(text: ' and agree to the '),
-                      TextSpan(text: 'Privacy Policy', style: TextStyle(color: theme.colorScheme.primary, decoration: TextDecoration.underline)),
+                      TextSpan(
+                        text: 'Privacy Policy',
+                        style: TextStyle(
+                          color: theme.colorScheme.primary,
+                          decoration: TextDecoration.underline,
+                        ),
+                      ),
                     ],
                   ),
                 ),
@@ -507,7 +816,10 @@ class _PackageFormCardState extends State<PackageFormCard> {
   }
 
   List<Widget> _buildExtraQuestions(BookingController controller) {
-    final extraQuestions = widget.package['extraQuestions'] ?? widget.package['packageextra_questions'] ?? [];
+    final extraQuestions =
+        widget.package['extraQuestions'] ??
+        widget.package['packageextra_questions'] ??
+        [];
     final form = controller.packageFormsData[widget.index] ?? {};
     List<Widget> fields = [];
 
@@ -518,7 +830,10 @@ class _PackageFormCardState extends State<PackageFormCard> {
       final type = question['question_type'] ?? 'Text';
       final answer = form['extraAnswers']?[uniqueKey] ?? '';
 
-      final ctrl = _extraQuestionControllers.putIfAbsent(uniqueKey, () => TextEditingController());
+      final ctrl = _extraQuestionControllers.putIfAbsent(
+        uniqueKey,
+        () => TextEditingController(),
+      );
 
       if (ctrl.text != answer) {
         ctrl.text = answer;
@@ -546,7 +861,8 @@ class _PackageFormCardState extends State<PackageFormCard> {
                 lastDate: DateTime(2100),
               );
               if (picked != null) {
-                final formatted = "${picked.day}-${picked.month}-${picked.year}";
+                final formatted =
+                    "${picked.day}-${picked.month}-${picked.year}";
                 ctrl.text = formatted;
                 controller.updateExtraAnswer(widget.index, qid, formatted);
               }
@@ -600,7 +916,8 @@ class _PackageFormCardState extends State<PackageFormCard> {
               }
               return null;
             },
-            onChanged: (val) => controller.updateExtraAnswer(widget.index, qid, val),
+            onChanged:
+                (val) => controller.updateExtraAnswer(widget.index, qid, val),
           ),
         );
       }
@@ -608,7 +925,11 @@ class _PackageFormCardState extends State<PackageFormCard> {
     return fields;
   }
 
-  Widget _buildExpandableSection({required String title, required bool isSelected, required VoidCallback onTap}) {
+  Widget _buildExpandableSection({
+    required String title,
+    required bool isSelected,
+    required VoidCallback onTap,
+  }) {
     final theme = Theme.of(context);
     return GestureDetector(
       onTap: onTap,
@@ -624,9 +945,22 @@ class _PackageFormCardState extends State<PackageFormCard> {
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Text(title, style: theme.textTheme.bodyLarge?.copyWith(color: isSelected ? theme.colorScheme.primary : theme.colorScheme.onSurface)),
-              Icon(isSelected ? Icons.remove : Icons.add,
-                  color: isSelected ? theme.colorScheme.primary : theme.iconTheme.color),
+              Text(
+                title,
+                style: theme.textTheme.bodyLarge?.copyWith(
+                  color:
+                      isSelected
+                          ? theme.colorScheme.primary
+                          : theme.colorScheme.onSurface,
+                ),
+              ),
+              Icon(
+                isSelected ? Icons.remove : Icons.add,
+                color:
+                    isSelected
+                        ? theme.colorScheme.primary
+                        : theme.iconTheme.color,
+              ),
             ],
           ),
         ),
@@ -638,31 +972,40 @@ class _PackageFormCardState extends State<PackageFormCard> {
 void showSelectedSlotSheet(BuildContext context, Slot selectedSlot) {
   showModalBottomSheet(
     context: context,
-    shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(16))),
-    builder: (_) => Padding(
-      padding: const EdgeInsets.all(16.0),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          const Text('Selected Slot', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
-          const SizedBox(height: 16),
-          Row(
+    shape: const RoundedRectangleBorder(
+      borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
+    ),
+    builder:
+        (_) => Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
             children: [
-              const Icon(Icons.access_time),
-              const SizedBox(width: 8),
-              Text('${selectedSlot.startTime} - ${selectedSlot.endTime}', style: const TextStyle(fontSize: 16)),
+              const Text(
+                'Selected Slot',
+                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+              ),
+              const SizedBox(height: 16),
+              Row(
+                children: [
+                  const Icon(Icons.access_time),
+                  const SizedBox(width: 8),
+                  Text(
+                    '${selectedSlot.startTime} - ${selectedSlot.endTime}',
+                    style: const TextStyle(fontSize: 16),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 16),
+              ElevatedButton.icon(
+                onPressed: () => Navigator.pop(context),
+                icon: const Icon(Icons.check),
+                label: const Text('OK'),
+                style: ElevatedButton.styleFrom(backgroundColor: Colors.green),
+              ),
             ],
           ),
-          const SizedBox(height: 16),
-          ElevatedButton.icon(
-            onPressed: () => Navigator.pop(context),
-            icon: const Icon(Icons.check),
-            label: const Text('OK'),
-            style: ElevatedButton.styleFrom(backgroundColor: Colors.green),
-          ),
-        ],
-      ),
-    ),
+        ),
   );
 }
 
@@ -673,7 +1016,8 @@ TimeOfDay? parseTimeOfDay(String? timeString) {
     if (parts.length != 2) throw const FormatException('Invalid time format');
 
     final timeParts = parts[0].split(':');
-    if (timeParts.length < 2) throw const FormatException('Invalid time format');
+    if (timeParts.length < 2)
+      throw const FormatException('Invalid time format');
 
     int hour = int.parse(timeParts[0]);
     final minute = int.parse(timeParts[1]);
@@ -694,7 +1038,8 @@ TimeOfDay? parseTimeOfDay(String? timeString) {
 
 void showTimeSlotSelector({
   required BuildContext context,
-  required List<TimeOfDay?> slots,
+  required List<Slot> slots,
+  required int buffer,
   required String packageHours,
   required int index,
   required TimeOfDay? startTime,
@@ -706,11 +1051,14 @@ void showTimeSlotSelector({
     isDismissible: true,
     enableDrag: true,
     isScrollControlled: true,
-    shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(20))),
+    shape: const RoundedRectangleBorder(
+      borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+    ),
     backgroundColor: Colors.white,
     builder: (context) {
       return TimeSlotSelector(
         context: context,
+        bufferTime: buffer,
         slots: slots,
         packageHours: packageHours,
         index: index,

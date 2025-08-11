@@ -410,8 +410,10 @@ class _CompanyLocatorMapScreenState extends State<CompanyLocatorMapScreen> {
           } else if (isFilterSelected) {
             return FilterCompanyListScreen(
               onTap: () {
-                isFilterSelected = false;
-                _loadData();
+                setState(() {
+                  isFilterSelected = false;
+                });
+                _loadData(); // Only if _loadData doesn't contain setState itself
               },
             );
           }
@@ -435,7 +437,7 @@ class _CompanyLocatorMapScreenState extends State<CompanyLocatorMapScreen> {
                     (controller) => _mapController.complete(controller),
                 markers: _customMarkers,
                 myLocationEnabled: true,
-                myLocationButtonEnabled: false,
+                myLocationButtonEnabled: true,
                 onTap: (_) => controller.clearSelectedCompany(),
               ),
 
@@ -452,67 +454,6 @@ class _CompanyLocatorMapScreenState extends State<CompanyLocatorMapScreen> {
                   );
                 },
               ),
-
-              // Positioned(
-              //   child: GetBuilder<CategoryController>(
-              //     builder: (_) {
-              //       if (categoryController.isLoading) {
-              //         return const Center(child: CircularProgressIndicator());
-              //       }
-              //       return Column(children: []);
-              //       // return Container(
-              //       //   padding: const EdgeInsets.symmetric(horizontal: 16),
-              //       //   decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(12)),
-              //       //   child: DropdownButtonHideUnderline(
-              //       //     child: DropdownButton2<int>(
-              //       //       value:
-              //       //           (() {
-              //       //             final allowed = widget.allowedCategoryIds;
-              //       //             if (allowed != null && allowed.contains(controller.selectedCategoryId)) {
-              //       //               return controller.selectedCategoryId;
-              //       //             } else if (allowed != null && allowed.isNotEmpty) {
-              //       //               return allowed.first;
-              //       //             } else {
-              //       //               return controller.selectedCategoryId;
-              //       //             }
-              //       //           })(),
-              //       //       isExpanded: true,
-              //       //       underline: const SizedBox(),
-              //       //       iconStyleData: const IconStyleData(icon: Icon(Icons.keyboard_arrow_down), iconSize: 24, iconEnabledColor: Colors.grey, iconDisabledColor: Colors.grey),
-              //       //       dropdownStyleData: DropdownStyleData(
-              //       //         elevation: 0,
-              //       //         decoration: BoxDecoration(
-              //       //           color: Colors.white, // Change this to your desired color
-              //       //           borderRadius: BorderRadius.only(bottomLeft: Radius.circular(12), bottomRight: Radius.circular(12)),
-              //       //         ),
-              //       //       ),
-              //       //       items:
-              //       //           categoryController.categories
-              //       //               .where((category) => widget.allowedCategoryIds == null || widget.allowedCategoryIds!.contains(category.id))
-              //       //               .map(
-              //       //                 (category) => DropdownMenuItem<int>(
-              //       //                   value: category.id,
-              //       //                   child: Center(child: Text(category.title, style: TextStyle(color: primaryColor, fontWeight: FontWeight.bold, fontSize: 17, letterSpacing: 0.5))),
-              //       //                 ),
-              //       //               )
-              //       //               .toList(),
-              //       //       onChanged: (int? newId) {
-              //       //         if (newId != null) {
-              //       //           controller.setCategoryId(newId);
-              //       //           controller.clearSelectedCompany();
-              //       //           setState(() {
-              //       //             _showSlider = false;
-              //       //             _currentPageIndex = 0;
-              //       //           });
-              //       //           _loadData();
-              //       //         }
-              //       //       },
-              //       //     ),
-              //       //   ),
-              //       // );
-              //     },
-              //   ),
-              // ),
 
               // Company Slider
               if (_showSlider)
@@ -545,39 +486,6 @@ class _CompanyLocatorMapScreenState extends State<CompanyLocatorMapScreen> {
                         ),
                         child: Column(
                           children: [
-                            // Page indicator
-                            // Container(
-                            //   padding: const EdgeInsets.symmetric(vertical: 8),
-                            //   child: SingleChildScrollView(
-                            //     scrollDirection: Axis.horizontal,
-                            //     child: Row(
-                            //       mainAxisAlignment: MainAxisAlignment.center,
-                            //       children: List.generate(
-                            //         controller.companies.length,
-                            //         (index) => AnimatedContainer(
-                            //           duration: const Duration(
-                            //             milliseconds: 200,
-                            //           ),
-                            //           width:
-                            //               _currentPageIndex == index ? 12 : 8,
-                            //           height:
-                            //               _currentPageIndex == index ? 12 : 8,
-                            //           margin: const EdgeInsets.symmetric(
-                            //             horizontal: 4,
-                            //           ),
-                            //           decoration: BoxDecoration(
-                            //             shape: BoxShape.circle,
-                            //             color:
-                            //                 _currentPageIndex == index
-                            //                     ? Colors.blue
-                            //                     : Colors.grey.withOpacity(0.5),
-                            //           ),
-                            //         ),
-                            //       ),
-                            //     ),
-                            //   ),
-                            // ),
-
                             // Company cards slider
                             Expanded(
                               child: GetBuilder<CompanyController>(
@@ -607,6 +515,7 @@ class _CompanyLocatorMapScreenState extends State<CompanyLocatorMapScreen> {
                                             mainState?.pushToCurrentTab(
                                               VendorDescription(
                                                 company: company,
+                                                companyId: company.companyId,
                                               ),
                                               hideBottomBar: true,
                                             );

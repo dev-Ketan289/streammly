@@ -9,6 +9,7 @@ import 'package:streammly/views/screens/home/widgets/home_header_banner.dart';
 import 'package:streammly/views/screens/home/widgets/page_nav.dart';
 import 'package:streammly/views/widgets/custom_doodle.dart';
 
+import '../../../controllers/booking_form_controller.dart';
 import '../../../controllers/category_controller.dart';
 import '../../../controllers/home_screen_controller.dart';
 import '../../../controllers/location_controller.dart';
@@ -28,6 +29,7 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
+  final BookingController bookingController = Get.find<BookingController>();
   final HomeController headerController = Get.find<HomeController>();
   final CategoryController categoryController = Get.find<CategoryController>();
   final LocationController locationController = Get.find<LocationController>();
@@ -40,6 +42,7 @@ class _HomeScreenState extends State<HomeScreen> {
     headerController.fetchRecommendedCompanies();
     categoryController.fetchCategories();
     companyController.fetchCompanyById(1);
+    bookingController.fetchBookings();
   }
 
   List<CategoryItem> convertToCategoryItems(List<CategoryModel> models) {
@@ -48,8 +51,12 @@ class _HomeScreenState extends State<HomeScreen> {
         label: model.title,
         imagePath: model.icon,
         onTap: () {
-          final mainState = context.findAncestorStateOfType<NavigationFlowState>();
-          mainState?.pushToCurrentTab(CompanyLocatorMapScreen(categoryId: model.id), hideBottomBar: true);
+          final mainState =
+              context.findAncestorStateOfType<NavigationFlowState>();
+          mainState?.pushToCurrentTab(
+            CompanyLocatorMapScreen(categoryId: model.id),
+            hideBottomBar: true,
+          );
         },
       );
     }).toList();
@@ -64,7 +71,12 @@ class _HomeScreenState extends State<HomeScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Container(height: 18, width: 120, color: Colors.white, margin: EdgeInsets.symmetric(horizontal: 16)),
+          Container(
+            height: 18,
+            width: 120,
+            color: Colors.white,
+            margin: EdgeInsets.symmetric(horizontal: 16),
+          ),
           SizedBox(height: 12),
           SizedBox(
             height: 90,
@@ -73,7 +85,15 @@ class _HomeScreenState extends State<HomeScreen> {
               itemCount: 6,
               padding: EdgeInsets.symmetric(horizontal: 16),
               separatorBuilder: (_, __) => SizedBox(width: 16),
-              itemBuilder: (_, __) => Container(width: 65, height: 80, decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(8))),
+              itemBuilder:
+                  (_, __) => Container(
+                    width: 65,
+                    height: 80,
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                  ),
             ),
           ),
         ],
@@ -91,7 +111,14 @@ class _HomeScreenState extends State<HomeScreen> {
         return Shimmer.fromColors(
           baseColor: Colors.grey[300]!,
           highlightColor: Colors.grey[100]!,
-          child: Container(margin: EdgeInsets.symmetric(horizontal: 16), height: 66, decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(12))),
+          child: Container(
+            margin: EdgeInsets.symmetric(horizontal: 16),
+            height: 66,
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(12),
+            ),
+          ),
         );
       },
     );
@@ -101,7 +128,14 @@ class _HomeScreenState extends State<HomeScreen> {
     return Shimmer.fromColors(
       baseColor: Colors.grey[300]!,
       highlightColor: Colors.grey[100]!,
-      child: Container(margin: EdgeInsets.all(16.0), height: 150, decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(16))),
+      child: Container(
+        margin: EdgeInsets.all(16.0),
+        height: 150,
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(16),
+        ),
+      ),
     );
   }
 
@@ -119,7 +153,16 @@ class _HomeScreenState extends State<HomeScreen> {
 
             // Main Shimmer Condition for Banner and Category list
             if (slides.isEmpty && isCategoryLoading) {
-              return SafeArea(child: Column(children: [SizedBox(height: 20), _shimmerHomeHeaderBanner(), SizedBox(height: 24), _shimmerCategoryScroller()]));
+              return SafeArea(
+                child: Column(
+                  children: [
+                    SizedBox(height: 20),
+                    _shimmerHomeHeaderBanner(),
+                    SizedBox(height: 24),
+                    _shimmerCategoryScroller(),
+                  ],
+                ),
+              );
             }
 
             return SafeArea(
@@ -128,23 +171,67 @@ class _HomeScreenState extends State<HomeScreen> {
                   children: [
                     slides.isEmpty
                         ? _shimmerHomeHeaderBanner()
-                        : HomeHeaderBanner(key: const ValueKey('home_header_banner'), slides: slides),
-                    const SizedBox(height: 24),
-                    UpcomingOfferCard(key: const ValueKey('upcoming_offer_card')),
-                    const SizedBox(height: 24),
+                        : HomeHeaderBanner(
+                          key: const ValueKey('home_header_banner'),
+                          slides: slides,
+                        ),
+                    const SizedBox(height: 20),
+                    GetBuilder<BookingController>(
+                      builder: (bookingCtrl) {
+                        if (bookingCtrl.isLoading) {
+                          // Show shimmer while loading
+                          return Column(
+                            children: [
+                              Container(
+                                margin: const EdgeInsets.symmetric(
+                                  horizontal: 16,
+                                ),
+                                height: 150,
+                                decoration: BoxDecoration(
+                                  color: Colors.grey[300],
+                                  borderRadius: BorderRadius.circular(16),
+                                ),
+                              ),
+                              const SizedBox(height: 24),
+                            ],
+                          );
+                        } else if (bookingCtrl.upcomingBookings.isNotEmpty) {
+                          // Show Upcoming Booking Card with spacing
+                          return Column(
+                            children: [
+                              UpcomingBookingCard(
+                                key: const ValueKey('upcoming_offer_card'),
+                                booking: bookingCtrl.upcomingBookings.first,
+                              ),
+                              const SizedBox(height: 5),
+                            ],
+                          );
+                        } else {
+                          // No booking — return empty (no gap)
+                          return const SizedBox.shrink();
+                        }
+                      },
+                    ),
+
+                    const SizedBox(height: 5),
                     isCategoryLoading
                         ? _shimmerCategoryScroller()
                         : CategoryScroller(
-                      key: const ValueKey('category_scroller'),
-                      title: "Categories",
-                      onSeeAll: () {
-                        Navigator.push(context, MaterialPageRoute(builder: (context) => CategoryListScreen()));
-                      },
-                      categories: convertToCategoryItems(categoryModels),
-                    ),
-                    const SizedBox(height: 24),
+                          key: const ValueKey('category_scroller'),
+                          title: "Categories",
+                          onSeeAll: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => CategoryListScreen(),
+                              ),
+                            );
+                          },
+                          categories: convertToCategoryItems(categoryModels),
+                        ),
+                    const SizedBox(height: 5),
                     PageNav(key: const ValueKey('page_nav')),
-                    const SizedBox(height: 24),
+                    const SizedBox(height: 5),
 
                     // RECOMMENDED LIST shimmer and list
                     GetBuilder<HomeController>(
@@ -166,9 +253,12 @@ class _HomeScreenState extends State<HomeScreen> {
                       },
                     ),
 
-                    const SizedBox(height: 24),
-                    ExploreUs(key: const ValueKey('explore_us'), vendorIds: ([1])),
-                    const SizedBox(height: 26),
+                    const SizedBox(height: 8),
+                    ExploreUs(
+                      key: const ValueKey('explore_us'),
+                      vendorIds: ([1]),
+                    ),
+                    const SizedBox(height: 8),
                     PromoSlider(key: const ValueKey('promo_slider')),
                     const SizedBox(height: 35),
                   ],

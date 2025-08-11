@@ -4,27 +4,41 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:streammly/data/api/api_client.dart';
 import 'package:streammly/data/repository/booking_repo.dart';
+import 'package:streammly/models/company/company_location.dart';
 import 'package:streammly/services/constants.dart';
 import 'package:streammly/views/screens/package/booking/booking_summary.dart';
 import 'package:streammly/views/screens/package/booking/widgets/booking_form_page.dart';
 import 'package:streammly/views/screens/package/booking/widgets/booking_personal_info.dart';
 import 'package:streammly/views/widgets/custom_doodle.dart';
 
+import '../../../../controllers/auth_controller.dart';
 import '../../../../controllers/booking_form_controller.dart';
+import '../../../../navigation_flow.dart';
 
 class BookingPage extends StatelessWidget {
   final List<Map<String, dynamic>> packages;
   final List<dynamic> companyLocations;
+  final CompanyLocation? companyLocation;
+  final int companyId;
+
   const BookingPage({
     super.key,
     required this.packages,
     required this.companyLocations,
-
+    required this.companyLocation,
+    required this.companyId,
   });
 
   @override
   Widget build(BuildContext context) {
+    log(companyLocation.toString(), name: 'companylocation');
     log(packages.toString());
+
+    // Remove the existing controller if it exists to avoid conflicts
+    if (Get.isRegistered<BookingController>()) {
+      Get.delete<BookingController>();
+    }
+
     final controller = Get.put(
       BookingController(
         bookingrepo: BookingRepo(
@@ -34,11 +48,20 @@ class BookingPage extends StatelessWidget {
           ),
         ),
       ),
+      permanent: false, // Changed to false to allow proper cleanup
     );
 
-    // Initialize packages and company locations once after the frame
-    WidgetsBinding.instance.addPostFrameCallback((_) {
+    // Initialize packages and refresh user profile in correct order
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      // First refresh user profile to ensure latest data
+      final authController = Get.find<AuthController>();
+      await authController.fetchUserProfile();
+
+      // Then initialize packages
       controller.initSelectedPackages(packages, companyLocations);
+
+      // Finally trigger autofill with refreshed data
+      controller.refreshPersonalInfo();
     });
 
     return CustomBackground(
@@ -50,7 +73,10 @@ class BookingPage extends StatelessWidget {
               if (controller.selectedPackages.isNotEmpty) {
                 return Text(
                   "Booking",
-                  style: Theme.of(context).textTheme.titleLarge?.copyWith(color:Theme.of(context).colorScheme.primary, fontWeight: FontWeight.w600)
+                  style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                    color: Theme.of(context).colorScheme.primary,
+                    fontWeight: FontWeight.w600,
+                  ),
                 );
               } else {
                 return const Text(
@@ -71,19 +97,18 @@ class BookingPage extends StatelessWidget {
         backgroundColor: Colors.transparent,
         body: GetBuilder<BookingController>(
           builder: (_) {
-            // If no packages yet, display empty widget/loader or placeholder
-            if (controller.selectedPackages.isEmpty) {
-              return const Center(
-                child: CircularProgressIndicator(),
-              );
+            // Show loading while initializing
+            if (controller.isLoading || controller.selectedPackages.isEmpty) {
+              return const Center(child: CircularProgressIndicator());
             }
 
             final currentPage = controller.currentPage;
             final packagesLength = controller.selectedPackages.length;
 
-            // Make sure currentPage is within valid bounds
             final safePageIndex =
-            (currentPage >= 0 && currentPage < packagesLength) ? currentPage : 0;
+                (currentPage >= 0 && currentPage < packagesLength)
+                    ? currentPage
+                    : 0;
 
             return Column(
               children: [
@@ -96,7 +121,6 @@ class BookingPage extends StatelessWidget {
                         const PersonalInfoSection(),
                         const SizedBox(height: 32),
 
-                        // Package Toggle Buttons (only show if multiple packages)
                         if (packagesLength > 1) ...[
                           SizedBox(
                             height: 45,
@@ -111,11 +135,14 @@ class BookingPage extends StatelessWidget {
                                     controller.update();
                                   },
                                   style: ElevatedButton.styleFrom(
-                                    backgroundColor: isSelected
-                                        ? const Color(0xFF4A6CF7)
-                                        : Colors.grey.shade100,
+                                    backgroundColor:
+                                        isSelected
+                                            ? const Color(0xFF4A6CF7)
+                                            : Colors.grey.shade100,
                                     foregroundColor:
-                                    isSelected ? Colors.white : Colors.black87,
+                                        isSelected
+                                            ? Colors.white
+                                            : Colors.black87,
                                     padding: const EdgeInsets.symmetric(
                                       horizontal: 20,
                                       vertical: 12,
@@ -127,20 +154,28 @@ class BookingPage extends StatelessWidget {
                                         topRight: Radius.circular(10),
                                       ),
                                       side: BorderSide(
-                                        color: isSelected
-                                            ? const Color.fromARGB(255, 0, 51, 255)
-                                            : Colors.grey.shade300,
+                                        color:
+                                            isSelected
+                                                ? const Color.fromARGB(
+                                                  255,
+                                                  0,
+                                                  51,
+                                                  255,
+                                                )
+                                                : Colors.grey.shade300,
                                       ),
                                     ),
                                   ),
                                   child: Text(
-                                    controller.selectedPackages[index]['title'] ??
+                                    controller
+                                            .selectedPackages[index]['title'] ??
                                         'Package ${index + 1}',
                                     style: TextStyle(
                                       fontSize: 14,
-                                      fontWeight: isSelected
-                                          ? FontWeight.w600
-                                          : FontWeight.w500,
+                                      fontWeight:
+                                          isSelected
+                                              ? FontWeight.w600
+                                              : FontWeight.w500,
                                     ),
                                   ),
                                 );
@@ -149,17 +184,16 @@ class BookingPage extends StatelessWidget {
                           ),
                         ],
 
-                        // Active Form
                         PackageFormCard(
                           index: safePageIndex,
                           package: controller.selectedPackages[safePageIndex],
+                          companyId: companyId,
                         ),
                       ],
                     ),
                   ),
                 ),
 
-                // Bottom Button
                 Container(
                   padding: const EdgeInsets.all(20),
                   decoration: BoxDecoration(
@@ -177,14 +211,20 @@ class BookingPage extends StatelessWidget {
                     width: double.infinity,
                     child: ElevatedButton(
                       onPressed: () {
-                        final controller = Get.find<BookingController>();  // get existing controller
+                        final controller = Get.find<BookingController>();
 
-                        // Validate required fields and terms acceptance
                         if (controller.canSubmit()) {
-                          // Proceed to booking summary page
-                          Get.to(() => BookingSummaryPage());
+                          final mainState =
+                              context
+                                  .findAncestorStateOfType<
+                                    NavigationFlowState
+                                  >();
+
+                          mainState?.pushToCurrentTab(
+                            BookingSummaryPage(),
+                            hideBottomBar: true,
+                          );
                         } else {
-                          // Show error snackbar or dialog to fill missing fields
                           Get.snackbar(
                             'Incomplete Details',
                             'Please fill all required fields and accept terms and conditions before continuing.',
@@ -203,7 +243,11 @@ class BookingPage extends StatelessWidget {
                       ),
                       child: const Text(
                         "Let's Continue",
-                        style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600, color: Colors.white),
+                        style: TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.w600,
+                          color: Colors.white,
+                        ),
                       ),
                     ),
                   ),

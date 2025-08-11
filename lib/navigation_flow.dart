@@ -1,12 +1,10 @@
-import 'dart:developer';
-
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_svg/svg.dart';
-import 'package:get/get.dart';
 import 'package:streammly/generated/assets.dart';
+import 'package:streammly/services/coming_soon_page.dart';
 import 'package:streammly/views/screens/home/home_screen.dart';
-import 'package:streammly/views/screens/package/booking/bookings.dart';
+import 'package:streammly/views/screens/package/booking/my_bookings.dart';
 
 import 'services/custom_exit_dailogue.dart';
 
@@ -110,7 +108,7 @@ class NavigationFlowState extends State<NavigationFlow> {
             _buildOffstageNavigator(0, HomeScreen()),
             _buildOffstageNavigator(1, ShopScreen()),
             _buildOffstageNavigator(2, CartScreen()),
-            _buildOffstageNavigator(3, Bookings()),
+            _buildOffstageNavigator(3, MyBookings()),
             _buildOffstageNavigator(4, MoreScreen()),
           ],
         ),
@@ -248,31 +246,31 @@ class NavigationFlowState extends State<NavigationFlow> {
       ),
     );
   }
+
+  void switchToTab(int index) {
+    setState(() {
+      _currentIndex = index;
+      _navigationHistory.clear();
+      _navigationHistory.add(index);
+      navigatorKeys[index].currentState?.popUntil((route) => route.isFirst);
+    });
+  }
 }
 
 class MoreScreen extends StatelessWidget {
   const MoreScreen({super.key});
-
   @override
-  Widget build(BuildContext context) {
-    return Scaffold(body: Text("data"));
-  }
+  Widget build(BuildContext context) => const ComingSoonPage();
 }
 
 class ShopScreen extends StatelessWidget {
   const ShopScreen({super.key});
-
   @override
-  Widget build(BuildContext context) {
-    return Scaffold(body: Text("data"));
-  }
+  Widget build(BuildContext context) => const ComingSoonPage();
 }
 
 class CartScreen extends StatelessWidget {
   const CartScreen({super.key});
-
   @override
-  Widget build(BuildContext context) {
-    return Scaffold(body: Text("data"));
-  }
+  Widget build(BuildContext context) => const ComingSoonPage();
 }

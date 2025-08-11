@@ -25,6 +25,7 @@ class Slot {
   factory Slot.fromJson(Map<String?, dynamic> json) {
     return Slot(
       startTime: json['start_time'] != null ? TimeOfDay(
+        
         hour: int.parse(json['start_time'].split(":")[0]),
         minute: int.parse(json['start_time'].split(":")[1]),
       ) : null,
@@ -32,13 +33,16 @@ class Slot {
         hour: int.parse(json['end_time'].split(":")[0]),
         minute: int.parse(json['end_time'].split(":")[1]),
       ) : null,   
-      booked: json['booked'] ?? true,
-      breakTime: json['break'] ?? true,
-      blockHome: json['block_homeshoot_time'] ?? true,
-      blockIndoor: json['block_indoorshoot_time'] ?? true,
-      blockOutdoor: json['block_outdoorshoot_time'] ?? true,
+      booked: json['booked'] ?? false,
+      breakTime: json['break'] ?? false,
+      blockHome: json['block_homeshoot_time'] ?? false,
+      blockIndoor: json['block_indoorshoot_time'] ?? false,
+      blockOutdoor: json['block_outdoorshoot_time'] ?? false,
     );
+    
   }
+  
+
 }
 
 class SlotMananger {

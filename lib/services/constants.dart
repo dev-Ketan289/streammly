@@ -26,8 +26,8 @@ class AppConstants {
   set setBaseUrl(String url) => baseUrl = url;
 
   //TODO: Change Base Url
-  static String baseUrl = 'https://admin.streammly.com/';
-  // static String baseUrl = 'http://192.168.1.113:8000/';
+  // static String baseUrl = 'https://admin.streammly.com/';
+  static String baseUrl = 'http://192.168.1.113:8000/';
 
   static String appName = 'App Name';
 
@@ -65,6 +65,9 @@ class AppConstants {
   static const String getCompanySubCategories =
       'api/v1/company/getcompanysubcategories/';
   static const String getSubVerticals = 'api/v1/company/getsubvertical';
+  static const String getCompanyBusinessSettings =
+      'api/v1/basic/getcompanybusinesssettings';
+  static const String getCompanySpecialities = 'api/v1/company/getspecialities';
 
   // Bookmark
   static const String postBookmark = 'api/v1/user/togglebookmark/';
@@ -72,6 +75,7 @@ class AppConstants {
 
   // Package
   static const String getPackagesUrl = "api/v1/package/getpackages";
+  static const String getFreeAddonsPath = 'api/v1/package/getfreeadons/';
 
   // Business Setting
   static const String businessSettingUri = "api/v1/basic/getbusinesssettings";

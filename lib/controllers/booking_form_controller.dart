@@ -1,34 +1,74 @@
+import 'dart:async';
 import 'dart:convert';
 import 'dart:developer';
-import 'package:flutter/foundation.dart';
+
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
 import 'package:streammly/controllers/auth_controller.dart';
 import 'package:streammly/controllers/package_page_controller.dart';
+import 'package:streammly/data/api/api_client.dart';
+import 'package:streammly/data/repository/auth_repo.dart';
 import 'package:streammly/data/repository/booking_repo.dart';
 import 'package:streammly/models/package/slots_model.dart';
 import 'package:streammly/models/response/response_model.dart';
+import 'package:streammly/services/constants.dart';
 import 'package:streammly/views/screens/package/booking/booking_page.dart';
 import 'package:streammly/views/screens/package/booking/thanks_for_booking.dart';
 
+import '../models/booking/booking_info_model.dart';
+import 'otp_controller.dart';
+
 class BookingController extends GetxController {
-  final AuthController authController = Get.find();
-  final PackagesController packagesController = Get.find();
+  // Dependencies - Lazy loading to prevent circular dependency issues
+  AuthController get authController => Get.find<AuthController>();
+  PackagesController get packagesController => Get.find<PackagesController>();
+
+  // bool _personalInfoLoading = false;
+  // bool _otpLoading = false;
+  bool _slotsLoading = false;
+  // bool _bookingsLoading = false;
+  // bool _submitLoading = false;
+
+  // Getters for loading states
+  // bool get isPersonalInfoLoading => _personalInfoLoading;
+  // bool get isOtpLoading => _otpLoading;
+  bool get isSlotsLoading => _slotsLoading;
+  // bool get isBookingsLoading => _bookingsLoading;
+  // bool get isSubmitLoading => _submitLoading;
+
   final BookingRepo bookingrepo;
+
+  // Text controllers - properly managed lifecycle
+  late final TextEditingController nameController;
+  late final TextEditingController mobileController;
+  late final TextEditingController emailController;
+
+  // Disposal tracking
+  bool _isDisposed = false;
 
   BookingController({required this.bookingrepo});
 
+  // State variables - using traditional approach with update()
+  List<BookingInfo> upcomingBookings = [];
+  List<BookingInfo> cancelledBookings = [];
+  List<BookingInfo> completedBookings = [];
   int currentPage = 0;
   List<Map<String, dynamic>> selectedPackages = [];
+  List<dynamic> thankYouData = [];
   bool isLoading = false;
+  bool acceptTerms = false;
 
-  final Map<String, String> personalInfo = {'name': '', 'mobile': '', 'email': ''};
+  // Form data
+  final Map<String, String> personalInfo = {
+    'name': '',
+    'mobile': '',
+    'email': '',
+  };
   final List<String> alternateMobiles = [];
   final List<String> alternateEmails = [];
   final Map<int, Map<String, dynamic>> packageFormsData = {};
 
-  bool acceptTerms = false;
   late List<int> packagePrices;
   late List<bool> showPackageDetails;
 
@@ -37,11 +77,65 @@ class BookingController extends GetxController {
   TimeOfDay? selectedStartTime;
   TimeOfDay? selectedEndTime;
 
+  // Slots related variables
+  List<Slot> timeSlots = [];
+  List<TimeOfDay?> startTime = [];
+  int bufferTime = 0;
+
   @override
   void onInit() {
     super.onInit();
+    _initializeControllers();
     autofillFromUserProfile();
+    fetchBookings();
   }
+
+  @override
+  void onReady() {
+    super.onReady();
+    // Any additional setup after widget is ready
+  }
+
+  @override
+  void onClose() {
+    _disposeControllers();
+    _clearData();
+    super.onClose();
+  }
+
+  // Private initialization methods
+  void _initializeControllers() {
+    nameController = TextEditingController();
+    mobileController = TextEditingController();
+    emailController = TextEditingController();
+  }
+
+  void _disposeControllers() {
+    if (!_isDisposed) {
+      nameController.dispose();
+      mobileController.dispose();
+      emailController.dispose();
+      _isDisposed = true;
+    }
+  }
+
+  void _clearData() {
+    upcomingBookings.clear();
+    cancelledBookings.clear();
+    completedBookings.clear();
+    selectedPackages.clear();
+    thankYouData.clear();
+    alternateMobiles.clear();
+    alternateEmails.clear();
+    packageFormsData.clear();
+    companyLocations.clear();
+    timeSlots.clear();
+    startTime.clear();
+    personalInfo.clear();
+  }
+
+  // Update autofillFromUserProfile to update controllers' text:
+  // In your BookingController class, update the autofillFromUserProfile method:
 
   void autofillFromUserProfile() {
     try {
@@ -50,35 +144,359 @@ class BookingController extends GetxController {
         personalInfo['name'] = userProfile.name ?? '';
         personalInfo['mobile'] = userProfile.phone ?? '';
         personalInfo['email'] = userProfile.email ?? '';
+
+        // Update controllers safely and force sync
+        if (!_isDisposed) {
+          nameController.text = personalInfo['name']!;
+          mobileController.text = personalInfo['mobile']!;
+          emailController.text = personalInfo['email']!;
+        }
         update();
       }
     } catch (e) {
-      if (kDebugMode) print("AuthController error: $e");
+      log('Error in autofillFromUserProfile: $e', name: 'BookingController');
     }
   }
 
-  void initSelectedPackages(List<Map<String, dynamic>> packages, List<dynamic> locations) {
+  bool isOTPSent = false;
+  bool isAlternateMobileVerified = false;
+
+  List<TextEditingController> otpControllers = List.generate(
+    6,
+    (index) => TextEditingController(),
+  );
+  List<String> otpDigits = ['', '', '', '', '', ''];
+  int otpTimer = 30;
+  Timer? _otpTimer;
+  bool get isOTPComplete => otpDigits.every((digit) => digit.isNotEmpty);
+
+  void onOTPDigitChanged(int index, String value) {
+    if (value.isNotEmpty && value.length == 1) {
+      otpDigits[index] = value;
+
+      // Auto move to next field
+      if (index < 5) {
+        FocusScope.of(Get.context!).nextFocus();
+      } else {
+        // Last field, hide keyboard
+        FocusScope.of(Get.context!).unfocus();
+      }
+    } else if (value.isEmpty) {
+      otpDigits[index] = '';
+
+      // Auto move to previous field when deleting
+      if (index > 0) {
+        FocusScope.of(Get.context!).previousFocus();
+      }
+    }
+    update();
+  }
+
+  void onOTPFieldTapped(int index) {
+    // Find the first empty field and focus there
+    for (int i = 0; i < otpDigits.length; i++) {
+      if (otpDigits[i].isEmpty) {
+        otpControllers[i].selection = TextSelection.fromPosition(
+          TextPosition(offset: otpControllers[i].text.length),
+        );
+        return;
+      }
+    }
+  }
+
+  void startOTPTimer() {
+    otpTimer = 30;
+    _otpTimer?.cancel();
+    _otpTimer = Timer.periodic(const Duration(seconds: 1), (timer) {
+      if (otpTimer > 0) {
+        otpTimer--;
+        update();
+      } else {
+        timer.cancel();
+      }
+    });
+  }
+
+  void resendOTP() {
+    // Clear current OTP
+    for (int i = 0; i < otpControllers.length; i++) {
+      otpControllers[i].clear();
+      otpDigits[i] = '';
+    }
+
+    // Send new OTP
+    sendOTPForAlternateMobile();
+    startOTPTimer();
+    update();
+  }
+
+  void sendOTPForAlternateMobile() async {
+    if (alternateMobiles.isEmpty || alternateMobiles[0].isEmpty) {
+      Get.snackbar('Error', 'Please enter alternate mobile number');
+      return;
+    }
+
+    final mobileNumber = alternateMobiles[0];
+    if (!RegExp(r'^\d{10}$').hasMatch(mobileNumber)) {
+      Get.snackbar('Error', 'Please enter valid 10-digit mobile number');
+      return;
+    }
+
+    try {
+      isLoading = true;
+      update();
+
+      // Use AuthController's OTP sending mechanism
+      final authController = Get.find<AuthController>();
+
+      // Temporarily store the alternate number in auth controller
+      final originalPhone = authController.phoneController.text;
+      authController.phoneController.text = mobileNumber;
+
+      final response = await authController.sendOtp();
+
+      // Restore original phone number
+      authController.phoneController.text = originalPhone;
+
+      if (response.isSuccess) {
+        isOTPSent = true;
+        startOTPTimer();
+        update();
+        Get.snackbar(
+          'OTP Sent',
+          'OTP has been sent to $mobileNumber',
+          backgroundColor: Colors.green,
+          colorText: Colors.white,
+        );
+      } else {
+        Get.snackbar(
+          'Error',
+          response.message,
+          backgroundColor: Colors.red,
+          colorText: Colors.white,
+        );
+      }
+    } catch (e) {
+      Get.snackbar(
+        'Error',
+        'Failed to send OTP. Please try again.',
+        backgroundColor: Colors.red,
+        colorText: Colors.white,
+      );
+    } finally {
+      isLoading = false;
+      update();
+    }
+  }
+
+  void verifyAlternateMobileOTP() async {
+    final otp = otpDigits.join('');
+    if (otp.isEmpty || otp.length != 6) {
+      Get.snackbar('Error', 'Please enter valid 6-digit OTP');
+      return;
+    }
+
+    try {
+      isLoading = true;
+      update(['otp_section']);
+
+      final mobileNumber = alternateMobiles[0];
+
+      final otpController = Get.put(
+        OtpController(
+          authRepo: AuthRepo(
+            sharedPreferences: Get.find(),
+            apiClient: ApiClient(
+              appBaseUrl: AppConstants.baseUrl,
+              sharedPreferences: Get.find(),
+            ),
+          ),
+        ),
+      );
+
+      final response = await otpController.verifyAlternateMobileOtp(
+        phone: mobileNumber,
+        otp: otp,
+      );
+
+      if (response.isSuccess) {
+        _otpTimer?.cancel();
+        isAlternateMobileVerified = true;
+        isOTPSent = false;
+
+        // Clear OTP fields on success
+        for (int i = 0; i < otpControllers.length; i++) {
+          otpControllers[i].clear();
+          otpDigits[i] = '';
+        }
+
+        // NEW: Update profile with verified alternate number
+        await updateAlternateNumberInProfile();
+      } else {
+        // Clear OTP fields on error
+        for (int i = 0; i < otpControllers.length; i++) {
+          otpControllers[i].clear();
+          otpDigits[i] = '';
+        }
+        Get.snackbar(
+          'Error',
+          response.message,
+          backgroundColor: Colors.red,
+          colorText: Colors.white,
+        );
+      }
+    } catch (e) {
+      // Clear OTP fields on exception
+      for (int i = 0; i < otpControllers.length; i++) {
+        otpControllers[i].clear();
+        otpDigits[i] = '';
+      }
+      Get.snackbar(
+        'Error',
+        'Failed to verify OTP. Please try again.',
+        backgroundColor: Colors.red,
+        colorText: Colors.white,
+      );
+    } finally {
+      isLoading = false;
+      update(['otp_section']);
+    }
+  }
+
+  Future<void> updateAlternateNumberInProfile() async {
+    if (!isAlternateMobileVerified ||
+        alternateMobiles.isEmpty ||
+        alternateMobiles[0].isEmpty) {
+      Get.snackbar('Error', 'Alternate number not verified');
+      return;
+    }
+
+    try {
+      isLoading = true;
+      update();
+
+      final userProfile = authController.userProfile;
+      if (userProfile == null) {
+        Get.snackbar('Error', 'User profile not found');
+        return;
+      }
+
+      // Update profile with alternate phone as separate field
+      final response = await authController.updateFullUserProfile(
+        name: userProfile.name ?? '',
+        email: userProfile.email ?? '',
+        phone: userProfile.phone ?? '', // Keep original phone
+        alternatePhone: alternateMobiles[0], // Add verified alternate phone
+        dob: userProfile.dob,
+        gender: userProfile.gender,
+      );
+
+      if (response != null && response.isSuccess) {
+        Get.snackbar(
+          'Success',
+          'Alternate number updated successfully',
+          backgroundColor: Colors.green,
+          colorText: Colors.white,
+        );
+      } else {
+        Get.snackbar(
+          'Error',
+          response?.message ?? 'Failed to update profile',
+          backgroundColor: Colors.red,
+          colorText: Colors.white,
+        );
+      }
+    } catch (e) {
+      Get.snackbar(
+        'Error',
+        'Something went wrong while updating profile',
+        backgroundColor: Colors.red,
+        colorText: Colors.white,
+      );
+    } finally {
+      isLoading = false;
+      update();
+    }
+  }
+
+  // Update your addAlternateEmail method
+  void addAlternateEmail() {
+    if (alternateEmails.isEmpty) {
+      alternateEmails.add('');
+      update();
+    } else {
+      Get.snackbar("Info", "Only one alternate email address is allowed.");
+    }
+  }
+
+  // Update removeAlternateEmail to actually remove
+  void removeAlternateEmail(int index) {
+    if (index < alternateEmails.length) {
+      alternateEmails.removeAt(index);
+      update();
+    }
+  }
+
+  // Add method to force refresh personal info
+  void refreshPersonalInfo() {
+    autofillFromUserProfile();
+  }
+
+  // Add this method to your BookingController
+  void _ensureAlternateFieldsExist() {
+    // Ensure one alternate mobile exists
+    if (alternateMobiles.isEmpty) {
+      alternateMobiles.add('');
+    }
+    // Ensure only one alternate mobile exists
+    if (alternateMobiles.length > 1) {
+      alternateMobiles.removeRange(1, alternateMobiles.length);
+    }
+
+    // Ensure one alternate email exists
+    if (alternateEmails.isEmpty) {
+      alternateEmails.add('');
+    }
+    // Ensure only one alternate email exists
+    if (alternateEmails.length > 1) {
+      alternateEmails.removeRange(1, alternateEmails.length);
+    }
+  }
+
+  // Update your initSelectedPackages method to call this
+  void initSelectedPackages(
+    List<Map<String, dynamic>> packages,
+    List<dynamic> locations,
+  ) {
     companyLocations = locations;
     WidgetsBinding.instance.addPostFrameCallback((_) {
       selectedPackages = List<Map<String, dynamic>>.from(packages);
       packagePrices = List<int>.generate(
         packages.length,
-            (index) =>
-        int.tryParse(packages[index]['packagevariations']?[0]?['amount']?.toString() ?? '0') ?? 0,
+        (index) =>
+            int.tryParse(
+              packages[index]['packagevariations']?[0]?['amount']?.toString() ??
+                  '0',
+            ) ??
+            0,
       );
       showPackageDetails = List<bool>.filled(packages.length, false);
 
+      packageFormsData.clear();
       for (int i = 0; i < packages.length; i++) {
         final package = packages[i];
         final packageTitle = package['title'] ?? '';
         final now = TimeOfDay.now();
         final formattedTime = cleanTimeString(formatTimeOfDay(now));
         Map<String, String> extraAnswers = {};
-        final extraQuestions = package['extraQuestions'] ?? package['packageextra_questions'] ?? [];
+        final extraQuestions =
+            package['extraQuestions'] ??
+            package['packageextra_questions'] ??
+            [];
         for (var question in extraQuestions) {
           extraAnswers["${i}_${question['id']}"] = '';
         }
-
+        log(packages.toString(), name: "initSelectedPackages");
         packageFormsData[i] = {
           'address': package['address'] ?? '',
           'date': '',
@@ -92,11 +510,42 @@ class BookingController extends GetxController {
           'extraAddOn': <Map<String, dynamic>>[],
           'termsAccepted': false,
           'extraAnswers': extraAnswers,
+          'advanceBookingDays':
+              int.tryParse(package['advanceBookingDays']?.toString() ?? '0') ??
+              1,
         };
       }
+
+      // Ensure alternate fields are initialized
+      _ensureAlternateFieldsExist();
       update();
     });
   }
+
+  // Remove or update these methods since we only allow one alternate field each
+  void addAlternateMobile() {
+    // Do nothing or show a message that only one alternate is allowed
+    Get.snackbar("Info", "Only one alternate mobile number is allowed.");
+  }
+
+  // void addAlternateEmail() {
+  //   Get.snackbar("Info", "Only one alternate email address is allowed.");
+  // }
+
+  // Update remove methods to clear the field instead of removing
+  void removeAlternateMobile(int index) {
+    if (index == 0 && alternateMobiles.isNotEmpty) {
+      alternateMobiles[0] = '';
+      update();
+    }
+  }
+
+  // void removeAlternateEmail(int index) {
+  //   if (index == 0 && alternateEmails.isNotEmpty) {
+  //     alternateEmails[0] = '';
+  //     update();
+  //   }
+  // }
 
   String formatTimeOfDay(TimeOfDay time) {
     final hour = time.hourOfPeriod.toString().padLeft(2, '0');
@@ -132,12 +581,21 @@ class BookingController extends GetxController {
   void editPackage(int index) {
     currentPage = index;
     update();
-    Get.to(() => BookingPage(packages: [], companyLocations: []));
+    Get.to(
+      () => BookingPage(
+        packages: [],
+        companyLocations: [],
+        companyLocation: null,
+        companyId: 0,
+      ),
+    );
   }
 
   void toggleDetails(int index) {
-    showPackageDetails[index] = !showPackageDetails[index];
-    update();
+    if (index < showPackageDetails.length) {
+      showPackageDetails[index] = !showPackageDetails[index];
+      update();
+    }
   }
 
   void updatePersonalInfo(String key, String value) {
@@ -147,29 +605,29 @@ class BookingController extends GetxController {
     }
   }
 
-  void addAlternateMobile() {
-    alternateMobiles.add('');
-    update();
-  }
-
-  void removeAlternateMobile(int index) {
-    if (index < alternateMobiles.length) {
-      alternateMobiles.removeAt(index);
-      update();
-    }
-  }
-
-  void addAlternateEmail() {
-    alternateEmails.add('');
-    update();
-  }
-
-  void removeAlternateEmail(int index) {
-    if (index < alternateEmails.length) {
-      alternateEmails.removeAt(index);
-      update();
-    }
-  }
+  // void addAlternateMobile() {
+  //   alternateMobiles.add('');
+  //   update();
+  // }
+  //
+  // void removeAlternateMobile(int index) {
+  //   if (index < alternateMobiles.length) {
+  //     alternateMobiles.removeAt(index);
+  //     update();
+  //   }
+  // }
+  //
+  // void addAlternateEmail() {
+  //   alternateEmails.add('');
+  //   update();
+  // }
+  //
+  // void removeAlternateEmail(int index) {
+  //   if (index < alternateEmails.length) {
+  //     alternateEmails.removeAt(index);
+  //     update();
+  //   }
+  // }
 
   void updatePackageForm(int index, String field, dynamic value) {
     final data = packageFormsData[index] ?? {};
@@ -202,11 +660,14 @@ class BookingController extends GetxController {
   }
 
   Future<String> selectDate(int index, BuildContext context) async {
-    final companyLocation = companyLocations.isNotEmpty ? companyLocations[index] : null;
+    final companyLocation =
+        companyLocations.isNotEmpty ? companyLocations[index] : null;
     final int advanceBlock = (companyLocation?.studio?.advanceDayBooking ?? 0);
 
     final DateTime now = DateTime.now();
-    final DateTime firstAvailableDate = now.add(Duration(days: advanceBlock + 1));
+    final DateTime firstAvailableDate = now.add(
+      Duration(days: advanceBlock + 1),
+    );
 
     final picked = await showDatePicker(
       context: context,
@@ -217,7 +678,8 @@ class BookingController extends GetxController {
 
     String formatted = "";
     if (picked != null) {
-      formatted = "${picked.day.toString().padLeft(2, '0')}-${picked.month.toString().padLeft(2, '0')}-${picked.year}";
+      formatted =
+          "${picked.day.toString().padLeft(2, '0')}-${picked.month.toString().padLeft(2, '0')}-${picked.year}";
       updatePackageForm(index, 'date', formatted);
     }
     return formatted;
@@ -243,7 +705,10 @@ class BookingController extends GetxController {
     if (time == null) return '';
 
     // Remove invisible unicode spaces
-    String cleaned = time.replaceAll(RegExp(r'[\u00A0\u202F\u2007\u2060]'), ' ');
+    String cleaned = time.replaceAll(
+      RegExp(r'[\u00A0\u202F\u2007\u2060]'),
+      ' ',
+    );
 
     // Collapse multiple spaces into one
     cleaned = cleaned.replaceAll(RegExp(r'\s+'), ' ').trim();
@@ -251,11 +716,12 @@ class BookingController extends GetxController {
     // Manual Split to enforce valid format
     List<String> parts = cleaned.split(' ');
     if (parts.length >= 2) {
-      final timePart = parts[0].trim();  // hh:mm
-      final periodPart = parts[1].toUpperCase();  // AM/PM
+      final timePart = parts[0].trim(); // hh:mm
+      final periodPart = parts[1].toUpperCase(); // AM/PM
 
       // Validate Time Format (basic check)
-      if (RegExp(r'^\d{1,2}:\d{2}$').hasMatch(timePart) && (periodPart == 'AM' || periodPart == 'PM')) {
+      if (RegExp(r'^\d{1,2}:\d{2}$').hasMatch(timePart) &&
+          (periodPart == 'AM' || periodPart == 'PM')) {
         return '$timePart $periodPart';
       }
     }
@@ -268,7 +734,10 @@ class BookingController extends GetxController {
 
     try {
       // Clean invisible spaces and weird unicode
-      String cleaned = timeStr.replaceAll(RegExp(r'[\u00A0\u202F\u2007\u2060]'), ' ');
+      String cleaned = timeStr.replaceAll(
+        RegExp(r'[\u00A0\u202F\u2007\u2060]'),
+        ' ',
+      );
       cleaned = cleaned.replaceAll(RegExp(r'\s+'), ' ').trim();
 
       log("Cleaned Time String: '$cleaned'");
@@ -280,8 +749,8 @@ class BookingController extends GetxController {
         return '';
       }
 
-      final timePart = parts[0];  // '10:00'
-      final periodPart = parts[1].toUpperCase();  // 'AM' or 'PM'
+      final timePart = parts[0]; // '10:00'
+      final periodPart = parts[1].toUpperCase(); // 'AM' or 'PM'
 
       // Validate timePart
       if (!RegExp(r'^\d{1,2}:\d{2}$').hasMatch(timePart)) {
@@ -298,7 +767,9 @@ class BookingController extends GetxController {
 
       log("Reconstructed Time: '$reconstructed'");
 
-      final dateTime = DateFormat('h:mm a').parse(reconstructed);  // Strict 12-hour parsing
+      final dateTime = DateFormat(
+        'h:mm a',
+      ).parse(reconstructed); // Strict 12-hour parsing
       final apiTime = DateFormat('HH:mm:ss').format(dateTime);
 
       log("Final API Time: $apiTime");
@@ -349,11 +820,19 @@ class BookingController extends GetxController {
         final cleanedEnd = cleanTimeString(rawEnd);
 
         debugPrint("---- PACKAGE $i ----");
-        debugPrint("Raw Start Time: '$rawStart'  -> Runes: ${rawStart.runes.toList()}");
-        debugPrint("Cleaned Start Time: '$cleanedStart'  -> Runes: ${cleanedStart.runes.toList()}");
+        debugPrint(
+          "Raw Start Time: '$rawStart'  -> Runes: ${rawStart.runes.toList()}",
+        );
+        debugPrint(
+          "Cleaned Start Time: '$cleanedStart'  -> Runes: ${cleanedStart.runes.toList()}",
+        );
 
-        debugPrint("Raw End Time: '$rawEnd'  -> Runes: ${rawEnd.runes.toList()}");
-        debugPrint("Cleaned End Time: '$cleanedEnd'  -> Runes: ${cleanedEnd.runes.toList()}");
+        debugPrint(
+          "Raw End Time: '$rawEnd'  -> Runes: ${rawEnd.runes.toList()}",
+        );
+        debugPrint(
+          "Cleaned End Time: '$cleanedEnd'  -> Runes: ${cleanedEnd.runes.toList()}",
+        );
 
         DateTime? safeParseTime(String? time) {
           if (time == null || time.isEmpty) return null;
@@ -375,7 +854,9 @@ class BookingController extends GetxController {
         }
 
         if (end.isBefore(start)) {
-          debugPrint("Validation fail: End time is before start time for package $i");
+          debugPrint(
+            "Validation fail: End time is before start time for package $i",
+          );
           return false;
         }
       } catch (e) {
@@ -383,28 +864,19 @@ class BookingController extends GetxController {
         return false;
       }
 
-      final packageTitle = form['package_title'] ?? selectedPackages[i]['title'] ?? '';
-      if (packageTitle == 'Cuteness' && (form['babyInfo'] == null || (form['babyInfo'] as String).isEmpty)) {
+      final packageTitle =
+          form['package_title'] ?? selectedPackages[i]['title'] ?? '';
+      if (packageTitle == 'Cuteness' &&
+          (form['babyInfo'] == null || (form['babyInfo'] as String).isEmpty)) {
         debugPrint("Validation fail: Baby info missing for package $i");
-        return false;
-      }
-      if (packageTitle == 'Moments' && (form['theme'] == null || (form['theme'] as String).isEmpty)) {
-        debugPrint("Validation fail: Theme missing for package $i");
-        return false;
-      }
-      if (packageTitle == 'Wonders' && (form['locationPreference'] == null || (form['locationPreference'] as String).isEmpty)) {
-        debugPrint("Validation fail: Location preference missing for package $i");
-        return false;
-      }
-
-      if (!(form['termsAccepted'] ?? false)) {
-        debugPrint("Validation fail: Terms not accepted for package $i");
         return false;
       }
 
       final answers = Map<String, String>.from(form['extraAnswers'] ?? {});
       if (answers.values.any((value) => value.trim().isEmpty)) {
-        debugPrint("Validation fail: Some extra answers are empty for package $i");
+        debugPrint(
+          "Validation fail: Some extra answers are empty for package $i",
+        );
         return false;
       }
     }
@@ -420,24 +892,43 @@ class BookingController extends GetxController {
   }
 
   int calculateWalletUsage(num payableAmount) {
-    final walletBalance = authController.userProfile?.wallet ?? 0;
-    final int payable = payableAmount.toInt();
-    final int walletBal = walletBalance.toInt();
-    return payable <= walletBal ? payable : walletBal;
+    try {
+      final walletBalance = authController.userProfile?.wallet ?? 0;
+      final int payable = payableAmount.toInt();
+      final int walletBal = walletBalance.toInt();
+      return payable <= walletBal ? payable : walletBal;
+    } catch (e) {
+      return 0;
+    }
   }
 
   // Added method that was missing in your original postBooking payload preparation
   num calculateWalletUsageForPackage(Map<String, dynamic> package) {
-    final walletBalanceNum = authController.userProfile?.wallet ?? 0;
-    final walletBalance = walletBalanceNum is int ? walletBalanceNum : walletBalanceNum.toInt();
-    final packagePayableAmount = int.tryParse(package['packagevariations']?[0]?['amount']?.toString() ?? '0') ?? 0;
-    return walletBalance >= packagePayableAmount ? packagePayableAmount : walletBalance;
+    try {
+      final walletBalanceNum = authController.userProfile?.wallet ?? 0;
+      final walletBalance =
+          walletBalanceNum is int ? walletBalanceNum : walletBalanceNum.toInt();
+      final packagePayableAmount =
+          int.tryParse(
+            package['packagevariations']?[0]?['amount']?.toString() ?? '0',
+          ) ??
+          0;
+      return walletBalance >= packagePayableAmount
+          ? packagePayableAmount
+          : walletBalance;
+    } catch (e) {
+      return 0;
+    }
   }
 
   int getWalletBalance() {
-    final walletValue = authController.userProfile?.wallet;
-    if (walletValue == null) return 0;
-    return walletValue.toInt();
+    try {
+      final walletValue = authController.userProfile?.wallet;
+      if (walletValue == null) return 0;
+      return walletValue.toInt();
+    } catch (e) {
+      return 0;
+    }
   }
 
   int totalExtraAddOnPrice() {
@@ -457,8 +948,6 @@ class BookingController extends GetxController {
     return packageTotal + addonsTotal;
   }
 
-
-
   // New method: check wallet sufficiency before booking
   bool canBookWithWallet() {
     final walletBalance = getWalletBalance();
@@ -477,15 +966,13 @@ class BookingController extends GetxController {
   }
 
   Future<void> submitBooking() async {
-
     if (!canSubmit()) {
       Get.snackbar("Error", "Please fill all required fields and accept terms");
       return;
     }
 
     if (!canBookWithWallet()) {
-      // Wallet insufficient snackbar shown in canBookWithWallet
-      return;
+      return; // Wallet insufficiency snackbar shown in canBookWithWallet
     }
 
     isLoading = true;
@@ -498,101 +985,84 @@ class BookingController extends GetxController {
         return;
       }
 
-      // Calculate total_hours = sum of all packages' hours
-      double totalHours = 0;
-      for (int i = 0; i < selectedPackages.length; i++) {
-        final form = packageFormsData[i] ?? {};
-        final startTime = convertToApiTimeString(form['startTime'] ?? '');
-        final endTime = convertToApiTimeString(form['endTime'] ?? '');
-        if (startTime.isNotEmpty && endTime.isNotEmpty) {
-          final startDT = DateFormat('HH:mm').parse(startTime);
-          final endDT = DateFormat('HH:mm').parse(endTime);
-          final durationMinutes = endDT.difference(startDT).inMinutes;
-          if (durationMinutes > 0) {
-            totalHours += durationMinutes / 60;
-          }
-        }
-      }
+      final List<Map<String, dynamic>> bookingsPayload = [];
 
       for (int i = 0; i < selectedPackages.length; i++) {
         final package = selectedPackages[i];
         final form = packageFormsData[i] ?? {};
 
-        final startTimeStr = convertToApiTimeString(form['startTime'] ?? '');
-        final endTimeStr = convertToApiTimeString(form['endTime'] ?? '');
+        final startTimeStr = form['startTime'] ?? '';
+        final endTimeStr = form['endTime'] ?? '';
+        final dateOfShoot = form['date'] ?? '';
 
-        String dateOfShoot = form['date'] ?? '';
-        try {
-          final dateParsed = DateFormat('yyyy-MM-dd').parse(dateOfShoot);
-          dateOfShoot = DateFormat('dd-MM-yyyy').format(dateParsed);
-        } catch (_) {
-          // Use as-is if format unknown
-        }
+        final totalHours =
+            (() {
+              final startApiTime = convertToApiTimeString(startTimeStr);
+              final endApiTime = convertToApiTimeString(endTimeStr);
+              if (startApiTime.isEmpty || endApiTime.isEmpty) return 0;
 
-        final int packageHours = (() {
-          if (startTimeStr.isEmpty || endTimeStr.isEmpty) return 0;
-          try {
-            final startDT = DateFormat('HH:mm').parse(startTimeStr);
-            final endDT = DateFormat('HH:mm').parse(endTimeStr);
-            final diff = endDT.difference(startDT).inMinutes;
-            return diff > 0 ? (diff / 60).ceil() : 0;
-          } catch (_) {
-            return 0;
-          }
-        })();
+              try {
+                final startDT = DateFormat('HH:mm:ss').parse(startApiTime);
+                final endDT = DateFormat('HH:mm:ss').parse(endApiTime);
+                final diff = endDT.difference(startDT).inHours;
+                return diff > 0 ? diff : 0;
+              } catch (_) {
+                return 0;
+              }
+            })();
 
-        final walletUsed = (calculateWalletUsageForPackage(package) > 0) ? 'yes' : 'no';
-
-        final payload = {
-          "app_user_id": userId,
-          "company_id": package['company_id'] ?? 1,
-          "studio_id": package['studio_id'] ?? 1,
-          "package_id": package['id'] ?? 0,  // IMPORTANT: Set valid package_id
-          "package_variation_id": package['packagevariations']?[0]?['id'] ?? 0,  // IMPORTANT: Set valid variation_id
-          "total_hours": packageHours, // Send per package hours here (or totalHours if backend expects that)
-          "name": personalInfo['name'] ?? '',
-          "mobile": personalInfo['mobile'] ?? '',
-          "alternate_mobile": alternateMobiles.isNotEmpty ? alternateMobiles.join(",") : '',
-          "email": personalInfo['email'] ?? '',
+        bookingsPayload.add({
+          "package_id": package['id'] ?? 0,
+          "package_variation_id": package['packagevariations']?[0]?['id'] ?? 0,
           "address": form['address'] ?? '',
+          "free_addons":
+              form['freeAddOn'] != null && (form['freeAddOn'] as Map).isNotEmpty
+                  ? [form['freeAddOn']['id']]
+                  : [],
+          "paid_addons":
+              (form['extraAddOn'] as List<dynamic>? ?? [])
+                  .map((addon) => addon['id'])
+                  .toList(),
+          "extra_question": extractExtraQuestionsAsString(form),
           "date_of_shoot": dateOfShoot,
           "start_time": startTimeStr,
           "end_time": endTimeStr,
-          "extra_questions": extractExtraQuestionsAsString(form),
-          "terms_accepted": form['termsAccepted'] ?? false,
-          "free_add_on": form['freeAddOn'] ?? {},
-          "extra_add_on": form['extraAddOn'] ?? [],
-          "wallet_used": walletUsed,
-        };
-
-        log("[submitBooking] Payload for packageId=${package['id']}: $payload");
-        log('Form Data for package $i: ${jsonEncode(form)}');
-        log('Extracted startTimeStr: $startTimeStr');
-        log('Extracted endTimeStr: $endTimeStr');
-        log("Final Start Time (API format): $startTimeStr");  // Should print like '10:00:00'
-        log("Final End Time (API format): $endTimeStr");
-        log("Form startTime Raw: '${form['startTime']}'");
-        log("Form endTime Raw: '${form['endTime']}'");
-        log("Extracted startTimeStr: $startTimeStr");
-        log("Extracted endTimeStr: $endTimeStr");
-// Should print like '13:00:00'
-
-
-
-        final ResponseModel? response = await bookingrepo.placeBooking(payload);
-
-        if (response == null || !response.isSuccess) {
-          Get.snackbar("Booking Failed", response?.message ?? "Booking failed for package ${package['title']}");
-          isLoading = false;
-          update();
-          return; // Stop further submission on failure
-        }
+          "total_hours": totalHours,
+        });
       }
 
-      // Refresh profile and wallet after all bookings
-      await authController.fetchUserProfile();
+      final payload = {
+        "company_id":
+            selectedPackages.isNotEmpty
+                ? selectedPackages[0]['company_id'] ?? 0
+                : 0,
+        "name": personalInfo['name'] ?? '',
+        "mobile": personalInfo['mobile'] ?? '',
+        "alternate_mobile":
+            alternateMobiles.isNotEmpty ? alternateMobiles.join(",") : '',
+        "wallet_used": 'yes', // or 'no' depending on your logic
+        "studio_id":
+            selectedPackages.isNotEmpty
+                ? selectedPackages[0]['studio_id'] ?? 0
+                : 0,
+        "bookings": bookingsPayload,
+      };
 
-      // Navigate to thank you page after successful booking
+      log("[submitBooking] Full payload: $payload");
+
+      final responseBody = await bookingrepo.placeBatchBooking(payload);
+
+      if (responseBody == null || responseBody['success'] != true) {
+        Get.snackbar(
+          "Booking Failed",
+          responseBody?['message'] ?? "Booking failed",
+        );
+        return;
+      }
+
+      thankYouData = responseBody['thankyouPage'] ?? [];
+
+      await authController.fetchUserProfile();
       Get.offAll(() => ThanksForBookingPage());
     } catch (e, stack) {
       log("submitBooking error: $e\n$stack");
@@ -603,19 +1073,18 @@ class BookingController extends GetxController {
     }
   }
 
-  List<Slot> timeSlots = [];
-  List<TimeOfDay?> startTime = [];
-
   Future<ResponseModel?> fetchAvailableSlots({
     required String companyId,
     required String date,
     required String studioId,
     required String typeId,
   }) async {
-    isLoading = true;
-    timeSlots = [];
-    startTime = [];
-    update();
+    // Use specific loading flag instead of global isLoading
+    _slotsLoading = true;
+    timeSlots.clear();
+    startTime.clear();
+    update(['slots']); // Only update slots section
+
     ResponseModel? responseModel;
     try {
       Response response = await bookingrepo.fetchAvailableSlots(
@@ -624,26 +1093,150 @@ class BookingController extends GetxController {
         studioId: studioId,
         typeId: typeId,
       );
-      log("Slots response: ${response.bodyString}");
+
+      log(
+        "Slots response: ${response.bodyString}",
+        name: "fetchAvailableSlots",
+      );
+
       if (response.statusCode == 200) {
-        timeSlots = (response.body["data"]["open_hours"] as List).map((e) => Slot.fromJson(e)).toList();
+        final openHours = response.body["data"]["open_hours"] as List;
+        log("Open hours: $openHours", name: "fetchAvailableSlots");
+
+        bufferTime =
+            int.tryParse(
+              response.body["data"]["studio_location"]["buffer_time"] ?? "0",
+            ) ??
+            0;
+
+        timeSlots = openHours.map((e) => Slot.fromJson(e)).toList();
+
+        // Build startTime array
         for (var i = 0; i < timeSlots.length; i++) {
           startTime.add(timeSlots[i].startTime);
-          if (i == timeSlots.length - 1) {
+          if (i == timeSlots.length - 1 && timeSlots[i].endTime != null) {
             startTime.add(timeSlots[i].endTime);
+            log(
+              "Last slot endTime: ${timeSlots[i].endTime!.format(Get.context!)}",
+              name: "fetchAvailableSlots",
+            );
           }
         }
+
+        // Add final slot if timeSlots is not empty
+        if (timeSlots.isNotEmpty) {
+          final lastSlot = timeSlots.last;
+          timeSlots.add(
+            Slot(
+              booked: lastSlot.booked,
+              breakTime: lastSlot.breakTime,
+              blockHome: lastSlot.blockHome,
+              blockIndoor: lastSlot.blockIndoor,
+              blockOutdoor: lastSlot.blockOutdoor,
+              startTime: lastSlot.endTime,
+              endTime: lastSlot.endTime,
+            ),
+          );
+        }
+
         responseModel = ResponseModel(true, "Slots fetched successfully");
       } else {
         timeSlots.clear();
-        responseModel = ResponseModel(false, "Failed to fetch slots");
+        startTime.clear();
+        responseModel = ResponseModel(
+          false,
+          "Failed to fetch slots: ${response.statusText}",
+        );
+        // Get.snackbar(
+        //   "Error",
+        //   "Failed to fetch slots: ${response.statusText}",
+        //   snackPosition: SnackPosition.BOTTOM,
+        //   backgroundColor: Colors.redAccent,
+        //   colorText: Colors.white,
+        // );
       }
     } catch (e) {
-      responseModel = ResponseModel(false, "Error fetching slots");
+      timeSlots.clear();
+      startTime.clear();
+      responseModel = ResponseModel(false, "Error fetching slots: $e");
+      // Get.snackbar(
+      //   "Error",
+      //   "Unable to fetch slots. Please try again later.",
+      //   snackPosition: SnackPosition.BOTTOM,
+      //   backgroundColor: Colors.redAccent,
+      //   colorText: Colors.white,
+      // );
       log(e.toString(), name: "fetchAvailableSlots");
+    } finally {
+      // Always reset loading state in finally block
+      _slotsLoading = false;
+      update(['slots']); // Only update slots section
     }
-    isLoading = false;
-    update();
+
     return responseModel;
+  }
+
+  Future<void> fetchBookings() async {
+    isLoading = true;
+    update();
+
+    try {
+      final response = await bookingrepo.getUserBookings();
+      if (response != null && response['success'] == true) {
+        final allBookings = response['data'] as List<dynamic>? ?? [];
+        final now = DateTime.now();
+
+        // Filter raw bookings by your logic
+        final upcomingRaw =
+            allBookings.where((booking) {
+              final shootDate = DateTime.tryParse(
+                booking['date_of_shoot'] ?? '',
+              );
+              final status = (booking['status'] ?? '').toString().toLowerCase();
+              return shootDate != null &&
+                  (shootDate.isAtSameMomentAs(now) || shootDate.isAfter(now)) &&
+                  status == 'pending';
+            }).toList();
+
+        final cancelledRaw =
+            allBookings.where((booking) {
+              return (booking['status'] ?? '').toString().toLowerCase() ==
+                  'cancelled';
+            }).toList();
+
+        final completedRaw =
+            allBookings.where((booking) {
+              return (booking['status'] ?? '').toString().toLowerCase() ==
+                      'completed' ||
+                  (booking['shoot_done'] == true);
+            }).toList();
+
+        // Map filtered raw data to typed BookingInfo list
+        upcomingBookings =
+            upcomingRaw
+                .map((b) => BookingInfo.fromJson(b as Map<String, dynamic>))
+                .toList();
+        cancelledBookings =
+            cancelledRaw
+                .map((b) => BookingInfo.fromJson(b as Map<String, dynamic>))
+                .toList();
+        completedBookings =
+            completedRaw
+                .map((b) => BookingInfo.fromJson(b as Map<String, dynamic>))
+                .toList();
+      } else {
+        upcomingBookings = [];
+        cancelledBookings = [];
+        completedBookings = [];
+      }
+    } catch (e) {
+      upcomingBookings = [];
+      cancelledBookings = [];
+      completedBookings = [];
+      log('Error fetching bookings: $e', name: 'BookingController');
+    } finally {
+      isLoading = false;
+      update();
+    }
   }
 }

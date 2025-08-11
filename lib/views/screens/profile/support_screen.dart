@@ -1,4 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
+import 'package:streammly/controllers/booking_form_controller.dart';
+import 'package:streammly/data/api/api_client.dart';
+import 'package:streammly/data/repository/booking_repo.dart';
+import 'package:streammly/services/constants.dart';
 import 'package:streammly/views/screens/profile/support_ticket_form.dart';
 
 class SupportTicketPage extends StatelessWidget {
@@ -6,6 +11,16 @@ class SupportTicketPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final bookingController = Get.put(
+      BookingController(
+        bookingrepo: BookingRepo(
+          apiClient: ApiClient(
+            appBaseUrl: AppConstants.baseUrl,
+            sharedPreferences: Get.find(),
+          ),
+        ),
+      ),
+    );
     final theme = Theme.of(context);
     final textTheme = theme.textTheme;
     final screenHeight = MediaQuery.of(context).size.height;
@@ -38,10 +53,7 @@ class SupportTicketPage extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.center,
             mainAxisSize: MainAxisSize.max,
             children: [
-              Image.asset(
-                'assets/images/support.png',
-                height: 150,
-              ),
+              Image.asset('assets/images/support.png', height: 150),
               const SizedBox(height: 16),
               Text(
                 '"Need help? Connect with our support team – we\'re here to assist you every step of the way."',
@@ -55,8 +67,21 @@ class SupportTicketPage extends StatelessWidget {
                 children: [
                   Expanded(
                     child: ElevatedButton(
-                      onPressed: () {
-                       Navigator.push(context, MaterialPageRoute(builder: ((_) => SupportTicketFormPage())));
+                      onPressed: () async {
+                        // Ensure bookings are fetched
+                        if (bookingController.upcomingBookings.isEmpty) {
+                          await bookingController.fetchBookings();
+                        }
+
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder:
+                                (_) => SupportTicketFormPage(
+                                  bookings: bookingController.upcomingBookings,
+                                ),
+                          ),
+                        );
                       },
                       style: ElevatedButton.styleFrom(
                         backgroundColor: Colors.blue.shade800,

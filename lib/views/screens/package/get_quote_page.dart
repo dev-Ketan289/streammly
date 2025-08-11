@@ -8,6 +8,7 @@ import 'package:streammly/views/widgets/custom_doodle.dart';
 
 import '../../../controllers/auth_controller.dart';
 import '../../../controllers/quote_controller.dart';
+import '../../../services/custom_error_pop_widget.dart';
 import '../auth_screens/login_screen.dart';
 import '../package/booking/widgets/custom_time_picker.dart';
 
@@ -43,151 +44,128 @@ class _GetQuoteScreenState extends State<GetQuoteScreen> {
   );
   final AuthController authController = Get.find<AuthController>();
 
-  final TextEditingController nameController = TextEditingController();
-  final TextEditingController mobileController = TextEditingController();
-  final TextEditingController emailController = TextEditingController();
-  final TextEditingController requirementsController = TextEditingController();
-  final TextEditingController dateController = TextEditingController();
-
-  DateTime selectedDate = DateTime.now();
-  String? startTime;
-  String? endTime;
-  String? favStartTime;
-  String? favEndTime;
-
-  bool showTimePicker = false;
-  bool showFavTimePicker = false;
-  bool isStartTime = true;
-  bool isFavTime = false;
-
   @override
   void initState() {
     super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      quoteController.companyId = widget.companyId.toString();
+      quoteController.subCategoryId = widget.subCategoryId.toString();
+      quoteController.subVerticalId = widget.subVerticalId.toString();
+      quoteController.subCategoryTitle = widget.subCategoryTitle.toString();
+      quoteController.subVerticalTitle = widget.subVerticalTitle.toString();
 
-    final args = Get.arguments ?? {};
-
+      quoteController.update();
+    });
     final nowFormatted = DateFormat('hh:mm a').format(DateTime.now());
-
-    nameController.text = args['name'] ?? '';
-    mobileController.text = args['mobile'] ?? '';
-    emailController.text = args['email'] ?? '';
-    requirementsController.text = args['requirements'] ?? '';
-    dateController.text = args['date'] ?? _formatDate(selectedDate);
-
-    startTime = args['startTime'] ?? nowFormatted;
-    endTime = args['endTime'] ?? nowFormatted;
-    favStartTime = args['favStartTime'] ?? nowFormatted;
-    favEndTime = args['favEndTime'] ?? nowFormatted;
   }
 
   void _pickDate() async {
     final picked = await showDatePicker(
       context: context,
-      initialDate: selectedDate,
+      initialDate: quoteController.selectedDate,
       firstDate: DateTime.now(),
       lastDate: DateTime(2100),
     );
     if (picked != null) {
-      setState(() {
-        selectedDate = picked;
-        dateController.text = _formatDate(picked);
-      });
+      quoteController.selectedDate = picked;
+      quoteController.dateController.text = _formatDate(picked);
+      quoteController.update();
     }
   }
 
   void _onTimeSelected(String value) {
-    setState(() {
-      if (isStartTime) {
-        startTime = value;
-      } else {
-        endTime = value;
-      }
-      showTimePicker = false;
-    });
+    if (quoteController.startTime != null) {
+      quoteController.startTime = value;
+    } else {
+      quoteController.endTime = value;
+    }
+    quoteController.showTimePicker = false;
+    quoteController.update();
   }
 
   void _onFavTimeSelected(String value) {
-    setState(() {
-      if (isFavTime) {
-        favStartTime = value;
-      } else {
-        favEndTime = value;
-      }
-      showFavTimePicker = false;
-    });
+    if (quoteController.isFavTime) {
+      quoteController.favStartTime = value;
+    } else {
+      quoteController.favEndTime = value;
+    }
+    quoteController.showFavTimePicker = false;
+    quoteController.update();
   }
 
   void _submitQuote() async {
-    if (nameController.text.isEmpty ||
-        mobileController.text.isEmpty ||
-        emailController.text.isEmpty ||
-        requirementsController.text.isEmpty) {
+    if (quoteController.nameController.text.isEmpty ||
+        quoteController.mobileController.text.isEmpty ||
+        quoteController.emailController.text.isEmpty ||
+        quoteController.requirementsController.text.isEmpty) {
       Get.snackbar("Validation", "Please fill all required fields");
       return;
     }
 
     if (!authController.isLoggedIn()) {
-      final shouldLogin = await Get.dialog<bool>(
-        AlertDialog(
-          title: const Text("Login Required"),
-          content: const Text(
-            "You are not logged in. Do you want to login to submit this quote?",
-          ),
-          actions: [
-            TextButton(
-              onPressed: () => Get.back(result: false),
-              child: const Text("Continue as Guest"),
-            ),
-            ElevatedButton(
-              onPressed: () => Get.back(result: true),
-              child: const Text("Login"),
-            ),
-          ],
-        ),
-      );
-
-      if (shouldLogin == true) {
-        Get.to(
-          () => const LoginScreen(),
-          arguments: {
-            'redirectTo': '/getQuote',
-            'formData': {
-              'companyId': widget.companyId,
-              'subCategoryId': widget.subCategoryId,
-              'subVerticalId': widget.subVerticalId,
-              'subCategoryTitle': widget.subCategoryTitle,
-              'subVerticalTitle': widget.subVerticalTitle,
-              'name': nameController.text,
-              'mobile': mobileController.text,
-              'email': emailController.text,
-              'requirements': requirementsController.text,
-              'date': dateController.text,
-              'startTime': startTime,
-              'endTime': endTime,
-              'favStartTime': favStartTime,
-              'favEndTime': favEndTime,
+      await CommonPopupDialog.show(
+        context,
+        imagePath: 'assets/images/access_denied.png',
+        title: 'Login Required',
+        message: 'You need to login to submit this quote.',
+        primaryBtnText: 'Cancel',
+        onPrimaryPressed: () {},
+        secondaryBtnText: 'Login',
+        onSecondaryPressed: () {
+          Navigator.of(context).pop(); // Close dialog first
+          Get.off(
+            () => const LoginScreen(),
+            arguments: {
+              'redirectTo': '/getQuote',
+              'formData': {
+                'companyId': quoteController.companyId,
+                'subCategoryId': quoteController.subCategoryId,
+                'subVerticalId': quoteController.subVerticalId,
+                'subCategoryTitle': quoteController.subCategoryTitle,
+                'subVerticalTitle': quoteController.subVerticalTitle,
+                'name': quoteController.nameController.text,
+                'mobile': quoteController.mobileController.text,
+                'email': quoteController.emailController.text,
+                'requirements': quoteController.requirementsController.text,
+                'date': quoteController.dateController.text,
+                'startTime': quoteController.startTime,
+                'endTime': quoteController.endTime,
+                'favStartTime': quoteController.favStartTime,
+                'favEndTime': quoteController.favEndTime,
+              },
             },
-          },
-        );
-        return;
-      }
+          );
+        },
+      );
+      return;
     }
 
+    // If logged in, proceed to submit
     quoteController.submitQuote(
-      companyId: widget.companyId ?? 0,
-      subCategoryId: widget.subCategoryId ?? 0,
-      subVerticalId: widget.subVerticalId ?? 0,
-      userName: nameController.text,
-      phone: mobileController.text,
-      email: emailController.text,
-      dateOfShoot: dateController.text,
-      startTime: startTime!,
-      endTime: endTime!,
-      favorableDate: dateController.text,
-      favorableStartTime: favStartTime!,
-      favorableEndTime: favEndTime!,
-      requirement: requirementsController.text,
-      shootType: "${widget.subCategoryTitle} / ${widget.subVerticalTitle}",
+      companyId:
+          (quoteController.companyId is int)
+              ? quoteController.companyId as int
+              : 0,
+      subCategoryId:
+          (quoteController.subCategoryId is int)
+              ? quoteController.subCategoryId as int
+              : 0,
+      subVerticalId:
+          (quoteController.subVerticalId is int)
+              ? quoteController.subVerticalId as int
+              : 0,
+      userName: quoteController.nameController.text,
+      phone: quoteController.mobileController.text,
+      email: quoteController.emailController.text,
+      dateOfShoot: quoteController.dateController.text,
+      startTime: quoteController.startTime!,
+      endTime: quoteController.endTime!,
+      favorableDate: quoteController.dateController.text,
+      favorableStartTime: quoteController.favStartTime!,
+      favorableEndTime: quoteController.favEndTime!,
+      requirement: quoteController.requirementsController.text,
+      shootType:
+          "${quoteController.subCategoryTitle} / ${quoteController.subVerticalTitle}",
     );
   }
 
@@ -221,7 +199,7 @@ class _GetQuoteScreenState extends State<GetQuoteScreen> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    "${widget.subCategoryTitle} / ${widget.subVerticalTitle}",
+                    "${controller.subCategoryTitle} / ${controller.subVerticalTitle}",
                     style: Theme.of(context).textTheme.labelLarge?.copyWith(
                       color: const Color(0xFF2864A6),
                       fontWeight: FontWeight.bold,
@@ -230,12 +208,12 @@ class _GetQuoteScreenState extends State<GetQuoteScreen> {
                   ),
                   const SizedBox(height: 15),
                   TextField(
-                    controller: nameController,
+                    controller: controller.nameController,
                     decoration: _buildDecoration('Name *', 'Enter name'),
                   ),
                   const SizedBox(height: 16),
                   TextField(
-                    controller: mobileController,
+                    controller: controller.mobileController,
                     decoration: _buildDecoration(
                       'Mobile No. *',
                       'Enter mobile number',
@@ -244,14 +222,14 @@ class _GetQuoteScreenState extends State<GetQuoteScreen> {
                   ),
                   const SizedBox(height: 16),
                   TextField(
-                    controller: emailController,
+                    controller: controller.emailController,
                     decoration: _buildDecoration('Email *', 'Enter email'),
                     keyboardType: TextInputType.emailAddress,
                   ),
                   const SizedBox(height: 16),
                   _buildTextField(
                     'Date of Shoot *',
-                    dateController,
+                    controller.dateController,
                     readOnly: true,
                     onTap: _pickDate,
                     suffixIcon: Icons.calendar_today,
@@ -262,12 +240,12 @@ class _GetQuoteScreenState extends State<GetQuoteScreen> {
                       Expanded(
                         child: _buildTextField(
                           'Start Time *',
-                          TextEditingController(text: startTime),
+                          TextEditingController(text: controller.startTime),
                           readOnly: true,
                           onTap: () {
-                            isStartTime = true;
-                            showTimePicker = true;
-                            setState(() {});
+                            controller.isStartTime = true;
+                            controller.showTimePicker = true;
+                            controller.update();
                           },
                         ),
                       ),
@@ -275,26 +253,28 @@ class _GetQuoteScreenState extends State<GetQuoteScreen> {
                       Expanded(
                         child: _buildTextField(
                           'End Time *',
-                          TextEditingController(text: endTime),
+                          TextEditingController(text: controller.endTime),
                           readOnly: true,
                           onTap: () {
-                            isStartTime = false;
-                            showTimePicker = true;
-                            setState(() {});
+                            controller.isStartTime = false;
+                            controller.showTimePicker = true;
+                            controller.update();
                           },
                         ),
                       ),
                     ],
                   ),
-                  if (showTimePicker)
+                  if (controller.showTimePicker)
                     CustomTimePicker(
-                      isStart: isStartTime,
-                      onCancel: () => setState(() => showTimePicker = false),
+                      isStart: controller.isStartTime,
+                      onCancel:
+                          () =>
+                              setState(() => controller.showTimePicker = false),
                       onTimeSelected: _onTimeSelected,
                     ),
                   const SizedBox(height: 16),
                   TextField(
-                    controller: requirementsController,
+                    controller: controller.requirementsController,
                     decoration: _buildDecoration(
                       'Describe your Requirements *',
                       'Enter requirements',
@@ -307,11 +287,11 @@ class _GetQuoteScreenState extends State<GetQuoteScreen> {
                       Expanded(
                         child: _buildTextField(
                           'Fav Time *',
-                          TextEditingController(text: favStartTime),
+                          TextEditingController(text: controller.favStartTime),
                           readOnly: true,
                           onTap: () {
-                            isFavTime = true;
-                            showFavTimePicker = true;
+                            controller.isFavTime = true;
+                            controller.showFavTimePicker = true;
                             setState(() {});
                           },
                         ),
@@ -320,21 +300,24 @@ class _GetQuoteScreenState extends State<GetQuoteScreen> {
                       Expanded(
                         child: _buildTextField(
                           'Fav Time *',
-                          TextEditingController(text: favEndTime),
+                          TextEditingController(text: controller.favEndTime),
                           readOnly: true,
                           onTap: () {
-                            isFavTime = false;
-                            showFavTimePicker = true;
+                            controller.isFavTime = false;
+                            controller.showFavTimePicker = true;
                             setState(() {});
                           },
                         ),
                       ),
                     ],
                   ),
-                  if (showFavTimePicker)
+                  if (controller.showFavTimePicker)
                     CustomTimePicker(
-                      isStart: isFavTime,
-                      onCancel: () => setState(() => showFavTimePicker = false),
+                      isStart: controller.isFavTime,
+                      onCancel:
+                          () => setState(
+                            () => controller.showFavTimePicker = false,
+                          ),
                       onTimeSelected: _onFavTimeSelected,
                     ),
                   const SizedBox(height: 16),

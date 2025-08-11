@@ -1,3 +1,4 @@
+import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../data/repository/quote_repo.dart';
 import 'auth_controller.dart';
@@ -9,8 +10,28 @@ class QuoteController extends GetxController implements GetxService {
   QuoteController({required this.quoteRepo});
 
   bool isSubmitting = false;
+  String? companyId;
+  String? subCategoryId;
+  String? subVerticalId;
+  String? subCategoryTitle;
+  String? subVerticalTitle;
   final AuthController authController = Get.find<AuthController>();
+  final TextEditingController nameController = TextEditingController();
+  final TextEditingController mobileController = TextEditingController();
+  final TextEditingController emailController = TextEditingController();
+  final TextEditingController requirementsController = TextEditingController();
+  final TextEditingController dateController = TextEditingController();
 
+  DateTime selectedDate = DateTime.now();
+String? startTime = "9:00 AM"; // Default value
+  String? endTime = "5:00 PM"; // Default value
+  String? favStartTime = "9:00 AM"; // Default value
+  String? favEndTime = "5:00 PM"; 
+
+  bool showTimePicker = false;
+  bool showFavTimePicker = false;
+  bool isStartTime = true;
+  bool isFavTime = false;
   Future<void> submitQuote({
     required int companyId,
     required int subCategoryId,
@@ -59,10 +80,12 @@ class QuoteController extends GetxController implements GetxService {
 
       if (response.statusCode == 200) {
         final formattedDateTime = "$dateOfShoot, $startTime";
-        Get.off(() => QuoteSubmittedScreen(
-          shootType: shootType,
-          submittedDateTime: formattedDateTime,
-        ));
+        Get.off(
+          () => QuoteSubmittedScreen(
+            shootType: shootType,
+            submittedDateTime: formattedDateTime,
+          ),
+        );
         Get.snackbar("Success", "Quote request submitted!");
       } else {
         Get.snackbar("Error", "Failed to submit quote.");
