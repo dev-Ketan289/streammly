@@ -6,11 +6,13 @@ import 'package:streammly/data/api/api_client.dart';
 import 'package:streammly/data/repository/booking_repo.dart';
 import 'package:streammly/models/company/company_location.dart';
 import 'package:streammly/services/constants.dart';
+import 'package:streammly/services/theme.dart';
 import 'package:streammly/views/screens/package/booking/booking_summary.dart';
 import 'package:streammly/views/screens/package/booking/widgets/booking_form_page.dart';
 import 'package:streammly/views/screens/package/booking/widgets/booking_personal_info.dart';
 import 'package:streammly/views/widgets/custom_doodle.dart';
 
+import '../../../../controllers/auth_controller.dart';
 import '../../../../controllers/booking_form_controller.dart';
 import '../../../../navigation_flow.dart';
 
@@ -18,19 +20,26 @@ class BookingPage extends StatelessWidget {
   final List<Map<String, dynamic>> packages;
   final List<dynamic> companyLocations;
   final CompanyLocation? companyLocation;
-    final int companyId;
+  final int companyId;
 
   const BookingPage({
     super.key,
     required this.packages,
-    required this.companyLocations,required this.companyLocation, required this.companyId,
-
+    required this.companyLocations,
+    required this.companyLocation,
+    required this.companyId,
   });
 
   @override
   Widget build(BuildContext context) {
     log(companyLocation.toString(), name: 'companylocation');
     log(packages.toString());
+
+    // Remove the existing controller if it exists to avoid conflicts
+    if (Get.isRegistered<BookingController>()) {
+      Get.delete<BookingController>();
+    }
+
     final controller = Get.put(
       BookingController(
         bookingrepo: BookingRepo(
@@ -40,11 +49,20 @@ class BookingPage extends StatelessWidget {
           ),
         ),
       ),
+      permanent: false, // Changed to false to allow proper cleanup
     );
 
-    // Initialize packages and company locations once after the frame
-    WidgetsBinding.instance.addPostFrameCallback((_) {
+    // Initialize packages and refresh user profile in correct order
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      // First refresh user profile to ensure latest data
+      final authController = Get.find<AuthController>();
+      await authController.fetchUserProfile();
+
+      // Then initialize packages
       controller.initSelectedPackages(packages, companyLocations);
+
+      // Finally trigger autofill with refreshed data
+      controller.refreshPersonalInfo();
     });
 
     return CustomBackground(
@@ -80,15 +98,14 @@ class BookingPage extends StatelessWidget {
         backgroundColor: Colors.transparent,
         body: GetBuilder<BookingController>(
           builder: (_) {
-            // If no packages yet, display empty widget/loader or placeholder
-            if (controller.selectedPackages.isEmpty) {
+            // Show loading while initializing
+            if (controller.isLoading || controller.selectedPackages.isEmpty) {
               return const Center(child: CircularProgressIndicator());
             }
 
             final currentPage = controller.currentPage;
             final packagesLength = controller.selectedPackages.length;
 
-            // Make sure currentPage is within valid bounds
             final safePageIndex =
                 (currentPage >= 0 && currentPage < packagesLength)
                     ? currentPage
@@ -105,7 +122,6 @@ class BookingPage extends StatelessWidget {
                         const PersonalInfoSection(),
                         const SizedBox(height: 32),
 
-                        // Package Toggle Buttons (only show if multiple packages)
                         if (packagesLength > 1) ...[
                           SizedBox(
                             height: 45,
@@ -122,7 +138,7 @@ class BookingPage extends StatelessWidget {
                                   style: ElevatedButton.styleFrom(
                                     backgroundColor:
                                         isSelected
-                                            ? const Color(0xFF4A6CF7)
+                                            ? primaryColor
                                             : Colors.grey.shade100,
                                     foregroundColor:
                                         isSelected
@@ -141,12 +157,7 @@ class BookingPage extends StatelessWidget {
                                       side: BorderSide(
                                         color:
                                             isSelected
-                                                ? const Color.fromARGB(
-                                                  255,
-                                                  0,
-                                                  51,
-                                                  255,
-                                                )
+                                                ? primaryColor
                                                 : Colors.grey.shade300,
                                       ),
                                     ),
@@ -169,17 +180,16 @@ class BookingPage extends StatelessWidget {
                           ),
                         ],
 
-                        // Active Form
                         PackageFormCard(
                           index: safePageIndex,
-                          package: controller.selectedPackages[safePageIndex], companyId: companyId,
+                          package: controller.selectedPackages[safePageIndex],
+                          companyId: companyId,
                         ),
                       ],
                     ),
                   ),
                 ),
 
-                // Bottom Button
                 Container(
                   padding: const EdgeInsets.all(20),
                   decoration: BoxDecoration(

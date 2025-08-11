@@ -30,31 +30,34 @@ class PackagesHeader extends StatelessWidget {
           ),
           GetBuilder<PackagesController>(
             id: 'grid_toggle', // optional, only if you want to optimize updates
-            builder: (controller) => Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                IconButton(
-                  icon: Icon(
-                    Icons.grid_view,
-                    color: controller.isGridView
-                        ? primaryColor
-                        : theme.disabledColor,
-                    size: 20,
-                  ),
-                  onPressed: () => controller.setGridView(true),
+            builder:
+                (controller) => Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    IconButton(
+                      icon: Icon(
+                        Icons.grid_view,
+                        color:
+                            controller.isGridView
+                                ? primaryColor
+                                : theme.disabledColor,
+                        size: 20,
+                      ),
+                      onPressed: () => controller.setGridView(true),
+                    ),
+                    IconButton(
+                      icon: Icon(
+                        Icons.view_list,
+                        color:
+                            !controller.isGridView
+                                ? primaryColor
+                                : theme.disabledColor,
+                        size: 20,
+                      ),
+                      onPressed: () => controller.setGridView(false),
+                    ),
+                  ],
                 ),
-                IconButton(
-                  icon: Icon(
-                    Icons.view_list,
-                    color: !controller.isGridView
-                        ? primaryColor
-                        : theme.disabledColor,
-                    size: 20,
-                  ),
-                  onPressed: () => controller.setGridView(false),
-                ),
-              ],
-            ),
           ),
         ],
       ),

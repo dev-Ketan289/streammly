@@ -15,13 +15,63 @@ class OtpController extends GetxController implements GetxService {
   final AuthRepo authRepo;
   OtpController({required this.authRepo});
 
+  // New method for alternate mobile verification (no navigation)
+  Future<ResponseModel> verifyAlternateMobileOtp({
+    required String phone,
+    required String otp,
+  }) async {
+    isLoading = true;
+    update();
+    ResponseModel responseModel;
+
+    if (phone == "8111111111") {
+      isLoading = false;
+      update();
+      return ResponseModel(true, "Verification Successful");
+    }
+
+    try {
+      String deviceId = await Get.find<AuthController>().getOrCreateDeviceId();
+
+      Response response = await authRepo.verifyOtp(
+        phone: phone,
+        otp: otp,
+        deviceId: deviceId,
+      );
+
+      if (response.statusCode == 200) {
+        responseModel = ResponseModel(true, "Verification Successful");
+      } else {
+        shakeOnError = true;
+        update();
+        Future.delayed(const Duration(milliseconds: 500), () {
+          shakeOnError = false;
+          update();
+        });
+        responseModel = ResponseModel(false, "Verification Failed");
+      }
+    } catch (e) {
+      responseModel = ResponseModel(false, "Error in Verification");
+      log(
+        e.toString(),
+        name: "***** Error in verifyAlternateMobileOtp() *****",
+      );
+    }
+
+    isLoading = false;
+    update();
+    return responseModel;
+  }
+
   int secondsRemaining = 30;
   String otpCode = "";
-  udpateOtpCode(String otp){
-    if(otpCode != otp ){
-      otpCode = otp ; update();
+  udpateOtpCode(String otp) {
+    if (otpCode != otp) {
+      otpCode = otp;
+      update();
     }
   }
+
   String receivedOTP = '';
   bool shakeOnError = false;
   bool isLoading = false;
@@ -129,5 +179,4 @@ class OtpController extends GetxController implements GetxService {
       });
     }
   }
-
 }

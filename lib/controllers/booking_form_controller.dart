@@ -1,35 +1,65 @@
+import 'dart:async';
 import 'dart:convert';
 import 'dart:developer';
 
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
 import 'package:streammly/controllers/auth_controller.dart';
 import 'package:streammly/controllers/package_page_controller.dart';
+import 'package:streammly/data/api/api_client.dart';
+import 'package:streammly/data/repository/auth_repo.dart';
 import 'package:streammly/data/repository/booking_repo.dart';
 import 'package:streammly/models/package/slots_model.dart';
 import 'package:streammly/models/response/response_model.dart';
+import 'package:streammly/services/constants.dart';
 import 'package:streammly/views/screens/package/booking/booking_page.dart';
 import 'package:streammly/views/screens/package/booking/thanks_for_booking.dart';
 
 import '../models/booking/booking_info_model.dart';
+import 'otp_controller.dart';
 
 class BookingController extends GetxController {
-  final AuthController authController = Get.find();
-  final PackagesController packagesController = Get.find();
+  // Dependencies - Lazy loading to prevent circular dependency issues
+  AuthController get authController => Get.find<AuthController>();
+  PackagesController get packagesController => Get.find<PackagesController>();
+
+  // bool _personalInfoLoading = false;
+  // bool _otpLoading = false;
+  bool _slotsLoading = false;
+  // bool _bookingsLoading = false;
+  // bool _submitLoading = false;
+
+  // Getters for loading states
+  // bool get isPersonalInfoLoading => _personalInfoLoading;
+  // bool get isOtpLoading => _otpLoading;
+  bool get isSlotsLoading => _slotsLoading;
+  // bool get isBookingsLoading => _bookingsLoading;
+  // bool get isSubmitLoading => _submitLoading;
+
   final BookingRepo bookingrepo;
 
+  // Text controllers - properly managed lifecycle
+  late final TextEditingController nameController;
+  late final TextEditingController mobileController;
+  late final TextEditingController emailController;
+
+  // Disposal tracking
+  bool _isDisposed = false;
+
   BookingController({required this.bookingrepo});
+
+  // State variables - using traditional approach with update()
   List<BookingInfo> upcomingBookings = [];
   List<BookingInfo> cancelledBookings = [];
   List<BookingInfo> completedBookings = [];
   int currentPage = 0;
   List<Map<String, dynamic>> selectedPackages = [];
   List<dynamic> thankYouData = [];
-
   bool isLoading = false;
+  bool acceptTerms = false;
 
+  // Form data
   final Map<String, String> personalInfo = {
     'name': '',
     'mobile': '',
@@ -39,7 +69,6 @@ class BookingController extends GetxController {
   final List<String> alternateEmails = [];
   final Map<int, Map<String, dynamic>> packageFormsData = {};
 
-  bool acceptTerms = false;
   late List<int> packagePrices;
   late List<bool> showPackageDetails;
 
@@ -48,13 +77,65 @@ class BookingController extends GetxController {
   TimeOfDay? selectedStartTime;
   TimeOfDay? selectedEndTime;
 
+  // Slots related variables
+  List<Slot> timeSlots = [];
+  List<TimeOfDay?> startTime = [];
+  int bufferTime = 0;
+
   @override
   void onInit() {
     super.onInit();
+    _initializeControllers();
     autofillFromUserProfile();
-    
     fetchBookings();
   }
+
+  @override
+  void onReady() {
+    super.onReady();
+    // Any additional setup after widget is ready
+  }
+
+  @override
+  void onClose() {
+    _disposeControllers();
+    _clearData();
+    super.onClose();
+  }
+
+  // Private initialization methods
+  void _initializeControllers() {
+    nameController = TextEditingController();
+    mobileController = TextEditingController();
+    emailController = TextEditingController();
+  }
+
+  void _disposeControllers() {
+    if (!_isDisposed) {
+      nameController.dispose();
+      mobileController.dispose();
+      emailController.dispose();
+      _isDisposed = true;
+    }
+  }
+
+  void _clearData() {
+    upcomingBookings.clear();
+    cancelledBookings.clear();
+    completedBookings.clear();
+    selectedPackages.clear();
+    thankYouData.clear();
+    alternateMobiles.clear();
+    alternateEmails.clear();
+    packageFormsData.clear();
+    companyLocations.clear();
+    timeSlots.clear();
+    startTime.clear();
+    personalInfo.clear();
+  }
+
+  // Update autofillFromUserProfile to update controllers' text:
+  // In your BookingController class, update the autofillFromUserProfile method:
 
   void autofillFromUserProfile() {
     try {
@@ -63,13 +144,326 @@ class BookingController extends GetxController {
         personalInfo['name'] = userProfile.name ?? '';
         personalInfo['mobile'] = userProfile.phone ?? '';
         personalInfo['email'] = userProfile.email ?? '';
+
+        // Update controllers safely and force sync
+        if (!_isDisposed) {
+          nameController.text = personalInfo['name']!;
+          mobileController.text = personalInfo['mobile']!;
+          emailController.text = personalInfo['email']!;
+        }
         update();
       }
     } catch (e) {
-      if (kDebugMode) print("AuthController error: $e");
+      log('Error in autofillFromUserProfile: $e', name: 'BookingController');
     }
   }
 
+  bool isOTPSent = false;
+  bool isAlternateMobileVerified = false;
+
+  List<TextEditingController> otpControllers = List.generate(
+    6,
+    (index) => TextEditingController(),
+  );
+  List<String> otpDigits = ['', '', '', '', '', ''];
+  int otpTimer = 30;
+  Timer? _otpTimer;
+  bool get isOTPComplete => otpDigits.every((digit) => digit.isNotEmpty);
+
+  void onOTPDigitChanged(int index, String value) {
+    if (value.isNotEmpty && value.length == 1) {
+      otpDigits[index] = value;
+
+      // Auto move to next field
+      if (index < 5) {
+        FocusScope.of(Get.context!).nextFocus();
+      } else {
+        // Last field, hide keyboard
+        FocusScope.of(Get.context!).unfocus();
+      }
+    } else if (value.isEmpty) {
+      otpDigits[index] = '';
+
+      // Auto move to previous field when deleting
+      if (index > 0) {
+        FocusScope.of(Get.context!).previousFocus();
+      }
+    }
+    update();
+  }
+
+  void onOTPFieldTapped(int index) {
+    // Find the first empty field and focus there
+    for (int i = 0; i < otpDigits.length; i++) {
+      if (otpDigits[i].isEmpty) {
+        otpControllers[i].selection = TextSelection.fromPosition(
+          TextPosition(offset: otpControllers[i].text.length),
+        );
+        return;
+      }
+    }
+  }
+
+  void startOTPTimer() {
+    otpTimer = 30;
+    _otpTimer?.cancel();
+    _otpTimer = Timer.periodic(const Duration(seconds: 1), (timer) {
+      if (otpTimer > 0) {
+        otpTimer--;
+        update();
+      } else {
+        timer.cancel();
+      }
+    });
+  }
+
+  void resendOTP() {
+    // Clear current OTP
+    for (int i = 0; i < otpControllers.length; i++) {
+      otpControllers[i].clear();
+      otpDigits[i] = '';
+    }
+
+    // Send new OTP
+    sendOTPForAlternateMobile();
+    startOTPTimer();
+    update();
+  }
+
+  void sendOTPForAlternateMobile() async {
+    if (alternateMobiles.isEmpty || alternateMobiles[0].isEmpty) {
+      Get.snackbar('Error', 'Please enter alternate mobile number');
+      return;
+    }
+
+    final mobileNumber = alternateMobiles[0];
+    if (!RegExp(r'^\d{10}$').hasMatch(mobileNumber)) {
+      Get.snackbar('Error', 'Please enter valid 10-digit mobile number');
+      return;
+    }
+
+    try {
+      isLoading = true;
+      update();
+
+      // Use AuthController's OTP sending mechanism
+      final authController = Get.find<AuthController>();
+
+      // Temporarily store the alternate number in auth controller
+      final originalPhone = authController.phoneController.text;
+      authController.phoneController.text = mobileNumber;
+
+      final response = await authController.sendOtp();
+
+      // Restore original phone number
+      authController.phoneController.text = originalPhone;
+
+      if (response.isSuccess) {
+        isOTPSent = true;
+        startOTPTimer();
+        update();
+        Get.snackbar(
+          'OTP Sent',
+          'OTP has been sent to $mobileNumber',
+          backgroundColor: Colors.green,
+          colorText: Colors.white,
+        );
+      } else {
+        Get.snackbar(
+          'Error',
+          response.message,
+          backgroundColor: Colors.red,
+          colorText: Colors.white,
+        );
+      }
+    } catch (e) {
+      Get.snackbar(
+        'Error',
+        'Failed to send OTP. Please try again.',
+        backgroundColor: Colors.red,
+        colorText: Colors.white,
+      );
+    } finally {
+      isLoading = false;
+      update();
+    }
+  }
+
+  void verifyAlternateMobileOTP() async {
+    final otp = otpDigits.join('');
+    if (otp.isEmpty || otp.length != 6) {
+      Get.snackbar('Error', 'Please enter valid 6-digit OTP');
+      return;
+    }
+
+    try {
+      isLoading = true;
+      update(['otp_section']);
+
+      final mobileNumber = alternateMobiles[0];
+
+      final otpController = Get.put(
+        OtpController(
+          authRepo: AuthRepo(
+            sharedPreferences: Get.find(),
+            apiClient: ApiClient(
+              appBaseUrl: AppConstants.baseUrl,
+              sharedPreferences: Get.find(),
+            ),
+          ),
+        ),
+      );
+
+      final response = await otpController.verifyAlternateMobileOtp(
+        phone: mobileNumber,
+        otp: otp,
+      );
+
+      if (response.isSuccess) {
+        _otpTimer?.cancel();
+        isAlternateMobileVerified = true;
+        isOTPSent = false;
+
+        // Clear OTP fields on success
+        for (int i = 0; i < otpControllers.length; i++) {
+          otpControllers[i].clear();
+          otpDigits[i] = '';
+        }
+
+        // NEW: Update profile with verified alternate number
+        await updateAlternateNumberInProfile();
+      } else {
+        // Clear OTP fields on error
+        for (int i = 0; i < otpControllers.length; i++) {
+          otpControllers[i].clear();
+          otpDigits[i] = '';
+        }
+        Get.snackbar(
+          'Error',
+          response.message,
+          backgroundColor: Colors.red,
+          colorText: Colors.white,
+        );
+      }
+    } catch (e) {
+      // Clear OTP fields on exception
+      for (int i = 0; i < otpControllers.length; i++) {
+        otpControllers[i].clear();
+        otpDigits[i] = '';
+      }
+      Get.snackbar(
+        'Error',
+        'Failed to verify OTP. Please try again.',
+        backgroundColor: Colors.red,
+        colorText: Colors.white,
+      );
+    } finally {
+      isLoading = false;
+      update(['otp_section']);
+    }
+  }
+
+  Future<void> updateAlternateNumberInProfile() async {
+    if (!isAlternateMobileVerified ||
+        alternateMobiles.isEmpty ||
+        alternateMobiles[0].isEmpty) {
+      Get.snackbar('Error', 'Alternate number not verified');
+      return;
+    }
+
+    try {
+      isLoading = true;
+      update();
+
+      final userProfile = authController.userProfile;
+      if (userProfile == null) {
+        Get.snackbar('Error', 'User profile not found');
+        return;
+      }
+
+      // Update profile with alternate phone as separate field
+      final response = await authController.updateFullUserProfile(
+        name: userProfile.name ?? '',
+        email: userProfile.email ?? '',
+        phone: userProfile.phone ?? '', // Keep original phone
+        alternatePhone: alternateMobiles[0], // Add verified alternate phone
+        dob: userProfile.dob,
+        gender: userProfile.gender,
+      );
+
+      if (response != null && response.isSuccess) {
+        Get.snackbar(
+          'Success',
+          'Alternate number updated successfully',
+          backgroundColor: Colors.green,
+          colorText: Colors.white,
+        );
+      } else {
+        Get.snackbar(
+          'Error',
+          response?.message ?? 'Failed to update profile',
+          backgroundColor: Colors.red,
+          colorText: Colors.white,
+        );
+      }
+    } catch (e) {
+      Get.snackbar(
+        'Error',
+        'Something went wrong while updating profile',
+        backgroundColor: Colors.red,
+        colorText: Colors.white,
+      );
+    } finally {
+      isLoading = false;
+      update();
+    }
+  }
+
+  // Update your addAlternateEmail method
+  void addAlternateEmail() {
+    if (alternateEmails.isEmpty) {
+      alternateEmails.add('');
+      update();
+    } else {
+      Get.snackbar("Info", "Only one alternate email address is allowed.");
+    }
+  }
+
+  // Update removeAlternateEmail to actually remove
+  void removeAlternateEmail(int index) {
+    if (index < alternateEmails.length) {
+      alternateEmails.removeAt(index);
+      update();
+    }
+  }
+
+  // Add method to force refresh personal info
+  void refreshPersonalInfo() {
+    autofillFromUserProfile();
+  }
+
+  // Add this method to your BookingController
+  void _ensureAlternateFieldsExist() {
+    // Ensure one alternate mobile exists
+    if (alternateMobiles.isEmpty) {
+      alternateMobiles.add('');
+    }
+    // Ensure only one alternate mobile exists
+    if (alternateMobiles.length > 1) {
+      alternateMobiles.removeRange(1, alternateMobiles.length);
+    }
+
+    // Ensure one alternate email exists
+    if (alternateEmails.isEmpty) {
+      alternateEmails.add('');
+    }
+    // Ensure only one alternate email exists
+    if (alternateEmails.length > 1) {
+      alternateEmails.removeRange(1, alternateEmails.length);
+    }
+  }
+
+  // Update your initSelectedPackages method to call this
   void initSelectedPackages(
     List<Map<String, dynamic>> packages,
     List<dynamic> locations,
@@ -88,6 +482,7 @@ class BookingController extends GetxController {
       );
       showPackageDetails = List<bool>.filled(packages.length, false);
 
+      packageFormsData.clear();
       for (int i = 0; i < packages.length; i++) {
         final package = packages[i];
         final packageTitle = package['title'] ?? '';
@@ -101,7 +496,7 @@ class BookingController extends GetxController {
         for (var question in extraQuestions) {
           extraAnswers["${i}_${question['id']}"] = '';
         }
-        log(packages.toString(), name: "ffgdf");
+        log(packages.toString(), name: "initSelectedPackages");
         packageFormsData[i] = {
           'address': package['address'] ?? '',
           'date': '',
@@ -115,12 +510,42 @@ class BookingController extends GetxController {
           'extraAddOn': <Map<String, dynamic>>[],
           'termsAccepted': false,
           'extraAnswers': extraAnswers,
-          'advanceBookingDays': int.tryParse(package['advanceBookingDays']?.toString() ?? '0') ?? 1,
+          'advanceBookingDays':
+              int.tryParse(package['advanceBookingDays']?.toString() ?? '0') ??
+              1,
         };
       }
+
+      // Ensure alternate fields are initialized
+      _ensureAlternateFieldsExist();
       update();
     });
   }
+
+  // Remove or update these methods since we only allow one alternate field each
+  void addAlternateMobile() {
+    // Do nothing or show a message that only one alternate is allowed
+    Get.snackbar("Info", "Only one alternate mobile number is allowed.");
+  }
+
+  // void addAlternateEmail() {
+  //   Get.snackbar("Info", "Only one alternate email address is allowed.");
+  // }
+
+  // Update remove methods to clear the field instead of removing
+  void removeAlternateMobile(int index) {
+    if (index == 0 && alternateMobiles.isNotEmpty) {
+      alternateMobiles[0] = '';
+      update();
+    }
+  }
+
+  // void removeAlternateEmail(int index) {
+  //   if (index == 0 && alternateEmails.isNotEmpty) {
+  //     alternateEmails[0] = '';
+  //     update();
+  //   }
+  // }
 
   String formatTimeOfDay(TimeOfDay time) {
     final hour = time.hourOfPeriod.toString().padLeft(2, '0');
@@ -156,12 +581,21 @@ class BookingController extends GetxController {
   void editPackage(int index) {
     currentPage = index;
     update();
-    Get.to(() => BookingPage(packages: [], companyLocations: [],companyLocation: null, companyId: 0,));
+    Get.to(
+      () => BookingPage(
+        packages: [],
+        companyLocations: [],
+        companyLocation: null,
+        companyId: 0,
+      ),
+    );
   }
 
   void toggleDetails(int index) {
-    showPackageDetails[index] = !showPackageDetails[index];
-    update();
+    if (index < showPackageDetails.length) {
+      showPackageDetails[index] = !showPackageDetails[index];
+      update();
+    }
   }
 
   void updatePersonalInfo(String key, String value) {
@@ -171,29 +605,29 @@ class BookingController extends GetxController {
     }
   }
 
-  void addAlternateMobile() {
-    alternateMobiles.add('');
-    update();
-  }
-
-  void removeAlternateMobile(int index) {
-    if (index < alternateMobiles.length) {
-      alternateMobiles.removeAt(index);
-      update();
-    }
-  }
-
-  void addAlternateEmail() {
-    alternateEmails.add('');
-    update();
-  }
-
-  void removeAlternateEmail(int index) {
-    if (index < alternateEmails.length) {
-      alternateEmails.removeAt(index);
-      update();
-    }
-  }
+  // void addAlternateMobile() {
+  //   alternateMobiles.add('');
+  //   update();
+  // }
+  //
+  // void removeAlternateMobile(int index) {
+  //   if (index < alternateMobiles.length) {
+  //     alternateMobiles.removeAt(index);
+  //     update();
+  //   }
+  // }
+  //
+  // void addAlternateEmail() {
+  //   alternateEmails.add('');
+  //   update();
+  // }
+  //
+  // void removeAlternateEmail(int index) {
+  //   if (index < alternateEmails.length) {
+  //     alternateEmails.removeAt(index);
+  //     update();
+  //   }
+  // }
 
   void updatePackageForm(int index, String field, dynamic value) {
     final data = packageFormsData[index] ?? {};
@@ -458,31 +892,43 @@ class BookingController extends GetxController {
   }
 
   int calculateWalletUsage(num payableAmount) {
-    final walletBalance = authController.userProfile?.wallet ?? 0;
-    final int payable = payableAmount.toInt();
-    final int walletBal = walletBalance.toInt();
-    return payable <= walletBal ? payable : walletBal;
+    try {
+      final walletBalance = authController.userProfile?.wallet ?? 0;
+      final int payable = payableAmount.toInt();
+      final int walletBal = walletBalance.toInt();
+      return payable <= walletBal ? payable : walletBal;
+    } catch (e) {
+      return 0;
+    }
   }
 
   // Added method that was missing in your original postBooking payload preparation
   num calculateWalletUsageForPackage(Map<String, dynamic> package) {
-    final walletBalanceNum = authController.userProfile?.wallet ?? 0;
-    final walletBalance =
-        walletBalanceNum is int ? walletBalanceNum : walletBalanceNum.toInt();
-    final packagePayableAmount =
-        int.tryParse(
-          package['packagevariations']?[0]?['amount']?.toString() ?? '0',
-        ) ??
-        0;
-    return walletBalance >= packagePayableAmount
-        ? packagePayableAmount
-        : walletBalance;
+    try {
+      final walletBalanceNum = authController.userProfile?.wallet ?? 0;
+      final walletBalance =
+          walletBalanceNum is int ? walletBalanceNum : walletBalanceNum.toInt();
+      final packagePayableAmount =
+          int.tryParse(
+            package['packagevariations']?[0]?['amount']?.toString() ?? '0',
+          ) ??
+          0;
+      return walletBalance >= packagePayableAmount
+          ? packagePayableAmount
+          : walletBalance;
+    } catch (e) {
+      return 0;
+    }
   }
 
   int getWalletBalance() {
-    final walletValue = authController.userProfile?.wallet;
-    if (walletValue == null) return 0;
-    return walletValue.toInt();
+    try {
+      final walletValue = authController.userProfile?.wallet;
+      if (walletValue == null) return 0;
+      return walletValue.toInt();
+    } catch (e) {
+      return 0;
+    }
   }
 
   int totalExtraAddOnPrice() {
@@ -611,8 +1057,6 @@ class BookingController extends GetxController {
           "Booking Failed",
           responseBody?['message'] ?? "Booking failed",
         );
-        isLoading = false;
-        update();
         return;
       }
 
@@ -620,10 +1064,6 @@ class BookingController extends GetxController {
 
       await authController.fetchUserProfile();
       Get.offAll(() => ThanksForBookingPage());
-
-      // Refresh profile/wallet and navigate on success
-      // await authController.fetchUserProfile();
-      // Get.offAll(() => ThanksForBookingPage());
     } catch (e, stack) {
       log("submitBooking error: $e\n$stack");
       Get.snackbar("Error", "Something went wrong during booking submission");
@@ -633,61 +1073,108 @@ class BookingController extends GetxController {
     }
   }
 
-  List<Slot> timeSlots = [];
-  List<TimeOfDay?> startTime = [];
-  int bufferTime = 0;
-
   Future<ResponseModel?> fetchAvailableSlots({
-  required String companyId,
-  required String date,
-  required String studioId,
-  required String typeId,
-}) async {
-  isLoading = true;
-  timeSlots = [];
-  startTime = [];
-  update();
-  ResponseModel? responseModel;
-  try {
-    Response response = await bookingrepo.fetchAvailableSlots(
-      companyId: companyId,
-      date: date,
-      studioId: studioId,
-      typeId: typeId,
-    );
-    log("Slots response: ${response.bodyString}", name: "fetchAvailableSlots");
-    if (response.statusCode == 200) {
-      
-      final openHours = response.body["data"]["open_hours"] as List;
-      log("Open hours: $openHours", name: "fetchAvailableSlots");
-      bufferTime =int.tryParse( response.body["data"]["studio_location"]["buffer_time"]??"0")??0;
-      timeSlots = openHours.map((e) => Slot.fromJson(e)).toList();
-      
-      for (var i = 0; i < timeSlots.length; i++) {
-        startTime.add(timeSlots[i].startTime);
-        if (i == timeSlots.length - 1 && timeSlots[i].endTime != null) {
-          startTime.add(timeSlots[i].endTime); // Include endTime of last slot
-          log("Last slot endTime: ${timeSlots[i].endTime!.format(Get.context!)}", name: "fetchAvailableSlots");
+    required String companyId,
+    required String date,
+    required String studioId,
+    required String typeId,
+  }) async {
+    // Use specific loading flag instead of global isLoading
+    _slotsLoading = true;
+    timeSlots.clear();
+    startTime.clear();
+    update(['slots']); // Only update slots section
+
+    ResponseModel? responseModel;
+    try {
+      Response response = await bookingrepo.fetchAvailableSlots(
+        companyId: companyId,
+        date: date,
+        studioId: studioId,
+        typeId: typeId,
+      );
+
+      log(
+        "Slots response: ${response.bodyString}",
+        name: "fetchAvailableSlots",
+      );
+
+      if (response.statusCode == 200) {
+        final openHours = response.body["data"]["open_hours"] as List;
+        log("Open hours: $openHours", name: "fetchAvailableSlots");
+
+        bufferTime =
+            int.tryParse(
+              response.body["data"]["studio_location"]["buffer_time"] ?? "0",
+            ) ??
+            0;
+
+        timeSlots = openHours.map((e) => Slot.fromJson(e)).toList();
+
+        // Build startTime array
+        for (var i = 0; i < timeSlots.length; i++) {
+          startTime.add(timeSlots[i].startTime);
+          if (i == timeSlots.length - 1 && timeSlots[i].endTime != null) {
+            startTime.add(timeSlots[i].endTime);
+            log(
+              "Last slot endTime: ${timeSlots[i].endTime!.format(Get.context!)}",
+              name: "fetchAvailableSlots",
+            );
+          }
         }
+
+        // Add final slot if timeSlots is not empty
+        if (timeSlots.isNotEmpty) {
+          final lastSlot = timeSlots.last;
+          timeSlots.add(
+            Slot(
+              booked: lastSlot.booked,
+              breakTime: lastSlot.breakTime,
+              blockHome: lastSlot.blockHome,
+              blockIndoor: lastSlot.blockIndoor,
+              blockOutdoor: lastSlot.blockOutdoor,
+              startTime: lastSlot.endTime,
+              endTime: lastSlot.endTime,
+            ),
+          );
+        }
+
+        responseModel = ResponseModel(true, "Slots fetched successfully");
+      } else {
+        timeSlots.clear();
+        startTime.clear();
+        responseModel = ResponseModel(
+          false,
+          "Failed to fetch slots: ${response.statusText}",
+        );
+        // Get.snackbar(
+        //   "Error",
+        //   "Failed to fetch slots: ${response.statusText}",
+        //   snackPosition: SnackPosition.BOTTOM,
+        //   backgroundColor: Colors.redAccent,
+        //   colorText: Colors.white,
+        // );
       }
-      if(timeSlots.isNotEmpty){
-        timeSlots.add(Slot(booked: timeSlots[timeSlots.length-1].booked, breakTime: timeSlots[timeSlots.length-1].breakTime, blockHome: timeSlots[timeSlots.length-1].blockHome, blockIndoor: timeSlots[timeSlots.length-1].blockIndoor, blockOutdoor: timeSlots[timeSlots.length-1].blockOutdoor,startTime: timeSlots[timeSlots.length-1].endTime,endTime: timeSlots[timeSlots.length-1].endTime,));
-      }
-      responseModel = ResponseModel(true, "Slots fetched successfully");
-    } else {
+    } catch (e) {
       timeSlots.clear();
-      responseModel = ResponseModel(false, "Failed to fetch slots: ${response.statusText}");
-      Get.snackbar("Error", "Failed to fetch slots: ${response.statusText}");
+      startTime.clear();
+      responseModel = ResponseModel(false, "Error fetching slots: $e");
+      // Get.snackbar(
+      //   "Error",
+      //   "Unable to fetch slots. Please try again later.",
+      //   snackPosition: SnackPosition.BOTTOM,
+      //   backgroundColor: Colors.redAccent,
+      //   colorText: Colors.white,
+      // );
+      log(e.toString(), name: "fetchAvailableSlots");
+    } finally {
+      // Always reset loading state in finally block
+      _slotsLoading = false;
+      update(['slots']); // Only update slots section
     }
-  } catch (e) {
-    responseModel = ResponseModel(false, "Error fetching slots: $e");
-    Get.snackbar("Error", "Unable to fetch slots. Please try again later.");
-    log(e.toString(), name: "fetchAvailableSlots");
+
+    return responseModel;
   }
-  isLoading = false;
-  update();
-  return responseModel;
-}
 
   Future<void> fetchBookings() async {
     isLoading = true;
@@ -746,7 +1233,7 @@ class BookingController extends GetxController {
       upcomingBookings = [];
       cancelledBookings = [];
       completedBookings = [];
-      // You can log or handle error here as needed
+      log('Error fetching bookings: $e', name: 'BookingController');
     } finally {
       isLoading = false;
       update();

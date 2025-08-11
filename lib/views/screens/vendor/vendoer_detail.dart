@@ -82,44 +82,34 @@ class _VendorDetailScreenState extends State<VendorDetailScreen> {
 
                     if (subs.isEmpty) {
                       return CategoryScroller(
-                        categories: [
-                          CategoryItem(
-                            label: 'Baby Shoot',
-                            imagePath:
-                                'assets/images/category/vendor_category/img.png',
-                            onTap:
-                                () => Get.to(
-                                  VendorGroup(
-                                    studio: widget.studio,
-                                    subCategoryId: 2,
-                                  ),
-                                ),
-                          ),
-                          CategoryItem(
-                            label: 'Wedding Shoot',
-                            imagePath:
-                                'assets/images/category/vendor_category/img.png',
-                            onTap: () {},
-                          ),
-                          CategoryItem(
-                            label: 'Portfolio Shoot',
-                            imagePath:
-                                'assets/images/category/vendor_category/img.png',
-                            onTap: () {},
-                          ),
-                          CategoryItem(
-                            label: 'Maternity Shoot',
-                            imagePath:
-                                'assets/images/category/vendor_category/img.png',
-                            onTap: () {},
-                          ),
-                          CategoryItem(
-                            label: 'Family Function',
-                            imagePath:
-                                'assets/images/category/vendor_category/img.png',
-                            onTap: () {},
-                          ),
-                        ],
+                        categories:
+                            subs.map((sub) {
+                              return CategoryItem(
+                                label: sub.title,
+                                imagePath: resolveImageUrl(sub.image),
+                                onTap: () {
+                                  final mainState =
+                                      context
+                                          .findAncestorStateOfType<
+                                            NavigationFlowState
+                                          >();
+
+                                  // Add a smooth transition delay
+                                  Future.delayed(
+                                    const Duration(milliseconds: 50),
+                                    () {
+                                      mainState?.pushToCurrentTab(
+                                        VendorGroup(
+                                          studio: widget.studio,
+                                          subCategoryId: sub.id,
+                                        ),
+                                        hideBottomBar: false,
+                                      );
+                                    },
+                                  );
+                                },
+                              );
+                            }).toList(),
                       );
                     }
 

@@ -233,7 +233,7 @@ class _HeaderBannerState extends State<HeaderBanner> {
                         onPressed: () {
                           Get.to(
                             () => const ProfilePage(),
-                            transition: Transition.leftToRight,
+                            // transition: Transition.fadeIn,
                             duration: const Duration(milliseconds: 300),
                           );
                         },
