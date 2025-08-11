@@ -73,7 +73,7 @@ class AuthController extends GetxController implements GetxService {
     String? dob,
     String? gender,
     required String phone,
-    String? alternatePhone, // Add this parameter
+    String? alternatePhone,
     File? profileImage,
     File? coverImage,
   }) async {
@@ -83,28 +83,86 @@ class AuthController extends GetxController implements GetxService {
     ResponseModel? responseModel;
 
     try {
+      // Input validation
+      if (name.trim().isEmpty || email.trim().isEmpty) {
+        responseModel = ResponseModel(false, "Name and email are required");
+        return responseModel;
+      }
+
+      if (!GetUtils.isEmail(email)) {
+        responseModel = ResponseModel(false, "Invalid email format");
+        return responseModel;
+      }
+
       Response response = await authRepo.updateFullUserProfile(
-        name: name,
-        email: email,
-        dob: dob,
+        name: name.trim(),
+        email: email.trim(),
+        dob: dob?.trim(),
         gender: gender,
-        phone: phone,
-        alternatePhone: alternatePhone, // Pass to repo
+        phone: phone.trim(),
+        alternatePhone: alternatePhone?.trim(),
         profileImage: profileImage,
         coverImage: coverImage,
       );
 
-      if (response.statusCode == 200 && response.body['success'] == true) {
-        userProfile = UserProfile.fromJson(response.body['data']);
-        responseModel = ResponseModel(true, "Profile updated successfully");
+      // Debug logging
+      log(
+        "Response Status: ${response.statusCode}",
+        name: "updateFullUserProfile",
+      );
+      log(
+        "Response Body: ${response.bodyString}",
+        name: "updateFullUserProfile",
+      );
+
+      // Handle successful response
+      if (response.statusCode == 200) {
+        final body = response.body;
+
+        // Check for different success indicators
+        bool isSuccess =
+            body['success'] == true ||
+            body['status'] == 'success' ||
+            body['code'] == 200;
+
+        if (isSuccess && body['data'] != null) {
+          userProfile = UserProfile.fromJson(body['data']);
+          responseModel = ResponseModel(
+            true,
+            body['message'] ?? "Profile updated successfully",
+          );
+        } else {
+          responseModel = ResponseModel(
+            false,
+            body['message'] ?? "Profile update failed",
+          );
+        }
       } else {
-        responseModel = ResponseModel(
-          false,
-          response.body['message'] ?? "Failed to update profile",
+        // Handle HTTP error responses
+        final errorMessage =
+            response.body?['message'] ??
+            response.body?['error'] ??
+            "Server error occurred";
+
+        log(
+          "HTTP Error: ${response.statusCode} - $errorMessage",
+          name: "updateFullUserProfile",
         );
+
+        responseModel = ResponseModel(false, errorMessage);
       }
+    } on SocketException catch (e) {
+      log("Network Error: ${e.message}", name: "updateFullUserProfile");
+      responseModel = ResponseModel(false, "No internet connection");
+    } on TimeoutException catch (e) {
+      log("Timeout Error: ${e.message}", name: "updateFullUserProfile");
+      responseModel = ResponseModel(false, "Request timeout");
+    } on FormatException catch (e) {
+      log("Format Error: ${e.message}", name: "updateFullUserProfile");
+      responseModel = ResponseModel(false, "Invalid response format");
     } catch (e) {
-      responseModel = ResponseModel(false, "Something went wrong");
+      log("Unexpected Error: ${e.toString()}", name: "updateFullUserProfile");
+      responseModel = ResponseModel(false, "An unexpected error occurred");
     }
 
     isLoading = false;

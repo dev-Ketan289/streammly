@@ -4,7 +4,6 @@ import 'package:streammly/controllers/company_controller.dart';
 import 'package:streammly/navigation_flow.dart';
 import 'package:streammly/services/theme.dart';
 import 'package:streammly/views/widgets/custom_doodle.dart';
-
 import '../../../models/category/category_item.dart';
 import '../../../models/company/company_location.dart';
 import '../home/widgets/category/review_card.dart';

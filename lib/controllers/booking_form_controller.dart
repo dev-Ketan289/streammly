@@ -43,6 +43,8 @@ class BookingController extends GetxController {
   late final TextEditingController nameController;
   late final TextEditingController mobileController;
   late final TextEditingController emailController;
+  late final TextEditingController alternateMobileController;
+  List<FocusNode> otpFocusNodes = List.generate(6, (index) => FocusNode());
 
   // Disposal tracking
   bool _isDisposed = false;
@@ -98,6 +100,10 @@ class BookingController extends GetxController {
 
   @override
   void onClose() {
+    // Dispose focus nodes
+    for (var node in otpFocusNodes) {
+      node.dispose();
+    }
     _disposeControllers();
     _clearData();
     super.onClose();
@@ -108,6 +114,7 @@ class BookingController extends GetxController {
     nameController = TextEditingController();
     mobileController = TextEditingController();
     emailController = TextEditingController();
+    alternateMobileController = TextEditingController();
   }
 
   void _disposeControllers() {
@@ -115,6 +122,7 @@ class BookingController extends GetxController {
       nameController.dispose();
       mobileController.dispose();
       emailController.dispose();
+      alternateMobileController.dispose();
       _isDisposed = true;
     }
   }
@@ -174,34 +182,56 @@ class BookingController extends GetxController {
     if (value.isNotEmpty && value.length == 1) {
       otpDigits[index] = value;
 
-      // Auto move to next field
+      // ✅ Use dedicated focus nodes instead of generic nextFocus
       if (index < 5) {
-        FocusScope.of(Get.context!).nextFocus();
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          otpFocusNodes[index + 1].requestFocus(); // ✅ Direct focus node access
+        });
       } else {
-        // Last field, hide keyboard
-        FocusScope.of(Get.context!).unfocus();
+        // Last field, unfocus keyboard
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          for (var node in otpFocusNodes) {
+            node.unfocus();
+          }
+        });
       }
     } else if (value.isEmpty) {
       otpDigits[index] = '';
 
-      // Auto move to previous field when deleting
+      // ✅ Move focus to previous field using focus nodes
       if (index > 0) {
-        FocusScope.of(Get.context!).previousFocus();
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          otpFocusNodes[index - 1].requestFocus(); // ✅ Direct focus node access
+        });
       }
     }
-    update();
+
+    // ✅ Only update verify button, not the entire OTP section
+    update(['verify_button']);
   }
 
   void onOTPFieldTapped(int index) {
     // Find the first empty field and focus there
     for (int i = 0; i < otpDigits.length; i++) {
       if (otpDigits[i].isEmpty) {
-        otpControllers[i].selection = TextSelection.fromPosition(
-          TextPosition(offset: otpControllers[i].text.length),
-        );
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          otpFocusNodes[i].requestFocus(); // ✅ Use focus nodes
+          // Position cursor at the end
+          otpControllers[i].selection = TextSelection.fromPosition(
+            TextPosition(offset: otpControllers[i].text.length),
+          );
+        });
         return;
       }
     }
+
+    // If all fields are filled, focus on the tapped field
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      otpFocusNodes[index].requestFocus(); // ✅ Use focus nodes
+      otpControllers[index].selection = TextSelection.fromPosition(
+        TextPosition(offset: otpControllers[index].text.length),
+      );
+    });
   }
 
   void startOTPTimer() {
@@ -443,23 +473,34 @@ class BookingController extends GetxController {
   }
 
   // Add this method to your BookingController
+  // Add this method to BookingController
+  void syncAlternateMobileData() {
+    final controllerText = alternateMobileController.text.trim();
+    if (alternateMobiles.isEmpty) {
+      alternateMobiles.add(controllerText);
+    } else {
+      alternateMobiles[0] = controllerText;
+    }
+  }
+
+  // Update _ensureAlternateFieldsExist
   void _ensureAlternateFieldsExist() {
-    // Ensure one alternate mobile exists
     if (alternateMobiles.isEmpty) {
       alternateMobiles.add('');
     }
-    // Ensure only one alternate mobile exists
     if (alternateMobiles.length > 1) {
       alternateMobiles.removeRange(1, alternateMobiles.length);
     }
 
-    // Ensure one alternate email exists
-    if (alternateEmails.isEmpty) {
-      alternateEmails.add('');
-    }
-    // Ensure only one alternate email exists
-    if (alternateEmails.length > 1) {
-      alternateEmails.removeRange(1, alternateEmails.length);
+    // ✅ Sync controller with the data (both ways)
+    if (!_isDisposed) {
+      if (alternateMobiles.isNotEmpty) {
+        alternateMobileController.text = alternateMobiles[0];
+      }
+      // Add listener to keep them in sync
+      alternateMobileController.addListener(() {
+        syncAlternateMobileData();
+      });
     }
   }
 
