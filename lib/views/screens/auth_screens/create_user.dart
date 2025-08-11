@@ -7,8 +7,10 @@ import '../../../controllers/auth_controller.dart';
 import '../../../services/theme.dart' as theme;
 import 'package:fluttertoast/fluttertoast.dart';
 
+import '../../screens/common/location_screen.dart'; // ✅ import your next screen
+
 class ProfileFormScreen extends StatefulWidget {
-  const ProfileFormScreen({Key? key}) : super(key: key);
+  const ProfileFormScreen({super.key});
 
   @override
   State<ProfileFormScreen> createState() => _ProfileFormScreenState();
@@ -74,15 +76,22 @@ class _ProfileFormScreenState extends State<ProfileFormScreen> {
         gender: selectedGender,
         phone: phone,
       );
+
       if (response?.isSuccess ?? false) {
+        // Fetch latest profile & show toast
         await authController.fetchUserProfile();
-        Fluttertoast.showToast(msg: response?.message ?? "");
+        Fluttertoast.showToast(msg: response?.message ?? "Profile updated");
+
+        // ✅ Navigate to next screen after success
+        Get.offAll(() => const LocationScreen());
+
       } else {
-        Fluttertoast.showToast(msg: response?.message ?? "");
+        Fluttertoast.showToast(msg: response?.message ?? "Update failed");
       }
     } catch (e) {
       Fluttertoast.showToast(msg: "Error updating profile");
     }
+
     setState(() => isLoading = false);
   }
 
@@ -148,94 +157,90 @@ class _ProfileFormScreenState extends State<ProfileFormScreen> {
     return Scaffold(
       body: SafeArea(
         child: CustomBackground(
-          child: Container(
-            width: double.infinity,
-            // height: size.height, // <-- REMOVE this line!
-            color: Colors.transparent,
-            child: SingleChildScrollView(         // <-- ADD this!
-              padding: EdgeInsets.zero,
-              child: Column(
-                children: [
-                  const SizedBox(height: 24),
-                  Text(
-                    "STREAMMLY",
-                    style: GoogleFonts.cinzelDecorative(
-                      fontSize: 22,
-                      fontWeight: FontWeight.bold,
-                      color: theme.primaryColor,
-                      letterSpacing: 1,
-                    ),
+          child: SingleChildScrollView(
+            padding: EdgeInsets.zero,
+            child: Column(
+              children: [
+                const SizedBox(height: 24),
+                Text(
+                  "STREAMMLY",
+                  style: GoogleFonts.cinzelDecorative(
+                    fontSize: 22,
+                    fontWeight: FontWeight.bold,
+                    color: theme.primaryColor,
+                    letterSpacing: 1,
                   ),
-                  const SizedBox(height: 15),
-                  SizedBox(
-                    width: 220,
-                    height: 220,
-                    child: Image.asset(
-                      'assets/images/GIF For Login 1.png',
-                      fit: BoxFit.fitWidth,
-                    ),
+                ),
+                const SizedBox(height: 15),
+                SizedBox(
+                  width: 220,
+                  height: 220,
+                  child: Image.asset(
+                    'assets/images/GIF For Login 1.png',
+                    fit: BoxFit.fitWidth,
                   ),
-                  const SizedBox(height: 7),
-                  Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 28.0),
-                    child: RichText(
-                      textAlign: TextAlign.center,
-                      text: TextSpan(
-                        text: "Complete your profile to get\nstarted with ",
-                        style: GoogleFonts.poppins(
-                          color: theme.textPrimary,
-                          fontWeight: FontWeight.w600,
-                          fontSize: 16.7,
-                          height: 1.3,
-                        ),
-                        children: [
-                          TextSpan(
-                            text: "Streammly !",
-                            style: GoogleFonts.poppins(
-                              color: theme.primaryColor,
-                              fontWeight: FontWeight.bold,
-                              fontSize: 16.7,
-                            ),
+                ),
+                const SizedBox(height: 7),
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 28.0),
+                  child: RichText(
+                    textAlign: TextAlign.center,
+                    text: TextSpan(
+                      text: "Complete your profile to get\nstarted with ",
+                      style: GoogleFonts.poppins(
+                        color: theme.textPrimary,
+                        fontWeight: FontWeight.w600,
+                        fontSize: 16.7,
+                        height: 1.3,
+                      ),
+                      children: [
+                        TextSpan(
+                          text: "Streammly !",
+                          style: GoogleFonts.poppins(
+                            color: theme.primaryColor,
+                            fontWeight: FontWeight.bold,
+                            fontSize: 16.7,
                           ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 18),
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 23),
+                  child: Column(
+                    children: [
+                      buildTextField(
+                        controller: nameController,
+                        hint: "Enter Full Name",
+                      ),
+                      const SizedBox(height: 10),
+                      buildTextField(
+                        controller: phoneController,
+                        hint: "Enter Mobile Number",
+                        keyboardType: TextInputType.phone,
+                        readOnly: authController.isPhoneLogin(),
+                        inputFormatters: [
+                          FilteringTextInputFormatter.digitsOnly,
+                          LengthLimitingTextInputFormatter(10),
                         ],
                       ),
-                    ),
-                  ),
-                  const SizedBox(height: 18),
-                  Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 23),
-                    child: Column(
-                      children: [
-                        buildTextField(
-                          controller: nameController,
-                          hint: "Enter Full Name",
-                        ),
-                        const SizedBox(height: 10),
-                        buildTextField(
-                          controller: phoneController,
-                          hint: "Enter Mobile Number",
-                          keyboardType: TextInputType.phone,
-                          readOnly: authController.isPhoneLogin(),
-                          inputFormatters: [
-                            FilteringTextInputFormatter.digitsOnly,
-                            LengthLimitingTextInputFormatter(10),
-                          ],
-                        ),
-                        const SizedBox(height: 10),
-                        buildTextField(
-                          controller: emailController,
-                          hint: "Enter Email Id",
-                          keyboardType: TextInputType.emailAddress,
-                          readOnly: authController.isGoogleLogin(),
-                        ),
-                        const SizedBox(height: 10),
-                        buildTextField(
-                          controller: dobController,
-                          hint: "Select DOB",
-                          onTap: _pickDate,
-                          suffixIcon: Icons.calendar_month,
-                        ),
-                        const SizedBox(height: 10),
+                      const SizedBox(height: 10),
+                      buildTextField(
+                        controller: emailController,
+                        hint: "Enter Email Id",
+                        keyboardType: TextInputType.emailAddress,
+                        readOnly: authController.isGoogleLogin(),
+                      ),
+                      const SizedBox(height: 10),
+                      buildTextField(
+                        controller: dobController,
+                        hint: "Select DOB",
+                        onTap: _pickDate,
+                        suffixIcon: Icons.calendar_month,
+                      ),
+                      const SizedBox(height: 10),
                       DropdownButtonFormField<String>(
                         value: selectedGender,
                         onChanged: (value) {
@@ -256,7 +261,7 @@ class _ProfileFormScreenState extends State<ProfileFormScreen> {
                           ),
                           filled: true,
                           fillColor: const Color(0xFFF7F8FA),
-                          contentPadding: const EdgeInsets.symmetric(horizontal: 15, vertical: 14), // match textfield
+                          contentPadding: const EdgeInsets.symmetric(horizontal: 15, vertical: 14),
                           border: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(10),
                             borderSide: BorderSide(color: Colors.grey[300]!),
@@ -275,53 +280,50 @@ class _ProfileFormScreenState extends State<ProfileFormScreen> {
                           color: Colors.grey[600],
                           size: 24,
                         ),
-                        dropdownColor: Colors.white, // menu background
+                        dropdownColor: Colors.white,
                         style: GoogleFonts.poppins(
                           color: Colors.black87,
                           fontSize: 15.0,
                           fontWeight: FontWeight.w500,
                         ),
-                        menuMaxHeight: 200, // control menu size
+                        menuMaxHeight: 200,
                       ),
-
-
                       const SizedBox(height: 27),
-                        SizedBox(
-                          width: double.infinity,
-                          height: 48,
-                          child: ElevatedButton(
-                            onPressed: isLoading ? null : saveProfile,
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: theme.primaryColor,
-                              elevation: 0,
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(10),
-                              ),
+                      SizedBox(
+                        width: double.infinity,
+                        height: 48,
+                        child: ElevatedButton(
+                          onPressed: isLoading ? null : saveProfile,
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: theme.primaryColor,
+                            elevation: 0,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(10),
                             ),
-                            child: isLoading
-                                ? const SizedBox(
-                              width: 22,
-                              height: 22,
-                              child: CircularProgressIndicator(
-                                strokeWidth: 2,
-                                color: Colors.white,
-                              ),
-                            )
-                                : Text(
-                              "Save Profile",
-                              style: themeData.textTheme.bodyLarge?.copyWith(
-                                color: Colors.white,
-                                fontWeight: FontWeight.bold,
-                                fontSize: 16,
-                              ),
+                          ),
+                          child: isLoading
+                              ? const SizedBox(
+                            width: 22,
+                            height: 22,
+                            child: CircularProgressIndicator(
+                              strokeWidth: 2,
+                              color: Colors.white,
+                            ),
+                          )
+                              : Text(
+                            "Save Profile",
+                            style: themeData.textTheme.bodyLarge?.copyWith(
+                              color: Colors.white,
+                              fontWeight: FontWeight.bold,
+                              fontSize: 16,
                             ),
                           ),
                         ),
-                      ],
-                    ),
-                  )
-                ],
-              ),
+                      ),
+                    ],
+                  ),
+                )
+              ],
             ),
           ),
         ),

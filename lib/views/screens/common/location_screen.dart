@@ -17,8 +17,6 @@ class LocationScreen extends StatelessWidget {
     final textTheme = theme.textTheme;
     final locationController = Get.put(LocationController());
 
-    // final bottomImageHeight = (size.height * 0.22) / MediaQuery.of(context).devicePixelRatio * 2;
-
     return Scaffold(
       backgroundColor: colorScheme.surface,
       body: SafeArea(
@@ -29,15 +27,22 @@ class LocationScreen extends StatelessWidget {
             children: [
               // Header with back button
               Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 10),
+                padding: const EdgeInsets.symmetric(
+                    horizontal: 16.0, vertical: 10),
                 child: Row(
                   children: [
-                    if (Navigator.canPop(context)) IconButton(icon: const Icon(Icons.arrow_back), onPressed: () => Navigator.pop(context)),
+                    if (Navigator.canPop(context))
+                      IconButton(
+                          icon: const Icon(Icons.arrow_back),
+                          onPressed: () => Navigator.pop(context)),
                     Expanded(
                       child: Text(
                         "Location",
-                        style: textTheme.titleLarge!.copyWith(fontWeight: FontWeight.bold),
-                        textAlign: Navigator.canPop(context) ? TextAlign.start : TextAlign.center,
+                        style: textTheme.titleLarge!
+                            .copyWith(fontWeight: FontWeight.bold),
+                        textAlign: Navigator.canPop(context)
+                            ? TextAlign.start
+                            : TextAlign.center,
                       ),
                     ),
                   ],
@@ -46,8 +51,13 @@ class LocationScreen extends StatelessWidget {
               const SizedBox(height: 40),
 
               Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 16.0),
-                child: Text("Let us know the spot.....\nwe'll bring the magic there.", textAlign: TextAlign.center, style: textTheme.bodyMedium!.copyWith(color: theme.hintColor)),
+                padding:
+                const EdgeInsets.symmetric(horizontal: 16.0),
+                child: Text(
+                    "Let us know the spot.....\nwe'll bring the magic there.",
+                    textAlign: TextAlign.center,
+                    style: textTheme.bodyMedium!
+                        .copyWith(color: theme.hintColor)),
               ),
               const SizedBox(height: 20),
 
@@ -58,51 +68,69 @@ class LocationScreen extends StatelessWidget {
                   return Container(
                     height: 220,
                     width: 200,
-                    decoration: BoxDecoration(color: Colors.grey[300], borderRadius: BorderRadius.circular(12)),
-                    child: const Icon(Icons.location_on, size: 80, color: Colors.grey),
+                    decoration: BoxDecoration(
+                        color: Colors.grey[300],
+                        borderRadius: BorderRadius.circular(12)),
+                    child: const Icon(Icons.location_on,
+                        size: 80, color: Colors.grey),
                   );
                 },
               ),
               const SizedBox(height: 20),
 
               Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 20.0),
+                padding:
+                const EdgeInsets.symmetric(horizontal: 20.0),
                 child: Column(
                   children: [
                     // Use Current Location Button
-                    Obx(
-                      () => SizedBox(
+                    GetBuilder<LocationController>(
+                      builder: (controller) => SizedBox(
                         width: double.infinity,
                         height: 50,
                         child: ElevatedButton(
                           style: ElevatedButton.styleFrom(
                             backgroundColor: colorScheme.primary,
-                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                            shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(10)),
                             elevation: 2,
                           ),
-                          onPressed:
-                              locationController.isLoading.value
-                                  ? null
-                                  : () async {
-                                    try {
-                                      await locationController.getCurrentLocation();
-                                      locationController.saveSelectedLocation();
-                                      Get.to(() => NavigationFlow());
-                                    } catch (e) {
-                                      Get.snackbar(
-                                        'Error',
-                                        'Failed to get current location. Please try again or enter manually.',
-                                        snackPosition: SnackPosition.BOTTOM,
-                                        backgroundColor: Colors.red,
-                                        colorText: Colors.white,
-                                      );
-                                    }
-                                  },
-
-                          child:
-                              locationController.isLoading.value
-                                  ? const SizedBox(height: 20, width: 20, child: CircularProgressIndicator(strokeWidth: 2, valueColor: AlwaysStoppedAnimation<Color>(Colors.white)))
-                                  : Text("Use Current Location", style: textTheme.bodyLarge!.copyWith(color: Colors.white, fontWeight: FontWeight.w600)),
+                          onPressed: controller.isLoading
+                              ? null
+                              : () async {
+                            try {
+                              await controller
+                                  .getCurrentLocation();
+                              controller
+                                  .saveSelectedLocation();
+                              Get.to(
+                                      () => NavigationFlow());
+                            } catch (e) {
+                              Get.snackbar(
+                                'Error',
+                                'Failed to get current location. Please try again or enter manually.',
+                                snackPosition:
+                                SnackPosition.BOTTOM,
+                                backgroundColor: Colors.red,
+                                colorText: Colors.white,
+                              );
+                            }
+                          },
+                          child: controller.isLoading
+                              ? const SizedBox(
+                              height: 20,
+                              width: 20,
+                              child: CircularProgressIndicator(
+                                  strokeWidth: 2,
+                                  valueColor:
+                                  AlwaysStoppedAnimation<
+                                      Color>(Colors.white)))
+                              : Text("Use Current Location",
+                              style: textTheme.bodyLarge!
+                                  .copyWith(
+                                  color: Colors.white,
+                                  fontWeight:
+                                  FontWeight.w600)),
                         ),
                       ),
                     ),
@@ -113,30 +141,25 @@ class LocationScreen extends StatelessWidget {
                       width: double.infinity,
                       height: 50,
                       child: OutlinedButton(
-                        style: OutlinedButton.styleFrom(side: BorderSide(color: colorScheme.primary), shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10))),
+                        style: OutlinedButton.styleFrom(
+                            side: BorderSide(
+                                color: colorScheme.primary),
+                            shape: RoundedRectangleBorder(
+                                borderRadius:
+                                BorderRadius.circular(10))),
                         onPressed: () {
-                          Get.to(() => EnterLocationManuallyScreen());
+                          Get.to(
+                                  () => EnterLocationManuallyScreen());
                         },
-                        child: Text("Enter Location Manually", style: textTheme.bodyLarge!.copyWith(color: colorScheme.primary, fontWeight: FontWeight.w600)),
+                        child: Text("Enter Location Manually",
+                            style: textTheme.bodyLarge!.copyWith(
+                                color: colorScheme.primary,
+                                fontWeight: FontWeight.w600)),
                       ),
                     ),
                   ],
                 ),
               ),
-              // SizedBox(
-              //   width: double.infinity,
-              //   height: bottomImageHeight,
-              //   child: Image.asset(
-              //     'assets/images/location_map_bottom.jpg',
-              //     fit: BoxFit.cover,
-              //     errorBuilder: (context, error, stackTrace) {
-              //       return Container(
-              //         color: Colors.grey[300],
-              //         child: const Icon(Icons.map, size: 60, color: Colors.grey),
-              //       );
-              //     },
-              //   ),
-              // ),
             ],
           ),
         ),

@@ -10,8 +10,8 @@ class PersonalInfoSection extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final textColor = const Color(0xFF111827); // Darker text
-    final secondaryTextColor = const Color(0xFF6B7280); // Gray
+    final textColor = const Color(0xFF111827);
+    final secondaryTextColor = const Color(0xFF6B7280);
 
     return GetBuilder<BookingController>(
       builder: (controller) {
@@ -21,7 +21,6 @@ class PersonalInfoSection extends StatelessWidget {
             _titleText("Personal Info", theme, textColor, 16, FontWeight.w600),
             const SizedBox(height: 12),
 
-            // Name Field
             _customReadOnlyField(
               controller.nameController,
               "Name *",
@@ -29,7 +28,6 @@ class PersonalInfoSection extends StatelessWidget {
             ),
             const SizedBox(height: 16),
 
-            // Mobile No
             _titleText("Mobile No *", theme, textColor, 14, FontWeight.w500),
             const SizedBox(height: 8),
             Row(
@@ -48,7 +46,6 @@ class PersonalInfoSection extends StatelessWidget {
 
             const SizedBox(height: 16),
 
-            // Alternate Mobile No
             _titleText(
               "Alternate Mobile No",
               theme,
@@ -56,68 +53,66 @@ class PersonalInfoSection extends StatelessWidget {
               14,
               FontWeight.w500,
             ),
-            // Alternate Mobile No section
+
             Row(
               children: [
                 Expanded(
                   child: Stack(
                     children: [
-                      TextField(
-                        controller:
-                            controller
-                                .alternateMobileController, // ✅ Use dedicated controller
-                        keyboardType: TextInputType.phone,
-                        maxLength: 10,
-                        style: const TextStyle(
-                          fontSize: 14,
-                          fontWeight: FontWeight.w500,
-                          color: Color(0xFF111827),
-                        ),
-                        inputFormatters: [
-                          FilteringTextInputFormatter.digitsOnly,
-                        ],
-                        decoration: InputDecoration(
-                          counterText: '',
-                          hintText: '8545254789',
-                          hintStyle: const TextStyle(
-                            color: Color(0xFF9CA3AF),
-                            fontWeight: FontWeight.w500,
-                            fontSize: 14,
-                          ),
-                          filled: true,
-                          fillColor: Colors.white,
-                          contentPadding: const EdgeInsets.only(
-                            left: 44,
-                            right: 12,
-                            top: 14,
-                            bottom: 14,
-                          ),
-                          border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(10),
-                            borderSide: const BorderSide(
-                              color: Color(0xFFE5E7EB),
-                              width: 1.5,
+                      GetBuilder<BookingController>(
+                        id: 'alternate_field',
+                        builder: (_) {
+                          return TextField(
+                            controller: controller.alternateMobileController,
+                            readOnly: !controller.isEditingAlternate,
+                            keyboardType: TextInputType.phone,
+                            maxLength: 10,
+                            style: const TextStyle(
+                              fontSize: 14,
+                              fontWeight: FontWeight.w500,
+                              color: Color(0xFF111827),
                             ),
-                          ),
-                          enabledBorder: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(10),
-                            borderSide: const BorderSide(
-                              color: Color(0xFFE5E7EB),
-                              width: 1.5,
+                            inputFormatters: [
+                              FilteringTextInputFormatter.digitsOnly,
+                            ],
+                            decoration: InputDecoration(
+                              counterText: '',
+                              hintText: '8545254789',
+                              hintStyle: const TextStyle(
+                                color: Color(0xFF9CA3AF),
+                                fontWeight: FontWeight.w500,
+                                fontSize: 14,
+                              ),
+                              filled: true,
+                              fillColor: Colors.white,
+                              contentPadding: const EdgeInsets.only(
+                                  left: 44, right: 12, top: 14, bottom: 14),
+                              border: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(10),
+                                borderSide: const BorderSide(
+                                  color: Color(0xFFE5E7EB),
+                                  width: 1.5,
+                                ),
+                              ),
+                              enabledBorder: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(10),
+                                borderSide: const BorderSide(
+                                  color: Color(0xFFE5E7EB),
+                                  width: 1.5,
+                                ),
+                              ),
                             ),
-                          ),
-                        ),
-                        onChanged: (value) {
-                          if (controller.alternateMobiles.isEmpty) {
-                            controller.alternateMobiles.add(value);
-                          } else {
-                            controller.alternateMobiles[0] = value;
-                          }
-                          // ✅ Add this to update button state
-                          controller.update(['verify_button']);
+                            onChanged: (value) {
+                              if (controller.alternateMobiles.isEmpty) {
+                                controller.alternateMobiles.add(value);
+                              } else {
+                                controller.alternateMobiles[0] = value;
+                              }
+                              controller.update(['verify_button']);
+                            },
+                          );
                         },
                       ),
-                      // +91 prefix overlay
                       Positioned(
                         left: 14,
                         top: 0,
@@ -140,22 +135,19 @@ class PersonalInfoSection extends StatelessWidget {
                 const SizedBox(width: 8),
                 GetBuilder<BookingController>(
                   id: 'verify_button',
-                  builder:
-                      (controller) => _buildVerifyButton(controller, context),
+                  builder: (controller) => _buildVerifyOrEditButton(controller),
                 ),
               ],
             ),
 
             if (controller.isOTPSent && !controller.isAlternateMobileVerified)
               GetBuilder<BookingController>(
-                id: 'otp_section', // ✅ Specific ID for targeted updates
-                builder:
-                    (controller) => _buildOTPVerificationSection(controller),
+                id: 'otp_section',
+                builder: (controller) => _buildOTPVerificationSection(controller),
               ),
 
             const SizedBox(height: 16),
 
-            // Email Section
             _titleText("Mail id *", theme, textColor, 14, FontWeight.w500),
             const SizedBox(height: 8),
             Row(
@@ -177,15 +169,7 @@ class PersonalInfoSection extends StatelessWidget {
     );
   }
 
-  // -------------------- REUSABLE WIDGETS --------------------
-
-  Widget _titleText(
-    String text,
-    ThemeData theme,
-    Color color,
-    double size,
-    FontWeight weight,
-  ) {
+  Widget _titleText(String text, ThemeData theme, Color color, double size, FontWeight weight) {
     return Text(
       text,
       style: theme.textTheme.bodyLarge?.copyWith(
@@ -196,11 +180,7 @@ class PersonalInfoSection extends StatelessWidget {
     );
   }
 
-  Widget _customReadOnlyField(
-    TextEditingController controller,
-    String label,
-    String hint,
-  ) {
+  Widget _customReadOnlyField(TextEditingController controller, String label, String hint) {
     return TextField(
       controller: controller,
       readOnly: true,
@@ -219,10 +199,7 @@ class PersonalInfoSection extends StatelessWidget {
         ),
         filled: true,
         fillColor: Colors.white,
-        contentPadding: const EdgeInsets.symmetric(
-          vertical: 14,
-          horizontal: 16,
-        ),
+        contentPadding: const EdgeInsets.symmetric(vertical: 14, horizontal: 16),
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(10),
           borderSide: const BorderSide(color: Color(0xFFE5E7EB), width: 1.5),
@@ -236,50 +213,6 @@ class PersonalInfoSection extends StatelessWidget {
           borderSide: const BorderSide(color: Color(0xFFE5E7EB), width: 1.5),
         ),
       ),
-    );
-  }
-
-  Widget _customEditableField({
-    required String initialValue,
-    required String hintText,
-    required Function(String) onChanged,
-  }) {
-    return TextField(
-      controller: TextEditingController(text: initialValue),
-      keyboardType: TextInputType.phone,
-      maxLength: 10,
-      style: const TextStyle(
-        fontSize: 14,
-        fontWeight: FontWeight.w500,
-        color: Color(0xFF111827),
-      ),
-      inputFormatters: [FilteringTextInputFormatter.digitsOnly],
-      decoration: InputDecoration(
-        counterText: '',
-        hintText: hintText,
-        hintStyle: const TextStyle(
-          color: Color(0xFF9CA3AF),
-          fontWeight: FontWeight.w500,
-          fontSize: 14,
-        ),
-        filled: true,
-        fillColor: Colors.white,
-        contentPadding: const EdgeInsets.only(
-          left: 44,
-          right: 12,
-          top: 14,
-          bottom: 14,
-        ),
-        border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(10),
-          borderSide: const BorderSide(color: Color(0xFFE5E7EB), width: 1.5),
-        ),
-        enabledBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(10),
-          borderSide: const BorderSide(color: Color(0xFFE5E7EB), width: 1.5),
-        ),
-      ),
-      onChanged: onChanged,
     );
   }
 
@@ -302,23 +235,34 @@ class PersonalInfoSection extends StatelessWidget {
     );
   }
 
-  Widget _buildVerifyButton(
-    BookingController controller,
-    BuildContext context,
-  ) {
-    // ✅ Check controller text directly instead of the list
-    final alternateNumber = controller.alternateMobileController.text.trim();
-    final isValidNumber = RegExp(r'^\d{10}$').hasMatch(alternateNumber);
+  Widget _buildVerifyOrEditButton(BookingController controller) {
+    final enteredNumber = controller.alternateMobileController.text.trim();
+    final isValidNumber = RegExp(r'^\d{10}$').hasMatch(enteredNumber);
 
-    if (controller.isAlternateMobileVerified) {
-      return _verifiedTag();
-    } else {
+    // When not in edit mode, show EDIT button
+    if (!controller.isEditingAlternate) {
       return ElevatedButton(
-        onPressed:
-            isValidNumber ? () => controller.sendOTPForAlternateMobile() : null,
+        onPressed: controller.toggleAlternateEdit,
         style: ElevatedButton.styleFrom(
-          backgroundColor:
-              isValidNumber ? const Color(0xFF4A6CF7) : const Color(0xFFD1D5DB),
+          backgroundColor: const Color(0xFF4A6CF7),
+          foregroundColor: Colors.white,
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+          minimumSize: Size.zero,
+        ),
+        child: const Text(
+          'Edit',
+          style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600),
+        ),
+      );
+    } else {
+      if (controller.isAlternateMobileVerified) {
+        return _verifiedTag();
+      }
+      return ElevatedButton(
+        onPressed: isValidNumber ? controller.onSendOTPPressed : null,
+        style: ElevatedButton.styleFrom(
+          backgroundColor: isValidNumber ? const Color(0xFF4A6CF7) : const Color(0xFFD1D5DB),
           foregroundColor: Colors.white,
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
@@ -326,11 +270,7 @@ class PersonalInfoSection extends StatelessWidget {
         ),
         child: const Text(
           'Send OTP',
-          style: TextStyle(
-            fontSize: 13,
-            fontWeight: FontWeight.w600,
-            color: Colors.white,
-          ),
+          style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600),
         ),
       );
     }
@@ -350,11 +290,10 @@ class PersonalInfoSection extends StatelessWidget {
                 height: 56,
                 decoration: BoxDecoration(
                   border: Border.all(
-                    color:
-                        controller.otpDigits.length > index &&
-                                controller.otpDigits[index].isNotEmpty
-                            ? const Color(0xFF4A6CF7)
-                            : const Color(0xFFD1D5DB),
+                    color: controller.otpDigits.length > index &&
+                        controller.otpDigits[index].isNotEmpty
+                        ? const Color(0xFF4A6CF7)
+                        : const Color(0xFFD1D5DB),
                     width: 1.5,
                   ),
                   borderRadius: BorderRadius.circular(10),
@@ -376,8 +315,7 @@ class PersonalInfoSection extends StatelessWidget {
                     border: InputBorder.none,
                     counterText: '',
                   ),
-                  onChanged:
-                      (value) => controller.onOTPDigitChanged(index, value),
+                  onChanged: (value) => controller.onOTPDigitChanged(index, value),
                   onTap: () => controller.onOTPFieldTapped(index),
                 ),
               ),
@@ -391,28 +329,18 @@ class PersonalInfoSection extends StatelessWidget {
             if (controller.otpTimer > 0)
               Row(
                 children: [
-                  const Icon(
-                    Icons.access_time,
-                    size: 16,
-                    color: Color(0xFF6B7280),
-                  ),
+                  const Icon(Icons.access_time, size: 16, color: Color(0xFF6B7280)),
                   const SizedBox(width: 4),
                   Text(
                     'Resend code in 00:${controller.otpTimer.toString().padLeft(2, '0')}',
-                    style: const TextStyle(
-                      color: Color(0xFF6B7280),
-                      fontSize: 13,
-                    ),
+                    style: const TextStyle(color: Color(0xFF6B7280), fontSize: 13),
                   ),
                 ],
               )
             else
               TextButton(
                 onPressed: () => controller.resendOTP(),
-                style: TextButton.styleFrom(
-                  padding: EdgeInsets.zero,
-                  minimumSize: Size.zero,
-                ),
+                style: TextButton.styleFrom(padding: EdgeInsets.zero, minimumSize: Size.zero),
                 child: const Text(
                   'Resend OTP',
                   style: TextStyle(
@@ -423,28 +351,18 @@ class PersonalInfoSection extends StatelessWidget {
                 ),
               ),
             ElevatedButton(
-              onPressed:
-                  controller.isOTPComplete
-                      ? () => controller.verifyAlternateMobileOTP()
-                      : null,
+              onPressed: controller.isOTPComplete
+                  ? () => controller.verifyAlternateMobileOTP()
+                  : null,
               style: ElevatedButton.styleFrom(
-                backgroundColor:
-                    controller.isOTPComplete
-                        ? const Color(0xFF4A6CF7)
-                        : const Color(0xFFD1D5DB),
+                backgroundColor: controller.isOTPComplete
+                    ? const Color(0xFF4A6CF7)
+                    : const Color(0xFFD1D5DB),
                 foregroundColor: Colors.white,
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 20,
-                  vertical: 8,
-                ),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(8),
-                ),
+                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
               ),
-              child: const Text(
-                'Verify',
-                style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600),
-              ),
+              child: const Text('Verify', style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600)),
             ),
           ],
         ),

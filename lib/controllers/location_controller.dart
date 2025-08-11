@@ -8,14 +8,19 @@ import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:google_maps_webservice2/places.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import 'booking_form_controller.dart';
+import 'category_controller.dart';
+import 'company_controller.dart';
+import 'home_screen_controller.dart';
+
 class LocationController extends GetxController {
-  final rxLat = 19.0760.obs;
-  final rxLng = 72.8777.obs;
-  final RxList<Prediction> suggestions = <Prediction>[].obs;
-  final RxBool isLoading = false.obs;
-  final RxBool isLocationServiceEnabled = true.obs;
-  final RxString selectedAddress = ''.obs;
-  final RxList<SavedAddress> savedAddresses = <SavedAddress>[].obs;
+  double lat = 19.0760;
+  double lng = 72.8777;
+  List<Prediction> suggestions = [];
+  bool isLoading = false;
+  bool isLocationServiceEnabled = true;
+  String selectedAddress = '';
+  List<SavedAddress> savedAddresses = [];
 
   late GoogleMapsPlaces _places;
   GoogleMapController? _mapController;
@@ -44,18 +49,16 @@ class LocationController extends GetxController {
       final lastLocation = prefs.getString(_lastLocationKey);
       if (lastLocation != null) {
         final locationData = json.decode(lastLocation);
-        rxLat.value = locationData['lat'] ?? 19.0760;
-        rxLng.value = locationData['lng'] ?? 72.8777;
-        selectedAddress.value = locationData['address'] ?? '';
+        lat = locationData['lat'] ?? 19.0760;
+        lng = locationData['lng'] ?? 72.8777;
+        selectedAddress = locationData['address'] ?? '';
       }
 
       final savedAddressesJson = prefs.getStringList(_savedAddressesKey);
       if (savedAddressesJson != null) {
-        savedAddresses.assignAll(
-          savedAddressesJson
-              .map((json) => SavedAddress.fromJson(json))
-              .toList(),
-        );
+        savedAddresses = savedAddressesJson
+            .map((json) => SavedAddress.fromJson(json))
+            .toList();
       } else {
         _addDefaultAddresses();
       }
@@ -63,10 +66,14 @@ class LocationController extends GetxController {
       print('Failed to load saved data: $e');
       _addDefaultAddresses();
     }
+    update();
   }
 
+
+
+
   void _addDefaultAddresses() {
-    savedAddresses.assignAll([
+    savedAddresses = [
       SavedAddress(
         id: '1',
         title: 'Home',
@@ -83,21 +90,23 @@ class LocationController extends GetxController {
         lng: 72.8397,
         type: AddressType.work,
       ),
-    ]);
+    ];
     _saveSavedAddresses();
+    update();
   }
 
   Future<void> _checkLocationServices() async {
-    isLocationServiceEnabled.value =
-        await Geolocator.isLocationServiceEnabled();
+    isLocationServiceEnabled = await Geolocator.isLocationServiceEnabled();
+    update();
   }
 
   Future<void> getCurrentLocation() async {
     try {
-      isLoading.value = true;
+      isLoading = true;
+      update();
 
       if (!await Geolocator.isLocationServiceEnabled()) {
-        isLocationServiceEnabled.value = false;
+        isLocationServiceEnabled = false;
         _showLocationServiceDialog();
         return;
       }
@@ -144,7 +153,8 @@ class LocationController extends GetxController {
         snackPosition: SnackPosition.BOTTOM,
       );
     } finally {
-      isLoading.value = false;
+      isLoading = false;
+      update();
     }
   }
 
@@ -169,13 +179,9 @@ class LocationController extends GetxController {
     );
   }
 
-  Future<void> updateLocation(
-    double lat,
-    double lng, {
-    bool moveCamera = true,
-  }) async {
-    rxLat.value = lat;
-    rxLng.value = lng;
+  Future<void> updateLocation(double lat, double lng, {bool moveCamera = true}) async {
+    this.lat = lat;
+    this.lng = lng;
 
     if (moveCamera && _mapController != null) {
       _mapController!.animateCamera(
@@ -185,6 +191,15 @@ class LocationController extends GetxController {
 
     await getAddressFromCoordinates(lat, lng);
     await _saveLastLocation(lat, lng);
+    update();
+
+    // 🔹 Trigger refresh here
+    final homeCtrl = Get.find<HomeController>();
+    homeCtrl.fetchSlides();
+    homeCtrl.fetchRecommendedCompanies();
+    Get.find<CategoryController>().fetchCategories();
+    Get.find<CompanyController>().fetchCompanyById(1);
+    Get.find<BookingController>().fetchBookings();
   }
 
   Future<void> getAddressFromCoordinates(double lat, double lng) async {
@@ -192,15 +207,16 @@ class LocationController extends GetxController {
       final placemarks = await geocoding.placemarkFromCoordinates(lat, lng);
       if (placemarks.isNotEmpty) {
         final place = placemarks.first;
-        selectedAddress.value =
-            '${place.name}, ${place.street}, ${place.locality}, ${place.administrativeArea}, ${place.postalCode}';
+        selectedAddress =
+        '${place.name}, ${place.street}, ${place.locality}, ${place.administrativeArea}, ${place.postalCode}';
       } else {
-        selectedAddress.value = 'Selected Location';
+        selectedAddress = 'Selected Location';
       }
     } catch (e) {
       print('Failed to get address: $e');
-      selectedAddress.value = 'Selected Location';
+      selectedAddress = 'Selected Location';
     }
+    update();
   }
 
   Future<void> _saveLastLocation(double lat, double lng) async {
@@ -209,7 +225,7 @@ class LocationController extends GetxController {
       final locationData = {
         'lat': lat,
         'lng': lng,
-        'address': selectedAddress.value,
+        'address': selectedAddress,
         'timestamp': DateTime.now().millisecondsSinceEpoch,
       };
       await prefs.setString(_lastLocationKey, json.encode(locationData));
@@ -221,6 +237,7 @@ class LocationController extends GetxController {
   void searchAutocomplete(String input) async {
     if (input.isEmpty) {
       suggestions.clear();
+      update();
       return;
     }
 
@@ -232,12 +249,12 @@ class LocationController extends GetxController {
         components: [Component(Component.country, "in")],
         types: [],
         strictbounds: false,
-        location: Location(lat: rxLat.value, lng: rxLng.value),
+        location: Location(lat: lat, lng: lng),
         radius: 50000,
       );
 
       if (response.isOkay) {
-        suggestions.assignAll(response.predictions);
+        suggestions = response.predictions;
       } else {
         suggestions.clear();
         print('Autocomplete error: ${response.errorMessage}');
@@ -246,10 +263,12 @@ class LocationController extends GetxController {
       suggestions.clear();
       print('Autocomplete fetch failed: $e');
     }
+    update();
   }
 
   void clearSuggestions() {
     suggestions.clear();
+    update();
   }
 
   void setMapController(GoogleMapController controller) {
@@ -262,7 +281,7 @@ class LocationController extends GetxController {
       if (details.isOkay) {
         final location = details.result.geometry!.location;
         await updateLocation(location.lat, location.lng);
-        selectedAddress.value = prediction.description ?? 'Selected Location';
+        selectedAddress = prediction.description ?? 'Selected Location';
       } else {
         print("Place detail error: ${details.errorMessage}");
         Get.snackbar('Error', 'Failed to get place details');
@@ -271,10 +290,11 @@ class LocationController extends GetxController {
       print('Failed to get place details: $e');
       Get.snackbar('Error', 'Failed to select location');
     }
+    update();
   }
 
   Future<void> saveSelectedLocation() async {
-    await _saveLastLocation(rxLat.value, rxLng.value);
+    await _saveLastLocation(lat, lng);
     Get.snackbar(
       'Location Saved',
       'Your selected location has been saved',
@@ -286,7 +306,8 @@ class LocationController extends GetxController {
 
   Future<void> selectSavedAddress(SavedAddress address) async {
     await updateLocation(address.lat, address.lng);
-    selectedAddress.value = address.address;
+    selectedAddress = address.address;
+    update();
   }
 
   Future<void> addSavedAddress(SavedAddress address) async {
@@ -297,6 +318,7 @@ class LocationController extends GetxController {
       '${address.title} has been added to saved addresses',
       snackPosition: SnackPosition.BOTTOM,
     );
+    update();
   }
 
   Future<void> removeSavedAddress(String id) async {
@@ -307,13 +329,14 @@ class LocationController extends GetxController {
       'Address has been removed from saved addresses',
       snackPosition: SnackPosition.BOTTOM,
     );
+    update();
   }
 
   Future<void> _saveSavedAddresses() async {
     try {
       final prefs = await SharedPreferences.getInstance();
       final addressesJson =
-          savedAddresses.map((address) => address.toJson()).toList();
+      savedAddresses.map((address) => address.toJson()).toList();
       await prefs.setStringList(_savedAddressesKey, addressesJson);
     } catch (e) {
       print('Failed to save addresses: $e');
@@ -321,18 +344,18 @@ class LocationController extends GetxController {
   }
 
   double getDistanceBetween(
-    double lat1,
-    double lng1,
-    double lat2,
-    double lng2,
-  ) {
+      double lat1,
+      double lng1,
+      double lat2,
+      double lng2,
+      ) {
     return Geolocator.distanceBetween(lat1, lng1, lat2, lng2);
   }
 
   String get formattedCurrentLocation {
-    return selectedAddress.value.isNotEmpty
-        ? selectedAddress.value
-        : 'Lat: ${rxLat.value.toStringAsFixed(6)}, Lng: ${rxLng.value.toStringAsFixed(6)}';
+    return selectedAddress.isNotEmpty
+        ? selectedAddress
+        : 'Lat: ${lat.toStringAsFixed(6)}, Lng: ${lng.toStringAsFixed(6)}';
   }
 
   Future<bool> hasSavedLocation() async {
@@ -369,13 +392,12 @@ class SavedAddress {
       lat: json['lat'].toDouble(),
       lng: json['lng'].toDouble(),
       type: AddressType.values.firstWhere(
-        (e) => e.toString() == json['type'],
+            (e) => e.toString() == json['type'],
         orElse: () => AddressType.other,
       ),
-      createdAt:
-          json['createdAt'] != null
-              ? DateTime.fromMillisecondsSinceEpoch(json['createdAt'])
-              : null,
+      createdAt: json['createdAt'] != null
+          ? DateTime.fromMillisecondsSinceEpoch(json['createdAt'])
+          : null,
     );
   }
 
