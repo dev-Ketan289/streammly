@@ -509,8 +509,6 @@ class PackagesController extends GetxController {
                 "image":
                     (pkg["image_upload"] != null &&
                             pkg["image_upload"].isNotEmpty)
-                        // ? 'https://admin.streammly.com/${pkg["image_upload"]}'
-                        // : 'assets/images/category/vendor_category/Baby.jpg',
               };
             }).toList();
         update();

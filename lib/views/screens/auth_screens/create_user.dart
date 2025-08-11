@@ -1,24 +1,24 @@
-import 'dart:developer';
-
 import 'package:flutter/material.dart';
-import 'package:fluttertoast/fluttertoast.dart';
+import 'package:flutter/services.dart';
 import 'package:get/get.dart';
-import 'package:streammly/views/screens/common/location_screen.dart';
-
+import 'package:google_fonts/google_fonts.dart';
+import 'package:streammly/views/widgets/custom_doodle.dart';
 import '../../../controllers/auth_controller.dart';
+import '../../../services/theme.dart' as theme;
+import 'package:fluttertoast/fluttertoast.dart';
 
 class ProfileFormScreen extends StatefulWidget {
-  const ProfileFormScreen({super.key});
+  const ProfileFormScreen({Key? key}) : super(key: key);
 
   @override
   State<ProfileFormScreen> createState() => _ProfileFormScreenState();
 }
 
 class _ProfileFormScreenState extends State<ProfileFormScreen> {
-  final TextEditingController nameController = TextEditingController();
-  final TextEditingController emailController = TextEditingController();
-  final TextEditingController dobController = TextEditingController();
-  final TextEditingController phoneController = TextEditingController();
+  final nameController = TextEditingController();
+  final emailController = TextEditingController();
+  final dobController = TextEditingController();
+  final phoneController = TextEditingController();
 
   String? selectedGender;
   bool isLoading = false;
@@ -28,8 +28,6 @@ class _ProfileFormScreenState extends State<ProfileFormScreen> {
   void initState() {
     super.initState();
     authController = Get.find<AuthController>();
-
-    // Prefill fields from existing user profile if available
     if (authController.userProfile != null) {
       nameController.text = authController.userProfile?.name ?? '';
       emailController.text = authController.userProfile?.email ?? '';
@@ -51,7 +49,7 @@ class _ProfileFormScreenState extends State<ProfileFormScreen> {
     );
     if (picked != null) {
       dobController.text =
-          "${picked.year.toString().padLeft(4, '0')}-${picked.month.toString().padLeft(2, '0')}-${picked.day.toString().padLeft(2, '0')}";
+      "${picked.year.toString().padLeft(4, '0')}-${picked.month.toString().padLeft(2, '0')}-${picked.day.toString().padLeft(2, '0')}";
     }
   }
 
@@ -66,9 +64,7 @@ class _ProfileFormScreenState extends State<ProfileFormScreen> {
       return;
     }
 
-    setState(() {
-      isLoading = true;
-    });
+    setState(() => isLoading = true);
 
     try {
       final response = await authController.updateFullUserProfile(
@@ -78,178 +74,253 @@ class _ProfileFormScreenState extends State<ProfileFormScreen> {
         gender: selectedGender,
         phone: phone,
       );
-
-      log("${response?.message}", name: "saveProfile");
-
       if (response?.isSuccess ?? false) {
         await authController.fetchUserProfile();
         Fluttertoast.showToast(msg: response?.message ?? "");
-        Get.offAll(() => const LocationScreen());
       } else {
         Fluttertoast.showToast(msg: response?.message ?? "");
       }
     } catch (e) {
       Fluttertoast.showToast(msg: "Error updating profile");
     }
+    setState(() => isLoading = false);
+  }
 
-    setState(() {
-      isLoading = false;
-    });
+  InputDecoration fieldDecoration({String? hint, IconData? icon}) {
+    final themeData = Theme.of(context);
+    return InputDecoration(
+      hintText: hint,
+      hintStyle: themeData.textTheme.bodyMedium?.copyWith(
+        color: Colors.grey[500],
+        fontSize: 15,
+        fontWeight: FontWeight.w400,
+      ),
+      filled: true,
+      fillColor: theme.backgroundLight.withValues(alpha: 0.97),
+      suffixIcon: icon != null
+          ? Icon(icon, color: Colors.grey[600], size: 19)
+          : null,
+      contentPadding: const EdgeInsets.symmetric(horizontal: 15, vertical: 14),
+      border: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(10),
+        borderSide: BorderSide(color: Colors.grey[300]!),
+      ),
+      enabledBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(10),
+        borderSide: BorderSide(color: Colors.grey[300]!),
+      ),
+      focusedBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(10),
+        borderSide: BorderSide(color: theme.primaryColor),
+      ),
+    );
+  }
+
+  Widget buildTextField({
+    required TextEditingController controller,
+    required String hint,
+    TextInputType? keyboardType,
+    bool readOnly = false,
+    IconData? suffixIcon,
+    void Function()? onTap,
+    List<TextInputFormatter>? inputFormatters,
+  }) {
+    return GestureDetector(
+      onTap: onTap,
+      child: AbsorbPointer(
+        absorbing: onTap != null,
+        child: TextField(
+          controller: controller,
+          keyboardType: keyboardType,
+          readOnly: readOnly,
+          inputFormatters: inputFormatters,
+          style: Theme.of(context).textTheme.bodyMedium?.copyWith(fontSize: 15),
+          decoration: fieldDecoration(hint: hint, icon: suffixIcon),
+        ),
+      ),
+    );
   }
 
   @override
   Widget build(BuildContext context) {
-    return PopScope(
-      canPop: false,
-      child: Scaffold(
-        backgroundColor: const Color(0xFFF5F6FA),
-        appBar: AppBar(
-          title: const Text("Complete Your Profile"),
-          centerTitle: true,
-          automaticallyImplyLeading: false,
-        ),
-        body: Center(
-          child: SingleChildScrollView(
-            child: Card(
-              elevation: 6,
-              margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 24),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(20),
-              ),
-              child: Padding(
-                padding: const EdgeInsets.all(24.0),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: [
-                    const SizedBox(height: 24),
-                    TextField(
-                      controller: nameController,
-                      decoration: InputDecoration(
-                        labelText: "Name *",
-                        prefixIcon: const Icon(Icons.person_outline),
-                        filled: true,
-                        fillColor: Colors.white,
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(12),
+    final themeData = Theme.of(context);
+
+    return Scaffold(
+      body: SafeArea(
+        child: CustomBackground(
+          child: Container(
+            width: double.infinity,
+            // height: size.height, // <-- REMOVE this line!
+            color: Colors.transparent,
+            child: SingleChildScrollView(         // <-- ADD this!
+              padding: EdgeInsets.zero,
+              child: Column(
+                children: [
+                  const SizedBox(height: 24),
+                  Text(
+                    "STREAMMLY",
+                    style: GoogleFonts.cinzelDecorative(
+                      fontSize: 22,
+                      fontWeight: FontWeight.bold,
+                      color: theme.primaryColor,
+                      letterSpacing: 1,
+                    ),
+                  ),
+                  const SizedBox(height: 15),
+                  SizedBox(
+                    width: 220,
+                    height: 220,
+                    child: Image.asset(
+                      'assets/images/GIF For Login 1.png',
+                      fit: BoxFit.fitWidth,
+                    ),
+                  ),
+                  const SizedBox(height: 7),
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 28.0),
+                    child: RichText(
+                      textAlign: TextAlign.center,
+                      text: TextSpan(
+                        text: "Complete your profile to get\nstarted with ",
+                        style: GoogleFonts.poppins(
+                          color: theme.textPrimary,
+                          fontWeight: FontWeight.w600,
+                          fontSize: 16.7,
+                          height: 1.3,
                         ),
+                        children: [
+                          TextSpan(
+                            text: "Streammly !",
+                            style: GoogleFonts.poppins(
+                              color: theme.primaryColor,
+                              fontWeight: FontWeight.bold,
+                              fontSize: 16.7,
+                            ),
+                          ),
+                        ],
                       ),
                     ),
-                    const SizedBox(height: 16),
-                    TextField(
-                      controller: emailController,
-                      keyboardType: TextInputType.emailAddress,
-                      readOnly: authController.isGoogleLogin(),
-                      decoration: InputDecoration(
-                        labelText: "Email *",
-                        prefixIcon: const Icon(Icons.email_outlined),
-                        filled: true,
-                        fillColor:
-                            authController.isGoogleLogin()
-                                ? Colors.grey[100]
-                                : Colors.white,
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(12),
+                  ),
+                  const SizedBox(height: 18),
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 23),
+                    child: Column(
+                      children: [
+                        buildTextField(
+                          controller: nameController,
+                          hint: "Enter Full Name",
                         ),
-                      ),
-                    ),
-                    const SizedBox(height: 16),
-                    TextField(
-                      controller: phoneController,
-                      keyboardType: TextInputType.phone,
-                      readOnly: authController.isPhoneLogin(),
-                      decoration: InputDecoration(
-                        labelText: "Phone *",
-                        prefixIcon: const Icon(Icons.phone_outlined),
-                        filled: true,
-                        fillColor:
-                            authController.isPhoneLogin()
-                                ? Colors.grey[100]
-                                : Colors.white,
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(12),
+                        const SizedBox(height: 10),
+                        buildTextField(
+                          controller: phoneController,
+                          hint: "Enter Mobile Number",
+                          keyboardType: TextInputType.phone,
+                          readOnly: authController.isPhoneLogin(),
+                          inputFormatters: [
+                            FilteringTextInputFormatter.digitsOnly,
+                            LengthLimitingTextInputFormatter(10),
+                          ],
                         ),
-                      ),
-                    ),
-                    const SizedBox(height: 16),
-                    GestureDetector(
-                      onTap: _pickDate,
-                      child: AbsorbPointer(
-                        child: TextField(
+                        const SizedBox(height: 10),
+                        buildTextField(
+                          controller: emailController,
+                          hint: "Enter Email Id",
+                          keyboardType: TextInputType.emailAddress,
+                          readOnly: authController.isGoogleLogin(),
+                        ),
+                        const SizedBox(height: 10),
+                        buildTextField(
                           controller: dobController,
-                          keyboardType: TextInputType.datetime,
-                          decoration: InputDecoration(
-                            labelText: "Date of Birth (Optional)",
-                            hintText: "YYYY-MM-DD",
-                            prefixIcon: const Icon(Icons.cake_outlined),
-                            filled: true,
-                            fillColor: Colors.white,
-                            border: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(12),
+                          hint: "Select DOB",
+                          onTap: _pickDate,
+                          suffixIcon: Icons.calendar_month,
+                        ),
+                        const SizedBox(height: 10),
+                      DropdownButtonFormField<String>(
+                        value: selectedGender,
+                        onChanged: (value) {
+                          setState(() => selectedGender = value);
+                        },
+                        items: const [
+                          DropdownMenuItem(value: "male", child: Text("Male")),
+                          DropdownMenuItem(value: "female", child: Text("Female")),
+                          DropdownMenuItem(value: "other", child: Text("Other")),
+                        ],
+                        isExpanded: true,
+                        decoration: InputDecoration(
+                          hintText: "Select Your Gender",
+                          hintStyle: GoogleFonts.poppins(
+                            color: Colors.grey[500],
+                            fontSize: 15,
+                            fontWeight: FontWeight.w400,
+                          ),
+                          filled: true,
+                          fillColor: const Color(0xFFF7F8FA),
+                          contentPadding: const EdgeInsets.symmetric(horizontal: 15, vertical: 14), // match textfield
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(10),
+                            borderSide: BorderSide(color: Colors.grey[300]!),
+                          ),
+                          enabledBorder: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(10),
+                            borderSide: BorderSide(color: Colors.grey[300]!),
+                          ),
+                          focusedBorder: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(10),
+                            borderSide: BorderSide(color: theme.primaryColor),
+                          ),
+                        ),
+                        icon: Icon(
+                          Icons.arrow_drop_down_rounded,
+                          color: Colors.grey[600],
+                          size: 24,
+                        ),
+                        dropdownColor: Colors.white, // menu background
+                        style: GoogleFonts.poppins(
+                          color: Colors.black87,
+                          fontSize: 15.0,
+                          fontWeight: FontWeight.w500,
+                        ),
+                        menuMaxHeight: 200, // control menu size
+                      ),
+
+
+                      const SizedBox(height: 27),
+                        SizedBox(
+                          width: double.infinity,
+                          height: 48,
+                          child: ElevatedButton(
+                            onPressed: isLoading ? null : saveProfile,
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: theme.primaryColor,
+                              elevation: 0,
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(10),
+                              ),
+                            ),
+                            child: isLoading
+                                ? const SizedBox(
+                              width: 22,
+                              height: 22,
+                              child: CircularProgressIndicator(
+                                strokeWidth: 2,
+                                color: Colors.white,
+                              ),
+                            )
+                                : Text(
+                              "Save Profile",
+                              style: themeData.textTheme.bodyLarge?.copyWith(
+                                color: Colors.white,
+                                fontWeight: FontWeight.bold,
+                                fontSize: 16,
+                              ),
                             ),
                           ),
                         ),
-                      ),
-                    ),
-                    const SizedBox(height: 16),
-                    DropdownButtonFormField<String>(
-                      value: selectedGender,
-                      hint: const Text("Select Gender *"),
-                      onChanged: (value) {
-                        setState(() {
-                          selectedGender = value;
-                        });
-                      },
-                      decoration: InputDecoration(
-                        prefixIcon: const Icon(Icons.wc_outlined),
-                        filled: true,
-                        fillColor: Colors.white,
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                      ),
-                      items: const [
-                        DropdownMenuItem(value: "male", child: Text("Male")),
-                        DropdownMenuItem(
-                          value: "female",
-                          child: Text("Female"),
-                        ),
-                        DropdownMenuItem(value: "other", child: Text("Other")),
                       ],
                     ),
-                    const SizedBox(height: 32),
-                    SizedBox(
-                      width: double.infinity,
-                      height: 50,
-                      child: ElevatedButton(
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: Theme.of(context).primaryColor,
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(12),
-                          ),
-                          textStyle: const TextStyle(
-                            fontSize: 18,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                        onPressed: isLoading ? null : saveProfile,
-                        child:
-                            isLoading
-                                ? const SizedBox(
-                                  width: 24,
-                                  height: 24,
-                                  child: CircularProgressIndicator(
-                                    strokeWidth: 2,
-                                    color: Colors.white,
-                                  ),
-                                )
-                                : const Text(
-                                  "Save Profile",
-                                  style: TextStyle(color: Colors.white),
-                                ),
-                      ),
-                    ),
-                  ],
-                ),
+                  )
+                ],
               ),
             ),
           ),
