@@ -173,56 +173,56 @@ class _HeaderBannerState extends State<HeaderBanner> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   // Location Row
-                  Obx(
-                    () => GestureDetector(
-                      onTap: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (_) => EnterLocationManuallyScreen(),
-                          ),
-                        );
-                      },
-                      child: Row(
-                        children: [
-                          const SizedBox(width: 50),
-                          Icon(
-                            Icons.location_on,
-                            color: theme.colorScheme.onPrimary,
-                            size: 20,
-                          ),
-                          const SizedBox(width: 8),
-                          Flexible(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  "Current Location",
-                                  style: theme.textTheme.bodySmall?.copyWith(
-                                    color: theme.colorScheme.onPrimary,
-                                    fontWeight: FontWeight.bold,
-                                    fontSize: 12,
-                                  ),
-                                ),
-                                Text(
-                                  locationController
-                                          .selectedAddress
-                                          .value
-                                          .isNotEmpty
-                                      ? locationController.selectedAddress.value
-                                      : "Fetching...",
-                                  style: theme.textTheme.bodySmall?.copyWith(
-                                    color: theme.colorScheme.onPrimary,
-                                    fontSize: 8,
-                                  ),
-                                  overflow: TextOverflow.visible,
-                                ),
-                              ],
+// Location Row
+                  GetBuilder<LocationController>(
+                    builder: (controller) {
+                      return GestureDetector(
+                        onTap: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (_) => EnterLocationManuallyScreen(),
                             ),
-                          ),
-                        ],
-                      ),
-                    ),
+                          );
+                        },
+                        child: Row(
+                          children: [
+                            const SizedBox(width: 50),
+                            Icon(
+                              Icons.location_on,
+                              color: theme.colorScheme.onPrimary,
+                              size: 20,
+                            ),
+                            const SizedBox(width: 8),
+                            Flexible(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    "Current Location",
+                                    style: theme.textTheme.bodySmall?.copyWith(
+                                      color: theme.colorScheme.onPrimary,
+                                      fontWeight: FontWeight.bold,
+                                      fontSize: 12,
+                                    ),
+                                  ),
+                                  Text(
+                                    controller.selectedAddress.isNotEmpty
+                                        ? controller.selectedAddress
+                                        : "Fetching...",
+                                    style: theme.textTheme.bodySmall?.copyWith(
+                                      color: theme.colorScheme.onPrimary,
+                                      fontSize: 8,
+                                    ),
+                                    overflow: TextOverflow.visible,
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ],
+                        ),
+                      );
+                    },
                   ),
 
                   // Search Bar

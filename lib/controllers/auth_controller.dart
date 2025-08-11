@@ -83,17 +83,15 @@ class AuthController extends GetxController implements GetxService {
     ResponseModel? responseModel;
 
     try {
-      // Input validation
+      // Validation
       if (name.trim().isEmpty || email.trim().isEmpty) {
-        responseModel = ResponseModel(false, "Name and email are required");
-        return responseModel;
+        return ResponseModel(false, "Name and email are required");
       }
-
       if (!GetUtils.isEmail(email)) {
-        responseModel = ResponseModel(false, "Invalid email format");
-        return responseModel;
+        return ResponseModel(false, "Invalid email format");
       }
 
+      // API call
       Response response = await authRepo.updateFullUserProfile(
         name: name.trim(),
         email: email.trim(),
@@ -105,63 +103,38 @@ class AuthController extends GetxController implements GetxService {
         coverImage: coverImage,
       );
 
-      // Debug logging
-      log(
-        "Response Status: ${response.statusCode}",
-        name: "updateFullUserProfile",
-      );
-      log(
-        "Response Body: ${response.bodyString}",
-        name: "updateFullUserProfile",
-      );
+      log("Response Status: ${response.statusCode}", name: "updateFullUserProfile");
+      log("Response Body: ${response.bodyString}", name: "updateFullUserProfile");
 
-      // Handle successful response
-      if (response.statusCode == 200) {
-        final body = response.body;
+      if (response.statusCode == 200 && response.body is Map<String, dynamic>) {
+        final body = response.body as Map<String, dynamic>;
 
-        // Check for different success indicators
-        bool isSuccess =
-            body['success'] == true ||
+        bool isSuccess = body['success'] == true ||
             body['status'] == 'success' ||
             body['code'] == 200;
 
-        if (isSuccess && body['data'] != null) {
-          userProfile = UserProfile.fromJson(body['data']);
-          responseModel = ResponseModel(
-            true,
-            body['message'] ?? "Profile updated successfully",
-          );
+        if (isSuccess) {
+          if (body['data'] is Map<String, dynamic>) {
+            // Parse full user profile
+            userProfile = UserProfile.fromJson(body['data']);
+          }
+          // If string, treat as success message only
+          final msg = body['message'] ?? body['data'] ?? "Profile updated";
+          responseModel = ResponseModel(true, msg.toString());
         } else {
-          responseModel = ResponseModel(
-            false,
-            body['message'] ?? "Profile update failed",
-          );
+          responseModel = ResponseModel(false, body['message'] ?? "Profile update failed");
         }
+
       } else {
-        // Handle HTTP error responses
         final errorMessage =
-            response.body?['message'] ??
-            response.body?['error'] ??
-            "Server error occurred";
-
-        log(
-          "HTTP Error: ${response.statusCode} - $errorMessage",
-          name: "updateFullUserProfile",
-        );
-
+        (response.body is Map && response.body['message'] != null)
+            ? response.body['message']
+            : "Server error occurred";
+        log("HTTP Error: ${response.statusCode} - $errorMessage");
         responseModel = ResponseModel(false, errorMessage);
       }
-    } on SocketException catch (e) {
-      log("Network Error: ${e.message}", name: "updateFullUserProfile");
-      responseModel = ResponseModel(false, "No internet connection");
-    } on TimeoutException catch (e) {
-      log("Timeout Error: ${e.message}", name: "updateFullUserProfile");
-      responseModel = ResponseModel(false, "Request timeout");
-    } on FormatException catch (e) {
-      log("Format Error: ${e.message}", name: "updateFullUserProfile");
-      responseModel = ResponseModel(false, "Invalid response format");
-    } catch (e) {
-      log("Unexpected Error: ${e.toString()}", name: "updateFullUserProfile");
+    } catch (e, st) {
+      log("Unexpected Error: $e\n$st", name: "updateFullUserProfile");
       responseModel = ResponseModel(false, "An unexpected error occurred");
     }
 
@@ -169,6 +142,7 @@ class AuthController extends GetxController implements GetxService {
     update();
     return responseModel;
   }
+
 
   // Otp Login
   Future<ResponseModel> sendOtp() async {

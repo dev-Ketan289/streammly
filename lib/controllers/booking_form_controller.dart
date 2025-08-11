@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'dart:developer';
 
 import 'package:flutter/material.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
 import 'package:streammly/controllers/auth_controller.dart';
@@ -142,28 +143,76 @@ class BookingController extends GetxController {
     personalInfo.clear();
   }
 
-  // Update autofillFromUserProfile to update controllers' text:
-  // In your BookingController class, update the autofillFromUserProfile method:
+  bool isEditingAlternate = false;
+  String? originalSecondaryMobile;
 
   void autofillFromUserProfile() {
-    try {
-      final userProfile = authController.userProfile;
-      if (userProfile != null) {
-        personalInfo['name'] = userProfile.name ?? '';
-        personalInfo['mobile'] = userProfile.phone ?? '';
-        personalInfo['email'] = userProfile.email ?? '';
+    final user = authController.userProfile;
+    if (user != null) {
+      nameController.text   = user.name ?? '';
+      mobileController.text = user.phone ?? '';
+      emailController.text  = user.email ?? '';
+      originalSecondaryMobile = user.secondaryMobile ?? '';
 
-        // Update controllers safely and force sync
-        if (!_isDisposed) {
-          nameController.text = personalInfo['name']!;
-          mobileController.text = personalInfo['mobile']!;
-          emailController.text = personalInfo['email']!;
+      // ✅ Keep personalInfo in sync when autofilling
+      personalInfo['name'] = nameController.text.trim();
+      personalInfo['mobile'] = mobileController.text.trim();
+      personalInfo['email'] = emailController.text.trim();
+
+      if (originalSecondaryMobile!.isNotEmpty) {
+        alternateMobileController.text = originalSecondaryMobile!;
+        if (alternateMobiles.isEmpty) {
+          alternateMobiles.add(originalSecondaryMobile!);
+        } else {
+          alternateMobiles[0] = originalSecondaryMobile!;
         }
-        update();
+      } else {
+        alternateMobileController.clear();
+        alternateMobiles.clear();
       }
-    } catch (e) {
-      log('Error in autofillFromUserProfile: $e', name: 'BookingController');
+
+      log('Fetched profile name: "${authController.userProfile?.name}"');
+      log('NameController text: "${nameController.text}"');
+
+      update();
     }
+  }
+
+  void toggleAlternateEdit() {
+    isEditingAlternate = !isEditingAlternate;
+    update(['verify_button', 'alternate_field']);
+  }
+
+  void onSendOTPPressed() {
+    final currentInput = alternateMobileController.text.trim();
+    final primaryNumber = mobileController.text.trim();
+    final existingSecondary = originalSecondaryMobile?.trim();
+
+    if (currentInput.isEmpty) return;
+
+    // Check if same as primary
+    if (currentInput == primaryNumber) {
+      Fluttertoast.showToast(
+        msg: "Alternate number cannot be same as primary number",
+        toastLength: Toast.LENGTH_SHORT,
+        gravity: ToastGravity.BOTTOM,
+      );
+      return;
+    }
+
+    // Check if same as already saved secondary
+    if (existingSecondary != null &&
+        existingSecondary.isNotEmpty &&
+        currentInput == existingSecondary) {
+      Fluttertoast.showToast(
+        msg: "This alternate number is already saved in your profile",
+        toastLength: Toast.LENGTH_SHORT,
+        gravity: ToastGravity.BOTTOM,
+      );
+      return;
+    }
+
+    sendOTPForAlternateMobile();
   }
 
   bool isOTPSent = false;
@@ -822,6 +871,11 @@ class BookingController extends GetxController {
   }
 
   bool canSubmit() {
+    // ✅ Always sync from controllers before validation
+    personalInfo['name'] = nameController.text.trim();
+    personalInfo['mobile'] = mobileController.text.trim();
+    personalInfo['email'] = emailController.text.trim();
+
     if (personalInfo['name']?.isEmpty ?? true) {
       debugPrint("Validation fail: Name is empty");
       return false;
@@ -922,6 +976,9 @@ class BookingController extends GetxController {
       }
     }
 
+    log('Name before validation = "${nameController.text}"');
+    log('Mobile before validation = "${mobileController.text}"');
+
     debugPrint("All validations passed");
     return true;
   }
@@ -941,6 +998,7 @@ class BookingController extends GetxController {
     } catch (e) {
       return 0;
     }
+
   }
 
   // Added method that was missing in your original postBooking payload preparation

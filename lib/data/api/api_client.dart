@@ -315,52 +315,56 @@ class ApiClient extends GetConnect implements GetxService {
   }
 
   Future<Response> postMultipartData(
-    String uri,
-    Map<String, String> fields, {
-    File? profileImage,
-    File? coverImage,
-  }) async {
+      String uri,
+      Map<String, String> fields, {
+        File? profileImage,
+        File? coverImage,
+      }) async {
     try {
       var url = Uri.parse(baseUrl! + uri);
       var request = http.MultipartRequest('POST', url);
 
-      // Attach Headers (Token)
+      // Headers
       request.headers['Authorization'] = 'Bearer $token';
       request.headers['Accept'] = 'application/json';
 
-      // Add form fields
+      // Fields
       request.fields.addAll(fields);
 
-      // Add profile image if available
+      // Files
       if (profileImage != null) {
-        request.files.add(
-          await http.MultipartFile.fromPath('profile_image', profileImage.path),
-        );
+        request.files.add(await http.MultipartFile.fromPath('profile_image', profileImage.path));
       }
-
-      // Add cover image if available
       if (coverImage != null) {
-        request.files.add(
-          await http.MultipartFile.fromPath('cover_image', coverImage.path),
-        );
+        request.files.add(await http.MultipartFile.fromPath('cover_image', coverImage.path));
       }
 
-      // Send the request
+      // Send request
       var streamedResponse = await request.send();
-      var response = await http.Response.fromStream(streamedResponse);
+      var rawResponse = await http.Response.fromStream(streamedResponse);
 
-      log('====> Multipart Response Status: ${response.statusCode}');
-      log('====> Multipart Response Body: ${response.body}');
+      log('====> Multipart Response Status: ${rawResponse.statusCode}');
+      log('====> Multipart Response Body: ${rawResponse.body}');
 
-      // Convert http.Response to GetX Response
+      dynamic parsedBody;
+
+      try {
+        parsedBody = jsonDecode(rawResponse.body);
+      } catch (e) {
+        // Not valid JSON, return raw string
+        log('JSON decode failed: $e');
+        parsedBody = rawResponse.body;
+      }
+
       return Response(
-        statusCode: response.statusCode,
-        bodyString: response.body,
-        body: jsonDecode(response.body),
+        statusCode: rawResponse.statusCode,
+        bodyString: rawResponse.body,
+        body: parsedBody,
       );
     } catch (e) {
       log('Error in Multipart Upload: $e');
       return Response(statusCode: 1, statusText: e.toString());
     }
   }
+
 }
