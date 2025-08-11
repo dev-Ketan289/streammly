@@ -213,6 +213,7 @@ class _VendorGroupState extends State<VendorGroup> {
                     }
 
                     final subVerticals = controller.subVerticalCards;
+                     
 
                     if (subVerticals.isEmpty) {
                       return const Padding(

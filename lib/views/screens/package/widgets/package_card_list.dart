@@ -29,6 +29,7 @@ class PackagesListView extends StatelessWidget {
                 : pkg["hours"].first;
             final priceMap = pkg["priceMap"] as Map<String, int>;
             final updatedPrice = priceMap[selectedHour] ?? pkg["price"];
+          
             log(pkg.toString());
 
             return GestureDetector(
@@ -52,30 +53,60 @@ class PackagesListView extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
                       if (pkg["specialOffer"] == true)
-                        Container(
-                          width: 40,
-                          decoration: const BoxDecoration(
-                            color: Color(0xffC59732),
-                            borderRadius: BorderRadius.only(
-                              topLeft: Radius.circular(12),
-                              bottomLeft: Radius.circular(12),
-                            ),
-                          ),
-                          child: const RotatedBox(
-                            quarterTurns: 3,
-                            child: Center(
-                              child: Text(
-                                "SPECIAL OFFER",
-                                style: TextStyle(
-                                  color: Colors.white,
-                                  fontSize: 13,
-                                  fontWeight: FontWeight.w600,
-                                  letterSpacing: 0.5,
+                        Builder(
+                          builder: (context) {
+                            Color resolveRibbonColor(String rawType) {
+                              final t = rawType.toLowerCase().trim();
+                              if ( t.contains('offer')) {
+                                return const Color(0xffC59732); // gold
+                              }
+                              if (t.contains('premium')) {
+                                return const Color(0xFFA34CF4); // purple
+                              }
+                              if (t.contains('standard')) {
+                                return Color(0xff3478F2); // app blue
+                              }
+                              return const Color(0xffC59732); // default to gold
+                            }
+
+                            final String typeText = (pkg["package_type"] ?? pkg["type"] ?? '').toString();
+                            String resolveLabel(String rawType) {
+                              final t = rawType.toLowerCase().trim();
+                              if ( t.contains('standard')) {
+                                return 'BASIC';
+                              }
+                              return rawType.toUpperCase();
+                            }
+                            final Color ribbonColor = resolveRibbonColor(typeText);
+
+                            return Container(
+                              width: 40,
+                              decoration: BoxDecoration(
+                                color: ribbonColor,
+                                borderRadius: const BorderRadius.only(
+                                  topLeft: Radius.circular(12),
+                                  bottomLeft: Radius.circular(12),
                                 ),
                               ),
-                            ),
-                          ),
+                              child: RotatedBox(
+                                quarterTurns: 3,
+                                child: Center(
+                                  child: Text(
+                                    resolveLabel(typeText),
+                                    textAlign: TextAlign.center,
+                                    style: const TextStyle(
+                                      color: Colors.white,
+                                      fontSize: 13,
+                                      fontWeight: FontWeight.w600,
+                                      letterSpacing: 0.5,
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            );
+                          },
                         ),
+                        if(pkg["specialOffer"] == true)
                       Expanded(
                         child: Padding(
                           padding: const EdgeInsets.all(16),

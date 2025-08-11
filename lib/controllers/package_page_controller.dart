@@ -129,6 +129,7 @@ class PackagesController extends GetxController {
                 'id': pkg['id'], // <-- Add id here properly
                 "title": pkg["title"] ?? "",
                 "type": pkg["type"] ?? "N/A",
+                 "package_type": pkg["package_type"] ?? "",
                 "typeId": pkg['type_id'],
                 "price": priceMap[getDurationLabel(firstVariation ?? {})] ?? 0,
                 "priceMap": priceMap,

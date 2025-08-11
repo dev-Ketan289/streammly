@@ -45,13 +45,50 @@ class BundlePackageCard extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             if (package["specialOffer"] == true)
-              Container(
-                width: 36,
-                decoration: const BoxDecoration(color: Color(0xFFE67E22), borderRadius: BorderRadius.only(topLeft: Radius.circular(12), bottomLeft: Radius.circular(12))),
-                child: const RotatedBox(
-                  quarterTurns: 3,
-                  child: Center(child: Text("SPECIAL OFFER", style: TextStyle(color: Colors.white, fontSize: 10, fontWeight: FontWeight.w600))),
-                ),
+              Builder(
+                builder: (context) {
+                  Color resolveRibbonColor(String rawType) {
+                    final t = rawType.toLowerCase().trim();
+                    if ( t.contains('offer')) {
+                      return const Color(0xffC59732); // gold
+                    }
+                    if (t.contains('premium')) {
+                      return const Color(0xFF6A1B9A); // purple
+                    }
+                    if (t.contains('standard')) {
+                      return const Color(0xFF4A6CF7); // blue used in bundle card
+                    }
+                    return const Color(0xffC59732);
+                  }
+
+                  final String typeText = (package["package_type"] ?? package["type"] ?? '').toString();
+                  String resolveLabel(String rawType) {
+                    final t = rawType.toLowerCase().trim();
+                    if ( t.contains('standard')) {
+                      return 'BASIC';
+                    }
+                    return rawType.toUpperCase();
+                  }
+                  final Color ribbonColor = resolveRibbonColor(typeText);
+
+                  return Container(
+                    width: 36,
+                    decoration: BoxDecoration(
+                      color: ribbonColor,
+                      borderRadius: const BorderRadius.only(topLeft: Radius.circular(12), bottomLeft: Radius.circular(12)),
+                    ),
+                    child: RotatedBox(
+                      quarterTurns: 3,
+                      child: Center(
+                        child: Text(
+                          resolveLabel(typeText),
+                          style: const TextStyle(color: Colors.white, fontSize: 10, fontWeight: FontWeight.w600),
+                          textAlign: TextAlign.center,
+                        ),
+                      ),
+                    ),
+                  );
+                },
               ),
             Expanded(
               child: Padding(
