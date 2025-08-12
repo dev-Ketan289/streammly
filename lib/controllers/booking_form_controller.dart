@@ -600,6 +600,8 @@ class BookingController extends GetxController {
           'extraAddOn': <Map<String, dynamic>>[],
           'termsAccepted': false,
           'extraAnswers': extraAnswers,
+          'specialInstructions': '',
+          'attachmentImage': null,
           'advanceBookingDays':
               int.tryParse(package['advanceBookingDays']?.toString() ?? '0') ??
               1,
@@ -611,6 +613,22 @@ class BookingController extends GetxController {
       update();
     });
   }
+
+  void updateSpecialInstructions(int index, String value) {
+    final data = packageFormsData[index] ?? {};
+    data['specialInstructions'] = value;
+    packageFormsData[index] = data;
+    update();
+  }
+
+  void updateAttachmentImage(int index, Map<String, dynamic>? fileData) {
+    final data = packageFormsData[index] ?? {};
+    data['attachmentImage'] = fileData; // {name, path, size, bytes}
+    packageFormsData[index] = data;
+    update();
+  }
+
+
 
   // Remove or update these methods since we only allow one alternate field each
   void addAlternateMobile() {
@@ -1086,6 +1104,8 @@ class BookingController extends GetxController {
 
       final List<Map<String, dynamic>> bookingsPayload = [];
 
+
+
       for (int i = 0; i < selectedPackages.length; i++) {
         final package = selectedPackages[i];
         final form = packageFormsData[i] ?? {};
@@ -1093,6 +1113,13 @@ class BookingController extends GetxController {
         final startTimeStr = form['startTime'] ?? '';
         final endTimeStr = form['endTime'] ?? '';
         final dateOfShoot = form['date'] ?? '';
+
+        final image = form['attachmentImage'];
+        if (image != null && image['size'] > 500 * 1024) {
+          Get.snackbar('Error', 'Image must be below 500KB');
+          return;
+        }
+
 
         final totalHours =
             (() {
@@ -1127,6 +1154,9 @@ class BookingController extends GetxController {
           "start_time": startTimeStr,
           "end_time": endTimeStr,
           "total_hours": totalHours,
+          "special_instructions": form['specialInstructions'] ?? '',
+          // For now, just include metadata for attachment; actual upload might be added later when backend supports
+          "attachment_image": image != null ? {"name": image['name'], "path": image['path']} : null,
         });
       }
 
