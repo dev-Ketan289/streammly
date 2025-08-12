@@ -107,9 +107,12 @@ class BookingPage extends StatelessWidget {
             final packagesLength = controller.selectedPackages.length;
 
             final safePageIndex =
-                (currentPage >= 0 && currentPage < packagesLength)
-                    ? currentPage
-                    : 0;
+            (currentPage >= 0 && currentPage < packagesLength)
+                ? currentPage
+                : 0;
+
+            final form = controller.packageFormsData[safePageIndex] ?? {};
+            final bool termsAccepted = form['termsAccepted'] == true;
 
             return Column(
               children: [
@@ -136,14 +139,12 @@ class BookingPage extends StatelessWidget {
                                     controller.update();
                                   },
                                   style: ElevatedButton.styleFrom(
-                                    backgroundColor:
-                                        isSelected
-                                            ? primaryColor
-                                            : Colors.grey.shade100,
-                                    foregroundColor:
-                                        isSelected
-                                            ? Colors.white
-                                            : Colors.black87,
+                                    backgroundColor: isSelected
+                                        ? primaryColor
+                                        : Colors.grey.shade100,
+                                    foregroundColor: isSelected
+                                        ? Colors.white
+                                        : Colors.black87,
                                     padding: const EdgeInsets.symmetric(
                                       horizontal: 20,
                                       vertical: 12,
@@ -155,23 +156,21 @@ class BookingPage extends StatelessWidget {
                                         topRight: Radius.circular(10),
                                       ),
                                       side: BorderSide(
-                                        color:
-                                            isSelected
-                                                ? primaryColor
-                                                : Colors.grey.shade300,
+                                        color: isSelected
+                                            ? primaryColor
+                                            : Colors.grey.shade300,
                                       ),
                                     ),
                                   ),
                                   child: Text(
-                                    controller
-                                            .selectedPackages[index]['title'] ??
+                                    controller.selectedPackages[index]
+                                    ['title'] ??
                                         'Package ${index + 1}',
                                     style: TextStyle(
                                       fontSize: 14,
-                                      fontWeight:
-                                          isSelected
-                                              ? FontWeight.w600
-                                              : FontWeight.w500,
+                                      fontWeight: isSelected
+                                          ? FontWeight.w600
+                                          : FontWeight.w500,
                                     ),
                                   ),
                                 );
@@ -206,15 +205,12 @@ class BookingPage extends StatelessWidget {
                   child: SizedBox(
                     width: double.infinity,
                     child: ElevatedButton(
-                      onPressed: () {
-                        final controller = Get.find<BookingController>();
-
+                      onPressed: termsAccepted
+                          ? () {
                         if (controller.canSubmit()) {
-                          final mainState =
-                              context
-                                  .findAncestorStateOfType<
-                                    NavigationFlowState
-                                  >();
+                          final mainState = context
+                              .findAncestorStateOfType<
+                              NavigationFlowState>();
 
                           mainState?.pushToCurrentTab(
                             BookingSummaryPage(),
@@ -223,15 +219,18 @@ class BookingPage extends StatelessWidget {
                         } else {
                           Get.snackbar(
                             'Incomplete Details',
-                            'Please fill all required fields and accept terms and conditions before continuing.',
+                            'Please fill all required fields before continuing.',
                             snackPosition: SnackPosition.BOTTOM,
                             backgroundColor: Colors.redAccent,
                             colorText: Colors.white,
                           );
                         }
-                      },
+                      }
+                          : null, // disables button when false
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: Color(0xFF4A6CF7),
+                        backgroundColor: termsAccepted
+                            ? const Color(0xFF4A6CF7)
+                            : Colors.grey.shade400, // greyed out
                         padding: const EdgeInsets.symmetric(vertical: 16),
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(12),

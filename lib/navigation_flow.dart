@@ -12,6 +12,8 @@ import 'services/custom_exit_dailogue.dart';
 
 class NavigationFlow extends StatefulWidget {
   const NavigationFlow({super.key, this.initialIndex});
+  static final GlobalKey<NavigationFlowState> navKey =
+  GlobalKey<NavigationFlowState>();
 
   final int? initialIndex;
 
