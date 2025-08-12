@@ -209,6 +209,7 @@ class EnterLocationManuallyScreen extends StatelessWidget {
                                 Get.to(() => AddressPage(
                                   mode: AddressPageMode.edit,
                                   existingAddress: AddressModel(
+                                    title: saved.title,
                                     line1: saved.line1,
                                     line2: saved.line2,
                                     city: saved.city,
@@ -247,7 +248,7 @@ class EnterLocationManuallyScreen extends StatelessWidget {
                                 if (updated is AddressModel) {
                                   controller.addSavedAddress(SavedAddress(
                                     id: DateTime.now().millisecondsSinceEpoch.toString(),
-                                    title: updated.isPrimary ? "Primary" : "Custom",
+                                    title: updated.title,
                                     address:
                                     '${updated.line1}, ${updated.line2}, ${updated.city}, ${updated.state}, ${updated.pincode}',
                                     line1: updated.line1,
