@@ -20,6 +20,7 @@ import 'package:streammly/views/screens/profile/offers_page.dart';
 import 'package:streammly/views/screens/profile/profile_screen.dart';
 import 'package:streammly/views/screens/profile/rate_your_experience.dart';
 import 'package:streammly/views/screens/profile/refer_and_earn.dart';
+import 'package:streammly/views/screens/profile/report_us.dart';
 import 'package:streammly/views/screens/profile/settings.dart';
 import 'package:streammly/views/screens/profile/support_screen.dart';
 import 'package:streammly/views/screens/wishlist/wishlistpage.dart';
@@ -388,7 +389,9 @@ class _ProfilePageState extends State<ProfilePage> {
           ProfileItemWidget(
             icon: SvgPicture.asset(Assets.svgReport, height: 26, width: 26),
             title: "Report an Issue",
-            onTap: () {},
+            onTap: () {
+              Navigator.push(context, MaterialPageRoute(builder: (_) => ReportIssuePage(bookings: [],)));
+            },
           ),
           ProfileItemWidget(
             icon: SvgPicture.asset(Assets.svgWorks, height: 26, width: 26),
