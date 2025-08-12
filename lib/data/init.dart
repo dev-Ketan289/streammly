@@ -12,7 +12,7 @@ import 'package:streammly/data/repository/business_settings_repo.dart';
 import 'package:streammly/data/repository/category_repo.dart';
 import 'package:streammly/data/repository/company_business_settings_repo.dart';
 import 'package:streammly/data/repository/company_repo.dart';
-import 'package:streammly/data/repository/company_specialities_repo.dart.dart';
+import 'package:streammly/data/repository/company_specialities_repo.dart';
 import 'package:streammly/data/repository/header_repo.dart';
 import 'package:streammly/data/repository/promo_slider_repo.dart';
 import 'package:streammly/data/repository/quote_repo.dart';

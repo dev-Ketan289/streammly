@@ -14,6 +14,7 @@ import 'package:streammly/views/screens/profile/faq_page.dart';
 import 'package:streammly/views/screens/profile/invoice_screen.dart';
 import 'package:streammly/views/screens/profile/language_preferences.dart';
 import 'package:streammly/views/screens/profile/linked_pages.dart';
+import 'package:streammly/views/screens/profile/my_quotation.dart';
 import 'package:streammly/views/screens/profile/my_wallet.dart';
 import 'package:streammly/views/screens/profile/offers_page.dart';
 import 'package:streammly/views/screens/profile/profile_screen.dart';
@@ -65,7 +66,7 @@ class _ProfilePageState extends State<ProfilePage> {
         leading: IconButton(
           icon: const Icon(Icons.arrow_back_ios_new, color: Colors.black),
           onPressed: () {
-            Get.back();
+            Navigator.pop(context);
           },
         ),
         title: const Text(
@@ -220,6 +221,9 @@ class _ProfilePageState extends State<ProfilePage> {
             title: "My Quotation",
             onTap: () {
               if (authController.isLoggedIn()) {
+                Future.delayed(const Duration(milliseconds: 300), () {
+                  Get.to(() => MyQuotationScreen());
+                });
               } else {
                 CommonPopupDialog.show(
                   context,

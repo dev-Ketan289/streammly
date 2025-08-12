@@ -129,6 +129,7 @@ class _VendorDetailScreenState extends State<VendorDetailScreen> {
                                     studio: widget.studio,
                                     subCategoryId: sub.id,
                                   ),
+
                                   hideBottomBar: false,
                                 );
                               },
