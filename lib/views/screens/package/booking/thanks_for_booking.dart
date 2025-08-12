@@ -209,7 +209,7 @@ class ThanksForBookingPage extends StatelessWidget {
                 fontWeight: isBold ? FontWeight.bold : FontWeight.normal,
               ),
               overflow: TextOverflow.ellipsis,
-              maxLines: 1,
+              maxLines: 3,
             ),
           ),
           Text(
