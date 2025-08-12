@@ -1338,4 +1338,10 @@ class BookingController extends GetxController {
       update();
     }
   }
+  void clearBookings() {
+    upcomingBookings.clear();
+    isLoading = false;
+    update();
+  }
+
 }

@@ -14,8 +14,10 @@ import 'package:streammly/models/response/response_model.dart';
 import 'package:uuid/uuid.dart';
 
 import '../models/profile/user_profile.dart';
+import '../services/custom_error_pop_widget.dart';
 import '../views/screens/auth_screens/create_user.dart';
 import '../views/screens/auth_screens/welcome.dart';
+import 'booking_form_controller.dart';
 
 class AuthController extends GetxController implements GetxService {
   final AuthRepo authRepo;
@@ -293,4 +295,48 @@ class AuthController extends GetxController implements GetxService {
   bool isGoogleLogin() {
     return loginMethod == 'google';
   }
+
+  Future<void> logout() async {
+    try {
+      await FirebaseAuth.instance.signOut();
+      await GoogleSignIn().signOut();
+      Get.find<BookingController>().clearBookings();
+
+
+      authRepo.clearSharedData();
+      userProfile = null;
+      loginMethod = null;
+      phoneController.clear();
+      emailController.clear();
+
+      update();
+    } catch (e) {
+      log("Logout error: $e");
+    }
+  }
+
+
+  void requireLogin(
+      BuildContext context, {
+        required String message,
+        required VoidCallback onSuccess,
+      }) {
+    if (isLoggedIn()) {
+      onSuccess();
+    } else {
+      CommonPopupDialog.show(
+        context,
+        imagePath: 'assets/images/access_denied.png', // your image asset
+        title: "Login Required",
+        message: message,
+        primaryBtnText: "Login",
+        onPrimaryPressed: () => Get.toNamed('/login'),
+        secondaryBtnText: "Cancel",
+        onSecondaryPressed: () {},
+      );
+    }
+  }
+
 }
+
+
