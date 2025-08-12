@@ -17,6 +17,7 @@
     <uses-permission android:name="android.permission.CAMERA" />
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" /> <!-- For Android 13+ -->
 
 
 
@@ -29,6 +30,20 @@
     >
         <meta-data android:name="com.google.android.geo.API_KEY" android:value="AIzaSyDC392D0em2z_kvN5qjga51hhtIrFqzp8Q"/>
         <uses-library android:name="org.apache.http.legacy" android:required="false"/>
+
+        <!-- Firebase Messaging Service for push notifications -->
+        <service
+            android:name="com.google.firebase.messaging.FirebaseMessagingService"
+            android:exported="false">
+            <intent-filter>
+                <action android:name="com.google.firebase.MESSAGING_EVENT" />
+            </intent-filter>
+        </service>
+
+        <!-- Default notification icon for FCM -->
+        <meta-data
+            android:name="com.google.firebase.messaging.default_notification_icon"
+            android:resource="@drawable/ic_notification" /> <!-- Create ic_notification.png in res/drawable -->
 
 
         <activity

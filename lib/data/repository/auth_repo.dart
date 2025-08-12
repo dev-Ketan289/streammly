@@ -5,6 +5,7 @@ import 'package:get/get.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:sms_autofill/sms_autofill.dart';
 import 'package:streammly/data/api/api_client.dart';
+import 'package:streammly/main.dart';
 import 'package:streammly/services/constants.dart';
 
 class AuthRepo {
@@ -28,7 +29,7 @@ class AuthRepo {
     return await apiClient.postData(AppConstants.verifyOtp, {
       "phone": phone,
       "otp": otp,
-      "device_id": deviceId,
+      "device_id": await messaging.getToken(),
     });
   }
 
@@ -39,7 +40,7 @@ class AuthRepo {
   }) async {
     return await apiClient.postData(AppConstants.signInWithGoogle, {
       "token": token,
-      "device_id": deviceId,
+      "device_id": await messaging.getToken(),
       "firebase_uid": firebaseUid,
     });
   }
