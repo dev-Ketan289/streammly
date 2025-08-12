@@ -31,9 +31,13 @@ class BookingController extends GetxController {
   // bool _bookingsLoading = false;
   // bool _submitLoading = false;
 
-  // Getters for loading states
-  // bool get isPersonalInfoLoading => _personalInfoLoading;
-  // bool get isOtpLoading => _otpLoading;
+  // OTP loaders
+  bool _isOtpSending = false;
+  bool _isOtpVerifying = false;
+
+  bool get isOtpSending => _isOtpSending;
+  bool get isOtpVerifying => _isOtpVerifying;
+
   bool get isSlotsLoading => _slotsLoading;
   // bool get isBookingsLoading => _bookingsLoading;
   // bool get isSubmitLoading => _submitLoading;
@@ -231,10 +235,9 @@ class BookingController extends GetxController {
     if (value.isNotEmpty && value.length == 1) {
       otpDigits[index] = value;
 
-      // ✅ Use dedicated focus nodes instead of generic nextFocus
       if (index < 5) {
         WidgetsBinding.instance.addPostFrameCallback((_) {
-          otpFocusNodes[index + 1].requestFocus(); // ✅ Direct focus node access
+          otpFocusNodes[index + 1].requestFocus();
         });
       } else {
         // Last field, unfocus keyboard
@@ -247,15 +250,15 @@ class BookingController extends GetxController {
     } else if (value.isEmpty) {
       otpDigits[index] = '';
 
-      // ✅ Move focus to previous field using focus nodes
+
       if (index > 0) {
         WidgetsBinding.instance.addPostFrameCallback((_) {
-          otpFocusNodes[index - 1].requestFocus(); // ✅ Direct focus node access
+          otpFocusNodes[index - 1].requestFocus();
         });
       }
     }
 
-    // ✅ Only update verify button, not the entire OTP section
+
     update(['verify_button']);
   }
 
@@ -264,7 +267,7 @@ class BookingController extends GetxController {
     for (int i = 0; i < otpDigits.length; i++) {
       if (otpDigits[i].isEmpty) {
         WidgetsBinding.instance.addPostFrameCallback((_) {
-          otpFocusNodes[i].requestFocus(); // ✅ Use focus nodes
+          otpFocusNodes[i].requestFocus();
           // Position cursor at the end
           otpControllers[i].selection = TextSelection.fromPosition(
             TextPosition(offset: otpControllers[i].text.length),
@@ -276,7 +279,7 @@ class BookingController extends GetxController {
 
     // If all fields are filled, focus on the tapped field
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      otpFocusNodes[index].requestFocus(); // ✅ Use focus nodes
+      otpFocusNodes[index].requestFocus();
       otpControllers[index].selection = TextSelection.fromPosition(
         TextPosition(offset: otpControllers[index].text.length),
       );
@@ -309,6 +312,10 @@ class BookingController extends GetxController {
     update();
   }
 
+
+  /// ==========================
+  /// SEND OTP FOR ALTERNATE NUMBER
+  /// ==========================
   void sendOTPForAlternateMobile() async {
     if (alternateMobiles.isEmpty || alternateMobiles[0].isEmpty) {
       Get.snackbar('Error', 'Please enter alternate mobile number');
@@ -321,26 +328,26 @@ class BookingController extends GetxController {
       return;
     }
 
-    try {
-      isLoading = true;
-      update();
+    _isOtpSending = true;
+    update(['verify_button']); // ✅ only refresh the "Send OTP" button UI
 
+    try {
       // Use AuthController's OTP sending mechanism
       final authController = Get.find<AuthController>();
 
-      // Temporarily store the alternate number in auth controller
+      // Temporarily store & set alternate number
       final originalPhone = authController.phoneController.text;
       authController.phoneController.text = mobileNumber;
 
       final response = await authController.sendOtp();
 
-      // Restore original phone number
+      // Restore original number
       authController.phoneController.text = originalPhone;
 
       if (response.isSuccess) {
         isOTPSent = true;
         startOTPTimer();
-        update();
+        update(['otp_section']); // update OTP section visibility
         Get.snackbar(
           'OTP Sent',
           'OTP has been sent to $mobileNumber',
@@ -363,11 +370,14 @@ class BookingController extends GetxController {
         colorText: Colors.white,
       );
     } finally {
-      isLoading = false;
-      update();
+      _isOtpSending = false;
+      update(['verify_button']);
     }
   }
 
+  /// ==========================
+  /// VERIFY ALTERNATE MOBILE OTP
+  /// ==========================
   void verifyAlternateMobileOTP() async {
     final otp = otpDigits.join('');
     if (otp.isEmpty || otp.length != 6) {
@@ -375,10 +385,10 @@ class BookingController extends GetxController {
       return;
     }
 
-    try {
-      isLoading = true;
-      update(['otp_section']);
+    _isOtpVerifying = true;
+    update(['otp_section']); // ✅ only update OTP section buttons
 
+    try {
       final mobileNumber = alternateMobiles[0];
 
       final otpController = Get.put(
@@ -409,7 +419,7 @@ class BookingController extends GetxController {
           otpDigits[i] = '';
         }
 
-        // NEW: Update profile with verified alternate number
+        // Update profile with verified alternate number
         await updateAlternateNumberInProfile();
       } else {
         // Clear OTP fields on error
@@ -437,10 +447,11 @@ class BookingController extends GetxController {
         colorText: Colors.white,
       );
     } finally {
-      isLoading = false;
-      update(['otp_section']);
+      _isOtpVerifying = false;
+      update(['otp_section']); // stop Verify button loader
     }
   }
+
 
   Future<void> updateAlternateNumberInProfile() async {
     if (!isAlternateMobileVerified ||
@@ -541,7 +552,6 @@ class BookingController extends GetxController {
       alternateMobiles.removeRange(1, alternateMobiles.length);
     }
 
-    // ✅ Sync controller with the data (both ways)
     if (!_isDisposed) {
       if (alternateMobiles.isNotEmpty) {
         alternateMobileController.text = alternateMobiles[0];

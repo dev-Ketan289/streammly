@@ -315,7 +315,8 @@ class PersonalInfoSection extends StatelessWidget {
                     border: InputBorder.none,
                     counterText: '',
                   ),
-                  onChanged: (value) => controller.onOTPDigitChanged(index, value),
+                  onChanged: (value) =>
+                      controller.onOTPDigitChanged(index, value),
                   onTap: () => controller.onOTPFieldTapped(index),
                 ),
               ),
@@ -329,18 +330,23 @@ class PersonalInfoSection extends StatelessWidget {
             if (controller.otpTimer > 0)
               Row(
                 children: [
-                  const Icon(Icons.access_time, size: 16, color: Color(0xFF6B7280)),
+                  const Icon(Icons.access_time,
+                      size: 16, color: Color(0xFF6B7280)),
                   const SizedBox(width: 4),
                   Text(
                     'Resend code in 00:${controller.otpTimer.toString().padLeft(2, '0')}',
-                    style: const TextStyle(color: Color(0xFF6B7280), fontSize: 13),
+                    style:
+                    const TextStyle(color: Color(0xFF6B7280), fontSize: 13),
                   ),
                 ],
               )
             else
               TextButton(
-                onPressed: () => controller.resendOTP(),
-                style: TextButton.styleFrom(padding: EdgeInsets.zero, minimumSize: Size.zero),
+                onPressed: controller.isOtpVerifying
+                    ? null
+                    : () => controller.resendOTP(),
+                style: TextButton.styleFrom(
+                    padding: EdgeInsets.zero, minimumSize: Size.zero),
                 child: const Text(
                   'Resend OTP',
                   style: TextStyle(
@@ -351,18 +357,30 @@ class PersonalInfoSection extends StatelessWidget {
                 ),
               ),
             ElevatedButton(
-              onPressed: controller.isOTPComplete
+              onPressed: (controller.isOTPComplete && !controller.isOtpVerifying)
                   ? () => controller.verifyAlternateMobileOTP()
                   : null,
               style: ElevatedButton.styleFrom(
-                backgroundColor: controller.isOTPComplete
+                backgroundColor: (controller.isOTPComplete &&
+                    !controller.isOtpVerifying)
                     ? const Color(0xFF4A6CF7)
                     : const Color(0xFFD1D5DB),
                 foregroundColor: Colors.white,
-                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                padding:
+                const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
+                shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(8)),
               ),
-              child: const Text('Verify', style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600)),
+              child: controller.isOtpVerifying
+                  ? const SizedBox(
+                width: 16,
+                height: 16,
+                child: CircularProgressIndicator(
+                    strokeWidth: 2, color: Colors.white),
+              )
+                  : const Text('Verify',
+                  style: TextStyle(
+                      fontSize: 14, fontWeight: FontWeight.w600)),
             ),
           ],
         ),
