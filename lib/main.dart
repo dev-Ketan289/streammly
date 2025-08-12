@@ -49,7 +49,7 @@ void main() async {
   NotificationSettings settings = await messaging.requestPermission(alert: true, badge: true, sound: true);
   log('User granted permission: ${settings.authorizationStatus}');
 
-  // Configure foreground notifications
+  // Configure foreground notifications          
   FirebaseMessaging.onMessage.listen((RemoteMessage message) {
     log('Got a message in the foreground: ${message.messageId}');
     if (message.notification != null) {
