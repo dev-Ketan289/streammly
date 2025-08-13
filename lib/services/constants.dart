@@ -26,8 +26,8 @@ class AppConstants {
   set setBaseUrl(String url) => baseUrl = url;
 
   //TODO: Change Base Url
-  static String baseUrl = 'https://admin.streammly.com/';
-  // static String baseUrl = 'http://192.168.1.113:8000/';
+  // static String baseUrl = 'https://admin.streammly.com/';
+  static String baseUrl = 'http://192.168.1.113:8000/';
 
   static String appName = 'App Name';
 
@@ -89,6 +89,9 @@ class AppConstants {
 
   //Booking
   static const String storeBooking = 'api/v1/workingtime/get-avilable-slots';
+
+  // In constants.dart
+  static const String storeLeadsUri = 'api/v1/leads/store-leads';
 
   //
   static const double horizontalPadding = 16;

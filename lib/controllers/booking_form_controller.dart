@@ -153,9 +153,9 @@ class BookingController extends GetxController {
   void autofillFromUserProfile() {
     final user = authController.userProfile;
     if (user != null) {
-      nameController.text   = user.name ?? '';
+      nameController.text = user.name ?? '';
       mobileController.text = user.phone ?? '';
-      emailController.text  = user.email ?? '';
+      emailController.text = user.email ?? '';
       originalSecondaryMobile = user.secondaryMobile ?? '';
 
       // ✅ Keep personalInfo in sync when autofilling
@@ -250,14 +250,12 @@ class BookingController extends GetxController {
     } else if (value.isEmpty) {
       otpDigits[index] = '';
 
-
       if (index > 0) {
         WidgetsBinding.instance.addPostFrameCallback((_) {
           otpFocusNodes[index - 1].requestFocus();
         });
       }
     }
-
 
     update(['verify_button']);
   }
@@ -311,7 +309,6 @@ class BookingController extends GetxController {
     startOTPTimer();
     update();
   }
-
 
   /// ==========================
   /// SEND OTP FOR ALTERNATE NUMBER
@@ -451,7 +448,6 @@ class BookingController extends GetxController {
       update(['otp_section']); // stop Verify button loader
     }
   }
-
 
   Future<void> updateAlternateNumberInProfile() async {
     if (!isAlternateMobileVerified ||
@@ -637,8 +633,6 @@ class BookingController extends GetxController {
     packageFormsData[index] = data;
     update();
   }
-
-
 
   // Remove or update these methods since we only allow one alternate field each
   void addAlternateMobile() {
@@ -1026,7 +1020,6 @@ class BookingController extends GetxController {
     } catch (e) {
       return 0;
     }
-
   }
 
   // Added method that was missing in your original postBooking payload preparation
@@ -1114,8 +1107,6 @@ class BookingController extends GetxController {
 
       final List<Map<String, dynamic>> bookingsPayload = [];
 
-
-
       for (int i = 0; i < selectedPackages.length; i++) {
         final package = selectedPackages[i];
         final form = packageFormsData[i] ?? {};
@@ -1129,7 +1120,6 @@ class BookingController extends GetxController {
           Get.snackbar('Error', 'Image must be below 500KB');
           return;
         }
-
 
         final totalHours =
             (() {
@@ -1166,7 +1156,10 @@ class BookingController extends GetxController {
           "total_hours": totalHours,
           "special_instructions": form['specialInstructions'] ?? '',
           // For now, just include metadata for attachment; actual upload might be added later when backend supports
-          "attachment_image": image != null ? {"name": image['name'], "path": image['path']} : null,
+          "attachment_image":
+              image != null
+                  ? {"name": image['name'], "path": image['path']}
+                  : null,
         });
       }
 
@@ -1378,10 +1371,68 @@ class BookingController extends GetxController {
       update();
     }
   }
+
   void clearBookings() {
     upcomingBookings.clear();
     isLoading = false;
     update();
   }
 
+  // Lead
+  bool _isStoringLead = false;
+  bool get isStoringLead => _isStoringLead;
+  bool leadStoredForThisSession = false;
+
+  // In BookingController - simplified version
+  Future<void> storeLead({
+    required int companyId,
+    required int packageId,
+  }) async {
+    if (_isStoringLead) return;
+
+    _isStoringLead = true;
+
+    try {
+      log(
+        'Storing lead: Company=$companyId, Package=$packageId',
+        name: 'storeLead',
+      );
+
+      final response = await bookingrepo.storeLead(
+        companyId: companyId,
+        packageId: packageId,
+      );
+
+      if (response.statusCode == 200 && response.body['success'] == true) {
+        log('Lead stored successfully', name: 'storeLead');
+      } else {
+        log('Lead storage failed: ${response.body}', name: 'storeLead');
+      }
+    } catch (e) {
+      log('Error storing lead: $e', name: 'storeLead');
+    } finally {
+      _isStoringLead = false;
+    }
+  }
+
+  // Method to call when user leaves booking page
+  void storeLeadOnExit() {
+    if (leadStoredForThisSession) {
+      log('Lead already stored for this session', name: 'storeLeadOnExit');
+      return;
+    }
+
+    log('🔄 storeLeadOnExit() called', name: 'BookingController');
+
+    if (selectedPackages.isNotEmpty) {
+      final package = selectedPackages.first;
+      final companyId = package['company_id'] ?? 0;
+      final packageId = package['id'] ?? 0;
+
+      if (companyId > 0 && packageId > 0) {
+        storeLead(companyId: companyId, packageId: packageId);
+        leadStoredForThisSession = true; // Mark as stored
+      }
+    }
+  }
 }

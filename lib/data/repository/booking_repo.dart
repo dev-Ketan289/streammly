@@ -58,6 +58,25 @@ class BookingRepo {
     }
   }
 
+  // Lead Response
+  // In booking_repo.dart
+  Future<Response> storeLead({
+    required int companyId,
+    required int packageId,
+  }) async {
+    final String token = Get.find<AuthController>().getUserToken();
+
+    return await apiClient.postData(
+      AppConstants.storeLeadsUri,
+      {'company_id': companyId, 'package_id': packageId},
+      headers: {
+        'Authorization': 'Bearer $token',
+        'Accept': 'application/json',
+        'Content-Type': 'application/json',
+      },
+    );
+  }
+
   Future<Map<String, dynamic>?> getUserBookings() async {
     try {
       final token = Get.find<AuthController>().getUserToken();
