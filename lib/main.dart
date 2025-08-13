@@ -1,4 +1,7 @@
+import 'dart:developer';
+
 import 'package:firebase_core/firebase_core.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
@@ -21,84 +24,61 @@ import 'package:streammly/views/screens/common/location_screen.dart';
 import 'package:streammly/views/screens/common/webview_screen.dart';
 import 'package:streammly/views/screens/home/widgets/category/category.dart';
 import 'package:streammly/views/screens/package/get_quote_page.dart';
+import 'package:streammly/controllers/business_setting_controller.dart';
+import 'package:streammly/controllers/category_controller.dart';
+import 'package:streammly/controllers/company_controller.dart';
+import 'package:streammly/controllers/location_controller.dart';
+import 'package:streammly/views/screens/splash_screen/splash_screen.dart';
 
-import 'controllers/business_setting_controller.dart';
-import 'controllers/category_controller.dart';
-import 'controllers/company_controller.dart';
-import 'controllers/location_controller.dart';
-import 'views/screens/splash_screen/splash_screen.dart';
+// Background message handler
+Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
+  log('Handling background message: ${message.messageId}');
+}
+
+FirebaseMessaging messaging = FirebaseMessaging.instance;
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  SystemChrome.setEnabledSystemUIMode(
-    SystemUiMode.manual,
+  SystemChrome.setEnabledSystemUIMode(SystemUiMode.manual, overlays: [SystemUiOverlay.top]);
 
-    overlays: [SystemUiOverlay.top],
-  );
   // Initialize Firebase
   await Firebase.initializeApp();
+  log('firebase initializing');
+
+  // Request notification permission
+  NotificationSettings settings = await messaging.requestPermission(alert: true, badge: true, sound: true);
+  log('User granted permission: ${settings.authorizationStatus}');
+
+  // Configure foreground notifications          
+  FirebaseMessaging.onMessage.listen((RemoteMessage message) {
+    log('Got a message in the foreground: ${message.messageId}');
+    if (message.notification != null) {
+      // Handle foreground notification (e.g., show a dialog or navigate)
+      Get.snackbar(message.notification!.title ?? 'Notification', message.notification!.body ?? 'You have a new notification', snackPosition: SnackPosition.TOP);
+    }
+  });
+
+  // Configure background notifications
+  FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
+
+  // Get FCM token for push notifications
+  String? token = await messaging.getToken();
+  log('FCM Token: $token');
+  // Optionally send this token to your server for targeted notifications
 
   // Initialize core data/services
   await Init().initialize();
 
   // Register global controllers (singleton)
-  Get.put(
-    BusinessSettingController(
-      businessSettingRepo: BusinessSettingRepo(
-        apiClient: ApiClient(
-          appBaseUrl: AppConstants.baseUrl,
-          sharedPreferences: Get.find(),
-        ),
-      ),
-    ),
-  );
-  Get.put(
-    HomeController(
-      homeRepo: HomeRepo(
-        apiClient: ApiClient(
-          appBaseUrl: AppConstants.baseUrl,
-          sharedPreferences: Get.find(),
-        ),
-      ),
-    ),
-    permanent: true,
-  );
-  Get.put(
-    PromoSliderController(
-      promoSliderRepo: PromoSliderRepo(
-        apiClient: ApiClient(
-          appBaseUrl: AppConstants.baseUrl,
-          sharedPreferences: Get.find(),
-        ),
-      ),
-    ),
-  );
+  Get.put(BusinessSettingController(businessSettingRepo: BusinessSettingRepo(apiClient: ApiClient(appBaseUrl: AppConstants.baseUrl, sharedPreferences: Get.find()))));
+  Get.put(HomeController(homeRepo: HomeRepo(apiClient: ApiClient(appBaseUrl: AppConstants.baseUrl, sharedPreferences: Get.find()))), permanent: true);
+  Get.put(PromoSliderController(promoSliderRepo: PromoSliderRepo(apiClient: ApiClient(appBaseUrl: AppConstants.baseUrl, sharedPreferences: Get.find()))));
   Get.put(LocationController(), permanent: true);
-  Get.put(
-    CategoryController(
-      categoryRepo: CategoryRepo(
-        apiClient: ApiClient(
-          appBaseUrl: AppConstants.baseUrl,
-          sharedPreferences: Get.find(),
-        ),
-      ),
-    ),
-    permanent: true,
-  );
-  Get.put(
-    CompanyController(
-      companyRepo: CompanyRepo(
-        apiClient: ApiClient(
-          appBaseUrl: AppConstants.baseUrl,
-          sharedPreferences: Get.find(),
-        ),
-      ),
-    ),
-    permanent: true,
-  );
+  Get.put(CategoryController(categoryRepo: CategoryRepo(apiClient: ApiClient(appBaseUrl: AppConstants.baseUrl, sharedPreferences: Get.find()))), permanent: true);
+  Get.put(CompanyController(companyRepo: CompanyRepo(apiClient: ApiClient(appBaseUrl: AppConstants.baseUrl, sharedPreferences: Get.find()))), permanent: true);
   Get.put(PackagesController());
 
-  // Ask permissions (optional before launch)
+  // Ask permissions (including notifications)
   await requestPermissions();
 
   runApp(StreammlyApp());
@@ -111,6 +91,9 @@ Future<void> requestPermissions() async {
 
   // Request Location permission
   await Permission.location.request();
+
+  // Request Notification permission (already handled by Firebase, but kept for completeness)
+  await Permission.notification.request();
 }
 
 class StreammlyApp extends StatelessWidget {
@@ -131,8 +114,6 @@ class StreammlyApp extends StatelessWidget {
         GetPage(name: '/home', page: () => NavigationFlow()),
         GetPage(name: '/login', page: () => LoginScreen()),
         GetPage(name: '/getQuote', page: () => GetQuoteScreen()),
-
-        // Promo slider redirection routes
         GetPage(name: '/webview', page: () => const WebViewScreen()),
         GetPage(name: '/category', page: () => CategoryListScreen()),
       ],

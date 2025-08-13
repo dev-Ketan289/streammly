@@ -15,37 +15,36 @@ class MyQuotationScreen extends StatelessWidget {
         {
           'label': 'Pending Vendor Response',
           'desc': 'Vendor and is currently awaiting their response.',
-          'isActive': true
+          'isActive': true,
         },
         {
           'label': 'Vendor Responded',
           'desc': 'The vendor has responded with a quotation.',
-          'isActive': true
+          'isActive': true,
         },
         {
           'label': 'Quote Under Review',
           'desc': 'Our team is reviewing the quotation received.',
-          'isActive': true
+          'isActive': true,
         },
         {
           'label': 'Quote Finalized',
-          'desc':
-          'The quotation has been finalized and sent for confirmation.',
-          'isActive': true
+          'desc': 'The quotation has been finalized and sent for confirmation.',
+          'isActive': true,
         },
-      ]
+      ],
     };
 
     final List<Map<String, dynamic>> previousQuotations = [
       {
         'title': 'Toddler Shoot',
         'date': 'Sun 20 July 2025, 12:00 PM',
-        'removable': true
+        'removable': true,
       },
       {
         'title': 'Infant Shoot',
         'date': 'Sun 20 July 2025, 12:00 PM',
-        'removable': false
+        'removable': false,
       },
     ];
 
@@ -80,7 +79,6 @@ class MyQuotationScreen extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-
             Container(
               padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
@@ -90,9 +88,12 @@ class MyQuotationScreen extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text("Recent",
-                      style: theme.textTheme.bodyMedium
-                          ?.copyWith(fontWeight: FontWeight.w600)),
+                  Text(
+                    "Recent",
+                    style: theme.textTheme.bodyMedium?.copyWith(
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
                   const SizedBox(height: 8),
                   Text(
                     recentQuotation['title'] as String,
@@ -112,10 +113,10 @@ class MyQuotationScreen extends StatelessWidget {
                   Column(
                     children: List.generate(
                       (recentQuotation['steps'] as List).length,
-                          (index) {
+                      (index) {
                         final step =
-                        (recentQuotation['steps'] as List)[index]
-                        as Map<String, dynamic>;
+                            (recentQuotation['steps'] as List)[index]
+                                as Map<String, dynamic>;
                         return _buildTimelineStep(
                           context,
                           step['label'] as String,
@@ -149,13 +150,15 @@ class MyQuotationScreen extends StatelessWidget {
                     ),
                   ),
 
-                  const SizedBox(height: 24,),
+                  const SizedBox(height: 24),
                   Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
                         "Previous",
-                        style: theme.textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.w600),
+                        style: theme.textTheme.bodyMedium?.copyWith(
+                          fontWeight: FontWeight.w600,
+                        ),
                       ),
                       const SizedBox(height: 8),
                       ...previousQuotations.map((quote) {
@@ -165,7 +168,8 @@ class MyQuotationScreen extends StatelessWidget {
                             key: ValueKey(quote['title']),
                             endActionPane: ActionPane(
                               motion: const ScrollMotion(),
-                              extentRatio: 0.25, // controls width of delete button
+                              extentRatio:
+                                  0.25, // controls width of delete button
                               children: [
                                 const SizedBox(width: 4),
                                 SlidableAction(
@@ -180,7 +184,10 @@ class MyQuotationScreen extends StatelessWidget {
                               ],
                             ),
                             child: Container(
-                              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 16,
+                                vertical: 12,
+                              ),
                               decoration: BoxDecoration(
                                 color: Colors.white,
                                 borderRadius: BorderRadius.circular(12),
@@ -189,20 +196,22 @@ class MyQuotationScreen extends StatelessWidget {
                                     color: Colors.black.withValues(alpha: 0.05),
                                     blurRadius: 6,
                                     offset: const Offset(0, 2),
-                                  )
+                                  ),
                                 ],
                               ),
                               child: Row(
                                 children: [
                                   Expanded(
                                     child: Column(
-                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
                                       children: [
                                         Text(
                                           quote['title'] as String,
-                                          style: theme.textTheme.bodyMedium?.copyWith(
-                                            fontWeight: FontWeight.w700,
-                                          ),
+                                          style: theme.textTheme.bodyMedium
+                                              ?.copyWith(
+                                                fontWeight: FontWeight.w700,
+                                              ),
                                         ),
                                         const SizedBox(height: 2),
                                         Text(
@@ -216,10 +225,11 @@ class MyQuotationScreen extends StatelessWidget {
                                     onPressed: () {},
                                     child: Text(
                                       "View Details",
-                                      style: theme.textTheme.bodySmall?.copyWith(
-                                        color: theme.primaryColor,
-                                        fontWeight: FontWeight.w600,
-                                      ),
+                                      style: theme.textTheme.bodySmall
+                                          ?.copyWith(
+                                            color: theme.primaryColor,
+                                            fontWeight: FontWeight.w600,
+                                          ),
                                     ),
                                   ),
                                 ],
@@ -229,13 +239,10 @@ class MyQuotationScreen extends StatelessWidget {
                         );
                       }),
                     ],
-                  )
+                  ),
                 ],
-
               ),
-
             ),
-
           ],
         ),
       ),
@@ -243,7 +250,11 @@ class MyQuotationScreen extends StatelessWidget {
   }
 
   Widget _buildTimelineStep(
-      BuildContext context, String title, String desc, bool hasLine) {
+    BuildContext context,
+    String title,
+    String desc,
+    bool hasLine,
+  ) {
     final theme = Theme.of(context);
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -258,12 +269,7 @@ class MyQuotationScreen extends StatelessWidget {
                 shape: BoxShape.circle,
               ),
             ),
-            if (hasLine)
-              Container(
-                width: 2,
-                height: 48,
-                color: Colors.green,
-              ),
+            if (hasLine) Container(width: 2, height: 48, color: Colors.green),
           ],
         ),
         const SizedBox(width: 12),
@@ -288,7 +294,7 @@ class MyQuotationScreen extends StatelessWidget {
               ],
             ),
           ),
-        )
+        ),
       ],
     );
   }

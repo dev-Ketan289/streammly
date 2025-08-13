@@ -78,7 +78,6 @@ dependencies:
   csc_picker_plus: ^0.0.3
   csc_picker: ^0.2.7
   country_state_city_picker: ^1.2.8
-  flutter_slidable: ^4.0.0
 
 
 dev_dependencies:

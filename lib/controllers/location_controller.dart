@@ -20,6 +20,7 @@ class LocationController extends GetxController {
   bool isLocationServiceEnabled = true;
   String selectedAddress = '';
   List<SavedAddress> savedAddresses = [];
+  Map<String, String> _detailedAddress = {};
 
   late GoogleMapsPlaces _places;
   GoogleMapController? _mapController;
@@ -205,11 +206,22 @@ class LocationController extends GetxController {
         final place = placemarks.first;
         selectedAddress =
         '${place.name}, ${place.street}, ${place.locality}, ${place.administrativeArea}, ${place.postalCode}';
+        
+        // Store detailed address components for use in address forms
+        _detailedAddress = {
+          'line1': '${place.name ?? ''} ${place.street ?? ''}'.trim(),
+          'city': place.locality ?? '',
+          'state': place.administrativeArea ?? '',
+          'pincode': place.postalCode ?? '',
+          'country': place.country ?? '',
+        };
       } else {
         selectedAddress = 'Selected Location';
+        _detailedAddress = {};
       }
     } catch (e) {
       selectedAddress = 'Selected Location';
+      _detailedAddress = {};
     }
     update();
   }
@@ -344,6 +356,14 @@ class LocationController extends GetxController {
     return selectedAddress.isNotEmpty
         ? selectedAddress
         : 'Lat: ${lat.toStringAsFixed(6)}, Lng: ${lng.toStringAsFixed(6)}';
+  }
+
+  Map<String, String> get detailedAddress => _detailedAddress;
+
+  void clearSelectedAddress() {
+    selectedAddress = '';
+    _detailedAddress = {};
+    update();
   }
 
   Future<bool> hasSavedLocation() async {
