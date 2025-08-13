@@ -1,9 +1,10 @@
   import 'dart:developer';
 
   import 'package:get/get.dart';
-  import 'package:streammly/data/repository/company_specialities_repo.dart.dart';
   import 'package:streammly/models/company/company_specialities_model.dart';
   import 'package:streammly/models/response/response_model.dart';
+
+import '../data/repository/company_specialities_repo.dart';
 
   class CompanySpecialitiesController extends GetxController {
     final CompanySpecialitiesRepo companySpecialitiesRepo;

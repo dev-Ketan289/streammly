@@ -34,7 +34,11 @@ class CompanyController extends GetxController {
   Position? userPosition;
 
   Future<Position> _getCurrentLocation() async {
-    return await Geolocator.getCurrentPosition(locationSettings: const LocationSettings(accuracy: LocationAccuracy.best));
+    return await Geolocator.getCurrentPosition(
+      locationSettings: const LocationSettings(
+        accuracy: LocationAccuracy.best,
+      ),
+    );
   }
 
   double calculateDistance(double lat1, double lon1, double lat2, double lon2) {
@@ -42,7 +46,7 @@ class CompanyController extends GetxController {
   }
 
   String _estimateTimeFromDistance(double distanceKm) {
-    const speed = 15.0;
+    const speed = 15.0; // km/h average
     final timeInHours = distanceKm / speed;
     final minutes = (timeInHours * 60).round();
 
@@ -58,7 +62,6 @@ class CompanyController extends GetxController {
       isLoading = true;
       update();
 
-      // Get user location
       userPosition = await _getCurrentLocation();
       final lat = userPosition?.latitude;
       final lng = userPosition?.longitude;
@@ -67,20 +70,25 @@ class CompanyController extends GetxController {
         throw "Location not available";
       }
 
-      // Fetch company list from repo with user's coordinates
-      final data = await companyRepo.fetchCompaniesByCategory(categoryId, userLat: lat, userLng: lng);
+      final data = await companyRepo.fetchCompaniesByCategory(
+        categoryId,
+        userLat: lat,
+        userLng: lng,
+      );
 
-      // For each company, calculate distance and estimated time
       for (var company in data) {
         if (company.latitude != null && company.longitude != null) {
-          final distance = calculateDistance(lat, lng, company.latitude!, company.longitude!);
-
+          final distance = calculateDistance(
+            lat,
+            lng,
+            company.latitude!,
+            company.longitude!,
+          );
           company.distanceKm = distance;
           company.estimatedTime = _estimateTimeFromDistance(distance);
         }
       }
 
-      // Assign final list
       companies.assignAll(data);
     } catch (e) {
       companies.clear();
@@ -101,7 +109,11 @@ class CompanyController extends GetxController {
         throw "Location not available";
       }
 
-      final company = await companyRepo.fetchCompanyById(companyId, userLat: lat, userLng: lng);
+      final company = await companyRepo.fetchCompanyById(
+        companyId,
+        userLat: lat,
+        userLng: lng,
+      );
 
       selectedCompany = company;
       update();
@@ -113,8 +125,11 @@ class CompanyController extends GetxController {
   Future<void> fetchCompanySubCategories(int companyId) async {
     try {
       final data = await companyRepo.fetchCompanySubCategories(companyId);
-      subCategories.clear();
-      subCategories.addAll(data.map((e) => CompanySubCategory.fromJson(e['subcategory'])));
+      subCategories
+        ..clear()
+        ..addAll(
+          data.map((e) => CompanySubCategory.fromJson(e['subcategory'])),
+        );
       update();
     } catch (e) {
       Get.snackbar("Error", "Something went wrong: $e");
@@ -123,9 +138,13 @@ class CompanyController extends GetxController {
 
   Future<void> fetchSubVerticals(int companyId, int subCategoryId) async {
     try {
-      final data = await companyRepo.fetchSubVerticals(companyId: companyId, subCategoryId: subCategoryId);
-      subVerticals.clear();
-      subVerticals.addAll(data.map((e) => SubVertical.fromJson(e)));
+      final data = await companyRepo.fetchSubVerticals(
+        companyId: companyId,
+        subCategoryId: subCategoryId,
+      );
+      subVerticals
+        ..clear()
+        ..addAll(data.map((e) => SubVertical.fromJson(e)));
       update();
     } catch (e) {
       subVerticals.clear();
@@ -139,19 +158,26 @@ class CompanyController extends GetxController {
       isSubVerticalLoading = true;
       update();
 
-      final data = await companyRepo.fetchSubVerticals(companyId: companyId, subCategoryId: subCategoryId);
-
-      subVerticalCards.clear();
-
-      subVerticalCards.addAll(
-        data.map<Map<String, String>>((item) {
-          final rawPath = item["image"]?.toString() ?? "";
-          final cleanedPath = rawPath.replaceFirst(RegExp(r'^/+'), '');
-          final imageUrl = cleanedPath.isNotEmpty ? cleanedPath : "";
-
-          return {"id": item["id"].toString(), "image": imageUrl, "label": item["title"] ?? "Untitled"};
-        }),
+      final data = await companyRepo.fetchSubVerticals(
+        companyId: companyId,
+        subCategoryId: subCategoryId,
       );
+
+      subVerticalCards
+        ..clear()
+        ..addAll(
+          data.map<Map<String, String>>((item) {
+            final rawPath = item["image"]?.toString() ?? "";
+            final cleanedPath = rawPath.replaceFirst(RegExp(r'^/+'), '');
+            final imageUrl = cleanedPath.isNotEmpty ? cleanedPath : "";
+
+            return {
+              "id": item["id"].toString(),
+              "image": imageUrl,
+              "label": item["title"] ?? "Untitled"
+            };
+          }),
+        );
     } catch (e) {
       Get.snackbar("Exception", "Something went wrong: $e");
     } finally {
@@ -170,10 +196,14 @@ class CompanyController extends GetxController {
         throw "Location not available";
       }
 
-      final company = await companyRepo.fetchCompanyById(companyId, userLat: lat, userLng: lng);
+      final company = await companyRepo.fetchCompanyById(
+        companyId,
+        userLat: lat,
+        userLng: lng,
+      );
 
-      // Company already has .distance from backend now.
-      if (company != null && !companies.any((c) => c.id == company.id)) {
+      if (company != null &&
+          !companies.any((c) => c.id == company.id)) {
         companies.add(company);
       }
 
@@ -191,15 +221,18 @@ class CompanyController extends GetxController {
       update();
 
       final data = await companyRepo.fetchSpecialized(companyId);
-      specialized.clear();
-      specialized.addAll(data.map((e) => SpecializedItem.fromJson(e)));
+      specialized
+        ..clear()
+        ..addAll(data.map((e) => SpecializedItem.fromJson(e)));
 
       print("🔍 Specialized fetched: ${specialized.map((s) => s.title).toList()}");
-
       update();
     } catch (e) {
       specialized.clear();
-      Get.snackbar("Error", "Could not fetch specialization: ${e.toString()}"); // fix here
+      // Get.snackbar(
+      //   "Error",
+      //   "Could not fetch specialization: ${e.toString()}",
+      // );
       update();
     } finally {
       isSpecializedLoading = false;
@@ -213,11 +246,12 @@ class CompanyController extends GetxController {
       update();
 
       final data = await companyRepo.fetchSpecialities();
-      specialities.clear();
-      specialities.addAll(data);
+      specialities
+        ..clear()
+        ..addAll(data);
     } catch (e) {
       specialities.clear();
-      Get.snackbar("Error", "Could not fetch specialities: ${e.toString()}");
+      // Get.snackbar("Error", "Could not fetch specialities: ${e.toString()}");
     } finally {
       isSpecialityLoading = false;
       update();
@@ -234,9 +268,23 @@ class CompanyController extends GetxController {
     update();
   }
 
+  /// Lifecycle improvement
   @override
   void onInit() {
     super.onInit();
+    // Only DNS/cache-independent minimal setup here
+  }
+
+  @override
+  void onReady() {
+    super.onReady();
+    // Fetch data after the widget is rendered to avoid blocking initial UI
     fetchCompaniesByCategory(selectedCategoryId);
+  }
+
+  @override
+  void onClose() {
+    // Cleanup future streams / controllers here if added later
+    super.onClose();
   }
 }

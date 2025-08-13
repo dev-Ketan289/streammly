@@ -79,54 +79,57 @@ class _HomeHeaderBannerState extends State<HomeHeaderBanner> {
           // Location Row
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 4),
-            child: Obx(
-              () => GestureDetector(
-                onTap: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (_) => EnterLocationManuallyScreen(),
-                    ),
-                  );
-                },
-                child: Row(
-                  children: [
-                    Icon(
-                      Icons.location_on,
-                      color: theme.colorScheme.primary,
-                      size: 20,
-                    ),
-                    const SizedBox(width: 8),
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            "Current Location",
-                            style: GoogleFonts.openSans(
-                              color: theme.colorScheme.primary,
-                              fontWeight: FontWeight.bold,
-                              fontSize: 12,
-                            ),
-                          ),
-                          Text(
-                            locationController.selectedAddress.value.isNotEmpty
-                                ? locationController.selectedAddress.value
-                                : "Fetching...",
-                            style: GoogleFonts.openSans(
-                              color: theme.colorScheme.primary,
-                              fontSize: 10,
-                            ),
-                            overflow: TextOverflow.ellipsis,
-                            maxLines: 1,
-                          ),
-                        ],
+            child: GetBuilder<LocationController>(
+              builder: (controller) {
+                return GestureDetector(
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (_) => EnterLocationManuallyScreen(),
                       ),
-                    ),
-                  ],
-                ),
-              ),
+                    );
+                  },
+                  child: Row(
+                    children: [
+                      Icon(
+                        Icons.location_on,
+                        color: theme.colorScheme.primary,
+                        size: 20,
+                      ),
+                      const SizedBox(width: 8),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              "Current Location",
+                              style: GoogleFonts.openSans(
+                                color: theme.colorScheme.primary,
+                                fontWeight: FontWeight.bold,
+                                fontSize: 12,
+                              ),
+                            ),
+                            Text(
+                              controller.selectedAddress.isNotEmpty
+                                  ? controller.selectedAddress
+                                  : "Fetching...",
+                              style: GoogleFonts.openSans(
+                                color: theme.colorScheme.primary,
+                                fontSize: 10,
+                              ),
+                              overflow: TextOverflow.ellipsis,
+                              maxLines: 1,
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                );
+              },
             ),
+
           ),
 
           // Search Bar Row

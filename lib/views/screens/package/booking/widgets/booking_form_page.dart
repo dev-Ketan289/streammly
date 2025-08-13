@@ -1,10 +1,12 @@
 import 'dart:developer';
+import 'dart:io';
 import 'package:dotted_border/dotted_border.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:get/get.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:streammly/controllers/company_business_settings_controller.dart';
 import 'package:streammly/models/package/slots_model.dart';
 import 'package:streammly/services/input_decoration.dart';
@@ -33,17 +35,175 @@ class PackageFormCard extends StatefulWidget {
 }
 
 class _PackageFormCardState extends State<PackageFormCard> {
+
+  Widget _buildImagePicker(BookingController controller) {
+    final attachment = controller.packageFormsData[widget.index]?['attachmentImage'];
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const SizedBox(height: 16),
+
+        /// Upload Box
+        GestureDetector(
+          onTap: () async {
+            try {
+              final picker = ImagePicker();
+              final XFile? file = await picker.pickImage(source: ImageSource.gallery);
+              if (file == null) return;
+
+              // Check file size
+              final size = await file.length();
+              if (size > 512 * 512) { // 500kb limit
+                Fluttertoast.showToast(msg: 'Image must be less than 500Kb');
+                return;
+              }
+
+              // Verify file exists
+              final pickedFile = File(file.path);
+              if (!await pickedFile.exists()) {
+                Fluttertoast.showToast(msg: 'Selected file not found');
+                return;
+              }
+
+              // Save to controller
+              controller.updateAttachmentImage(widget.index, {
+                'name': file.name,
+                'path': file.path,
+                'size': size,
+                'bytes': await file.readAsBytes(),
+              });
+            } catch (e) {
+              debugPrint("Image pick error: $e");
+              Fluttertoast.showToast(msg: 'Failed to pick image');
+            }
+          },
+          child: Container(
+            width: double.infinity,
+            padding: const EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              color: const Color(0xFFF9FBFF),
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(
+                color: const Color(0xFFE0E0E0),
+                width: 1,
+              ),
+            ),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Icon(
+                  Icons.upload_file,
+                  size: 40,
+                  color: Colors.black.withValues(alpha: 0.6),
+                ),
+                const SizedBox(height: 10),
+                Text.rich(
+                  TextSpan(
+                    children: [
+                      TextSpan(
+                        text: "Click to upload",
+                        style: TextStyle(
+                          color: Colors.blue.shade700,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                      const TextSpan(text: " or Drop file here"),
+                    ],
+                  ),
+                  textAlign: TextAlign.center,
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  "PNG, JPG, JPEG (max. 500kb)",
+                  style: TextStyle(
+                    fontSize: 12,
+                    color: Colors.grey.shade600,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+
+        /// Preview Section
+        if (attachment != null) ...[
+          const SizedBox(height: 16),
+          Text(
+            "Selected Image",
+            style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+          const SizedBox(height: 8),
+
+          Wrap(
+            spacing: 12,
+            runSpacing: 12,
+            children: [
+              Stack(
+                clipBehavior: Clip.none,
+                children: [
+                  ClipRRect(
+                    borderRadius: BorderRadius.circular(8),
+                    child: Image.file(
+                      File(attachment['path']),
+                      width: 80,
+                      height: 80,
+                      fit: BoxFit.cover,
+                      errorBuilder: (context, error, stackTrace) {
+                        debugPrint("Image load error: $error");
+                        return Container(
+                          width: 80,
+                          height: 80,
+                          color: Colors.grey[300],
+                          child: const Icon(Icons.broken_image, color: Colors.grey),
+                        );
+                      },
+                    ),
+                  ),
+                  Positioned(
+                    top: -6,
+                    right: -6,
+                    child: GestureDetector(
+                      onTap: () => controller.updateAttachmentImage(widget.index, null),
+                      child: Container(
+                        padding: const EdgeInsets.all(2),
+                        decoration: const BoxDecoration(
+                          color: Colors.red,
+                          shape: BoxShape.circle,
+                        ),
+                        child: const Icon(
+                          Icons.close,
+                          size: 16,
+                          color: Colors.white,
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ],
+      ],
+    );
+  }
+
   late TextEditingController addressController;
   late TextEditingController startTimeController;
   late TextEditingController endTimeController;
   late TextEditingController dateTimeController;
   late TextEditingController selectedTimingController;
+  late final TextEditingController _specialInstructionsController;
 
   bool isStartTime = true;
   bool showTimePicker = false;
 
   final Map<String, TextEditingController> _extraQuestionControllers = {};
   late CompanyBusinessSettingsController companyBusinessSettings;
+
+
 
   @override
   void initState() {
@@ -53,12 +213,25 @@ class _PackageFormCardState extends State<PackageFormCard> {
     final controller = Get.find<BookingController>();
     final form = controller.packageFormsData[widget.index] ?? {};
 
+    _specialInstructionsController = TextEditingController(
+      text: form['specialInstructions'] ?? '',
+    );
+    _specialInstructionsController.addListener(() {
+      controller.updatePackageForm(
+        widget.index,
+        'specialInstructions',
+        _specialInstructionsController.text,
+      );
+    });
+
     addressController = TextEditingController(text: form['address'] ?? '');
     addressController.addListener(() {
       controller.updatePackageForm(
         widget.index,
         'address',
         addressController.text,
+
+
       );
     });
 
@@ -107,6 +280,7 @@ void _fetchBusinessSettings() async {
     for (final controller in _extraQuestionControllers.values) {
       controller.dispose();
     }
+    _specialInstructionsController.dispose();
     super.dispose();
   }
 
@@ -376,9 +550,9 @@ void _fetchBusinessSettings() async {
               fontWeight: FontWeight.w600,
             ),
           ),
-          const SizedBox(height: 16),
+          const SizedBox(height: 4),
           ..._buildExtraQuestions(controller),
-          const SizedBox(height: 32),
+          const SizedBox(height: 16),
           _buildExpandableSection(
             title: 'Choose Free Item',
             isSelected: form['freeAddOn'] != null,
@@ -737,6 +911,63 @@ void _fetchBusinessSettings() async {
               ],
             ),
           ],
+
+          const SizedBox(height: 16),
+
+          Text(
+            "Special Instructions",
+            style: theme.textTheme.titleMedium?.copyWith(
+              fontWeight: FontWeight.w600,
+              color: Colors.black,
+            ),
+          ),
+          const SizedBox(height: 8),
+          TextField(
+            controller: _specialInstructionsController,
+            minLines: 2,
+            maxLines: 5,
+            textInputAction: TextInputAction.newline,
+            style: const TextStyle(fontSize: 14),
+            decoration: InputDecoration(
+              hintText: "Write here....",
+              hintStyle: TextStyle(
+                color: Colors.grey.shade500,
+                fontSize: 14,
+              ),
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(8),
+                borderSide: BorderSide(
+                  color: Colors.grey.shade300,
+                  width: 1,
+                ),
+              ),
+              enabledBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(8),
+                borderSide: BorderSide(
+                  color: Colors.grey.shade300,
+                  width: 1,
+                ),
+              ),
+              focusedBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(8),
+                borderSide: BorderSide(
+                  color: Colors.grey.shade500,
+                  width: 1.2,
+                ),
+              ),
+              contentPadding: const EdgeInsets.symmetric(vertical: 14, horizontal: 12),
+              filled: true,
+              fillColor: Colors.white,
+            ),
+          ),
+
+
+          Center(child: _buildImagePicker(controller)),
+
+
+
+
+
           const SizedBox(height: 32),
           Row(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -1008,6 +1239,8 @@ void showSelectedSlotSheet(BuildContext context, Slot selectedSlot) {
         ),
   );
 }
+
+
 
 TimeOfDay? parseTimeOfDay(String? timeString) {
   if (timeString == null || timeString.isEmpty) return null;

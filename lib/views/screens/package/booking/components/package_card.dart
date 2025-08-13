@@ -59,6 +59,7 @@ class PackageCard extends StatelessWidget {
                               color: Colors.black,
                               fontWeight: FontWeight.bold,
                             ),
+                            maxLines: 3,
                           ),
                           Text(
                             getBookingId(),

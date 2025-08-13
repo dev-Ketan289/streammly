@@ -11,6 +11,7 @@ import 'package:streammly/services/custom_image.dart';
 import 'package:streammly/services/theme.dart';
 import 'package:streammly/views/widgets/custom_doodle.dart';
 
+import '../../../data/repository/company_specialities_repo.dart';
 import '../../../models/company/company_location.dart';
 import '../home/widgets/header_banner.dart';
 import '../package/get_quote_page.dart';
@@ -41,7 +42,17 @@ class _VendorGroupState extends State<VendorGroup> {
   @override
   void initState() {
     super.initState();
+
     controller = Get.find<CompanyController>();
+
+    if (!Get.isRegistered<CompanySpecialitiesController>()) {
+      if (!Get.isRegistered<CompanySpecialitiesRepo>()) {
+        Get.lazyPut(() => CompanySpecialitiesRepo(apiClient: Get.find()));
+      }
+      Get.lazyPut(() => CompanySpecialitiesController(companySpecialitiesRepo: Get.find()));
+    }
+    specialitiesController = Get.find<CompanySpecialitiesController>();
+
     selectedSubCategoryId = widget.subCategoryId;
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -53,6 +64,7 @@ class _VendorGroupState extends State<VendorGroup> {
       controller.fetchSpecialized(widget.studio.companyId);
     });
   }
+
 
   String resolveImageUrl(String? url) {
     if (url == null || url.isEmpty) return '';
@@ -213,6 +225,7 @@ class _VendorGroupState extends State<VendorGroup> {
                     }
 
                     final subVerticals = controller.subVerticalCards;
+                     
 
                     if (subVerticals.isEmpty) {
                       return const Padding(
@@ -637,7 +650,18 @@ class _VendorGroupState extends State<VendorGroup> {
       ),
     );
   }
+
 }
+
+class VendorGroupBinding extends Bindings {
+  @override
+  void dependencies() {
+    Get.lazyPut(() => CompanySpecialitiesRepo(apiClient: Get.find()));
+    Get.lazyPut(() => CompanySpecialitiesController(companySpecialitiesRepo: Get.find()));
+    Get.lazyPut(() => CompanyController(companyRepo: Get.find()));
+  }
+}
+
 
 // class _FacilityIconDynamic extends StatelessWidget {
 //   final String label;

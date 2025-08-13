@@ -159,6 +159,7 @@ class BookingDetailsPage extends StatelessWidget {
                                 style: theme.textTheme.titleMedium?.copyWith(
                                   fontWeight: FontWeight.bold,
                                 ),
+                                maxLines: 2,
                               ),
                               subtitle: Text(
                                 addon.desc,
@@ -559,18 +560,22 @@ class CustomDetailContainer extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
+            /// FIX: Wrap title/type + OTP in same Row, make title flexible to avoid overflow
             Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                TitleSection(
-                  title: booking.title,
-                  type: booking.type,
-                  theme: theme,
+                Expanded(
+                  child: TitleSection(
+                    title: booking.title,
+                    type: booking.type,
+                    theme: theme,
+                  ),
                 ),
+                const SizedBox(width: 8),
                 OtpSection(otp: booking.otp, theme: theme),
               ],
             ),
-            SizedBox(height: 15),
+            const SizedBox(height: 15),
             Text("Booking Id"),
             Text(
               booking.bookingId,
@@ -580,9 +585,9 @@ class CustomDetailContainer extends StatelessWidget {
                 color: Colors.black,
               ),
             ),
-            SizedBox(height: 5),
+            const SizedBox(height: 5),
             Divider(color: Colors.grey.shade400),
-            SizedBox(height: 5),
+            const SizedBox(height: 5),
             Text("Date of Shoot"),
             Text(
               booking.date,
@@ -592,7 +597,7 @@ class CustomDetailContainer extends StatelessWidget {
                 color: Colors.black,
               ),
             ),
-            SizedBox(height: 10),
+            const SizedBox(height: 10),
             Text("Timing"),
             Text(
               booking.time,
@@ -602,7 +607,7 @@ class CustomDetailContainer extends StatelessWidget {
                 color: Colors.black,
               ),
             ),
-            SizedBox(height: 20),
+            const SizedBox(height: 20),
             Text("Shoot Location"),
             Text(
               booking.location,

@@ -225,6 +225,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "3.1.2"
+  country_state_city_picker:
+    dependency: "direct main"
+    description:
+      name: country_state_city_picker
+      sha256: "509c282165df329ee5a29babb28e13dce3bc32166cea21b202a49c44d20cfef3"
+      url: "https://pub.dev"
+    source: hosted
+    version: "1.2.8"
   cross_file:
     dependency: transitive
     description:
@@ -241,6 +249,22 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "3.0.6"
+  csc_picker:
+    dependency: "direct main"
+    description:
+      name: csc_picker
+      sha256: "7e5d6023a81f53b89a7fb0369953fd4dc676f7ea20e9a0c0707973a5f0aedf14"
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.2.7"
+  csc_picker_plus:
+    dependency: "direct main"
+    description:
+      name: csc_picker_plus
+      sha256: "105e1989dd7462a504d60af024880918bb2936dbb9c97f46c4bd4923fe011411"
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.0.3"
   csslib:
     dependency: transitive
     description:
@@ -590,6 +614,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "2.0.28"
+  flutter_slidable:
+    dependency: "direct main"
+    description:
+      name: flutter_slidable
+      sha256: ab7dbb16f783307c9d7762ede2593ce32c220ba2ba0fd540a3db8e9a3acba71a
+      url: "https://pub.dev"
+    source: hosted
+    version: "4.0.0"
   flutter_svg:
     dependency: "direct main"
     description:

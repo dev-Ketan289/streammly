@@ -14,15 +14,19 @@ import 'package:streammly/views/screens/profile/faq_page.dart';
 import 'package:streammly/views/screens/profile/invoice_screen.dart';
 import 'package:streammly/views/screens/profile/language_preferences.dart';
 import 'package:streammly/views/screens/profile/linked_pages.dart';
+import 'package:streammly/views/screens/profile/my_quotation.dart';
 import 'package:streammly/views/screens/profile/my_wallet.dart';
 import 'package:streammly/views/screens/profile/offers_page.dart';
 import 'package:streammly/views/screens/profile/profile_screen.dart';
 import 'package:streammly/views/screens/profile/rate_your_experience.dart';
 import 'package:streammly/views/screens/profile/refer_and_earn.dart';
+import 'package:streammly/views/screens/profile/report_us.dart';
 import 'package:streammly/views/screens/profile/settings.dart';
 import 'package:streammly/views/screens/profile/support_screen.dart';
 import 'package:streammly/views/screens/wishlist/wishlistpage.dart';
 
+import '../../../navigation_flow.dart';
+import '../../../services/custom_error_pop_widget.dart';
 import 'chatbot_page.dart';
 import 'components/profile_item_widget.dart';
 import 'components/transcation_histroy_screen.dart';
@@ -63,7 +67,7 @@ class _ProfilePageState extends State<ProfilePage> {
         leading: IconButton(
           icon: const Icon(Icons.arrow_back_ios_new, color: Colors.black),
           onPressed: () {
-            Get.back();
+            Navigator.pop(context);
           },
         ),
         title: const Text(
@@ -205,17 +209,9 @@ class _ProfilePageState extends State<ProfilePage> {
           ),
 
           SizedBox(height: screenHeight * 0.03),
+
+
           ProfileSectionWidget(title: "Bookings & Orders"),
-          ProfileItemWidget(
-            icon: SvgPicture.asset(Assets.svgMybookings, height: 26, width: 26),
-            title: "My Bookings",
-            onTap: () {
-              // Navigator.of(context).pop(); // Close the drawer
-              Future.delayed(Duration(milliseconds: 300), () {
-                Get.to(() => MyBookings());
-              });
-            },
-          ),
 
           ProfileItemWidget(
             icon: SvgPicture.asset(
@@ -223,9 +219,60 @@ class _ProfilePageState extends State<ProfilePage> {
               height: 26,
               width: 26,
             ),
-            title: "Cancellation History",
-            onTap: () {},
+            title: "My Quotation",
+            onTap: () {
+              if (authController.isLoggedIn()) {
+                Future.delayed(const Duration(milliseconds: 300), () {
+                  Get.to(() => MyQuotationScreen());
+                });
+              } else {
+                CommonPopupDialog.show(
+                  context,
+                  imagePath: 'assets/images/access_denied.png', // your image asset
+                  title: "Login Required",
+                  message: "Please log in to view your cancellation history.",
+                  primaryBtnText: "Login",
+                  onPrimaryPressed: () {
+                    Get.toNamed('/login');
+                  },
+                  secondaryBtnText: "Cancel",
+                  onSecondaryPressed: () {
+                    // nothing extra, just close
+                  },
+                );
+              }
+            },
           ),
+
+          ProfileItemWidget(
+            icon: SvgPicture.asset(Assets.svgMybookings, height: 26, width: 26),
+            title: "My Bookings",
+            onTap: () {
+              if (authController.isLoggedIn()) {
+                Future.delayed(const Duration(milliseconds: 300), () {
+                  Get.to(() => MyBookings());
+                });
+              } else {
+                CommonPopupDialog.show(
+                  context,
+                  imagePath: 'assets/images/access_denied.png',
+                  title: "Login Required",
+                  message: "You need to log in to view your bookings.",
+                  primaryBtnText: "Login",
+                  onPrimaryPressed: () {
+                    Get.toNamed('/login'); // Navigate to login
+                  },
+                  secondaryBtnText: "Cancel",
+                  onSecondaryPressed: () {
+                    // Just close dialog, nothing else to do
+                  },
+                );
+              }
+            },
+          ),
+
+
+
 
           SizedBox(height: screenHeight * 0.03),
           ProfileSectionWidget(title: "Offers & Wishlist"),
@@ -246,48 +293,75 @@ class _ProfilePageState extends State<ProfilePage> {
 
           SizedBox(height: screenHeight * 0.03),
           ProfileSectionWidget(title: "Payments & Wallet"),
+
+// My Wallet
           ProfileItemWidget(
             icon: SvgPicture.asset(Assets.svgSaved, height: 26, width: 26),
             title: "My Wallet",
             onTap: () {
-              Get.to(() => WalletScreen());
+              authController.requireLogin(
+                context,
+                message: "Please log in to access your wallet.",
+                onSuccess: () => Get.to(() => WalletScreen()),
+              );
             },
           ),
+
+// Transaction History
           ProfileItemWidget(
-            icon: SvgPicture.asset(
-              Assets.svgTransaction,
-              height: 26,
-              width: 26,
-            ),
+            icon: SvgPicture.asset(Assets.svgTransaction, height: 26, width: 26),
             title: "Transaction History",
             onTap: () {
-              Get.to(() => TransactionHistoryScreen());
+              authController.requireLogin(
+                context,
+                message: "Please log in to view your transaction history.",
+                onSuccess: () => Get.to(() => TransactionHistoryScreen()),
+              );
             },
           ),
+
+// Invoice
           ProfileItemWidget(
-            icon: SvgPicture.asset(
-              Assets.svgTransaction,
-              height: 26,
-              width: 26,
-            ),
+            icon: SvgPicture.asset(Assets.svgTransaction, height: 26, width: 26),
             title: "Invoice",
             onTap: () {
-              Get.to(() => InvoiceScreen());
+              authController.requireLogin(
+                context,
+                message: "Please log in to view your invoices.",
+                onSuccess: () => Get.to(() => InvoiceScreen()),
+              );
             },
           ),
+
+// Refer & Earn
           ProfileItemWidget(
             icon: SvgPicture.asset(Assets.svgRefer, height: 26, width: 26),
             title: "Refer & Earn",
             onTap: () {
-              Get.to(() => ReferAndEarnPage());
+              authController.requireLogin(
+                context,
+                message: "Please log in to refer and earn rewards.",
+                onSuccess: () => Get.to(() => ReferAndEarnPage()),
+              );
             },
           ),
-          ProfileItemWidget(
-            icon: SvgPicture.asset(Assets.svgPromo, height: 26, width: 26),
-            title: "Apply Promo Code",
-            onTap: () {},
-          ),
+
+// // Apply Promo Code
+//           ProfileItemWidget(
+//             icon: SvgPicture.asset(Assets.svgPromo, height: 26, width: 26),
+//             title: "Apply Promo Code",
+//             onTap: () {
+//               authController.requireLogin(
+//                 context,
+//                 message: "Please log in to apply a promo code.",
+//                 onSuccess: () {
+//                   // Your promo code logic here
+//                 },
+//               );
+//             },
+//           ),
           SizedBox(height: screenHeight * 0.03),
+
 
           ProfileSectionWidget(title: "Rating & Reviews"),
           ProfileItemWidget(
@@ -315,7 +389,9 @@ class _ProfilePageState extends State<ProfilePage> {
           ProfileItemWidget(
             icon: SvgPicture.asset(Assets.svgReport, height: 26, width: 26),
             title: "Report an Issue",
-            onTap: () {},
+            onTap: () {
+              Navigator.push(context, MaterialPageRoute(builder: (_) => ReportIssuePage(bookings: [],)));
+            },
           ),
           ProfileItemWidget(
             icon: SvgPicture.asset(Assets.svgWorks, height: 26, width: 26),
@@ -351,11 +427,12 @@ class _ProfilePageState extends State<ProfilePage> {
               icon: SvgPicture.asset(Assets.svgLogout, height: 26, width: 26),
               title: "Logout",
               onTap: () {
-                authController.clearSharedData();
-                Navigator.pop(context);
+                authController.logout(); // Clear data, sign out
+                NavigationFlow.navKey.currentState?.switchToTab(0); // Go to Home tab
                 Fluttertoast.showToast(msg: "Logged out successfully");
               },
             ),
+
           SizedBox(height: screenHeight * 0.03),
         ],
       ),

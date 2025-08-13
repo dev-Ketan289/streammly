@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'dart:developer';
 
 import 'package:flutter/material.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
 import 'package:streammly/controllers/auth_controller.dart';
@@ -30,9 +31,13 @@ class BookingController extends GetxController {
   // bool _bookingsLoading = false;
   // bool _submitLoading = false;
 
-  // Getters for loading states
-  // bool get isPersonalInfoLoading => _personalInfoLoading;
-  // bool get isOtpLoading => _otpLoading;
+  // OTP loaders
+  bool _isOtpSending = false;
+  bool _isOtpVerifying = false;
+
+  bool get isOtpSending => _isOtpSending;
+  bool get isOtpVerifying => _isOtpVerifying;
+
   bool get isSlotsLoading => _slotsLoading;
   // bool get isBookingsLoading => _bookingsLoading;
   // bool get isSubmitLoading => _submitLoading;
@@ -142,28 +147,76 @@ class BookingController extends GetxController {
     personalInfo.clear();
   }
 
-  // Update autofillFromUserProfile to update controllers' text:
-  // In your BookingController class, update the autofillFromUserProfile method:
+  bool isEditingAlternate = false;
+  String? originalSecondaryMobile;
 
   void autofillFromUserProfile() {
-    try {
-      final userProfile = authController.userProfile;
-      if (userProfile != null) {
-        personalInfo['name'] = userProfile.name ?? '';
-        personalInfo['mobile'] = userProfile.phone ?? '';
-        personalInfo['email'] = userProfile.email ?? '';
+    final user = authController.userProfile;
+    if (user != null) {
+      nameController.text   = user.name ?? '';
+      mobileController.text = user.phone ?? '';
+      emailController.text  = user.email ?? '';
+      originalSecondaryMobile = user.secondaryMobile ?? '';
 
-        // Update controllers safely and force sync
-        if (!_isDisposed) {
-          nameController.text = personalInfo['name']!;
-          mobileController.text = personalInfo['mobile']!;
-          emailController.text = personalInfo['email']!;
+      // ✅ Keep personalInfo in sync when autofilling
+      personalInfo['name'] = nameController.text.trim();
+      personalInfo['mobile'] = mobileController.text.trim();
+      personalInfo['email'] = emailController.text.trim();
+
+      if (originalSecondaryMobile!.isNotEmpty) {
+        alternateMobileController.text = originalSecondaryMobile!;
+        if (alternateMobiles.isEmpty) {
+          alternateMobiles.add(originalSecondaryMobile!);
+        } else {
+          alternateMobiles[0] = originalSecondaryMobile!;
         }
-        update();
+      } else {
+        alternateMobileController.clear();
+        alternateMobiles.clear();
       }
-    } catch (e) {
-      log('Error in autofillFromUserProfile: $e', name: 'BookingController');
+
+      log('Fetched profile name: "${authController.userProfile?.name}"');
+      log('NameController text: "${nameController.text}"');
+
+      update();
     }
+  }
+
+  void toggleAlternateEdit() {
+    isEditingAlternate = !isEditingAlternate;
+    update(['verify_button', 'alternate_field']);
+  }
+
+  void onSendOTPPressed() {
+    final currentInput = alternateMobileController.text.trim();
+    final primaryNumber = mobileController.text.trim();
+    final existingSecondary = originalSecondaryMobile?.trim();
+
+    if (currentInput.isEmpty) return;
+
+    // Check if same as primary
+    if (currentInput == primaryNumber) {
+      Fluttertoast.showToast(
+        msg: "Alternate number cannot be same as primary number",
+        toastLength: Toast.LENGTH_SHORT,
+        gravity: ToastGravity.BOTTOM,
+      );
+      return;
+    }
+
+    // Check if same as already saved secondary
+    if (existingSecondary != null &&
+        existingSecondary.isNotEmpty &&
+        currentInput == existingSecondary) {
+      Fluttertoast.showToast(
+        msg: "This alternate number is already saved in your profile",
+        toastLength: Toast.LENGTH_SHORT,
+        gravity: ToastGravity.BOTTOM,
+      );
+      return;
+    }
+
+    sendOTPForAlternateMobile();
   }
 
   bool isOTPSent = false;
@@ -182,10 +235,9 @@ class BookingController extends GetxController {
     if (value.isNotEmpty && value.length == 1) {
       otpDigits[index] = value;
 
-      // ✅ Use dedicated focus nodes instead of generic nextFocus
       if (index < 5) {
         WidgetsBinding.instance.addPostFrameCallback((_) {
-          otpFocusNodes[index + 1].requestFocus(); // ✅ Direct focus node access
+          otpFocusNodes[index + 1].requestFocus();
         });
       } else {
         // Last field, unfocus keyboard
@@ -198,15 +250,15 @@ class BookingController extends GetxController {
     } else if (value.isEmpty) {
       otpDigits[index] = '';
 
-      // ✅ Move focus to previous field using focus nodes
+
       if (index > 0) {
         WidgetsBinding.instance.addPostFrameCallback((_) {
-          otpFocusNodes[index - 1].requestFocus(); // ✅ Direct focus node access
+          otpFocusNodes[index - 1].requestFocus();
         });
       }
     }
 
-    // ✅ Only update verify button, not the entire OTP section
+
     update(['verify_button']);
   }
 
@@ -215,7 +267,7 @@ class BookingController extends GetxController {
     for (int i = 0; i < otpDigits.length; i++) {
       if (otpDigits[i].isEmpty) {
         WidgetsBinding.instance.addPostFrameCallback((_) {
-          otpFocusNodes[i].requestFocus(); // ✅ Use focus nodes
+          otpFocusNodes[i].requestFocus();
           // Position cursor at the end
           otpControllers[i].selection = TextSelection.fromPosition(
             TextPosition(offset: otpControllers[i].text.length),
@@ -227,7 +279,7 @@ class BookingController extends GetxController {
 
     // If all fields are filled, focus on the tapped field
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      otpFocusNodes[index].requestFocus(); // ✅ Use focus nodes
+      otpFocusNodes[index].requestFocus();
       otpControllers[index].selection = TextSelection.fromPosition(
         TextPosition(offset: otpControllers[index].text.length),
       );
@@ -260,6 +312,10 @@ class BookingController extends GetxController {
     update();
   }
 
+
+  /// ==========================
+  /// SEND OTP FOR ALTERNATE NUMBER
+  /// ==========================
   void sendOTPForAlternateMobile() async {
     if (alternateMobiles.isEmpty || alternateMobiles[0].isEmpty) {
       Get.snackbar('Error', 'Please enter alternate mobile number');
@@ -272,26 +328,26 @@ class BookingController extends GetxController {
       return;
     }
 
-    try {
-      isLoading = true;
-      update();
+    _isOtpSending = true;
+    update(['verify_button']); // ✅ only refresh the "Send OTP" button UI
 
+    try {
       // Use AuthController's OTP sending mechanism
       final authController = Get.find<AuthController>();
 
-      // Temporarily store the alternate number in auth controller
+      // Temporarily store & set alternate number
       final originalPhone = authController.phoneController.text;
       authController.phoneController.text = mobileNumber;
 
       final response = await authController.sendOtp();
 
-      // Restore original phone number
+      // Restore original number
       authController.phoneController.text = originalPhone;
 
       if (response.isSuccess) {
         isOTPSent = true;
         startOTPTimer();
-        update();
+        update(['otp_section']); // update OTP section visibility
         Get.snackbar(
           'OTP Sent',
           'OTP has been sent to $mobileNumber',
@@ -314,11 +370,14 @@ class BookingController extends GetxController {
         colorText: Colors.white,
       );
     } finally {
-      isLoading = false;
-      update();
+      _isOtpSending = false;
+      update(['verify_button']);
     }
   }
 
+  /// ==========================
+  /// VERIFY ALTERNATE MOBILE OTP
+  /// ==========================
   void verifyAlternateMobileOTP() async {
     final otp = otpDigits.join('');
     if (otp.isEmpty || otp.length != 6) {
@@ -326,10 +385,10 @@ class BookingController extends GetxController {
       return;
     }
 
-    try {
-      isLoading = true;
-      update(['otp_section']);
+    _isOtpVerifying = true;
+    update(['otp_section']); // ✅ only update OTP section buttons
 
+    try {
       final mobileNumber = alternateMobiles[0];
 
       final otpController = Get.put(
@@ -360,7 +419,7 @@ class BookingController extends GetxController {
           otpDigits[i] = '';
         }
 
-        // NEW: Update profile with verified alternate number
+        // Update profile with verified alternate number
         await updateAlternateNumberInProfile();
       } else {
         // Clear OTP fields on error
@@ -388,10 +447,11 @@ class BookingController extends GetxController {
         colorText: Colors.white,
       );
     } finally {
-      isLoading = false;
-      update(['otp_section']);
+      _isOtpVerifying = false;
+      update(['otp_section']); // stop Verify button loader
     }
   }
+
 
   Future<void> updateAlternateNumberInProfile() async {
     if (!isAlternateMobileVerified ||
@@ -492,7 +552,6 @@ class BookingController extends GetxController {
       alternateMobiles.removeRange(1, alternateMobiles.length);
     }
 
-    // ✅ Sync controller with the data (both ways)
     if (!_isDisposed) {
       if (alternateMobiles.isNotEmpty) {
         alternateMobileController.text = alternateMobiles[0];
@@ -551,6 +610,8 @@ class BookingController extends GetxController {
           'extraAddOn': <Map<String, dynamic>>[],
           'termsAccepted': false,
           'extraAnswers': extraAnswers,
+          'specialInstructions': '',
+          'attachmentImage': null,
           'advanceBookingDays':
               int.tryParse(package['advanceBookingDays']?.toString() ?? '0') ??
               1,
@@ -562,6 +623,22 @@ class BookingController extends GetxController {
       update();
     });
   }
+
+  void updateSpecialInstructions(int index, String value) {
+    final data = packageFormsData[index] ?? {};
+    data['specialInstructions'] = value;
+    packageFormsData[index] = data;
+    update();
+  }
+
+  void updateAttachmentImage(int index, Map<String, dynamic>? fileData) {
+    final data = packageFormsData[index] ?? {};
+    data['attachmentImage'] = fileData; // {name, path, size, bytes}
+    packageFormsData[index] = data;
+    update();
+  }
+
+
 
   // Remove or update these methods since we only allow one alternate field each
   void addAlternateMobile() {
@@ -822,6 +899,11 @@ class BookingController extends GetxController {
   }
 
   bool canSubmit() {
+    // ✅ Always sync from controllers before validation
+    personalInfo['name'] = nameController.text.trim();
+    personalInfo['mobile'] = mobileController.text.trim();
+    personalInfo['email'] = emailController.text.trim();
+
     if (personalInfo['name']?.isEmpty ?? true) {
       debugPrint("Validation fail: Name is empty");
       return false;
@@ -922,6 +1004,9 @@ class BookingController extends GetxController {
       }
     }
 
+    log('Name before validation = "${nameController.text}"');
+    log('Mobile before validation = "${mobileController.text}"');
+
     debugPrint("All validations passed");
     return true;
   }
@@ -941,6 +1026,7 @@ class BookingController extends GetxController {
     } catch (e) {
       return 0;
     }
+
   }
 
   // Added method that was missing in your original postBooking payload preparation
@@ -1028,6 +1114,8 @@ class BookingController extends GetxController {
 
       final List<Map<String, dynamic>> bookingsPayload = [];
 
+
+
       for (int i = 0; i < selectedPackages.length; i++) {
         final package = selectedPackages[i];
         final form = packageFormsData[i] ?? {};
@@ -1035,6 +1123,13 @@ class BookingController extends GetxController {
         final startTimeStr = form['startTime'] ?? '';
         final endTimeStr = form['endTime'] ?? '';
         final dateOfShoot = form['date'] ?? '';
+
+        final image = form['attachmentImage'];
+        if (image != null && image['size'] > 500 * 1024) {
+          Get.snackbar('Error', 'Image must be below 500KB');
+          return;
+        }
+
 
         final totalHours =
             (() {
@@ -1069,6 +1164,9 @@ class BookingController extends GetxController {
           "start_time": startTimeStr,
           "end_time": endTimeStr,
           "total_hours": totalHours,
+          "special_instructions": form['specialInstructions'] ?? '',
+          // For now, just include metadata for attachment; actual upload might be added later when backend supports
+          "attachment_image": image != null ? {"name": image['name'], "path": image['path']} : null,
         });
       }
 
@@ -1280,4 +1378,10 @@ class BookingController extends GetxController {
       update();
     }
   }
+  void clearBookings() {
+    upcomingBookings.clear();
+    isLoading = false;
+    update();
+  }
+
 }

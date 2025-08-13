@@ -8,6 +8,7 @@ import 'package:streammly/navigation_flow.dart';
 import 'package:streammly/services/theme.dart';
 import 'package:streammly/views/screens/vendor/vendoer_detail.dart';
 
+import '../../../data/repository/company_business_settings_repo.dart';
 import '../../../models/company/company_location.dart';
 
 class VendorDescription extends StatefulWidget {
@@ -24,13 +25,23 @@ class VendorDescription extends StatefulWidget {
 }
 
 class _VendorDescriptionState extends State<VendorDescription> {
-  final CompanyBusinessSettingsController companyBusinessSettings =
-      Get.find<CompanyBusinessSettingsController>();
+  late CompanyBusinessSettingsController companyBusinessSettings;
 
   @override
   void initState() {
     super.initState();
+    if (!Get.isRegistered<CompanyBusinessSettingsController>()) {
+      // Register it with its required repo if not already registered
+      if (!Get.isRegistered<CompanyBusinessSettingsRepo>()) {
+        Get.lazyPut(() => CompanyBusinessSettingsRepo(apiClient: Get.find()));
+      }
+      Get.lazyPut(() => CompanyBusinessSettingsController(
+        companyBusinessSettingsRepo: Get.find(),
+      ));
+    }
+    companyBusinessSettings = Get.find<CompanyBusinessSettingsController>();
   }
+
 
   @override
   Widget build(BuildContext context) {
@@ -213,9 +224,9 @@ class _VendorDescriptionState extends State<VendorDescription> {
                         children: [
                           Text(
                             "View More Details ",
-                            style: theme.textTheme.bodySmall?.copyWith(
+                            style: theme.textTheme.labelLarge?.copyWith(
                               color: Colors.white,
-                              fontWeight: FontWeight.w500,
+                              fontWeight: FontWeight.w600,
                             ),
                           ),
                           Icon(

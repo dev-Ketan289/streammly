@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:shimmer/shimmer.dart';
 import 'package:streammly/controllers/company_controller.dart';
+import 'package:streammly/controllers/promo_slider_controller.dart';
 import 'package:streammly/navigation_flow.dart';
 import 'package:streammly/views/screens/home/vendor_locator.dart';
 import 'package:streammly/views/screens/home/widgets/category/category.dart';
@@ -25,25 +26,35 @@ class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
 
   @override
-  State<HomeScreen> createState() => _HomeScreenState();
+  State<HomeScreen> createState() => HomeScreenState();
 }
 
-class _HomeScreenState extends State<HomeScreen> {
+class HomeScreenState extends State<HomeScreen> {
   final BookingController bookingController = Get.find<BookingController>();
   final HomeController headerController = Get.find<HomeController>();
   final CategoryController categoryController = Get.find<CategoryController>();
   final LocationController locationController = Get.find<LocationController>();
   final CompanyController companyController = Get.find<CompanyController>();
+  final PromoSliderController promoSliderController = Get.find<PromoSliderController>();
 
   @override
   void initState() {
     super.initState();
+    Get.find<HomeController>().refreshHome();
+    // _loadData();
+  }
+
+  void _loadData() {
     headerController.fetchSlides();
     headerController.fetchRecommendedCompanies();
     categoryController.fetchCategories();
     companyController.fetchCompanyById(1);
     bookingController.fetchBookings();
+    promoSliderController;
   }
+
+
+
 
   List<CategoryItem> convertToCategoryItems(List<CategoryModel> models) {
     return models.map((model) {
