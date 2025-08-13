@@ -1,12 +1,17 @@
+import 'dart:convert';
+import 'dart:developer';
+
 import 'package:geolocator/geolocator.dart';
 import 'package:get/get.dart';
+import 'package:http/http.dart' as http;
+import 'package:streammly/models/company/company_location.dart';
 import 'package:streammly/models/company/speciality_model.dart';
 
 import '../data/repository/company_repo.dart';
 import '../models/category/sub_category_model.dart';
 import '../models/category/sub_vertical_model.dart';
-import 'package:streammly/models/company/company_location.dart';
 import '../models/company/specialized_in.dart';
+import '../services/constants.dart';
 
 class CompanyController extends GetxController {
   final CompanyRepo companyRepo;
@@ -15,6 +20,8 @@ class CompanyController extends GetxController {
 
   final List<Speciality> specialities = [];
   bool isSpecialityLoading = false;
+
+  List<Map<String, dynamic>> popularPackagesList = [];
 
   final List<SpecializedItem> specialized = [];
   bool isSpecializedLoading = false;
@@ -35,9 +42,7 @@ class CompanyController extends GetxController {
 
   Future<Position> _getCurrentLocation() async {
     return await Geolocator.getCurrentPosition(
-      locationSettings: const LocationSettings(
-        accuracy: LocationAccuracy.best,
-      ),
+      locationSettings: const LocationSettings(accuracy: LocationAccuracy.best),
     );
   }
 
@@ -57,6 +62,7 @@ class CompanyController extends GetxController {
     return "$hrs hr${hrs > 1 ? 's' : ''}${mins > 0 ? ' $mins mins' : ''}";
   }
 
+  // In CompanyController
   Future<void> fetchCompaniesByCategory(int categoryId) async {
     try {
       isLoading = true;
@@ -70,26 +76,36 @@ class CompanyController extends GetxController {
         throw "Location not available";
       }
 
+      // IMPORTANT: Remove any limit parameter or increase it
       final data = await companyRepo.fetchCompaniesByCategory(
         categoryId,
         userLat: lat,
         userLng: lng,
+        // Remove limit or set it higher
+        // limit: 100, // Add this if your API supports it
       );
 
+      log('API returned ${data.length} companies', name: 'CompanyController');
+
+      // Process all companies, not just first 10
       for (var company in data) {
         if (company.latitude != null && company.longitude != null) {
           final distance = calculateDistance(
             lat,
             lng,
-            company.latitude!,
-            company.longitude!,
+            double.parse(company.latitude.toString()),
+            double.parse(company.longitude.toString()),
           );
           company.distanceKm = distance;
           company.estimatedTime = _estimateTimeFromDistance(distance);
         }
       }
 
-      companies.assignAll(data);
+      companies.assignAll(data); // This should assign ALL companies
+      log(
+        'Controller now has ${companies.length} companies',
+        name: 'CompanyController',
+      );
     } catch (e) {
       companies.clear();
       Get.snackbar("Error", "Something went wrong: $e");
@@ -174,7 +190,7 @@ class CompanyController extends GetxController {
             return {
               "id": item["id"].toString(),
               "image": imageUrl,
-              "label": item["title"] ?? "Untitled"
+              "label": item["title"] ?? "Untitled",
             };
           }),
         );
@@ -202,8 +218,7 @@ class CompanyController extends GetxController {
         userLng: lng,
       );
 
-      if (company != null &&
-          !companies.any((c) => c.id == company.id)) {
+      if (company != null && !companies.any((c) => c.id == company.id)) {
         companies.add(company);
       }
 
@@ -225,7 +240,9 @@ class CompanyController extends GetxController {
         ..clear()
         ..addAll(data.map((e) => SpecializedItem.fromJson(e)));
 
-      print("🔍 Specialized fetched: ${specialized.map((s) => s.title).toList()}");
+      print(
+        "🔍 Specialized fetched: ${specialized.map((s) => s.title).toList()}",
+      );
       update();
     } catch (e) {
       specialized.clear();
@@ -286,5 +303,41 @@ class CompanyController extends GetxController {
   void onClose() {
     // Cleanup future streams / controllers here if added later
     super.onClose();
+  }
+
+  Future<void> fetchPopularPackages(int companyId, int studioId) async {
+    try {
+      final url =
+          "${AppConstants.baseUrl}api/v1/package/getpopularpackages?company_id=$companyId&studio_id=$studioId";
+
+      final response = await http.get(Uri.parse(url));
+
+      if (response.statusCode == 200) {
+        final jsonBody = json.decode(response.body);
+        final List<dynamic> data = jsonBody["data"] ?? [];
+
+        popularPackagesList =
+            data.map<Map<String, dynamic>>((pkg) {
+              final variations = pkg["packagevariations"] ?? [];
+              final firstVariation =
+                  variations.isNotEmpty ? variations.first : null;
+
+              return {
+                "title": pkg["title"] ?? "",
+                "price":
+                    int.tryParse(
+                      firstVariation?["amount"]?.toString() ?? "0",
+                    ) ??
+                    0,
+              };
+            }).toList();
+
+        update();
+      } else {
+        Get.snackbar("Error", "Failed to fetch popular packages");
+      }
+    } catch (e) {
+      Get.snackbar("Exception", e.toString());
+    }
   }
 }

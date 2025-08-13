@@ -129,7 +129,7 @@ class PackagesController extends GetxController {
                 'id': pkg['id'], // <-- Add id here properly
                 "title": pkg["title"] ?? "",
                 "type": pkg["type"] ?? "N/A",
-                 "package_type": pkg["package_type"] ?? "",
+                "package_type": pkg["package_type"] ?? "",
                 "typeId": pkg['type_id'],
                 "price": priceMap[getDurationLabel(firstVariation ?? {})] ?? 0,
                 "priceMap": priceMap,
@@ -478,40 +478,33 @@ class PackagesController extends GetxController {
     }
   }
 
-  Future<void> fetchPopularPackages() async {
+  Future<void> fetchPopularPackages(int companyId, int studioId) async {
     try {
-      final response = await http.get(
-        Uri.parse("${AppConstants.baseUrl}api/v1/package/getpopularpackages"),
-        headers: {"Content-Type": "application/json"},
-      );
+      final url =
+          "${AppConstants.baseUrl}api/v1/package/getpopularpackages?company_id=$companyId&studio_id=$studioId";
+
+      final response = await http.get(Uri.parse(url));
+
       if (response.statusCode == 200) {
         final jsonBody = json.decode(response.body);
-        final List data = jsonBody["data"] ?? [];
+        final List<dynamic> data = jsonBody["data"] ?? [];
 
         popularPackagesList =
             data.map<Map<String, dynamic>>((pkg) {
-              final List<dynamic>? variations = pkg["packagevariations"];
+              final variations = pkg["packagevariations"] ?? [];
               final firstVariation =
-                  (variations != null && variations.isNotEmpty)
-                      ? variations[0]
-                      : null;
+                  variations.isNotEmpty ? variations.first : null;
 
               return {
                 "title": pkg["title"] ?? "",
-                "type": pkg["type"] ?? "N/A",
                 "price":
                     int.tryParse(
                       firstVariation?["amount"]?.toString() ?? "0",
                     ) ??
                     0,
-                "shortDescription": pkg["short_description"] ?? "",
-                "highlight": pkg["fullDescription"] ?? "",
-                "packageIndex": data.indexOf(pkg),
-                "image":
-                    (pkg["image_upload"] != null &&
-                            pkg["image_upload"].isNotEmpty)
               };
             }).toList();
+
         update();
       } else {
         Get.snackbar("Error", "Failed to fetch popular packages");

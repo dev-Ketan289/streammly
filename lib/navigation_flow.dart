@@ -2,8 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:get/get.dart';
+import 'package:page_transition/page_transition.dart';
 import 'package:streammly/generated/assets.dart';
 import 'package:streammly/services/coming_soon_page.dart';
+import 'package:streammly/services/route_helper.dart';
 import 'package:streammly/views/screens/home/home_screen.dart';
 import 'package:streammly/views/screens/package/booking/my_bookings.dart';
 
@@ -13,7 +15,7 @@ import 'services/custom_exit_dailogue.dart';
 class NavigationFlow extends StatefulWidget {
   const NavigationFlow({super.key, this.initialIndex});
   static final GlobalKey<NavigationFlowState> navKey =
-  GlobalKey<NavigationFlowState>();
+      GlobalKey<NavigationFlowState>();
 
   final int? initialIndex;
 
@@ -52,17 +54,61 @@ class NavigationFlowState extends State<NavigationFlow> {
     }
   }
 
-  void pushToCurrentTab(Widget page, {bool hideBottomBar = false}) {
+  void pushToCurrentTab(
+    Widget page, {
+    bool hideBottomBar = false,
+    PageTransitionType? transitionType,
+    Duration? duration,
+    Duration? reverseDuration,
+    bool replaceEffect = true, // Enable replacement effect by default
+  }) {
+    // Prevent rapid taps
+    if (bottomBarStack.length > 5) return;
+
     bottomBarStack.add(!hideBottomBar);
     showBottomBar.value = !hideBottomBar;
 
+    final selectedTransition = transitionType ?? _getContextualTransition();
+    final selectedDuration = duration ?? const Duration(milliseconds: 300);
+    final selectedReverseDuration =
+        reverseDuration ?? const Duration(milliseconds: 300);
+
     navigatorKeys[_currentIndex].currentState
-        ?.push(MaterialPageRoute(builder: (_) => page))
+        ?.push(
+          getCustomRoute(
+            child: page,
+            type: selectedTransition,
+            duration: selectedDuration,
+            reverseDuration: selectedReverseDuration,
+            animate: true,
+            replaceEffect: replaceEffect, // Enable smooth replacement
+          ),
+        )
         .then((_) {
-          bottomBarStack.removeLast();
+          if (bottomBarStack.isNotEmpty) {
+            bottomBarStack.removeLast();
+          }
           showBottomBar.value =
               bottomBarStack.isNotEmpty ? bottomBarStack.last : true;
         });
+  }
+
+  // Contextual transitions for better UX
+  PageTransitionType _getContextualTransition() {
+    switch (_currentIndex) {
+      case 0: // Home
+        return PageTransitionType.rightToLeft;
+      case 1: // Shop
+        return PageTransitionType.rightToLeft;
+      case 2: // Cart
+        return PageTransitionType.bottomToTop;
+      case 3: // Bookings
+        return PageTransitionType.rightToLeft;
+      case 4: // More
+        return PageTransitionType.fade;
+      default:
+        return PageTransitionType.rightToLeft;
+    }
   }
 
   Future<void> _handleBackNavigation() async {
@@ -109,17 +155,17 @@ class NavigationFlowState extends State<NavigationFlow> {
     }
   }
 
-
   Widget _buildOffstageNavigator(int index, Widget child) {
     return Offstage(
       offstage: _currentIndex != index,
       child: Navigator(
         key: navigatorKeys[index],
         onGenerateRoute: (settings) {
-          return MaterialPageRoute(
-            builder: (context) {
-              return child;
-            },
+          return getCustomRoute(
+            child: child,
+            type: PageTransitionType.fade,
+            duration: const Duration(milliseconds: 200),
+            animate: false, // No animation for tab switching
           );
         },
       ),
@@ -157,6 +203,7 @@ class NavigationFlowState extends State<NavigationFlow> {
                 backgroundColor: Colors.white,
                 elevation: 3,
                 onPressed: () {
+                  HapticFeedback.lightImpact(); // Added haptic feedback
                   setState(() {
                     _currentIndex = 2;
                     _navigationHistory.add(2);
@@ -234,7 +281,7 @@ class NavigationFlowState extends State<NavigationFlow> {
                     ),
                   ),
                 )
-                : SizedBox.shrink();
+                : const SizedBox.shrink();
           },
         ),
       ),
@@ -253,6 +300,7 @@ class NavigationFlowState extends State<NavigationFlow> {
 
     return GestureDetector(
       onTap: () {
+        HapticFeedback.lightImpact(); // Added haptic feedback
         _onTap(index);
       },
       child: Column(

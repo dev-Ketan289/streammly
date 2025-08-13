@@ -4,12 +4,12 @@ import 'package:streammly/controllers/company_controller.dart';
 import 'package:streammly/navigation_flow.dart';
 import 'package:streammly/services/theme.dart';
 import 'package:streammly/views/widgets/custom_doodle.dart';
+
 import '../../../models/category/category_item.dart';
 import '../../../models/company/company_location.dart';
 import '../home/widgets/category/review_card.dart';
 import '../home/widgets/category/widgets/category_scroller.dart';
 import '../home/widgets/header_banner.dart';
-import '../home/widgets/horizontal_card.dart';
 import 'vendor_group.dart';
 
 class VendorDetailScreen extends StatefulWidget {
@@ -51,7 +51,7 @@ class _VendorDetailScreenState extends State<VendorDetailScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                /// ---- Header Banner ----
+                // ---- Header Banner ----
                 GetBuilder<CompanyController>(
                   builder: (controller) {
                     final specialized = controller.specialized;
@@ -74,7 +74,7 @@ class _VendorDetailScreenState extends State<VendorDetailScreen> {
 
                 SizedBox(height: screenWidth * 0.02),
 
-                /// ---- Category Scroller (Subcategories) ----
+                // ---- Category Scroller (Subcategories) ----
                 GetBuilder<CompanyController>(
                   builder: (controller) {
                     final subs = controller.subCategories;
@@ -95,7 +95,7 @@ class _VendorDetailScreenState extends State<VendorDetailScreen> {
 
                                   // Add a smooth transition delay
                                   Future.delayed(
-                                    const Duration(milliseconds: 50),
+                                    const Duration(milliseconds: 200),
                                     () {
                                       mainState?.pushToCurrentTab(
                                         VendorGroup(
@@ -129,7 +129,6 @@ class _VendorDetailScreenState extends State<VendorDetailScreen> {
                                     studio: widget.studio,
                                     subCategoryId: sub.id,
                                   ),
-
                                   hideBottomBar: false,
                                 );
                               },
@@ -141,7 +140,7 @@ class _VendorDetailScreenState extends State<VendorDetailScreen> {
 
                 SizedBox(height: screenWidth * 0.04),
 
-                /// ---- Reviews ----
+                // ---- Reviews ----
                 Padding(
                   padding: EdgeInsets.symmetric(
                     horizontal: horizontalPadding,
@@ -215,47 +214,203 @@ class _VendorDetailScreenState extends State<VendorDetailScreen> {
 
                 SizedBox(height: screenWidth * 0.05),
 
-                /// ---- Packages ----
-                PackageSection(
-                  title: "Popular Packages",
-                  onSeeAll: () {},
-                  isPopular: true,
-                  packages: [
-                    {
-                      "image":
-                          "assets/images/category/vendor_category/Baby.jpg",
-                      "label": "Album",
-                    },
-                    {
-                      "image":
-                          "assets/images/category/vendor_category/Baby.jpg",
-                      "label": "Frame",
-                    },
-                  ],
+                // ---- Popular Packages ----
+                Padding(
+                  padding: EdgeInsets.symmetric(horizontal: horizontalPadding),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(
+                        "Popular Packages",
+                        style: TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.black,
+                        ),
+                      ),
+                      Text(
+                        "View all",
+                        style: TextStyle(fontSize: 14, color: primaryColor),
+                      ),
+                    ],
+                  ),
                 ),
 
-                PackageSection(
-                  title: "Exclusive Offers Just For You",
-                  onSeeAll: () {},
-                  isPopular: false,
-                  packages: [
-                    {
-                      "image":
-                          "assets/images/category/vendor_category/Baby.jpg",
-                      "label": "XYZ Packages",
-                      "price": "Rs. 2000/-",
-                    },
-                    {
-                      "image":
-                          "assets/images/category/vendor_category/Baby.jpg",
-                      "label": "XYZ Packages",
-                      "price": "Rs. 2000/-",
-                    },
-                  ],
+                SizedBox(height: 16),
+
+                // Popular Packages List
+                SizedBox(
+                  height: 120,
+                  child: ListView(
+                    scrollDirection: Axis.horizontal,
+                    padding: EdgeInsets.only(left: horizontalPadding),
+                    children: [
+                      _buildPopularPackageCard("₹5999", "Cuteness"),
+                      SizedBox(width: 12),
+                      _buildPopularPackageCard("₹5999", "Cuteness"),
+                    ],
+                  ),
+                ),
+
+                SizedBox(height: screenWidth * 0.05),
+
+                // ---- Exclusive Offers ----
+                Padding(
+                  padding: EdgeInsets.symmetric(horizontal: horizontalPadding),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(
+                        "Exclusive Offers",
+                        style: TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.black,
+                        ),
+                      ),
+                      Text(
+                        "View all",
+                        style: TextStyle(fontSize: 14, color: primaryColor),
+                      ),
+                    ],
+                  ),
+                ),
+
+                SizedBox(height: 16),
+
+                // Exclusive Offers Slider
+                SizedBox(
+                  height: 140,
+                  child: ListView(
+                    scrollDirection: Axis.horizontal,
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 16,
+                    ), // matches design
+                    children: [
+                      _buildExclusiveOfferSlide(),
+                      _buildExclusiveOfferSlide(),
+                      _buildExclusiveOfferSlide(),
+                    ],
+                  ),
+                ),
+
+                SizedBox(height: 30),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  // Popular Packages Card
+  Widget _buildPopularPackageCard(String price, String title) {
+    return Container(
+      width: 240,
+      height: 97, // fixed height so all cards align
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(10),
+        border: Border.all(
+          color: Colors.blue, // softer border color from screenshot
+          width: 1,
+        ),
+      ),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Top section (price + title)
+          Padding(
+            padding: const EdgeInsets.fromLTRB(12, 12, 12, 8),
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                Text(
+                  "$price/-",
+                  style: TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                    color: primaryColor,
+                  ),
+                ),
+                const Spacer(),
+                Expanded(
+                  child: Text(
+                    title,
+                    style: const TextStyle(
+                      fontSize: 14,
+                      color: Color(0xFF666666),
+                    ),
+                    overflow: TextOverflow.ellipsis,
+                  ),
                 ),
               ],
             ),
           ),
+
+          // Divider line
+          Container(
+            height: 1,
+            color: const Color(0xFFE4E4E4),
+            margin: const EdgeInsets.symmetric(horizontal: 12),
+          ),
+
+          // Bottom section (More Details + BUY)
+          Padding(
+            padding: const EdgeInsets.fromLTRB(12, 6, 12, 8),
+            child: Row(
+              children: [
+                Expanded(
+                  child: Text(
+                    "More Details",
+                    style: const TextStyle(
+                      fontSize: 12,
+                      color: Color(0xFF888888),
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                ),
+                ElevatedButton(
+                  onPressed: () {},
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: primaryColor,
+                    elevation: 0,
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 12,
+                      vertical: 4,
+                    ),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(6),
+                    ),
+                  ),
+                  child: const Text(
+                    "BUY",
+                    style: TextStyle(
+                      fontSize: 10,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.white,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildExclusiveOfferSlide() {
+    return Container(
+      width: 0.88 * Get.width, // around 88% of screen width
+      height: 140, // proportional to screenshot
+      margin: const EdgeInsets.only(right: 12),
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(16),
+        image: const DecorationImage(
+          image: AssetImage("assets/images/recommended_banner/PromoSlider.jpg"),
+          fit: BoxFit.cover,
         ),
       ),
     );
