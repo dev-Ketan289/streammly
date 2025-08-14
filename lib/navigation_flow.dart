@@ -239,9 +239,8 @@ class NavigationFlowState extends State<NavigationFlow> {
                     notchMargin: 5,
                     color: const Color(0xffF1F6FB),
                     child: SizedBox(
-                      height: 30,
+                      height: 60, // Increased height for better touch targets
                       child: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceAround,
                         children: [
                           _buildNavItem(
                             theme: Theme.of(context),
@@ -259,7 +258,7 @@ class NavigationFlowState extends State<NavigationFlow> {
                             label: 'Shop',
                             index: 1,
                           ),
-                          const SizedBox(width: 25),
+                          const SizedBox(width: 50), // Space for FAB
                           _buildNavItem(
                             theme: Theme.of(context),
                             icon: Assets.svgBooking,
@@ -271,8 +270,8 @@ class NavigationFlowState extends State<NavigationFlow> {
                           _buildNavItem(
                             theme: Theme.of(context),
                             icon: Assets.svgMore,
-                            height: 5,
-                            spacing: 15,
+                            height: 5, // Standardized height
+                            spacing: 4, // Standardized spacing
                             label: 'More',
                             index: 4,
                           ),
@@ -298,32 +297,52 @@ class NavigationFlowState extends State<NavigationFlow> {
   }) {
     final isSelected = _currentIndex == index;
 
-    return GestureDetector(
-      onTap: () {
-        HapticFeedback.lightImpact(); // Added haptic feedback
-        _onTap(index);
-      },
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          SvgPicture.asset(
-            icon,
-            height: height,
-            colorFilter:
-                isSelected
-                    ? ColorFilter.mode(theme.primaryColor, BlendMode.srcIn)
-                    : null,
-          ),
-          SizedBox(height: spacing),
-          Text(
-            label,
-            style: theme.textTheme.bodySmall?.copyWith(
-              color: isSelected ? theme.primaryColor : Colors.black54,
-              fontWeight: FontWeight.bold,
-              letterSpacing: 0.5,
+    return Expanded(
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          onTap: () {
+            HapticFeedback.lightImpact();
+            _onTap(index);
+          },
+          splashColor: theme.primaryColor.withValues(alpha: 0.1),
+          highlightColor: theme.primaryColor.withValues(alpha: 0.05),
+          borderRadius: BorderRadius.circular(8),
+          child: Container(
+            height: 60, // Fixed consistent tap area
+            padding: const EdgeInsets.symmetric(vertical: 8),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                SizedBox(
+                  height: 20, // Fixed icon container height
+                  child: SvgPicture.asset(
+                    icon,
+                    height: height,
+                    colorFilter:
+                        isSelected
+                            ? ColorFilter.mode(
+                              theme.primaryColor,
+                              BlendMode.srcIn,
+                            )
+                            : null,
+                  ),
+                ),
+                const SizedBox(height: 4), // Fixed spacing
+                Text(
+                  label,
+                  style: theme.textTheme.bodySmall?.copyWith(
+                    color: isSelected ? theme.primaryColor : Colors.black54,
+                    fontWeight: FontWeight.bold,
+                    letterSpacing: 0.5,
+                    fontSize: 10, // Ensure consistent text size
+                  ),
+                ),
+              ],
             ),
           ),
-        ],
+        ),
       ),
     );
   }

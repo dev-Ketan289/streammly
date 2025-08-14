@@ -3,7 +3,6 @@ import 'package:get/get.dart';
 import 'package:streammly/data/repository/booking_repo.dart';
 import 'package:streammly/services/custom_error_inline_widget.dart';
 import 'package:streammly/services/theme.dart';
-import 'package:streammly/views/screens/home/home_screen.dart';
 import 'package:streammly/views/screens/package/booking/widgets/booking_details.dart';
 import 'package:streammly/views/screens/package/booking/widgets/custom_bookingcard.dart';
 import 'package:streammly/views/widgets/custom_doodle.dart';
@@ -28,7 +27,7 @@ class MyBookings extends StatelessWidget {
   Widget build(BuildContext context) {
     return GetBuilder<AuthController>(
       builder: (authController) {
-        // ✅ Dynamically check on every rebuild
+        // Dynamically check on every rebuild
         if (!authController.isLoggedIn()) {
           return Center(
             child: Padding(
@@ -74,7 +73,7 @@ class MyBookings extends StatelessWidget {
           );
         }
 
-        // ✅ Logged in → show bookings tab
+        // Logged in → show bookings tab
         return GetBuilder<BookingController>(
           builder: (controller) {
             if (controller.isLoading) {
@@ -155,7 +154,6 @@ class MyBookings extends StatelessWidget {
     );
   }
 
-
   Widget _buildBookingList(
     BuildContext context,
     List<BookingInfo> bookings, {
@@ -171,13 +169,13 @@ class MyBookings extends StatelessWidget {
   }) {
     if (bookings.isEmpty) {
       return CommonInlineMessage(
-        imagePath:
-            'assets/images/no_booking.png',
+        imagePath: 'assets/images/no_booking.png',
         title: 'No Bookings Yet',
         btnText: 'Browse Services',
         onPressed: () {
-          Get.offAll(() => NavigationFlow(initialIndex: 0));
-
+          final navigationFlow =
+              context.findAncestorStateOfType<NavigationFlowState>();
+          navigationFlow?.switchToTab(0);
         },
         message: 'You haven’t booked any services yet',
       );

@@ -16,6 +16,7 @@ import 'package:streammly/data/repository/company_specialities_repo.dart';
 import 'package:streammly/data/repository/header_repo.dart';
 import 'package:streammly/data/repository/promo_slider_repo.dart';
 import 'package:streammly/data/repository/quote_repo.dart';
+import 'package:streammly/data/repository/support_ticket_repo.dart';
 import 'package:streammly/data/repository/wishlist_repo.dart';
 
 import '../controllers/booking_form_controller.dart';
@@ -26,6 +27,7 @@ import '../controllers/home_screen_controller.dart';
 import '../controllers/package_page_controller.dart';
 import '../controllers/promo_slider_controller.dart';
 import '../controllers/quote_controller.dart';
+import '../controllers/support_ticket_controller.dart';
 import '../services/constants.dart';
 import 'api/api_client.dart';
 import 'repository/booking_repo.dart';
@@ -38,12 +40,18 @@ class Init {
 
     try {
       //Repo initialization
-      final String token = sharedPreferences.getString(AppConstants.token) ?? "";
-      final apiClient = ApiClient(appBaseUrl: AppConstants.baseUrl, sharedPreferences: sharedPreferences);
+      final String token =
+          sharedPreferences.getString(AppConstants.token) ?? "";
+      final apiClient = ApiClient(
+        appBaseUrl: AppConstants.baseUrl,
+        sharedPreferences: sharedPreferences,
+      );
       apiClient.updateHeader(token);
       Get.lazyPut(() => apiClient);
 
-      Get.lazyPut(() => AuthRepo(apiClient: Get.find(), sharedPreferences: Get.find()));
+      Get.lazyPut(
+        () => AuthRepo(apiClient: Get.find(), sharedPreferences: Get.find()),
+      );
 
       // Home
       Get.lazyPut(() => CategoryRepo(apiClient: Get.find()));
@@ -67,10 +75,17 @@ class Init {
 
       //company specialities
       Get.lazyPut(() => CompanySpecialitiesRepo(apiClient: Get.find()));
-      Get.lazyPut(() => CompanySpecialitiesController(companySpecialitiesRepo: Get.find()));
+      Get.lazyPut(
+        () =>
+            CompanySpecialitiesController(companySpecialitiesRepo: Get.find()),
+      );
       //company business settings
       Get.lazyPut(() => CompanyBusinessSettingsRepo(apiClient: Get.find()));
-      Get.lazyPut(() => CompanyBusinessSettingsController(companyBusinessSettingsRepo: Get.find()));
+      Get.lazyPut(
+        () => CompanyBusinessSettingsController(
+          companyBusinessSettingsRepo: Get.find(),
+        ),
+      );
       //Wishlist
       Get.lazyPut(() => WishlistRepo(apiClient: Get.find()));
       Get.lazyPut(() => WishlistController(wishlistRepo: Get.find()));
@@ -80,7 +95,9 @@ class Init {
 
       //Business setting
       Get.lazyPut(() => BusinessSettingRepo(apiClient: Get.find()));
-      Get.lazyPut(() => BusinessSettingController(businessSettingRepo: Get.find()));
+      Get.lazyPut(
+        () => BusinessSettingController(businessSettingRepo: Get.find()),
+      );
 
       // //Booking Slots
       Get.lazyPut(() => BookingRepo(apiClient: Get.find()));
@@ -92,6 +109,14 @@ class Init {
     } catch (e) {
       log('---- ${e.toString()} ----', name: "ERROR AT initialize()");
     }
+
+    //Support Ticket
+    Get.lazyPut(() => SupportTicketRepo(apiClient: Get.find<ApiClient>()));
+    Get.lazyPut(
+      () => SupportTicketController(
+        supportTicketRepo: Get.find<SupportTicketRepo>(),
+      ),
+    );
   }
 
   // Location save & check methods

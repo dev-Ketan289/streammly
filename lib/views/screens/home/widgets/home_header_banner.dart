@@ -129,7 +129,6 @@ class _HomeHeaderBannerState extends State<HomeHeaderBanner> {
                 );
               },
             ),
-
           ),
 
           // Search Bar Row
@@ -351,7 +350,7 @@ class _HomeHeaderBannerState extends State<HomeHeaderBanner> {
 
                 const SizedBox(height: 10),
 
-                // ⬅️ Arrow + Dots + Arrow ➡️
+                //  Arrow + Dots + Arrow
                 Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [

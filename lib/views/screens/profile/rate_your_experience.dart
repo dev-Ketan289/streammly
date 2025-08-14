@@ -142,9 +142,17 @@ class _RateExperiencePageState extends State<RateExperiencePage> {
                               },
                               style: ElevatedButton.styleFrom(
                                 backgroundColor: theme.primaryColor,
-                                padding: const EdgeInsets.symmetric(vertical: 14),
+                                padding: const EdgeInsets.symmetric(
+                                  vertical: 14,
+                                ),
                               ),
-                              child: const Text("Submit Review"),
+                              child: Text(
+                                "Submit Review",
+                                style: textTheme.labelLarge?.copyWith(
+                                  color: Colors.white,
+                                  fontWeight: FontWeight.w600,
+                                ),
+                              ),
                             ),
                           ),
                           const SizedBox(height: 8),
