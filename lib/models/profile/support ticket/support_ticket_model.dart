@@ -1,43 +1,83 @@
+import '../../booking/booking_info_model.dart';
+
 class SupportTicket {
   final int id;
+  final String? status;
   final int userId;
   final int? companyDepartmentId;
   final String title;
   final String description;
   final String? referenceImage;
   final String platform;
+  final String? deletedAt;
+  final String createdAt;
+  final String updatedAt;
   final String important;
   final int? companyId;
-  final DateTime createdAt;
-  final DateTime updatedAt;
+  final int? bookingId;
+  final BookingInfo? booking;
 
-  SupportTicket({
+  const SupportTicket({
     required this.id,
+    this.status,
     required this.userId,
-    required this.companyDepartmentId,
+    this.companyDepartmentId,
     required this.title,
     required this.description,
-    required this.referenceImage,
+    this.referenceImage,
     required this.platform,
-    required this.important,
-    required this.companyId,
+    this.deletedAt,
     required this.createdAt,
     required this.updatedAt,
+    required this.important,
+    this.companyId,
+    this.bookingId,
+    this.booking,
   });
 
   factory SupportTicket.fromJson(Map<String, dynamic> json) {
     return SupportTicket(
-      id: json['id'],
-      userId: json['user_id'],
+      id: json['id'] ?? 0,
+      status: json['status'],
+      userId: json['user_id'] ?? 0,
       companyDepartmentId: json['company_department_id'],
-      title: json['title'],
-      description: json['description'],
+      title: json['title'] ?? '',
+      description: json['description'] ?? '',
       referenceImage: json['reference_image'],
-      platform: json['platform'],
-      important: json['important'],
+      platform: json['platform'] ?? '',
+      deletedAt: json['deleted_at'],
+      createdAt: json['created_at'] ?? '',
+      updatedAt: json['updated_at'] ?? '',
+      important: json['important'] ?? '',
       companyId: json['company_id'],
-      createdAt: DateTime.parse(json['created_at']),
-      updatedAt: DateTime.parse(json['updated_at']),
+      bookingId: json['booking_id'],
+      booking:
+          json['booking'] != null
+              ? BookingInfo.fromJson(json['booking'] as Map<String, dynamic>)
+              : null,
     );
+  }
+
+  // Helper methods for status
+  bool get isPending => status == 'pending' || status == null;
+  bool get isResolved => status == 'resolved';
+  bool get isRejected => status == 'rejected';
+
+  String get displayStatus {
+    if (status == null) return 'Pending';
+    switch (status!.toLowerCase()) {
+      case 'pending':
+        return 'Pending';
+      case 'resolved':
+        return 'Resolved';
+      case 'rejected':
+        return 'Rejected';
+      default:
+        return 'Pending';
+    }
+  }
+
+  String get displayBookingId {
+    return booking?.bookingId ?? 'N/A';
   }
 }

@@ -30,6 +30,10 @@ class _VendorDetailScreenState extends State<VendorDetailScreen> {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       companyController.fetchCompanySubCategories(widget.studio.companyId);
       companyController.fetchSpecialized(widget.studio.companyId);
+      companyController.fetchPopularPackages(
+        widget.studio.companyId,
+        widget.studio.id, // Use the studio ID from your CompanyLocation object
+      );
     });
   }
 
@@ -239,20 +243,35 @@ class _VendorDetailScreenState extends State<VendorDetailScreen> {
                 SizedBox(height: 16),
 
                 // Popular Packages List
+                // Popular Packages List
                 SizedBox(
                   height: 120,
-                  child: ListView(
-                    scrollDirection: Axis.horizontal,
-                    padding: EdgeInsets.only(left: horizontalPadding),
-                    children: [
-                      _buildPopularPackageCard("₹5999", "Cuteness"),
-                      SizedBox(width: 12),
-                      _buildPopularPackageCard("₹5999", "Cuteness"),
-                    ],
+                  child: GetBuilder<CompanyController>(
+                    builder: (controller) {
+                      if (controller.popularPackagesList.isEmpty) {
+                        return Center(child: Text("No packages available"));
+                      }
+
+                      return ListView.builder(
+                        scrollDirection: Axis.horizontal,
+                        padding: EdgeInsets.only(left: horizontalPadding),
+                        itemCount: controller.popularPackagesList.length,
+                        itemBuilder: (context, index) {
+                          final package = controller.popularPackagesList[index];
+                          return Padding(
+                            padding: EdgeInsets.only(right: 12),
+                            child: _buildPopularPackageCard(
+                              "₹${package['price']}",
+                              package['title'] ?? "Untitled",
+                            ),
+                          );
+                        },
+                      );
+                    },
                   ),
                 ),
 
-                SizedBox(height: screenWidth * 0.05),
+                const SizedBox(height: 20),
 
                 // ---- Exclusive Offers ----
                 Padding(

@@ -90,6 +90,9 @@ class AppConstants {
   static const String addSupportTicket =
       'api/v1/support-ticket/addsupportticket';
 
+  static const String getSupportTicket =
+      'api/v1/support-ticket/getsupportticket';
+
   //Booking
   static const String storeBooking = 'api/v1/workingtime/get-avilable-slots';
 

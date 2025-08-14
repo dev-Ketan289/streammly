@@ -1,9 +1,7 @@
-import 'dart:convert';
 import 'dart:developer';
 
 import 'package:geolocator/geolocator.dart';
 import 'package:get/get.dart';
-import 'package:http/http.dart' as http;
 import 'package:streammly/models/company/company_location.dart';
 import 'package:streammly/models/company/speciality_model.dart';
 
@@ -11,7 +9,6 @@ import '../data/repository/company_repo.dart';
 import '../models/category/sub_category_model.dart';
 import '../models/category/sub_vertical_model.dart';
 import '../models/company/specialized_in.dart';
-import '../services/constants.dart';
 
 class CompanyController extends GetxController {
   final CompanyRepo companyRepo;
@@ -307,37 +304,30 @@ class CompanyController extends GetxController {
 
   Future<void> fetchPopularPackages(int companyId, int studioId) async {
     try {
-      final url =
-          "${AppConstants.baseUrl}api/v1/package/getpopularpackages?company_id=$companyId&studio_id=$studioId";
+      popularPackagesList.clear();
+      update();
 
-      final response = await http.get(Uri.parse(url));
+      final data = await companyRepo.fetchPopularPackages(companyId, studioId);
 
-      if (response.statusCode == 200) {
-        final jsonBody = json.decode(response.body);
-        final List<dynamic> data = jsonBody["data"] ?? [];
+      popularPackagesList =
+          data.map<Map<String, dynamic>>((pkg) {
+            final variations = pkg["packagevariations"] ?? [];
+            final firstVariation =
+                variations.isNotEmpty ? variations.first : null;
 
-        popularPackagesList =
-            data.map<Map<String, dynamic>>((pkg) {
-              final variations = pkg["packagevariations"] ?? [];
-              final firstVariation =
-                  variations.isNotEmpty ? variations.first : null;
+            return {
+              "title": pkg["title"] ?? "",
+              "price":
+                  int.tryParse(firstVariation?["amount"]?.toString() ?? "0") ??
+                  0,
+            };
+          }).toList();
 
-              return {
-                "title": pkg["title"] ?? "",
-                "price":
-                    int.tryParse(
-                      firstVariation?["amount"]?.toString() ?? "0",
-                    ) ??
-                    0,
-              };
-            }).toList();
-
-        update();
-      } else {
-        Get.snackbar("Error", "Failed to fetch popular packages");
-      }
+      update();
     } catch (e) {
-      Get.snackbar("Exception", e.toString());
+      popularPackagesList.clear();
+      update();
+      log('Error fetching popular packages: $e', name: 'CompanyController');
     }
   }
 }

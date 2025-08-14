@@ -19,6 +19,7 @@ class ExploreUs extends StatefulWidget {
 class _ExploreUsState extends State<ExploreUs> {
   final CompanyController companyController = Get.find<CompanyController>();
   bool isFetching = false;
+  bool hasInitialized = false;
 
   @override
   void initState() {
@@ -26,24 +27,76 @@ class _ExploreUsState extends State<ExploreUs> {
     _loadVendorsByIds();
   }
 
+  @override
+  void didUpdateWidget(ExploreUs oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    // Handle vendorIds changes
+    if (widget.vendorIds != oldWidget.vendorIds) {
+      hasInitialized = false;
+      _loadVendorsByIds();
+    }
+  }
+
   Future<void> _loadVendorsByIds() async {
-    if (widget.vendorIds == null || widget.vendorIds!.isEmpty) return;
+    if (widget.vendorIds == null || widget.vendorIds!.isEmpty || hasInitialized)
+      return;
 
-    setState(() => isFetching = true);
+    if (mounted) {
+      setState(() => isFetching = true);
+    }
 
-    final alreadyFetched = companyController.companies.map((e) => e.id).toSet();
+    try {
+      final alreadyFetched =
+          companyController.companies.map((e) => e.id).toSet();
+      final toFetch =
+          widget.vendorIds!
+              .where((id) => !alreadyFetched.contains(id))
+              .toList();
 
-    for (final id in widget.vendorIds!) {
-      if (!alreadyFetched.contains(id)) {
-        await companyController.fetchCompanyById(id);
-        if (companyController.selectedCompany != null) {
+      // Batch process with concurrent requests (limit concurrency)
+      const batchSize = 3;
+      for (int i = 0; i < toFetch.length; i += batchSize) {
+        final batch = toFetch.skip(i).take(batchSize).toList();
+
+        await Future.wait(
+          batch.map((id) => _fetchSingleCompany(id)),
+          eagerError: false, // Continue even if some fail
+        );
+
+        // Update UI after each batch for better perceived performance
+        if (mounted) {
+          companyController.update();
+        }
+      }
+
+      hasInitialized = true;
+    } catch (e) {
+      // Silent fail - don't show error to user
+      debugPrint('Error loading vendors: $e');
+    } finally {
+      if (mounted) {
+        setState(() => isFetching = false);
+        companyController.update();
+      }
+    }
+  }
+
+  Future<void> _fetchSingleCompany(int id) async {
+    try {
+      await companyController.fetchCompanyById(id);
+      if (companyController.selectedCompany != null) {
+        // Check if company not already in list (thread safety)
+        final exists = companyController.companies.any(
+          (c) => c.id == companyController.selectedCompany!.id,
+        );
+        if (!exists) {
           companyController.companies.add(companyController.selectedCompany!);
         }
       }
+    } catch (e) {
+      // Silent fail for individual company
+      debugPrint('Failed to fetch company $id: $e');
     }
-
-    companyController.update();
-    setState(() => isFetching = false);
   }
 
   @override
@@ -78,17 +131,7 @@ class _ExploreUsState extends State<ExploreUs> {
                   );
                 },
                 child: Row(
-                  children: [
-                    Text(
-                      "View Map",
-                      style: theme.textTheme.bodyMedium?.copyWith(
-                        color: primaryColor,
-                        fontWeight: FontWeight.w500,
-                      ),
-                    ),
-                    const SizedBox(width: 4),
-                    Icon(Icons.location_on),
-                  ],
+                  children: [const SizedBox(width: 4), Icon(Icons.location_on)],
                 ),
               ),
             ],
@@ -97,6 +140,7 @@ class _ExploreUsState extends State<ExploreUs> {
 
         GetBuilder<CompanyController>(
           builder: (controller) {
+            // Show shimmer during loading
             if (controller.isLoading || isFetching) {
               return _buildShimmerList();
             }
@@ -136,9 +180,7 @@ class _ExploreUsState extends State<ExploreUs> {
                   },
                   child: Container(
                     padding: const EdgeInsets.all(10),
-
                     margin: const EdgeInsets.only(bottom: 10),
-
                     decoration: BoxDecoration(
                       borderRadius: BorderRadius.circular(18),
                       border: Border.all(color: Color(0xffE2EDF9), width: 2),
@@ -159,6 +201,40 @@ class _ExploreUsState extends State<ExploreUs> {
                                     height: 150,
                                     width: double.infinity,
                                     fit: BoxFit.fill,
+                                    loadingBuilder: (
+                                      context,
+                                      child,
+                                      loadingProgress,
+                                    ) {
+                                      if (loadingProgress == null) return child;
+                                      return Container(
+                                        height: 150,
+                                        width: double.infinity,
+                                        color: Colors.grey[200],
+                                        child: Center(
+                                          child: CircularProgressIndicator(
+                                            strokeWidth: 2,
+                                            value:
+                                                loadingProgress
+                                                            .expectedTotalBytes !=
+                                                        null
+                                                    ? loadingProgress
+                                                            .cumulativeBytesLoaded /
+                                                        loadingProgress
+                                                            .expectedTotalBytes!
+                                                    : null,
+                                          ),
+                                        ),
+                                      );
+                                    },
+                                    errorBuilder: (context, error, stackTrace) {
+                                      return Image.asset(
+                                        'assets/images/recommended_banner/FocusPointVendor.png',
+                                        height: 150,
+                                        width: double.infinity,
+                                        fit: BoxFit.cover,
+                                      );
+                                    },
                                   )
                                   : Image.asset(
                                     'assets/images/recommended_banner/FocusPointVendor.png',

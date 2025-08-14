@@ -5,7 +5,6 @@ import 'package:flutter_svg/flutter_svg.dart'; // Use flutter_svg for SVG images
 import 'package:get/get.dart';
 import 'package:streammly/controllers/company_controller.dart';
 import 'package:streammly/controllers/company_specialities_controller.dart';
-import 'package:streammly/generated/assets.dart';
 import 'package:streammly/navigation_flow.dart';
 import 'package:streammly/services/custom_image.dart';
 import 'package:streammly/services/theme.dart';
@@ -49,7 +48,10 @@ class _VendorGroupState extends State<VendorGroup> {
       if (!Get.isRegistered<CompanySpecialitiesRepo>()) {
         Get.lazyPut(() => CompanySpecialitiesRepo(apiClient: Get.find()));
       }
-      Get.lazyPut(() => CompanySpecialitiesController(companySpecialitiesRepo: Get.find()));
+      Get.lazyPut(
+        () =>
+            CompanySpecialitiesController(companySpecialitiesRepo: Get.find()),
+      );
     }
     specialitiesController = Get.find<CompanySpecialitiesController>();
 
@@ -64,7 +66,6 @@ class _VendorGroupState extends State<VendorGroup> {
       controller.fetchSpecialized(widget.studio.companyId);
     });
   }
-
 
   String resolveImageUrl(String? url) {
     if (url == null || url.isEmpty) return '';
@@ -129,7 +130,7 @@ class _VendorGroupState extends State<VendorGroup> {
                               selectedSubCategoryId = sub.id;
                             });
                             controller.fetchSubVerticalCards(
-                              widget.studio.id,
+                              widget.studio.companyId,
                               sub.id,
                             );
                           },
@@ -225,7 +226,6 @@ class _VendorGroupState extends State<VendorGroup> {
                     }
 
                     final subVerticals = controller.subVerticalCards;
-                     
 
                     if (subVerticals.isEmpty) {
                       return const Padding(
@@ -429,7 +429,7 @@ class _VendorGroupState extends State<VendorGroup> {
                         studioId: widget.studio.id,
                         companyLocation: widget.studio,
                       ),
-                     
+
                       hideBottomBar: true,
                     );
 
@@ -465,29 +465,39 @@ class _VendorGroupState extends State<VendorGroup> {
                     }
 
                     return Wrap(
-             
-                      children: List.generate(specialitiesController.specialities.length, (index) {
-                        final specialities = specialitiesController.specialities[index];
+                      children: List.generate(
+                        specialitiesController.specialities.length,
+                        (index) {
+                          final specialities =
+                              specialitiesController.specialities[index];
 
-                        return Row(
-                     
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Container(
-                              margin: EdgeInsets.symmetric(vertical: 5),
-                              width: 21,
-                              height: 21,
-                              decoration: BoxDecoration(color: Colors.blue, borderRadius: BorderRadius.circular(20)),
-                              child: CustomImage(path: specialities.image ?? ''),
-                            ),
-                            SizedBox(width: 11),
-                            Text(specialities.title ?? '', style: Theme.of(context).textTheme.headlineLarge?.copyWith(fontSize: 9)),
-                            SizedBox(width: 6,)
-                          ],
-                        );
-                      }),
+                          return Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Container(
+                                margin: EdgeInsets.symmetric(vertical: 5),
+                                width: 21,
+                                height: 21,
+                                decoration: BoxDecoration(
+                                  color: Colors.blue,
+                                  borderRadius: BorderRadius.circular(20),
+                                ),
+                                child: CustomImage(
+                                  path: specialities.image ?? '',
+                                ),
+                              ),
+                              SizedBox(width: 11),
+                              Text(
+                                specialities.title ?? '',
+                                style: Theme.of(context).textTheme.headlineLarge
+                                    ?.copyWith(fontSize: 9),
+                              ),
+                              SizedBox(width: 6),
+                            ],
+                          );
+                        },
+                      ),
                     );
-
                   },
                 ),
 
@@ -650,18 +660,18 @@ class _VendorGroupState extends State<VendorGroup> {
       ),
     );
   }
-
 }
 
 class VendorGroupBinding extends Bindings {
   @override
   void dependencies() {
     Get.lazyPut(() => CompanySpecialitiesRepo(apiClient: Get.find()));
-    Get.lazyPut(() => CompanySpecialitiesController(companySpecialitiesRepo: Get.find()));
+    Get.lazyPut(
+      () => CompanySpecialitiesController(companySpecialitiesRepo: Get.find()),
+    );
     Get.lazyPut(() => CompanyController(companyRepo: Get.find()));
   }
 }
-
 
 // class _FacilityIconDynamic extends StatelessWidget {
 //   final String label;

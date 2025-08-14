@@ -21,7 +21,7 @@ class _SupportTicketFormPageState extends State<SupportTicketFormPage> {
   final TextEditingController titleController = TextEditingController();
   final TextEditingController descriptionController = TextEditingController();
   List<File> selectedFiles = [];
-  String? selectedBooking;
+  BookingInfo? selectedBookingInfo; // Changed from String to BookingInfo
 
   final AuthController authController = Get.find<AuthController>();
   bool _isSubmitting = false; // <-- Flag to prevent multiple taps
@@ -47,18 +47,22 @@ class _SupportTicketFormPageState extends State<SupportTicketFormPage> {
   }
 
   Future<void> submitSupportTicket() async {
-    if (_isSubmitting) return; // prevent multiple clicks
+    if (_isSubmitting) return;
     setState(() {
       _isSubmitting = true;
     });
 
     final String token = authController.getUserToken();
 
+    // Enhanced validation
     if (token.isEmpty) {
-      Get.snackbar("Error", "You must be logged in to submit a ticket.");
-      setState(() {
-        _isSubmitting = false;
-      });
+      _showError("You must be logged in to submit a ticket.");
+      return;
+    }
+
+    if (titleController.text.trim().isEmpty ||
+        descriptionController.text.trim().isEmpty) {
+      _showError("Please fill all required fields");
       return;
     }
 
@@ -66,24 +70,42 @@ class _SupportTicketFormPageState extends State<SupportTicketFormPage> {
       '${AppConstants.baseUrl}${AppConstants.addSupportTicket}',
     );
 
+    // Debug the full URL
+    debugPrint("Full API URL: $uri");
+    debugPrint("Token present: ${token.isNotEmpty}");
+    debugPrint(
+      "Booking ID: ${selectedBookingInfo?.id}",
+    ); // Updated to use internal ID
+
     final request =
         http.MultipartRequest('POST', uri)
-          ..headers['Authorization'] = 'Bearer $token'
-          ..fields['booking_id'] = selectedBooking ?? ''
-          ..fields['title'] = titleController.text
-          ..fields['description'] = descriptionController.text;
+          ..headers.addAll({
+            'Authorization': 'Bearer $token',
+            'Accept': 'application/json',
+            'Content-Type': 'multipart/form-data',
+          })
+          ..fields.addAll({
+            'title': titleController.text.trim(),
+            'description': descriptionController.text.trim(),
+            if (selectedBookingInfo != null)
+              'booking_id':
+                  selectedBookingInfo!.id.toString(), // Send internal ID
+          });
 
+    // Add file if selected
     if (selectedFiles.isNotEmpty) {
-      final file = selectedFiles.first;
-      final fileName = file.path.split('/').last;
+      for (int i = 0; i < selectedFiles.length; i++) {
+        final file = selectedFiles[i];
+        final fileName = file.path.split('/').last;
 
-      request.files.add(
-        await http.MultipartFile.fromPath(
-          'reference_image',
-          file.path,
-          filename: fileName,
-        ),
-      );
+        request.files.add(
+          await http.MultipartFile.fromPath(
+            'reference_image${i > 0 ? '[]' : ''}', // Handle multiple files
+            file.path,
+            filename: fileName,
+          ),
+        );
+      }
     }
 
     try {
@@ -91,39 +113,53 @@ class _SupportTicketFormPageState extends State<SupportTicketFormPage> {
       final response = await http.Response.fromStream(streamedResponse);
 
       debugPrint("Status Code: ${response.statusCode}");
+      debugPrint("Headers: ${response.headers}");
       debugPrint("Response: ${response.body}");
 
-      if (response.statusCode == 200) {
-        // final resBody = json.decode(response.body);
-
-        if (context.mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text('Support ticket submitted successfully!'),
-            ),
-          );
-          titleController.clear();
-          descriptionController.clear();
-          setState(() {
-            selectedFiles.clear();
-          });
-        }
-      } else {
-        debugPrint('Error: ${response.body}');
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Failed: ${response.statusCode}')),
+      if (response.statusCode == 200 || response.statusCode == 201) {
+        _handleSuccess();
+      } else if (response.statusCode == 302) {
+        _showError(
+          "API endpoint not found or redirected. Check your URL configuration.",
         );
+      } else {
+        _showError("Failed: ${response.statusCode} - ${response.body}");
       }
     } catch (e) {
       debugPrint('Exception: $e');
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text('Error: $e')));
+      _showError("Network error: $e");
     } finally {
       setState(() {
         _isSubmitting = false;
       });
     }
+  }
+
+  void _showError(String message) {
+    ScaffoldMessenger.of(
+      context,
+    ).showSnackBar(SnackBar(content: Text(message)));
+    setState(() {
+      _isSubmitting = false;
+    });
+  }
+
+  void _handleSuccess() {
+    if (context.mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Support ticket submitted successfully!')),
+      );
+      _clearForm();
+    }
+  }
+
+  void _clearForm() {
+    titleController.clear();
+    descriptionController.clear();
+    setState(() {
+      selectedFiles.clear();
+      selectedBookingInfo = null; // Updated to clear BookingInfo object
+    });
   }
 
   @override
@@ -172,7 +208,9 @@ class _SupportTicketFormPageState extends State<SupportTicketFormPage> {
                   child: AbsorbPointer(
                     child: TextFormField(
                       controller: TextEditingController(
-                        text: selectedBooking ?? '',
+                        text:
+                            selectedBookingInfo?.bookingId ??
+                            '', // Display user-friendly bookingId
                       ),
                       style: textTheme.bodyMedium,
                       decoration: InputDecoration(
@@ -408,12 +446,13 @@ class _SupportTicketFormPageState extends State<SupportTicketFormPage> {
               widget.bookings.map((booking) {
                 return ListTile(
                   title: Text(
-                    booking.bookingId,
+                    booking.bookingId, // Still displays user-friendly bookingId
                     style: const TextStyle(fontWeight: FontWeight.w500),
                   ),
                   onTap: () {
                     setState(() {
-                      selectedBooking = booking.bookingId;
+                      selectedBookingInfo =
+                          booking; // Store full BookingInfo object
                     });
                     Navigator.pop(context);
                   },

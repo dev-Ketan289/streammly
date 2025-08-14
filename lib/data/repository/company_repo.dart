@@ -1,8 +1,11 @@
+import 'dart:convert';
 import 'dart:developer';
 
+import 'package:http/http.dart' as http;
 import 'package:streammly/models/company/speciality_model.dart';
 
 import '../../models/company/company_location.dart';
+import '../../services/constants.dart';
 import '../api/api_client.dart';
 
 class CompanyRepo {
@@ -155,6 +158,29 @@ class CompanyRepo {
       throw Exception(
         "Failed to fetch specialities: ${response.body.toString()}",
       );
+    }
+  }
+
+  Future<List<Map<String, dynamic>>> fetchPopularPackages(
+    int companyId,
+    int studioId,
+  ) async {
+    try {
+      final response = await http.post(
+        Uri.parse("${AppConstants.baseUrl}api/v1/package/getpopularpackages"),
+        headers: {'Content-Type': 'application/json'},
+        body: json.encode({'company_id': companyId, 'studio_id': studioId}),
+      );
+
+      if (response.statusCode == 200) {
+        final jsonBody = json.decode(response.body);
+        return List<Map<String, dynamic>>.from(jsonBody["data"] ?? []);
+      }
+      throw Exception(
+        'Failed to load popular packages: ${response.statusCode}',
+      );
+    } catch (e) {
+      throw Exception('Error fetching popular packages: $e');
     }
   }
 }
