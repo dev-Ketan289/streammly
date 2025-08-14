@@ -210,7 +210,6 @@ class _ProfilePageState extends State<ProfilePage> {
 
           SizedBox(height: screenHeight * 0.03),
 
-
           ProfileSectionWidget(title: "Bookings & Orders"),
 
           ProfileItemWidget(
@@ -228,7 +227,8 @@ class _ProfilePageState extends State<ProfilePage> {
               } else {
                 CommonPopupDialog.show(
                   context,
-                  imagePath: 'assets/images/access_denied.png', // your image asset
+                  imagePath:
+                      'assets/images/access_denied.png', // your image asset
                   title: "Login Required",
                   message: "Please log in to view your cancellation history.",
                   primaryBtnText: "Login",
@@ -271,9 +271,6 @@ class _ProfilePageState extends State<ProfilePage> {
             },
           ),
 
-
-
-
           SizedBox(height: screenHeight * 0.03),
           ProfileSectionWidget(title: "Offers & Wishlist"),
           ProfileItemWidget(
@@ -294,7 +291,7 @@ class _ProfilePageState extends State<ProfilePage> {
           SizedBox(height: screenHeight * 0.03),
           ProfileSectionWidget(title: "Payments & Wallet"),
 
-// My Wallet
+          // My Wallet
           ProfileItemWidget(
             icon: SvgPicture.asset(Assets.svgSaved, height: 26, width: 26),
             title: "My Wallet",
@@ -307,9 +304,13 @@ class _ProfilePageState extends State<ProfilePage> {
             },
           ),
 
-// Transaction History
+          // Transaction History
           ProfileItemWidget(
-            icon: SvgPicture.asset(Assets.svgTransaction, height: 26, width: 26),
+            icon: SvgPicture.asset(
+              Assets.svgTransaction,
+              height: 26,
+              width: 26,
+            ),
             title: "Transaction History",
             onTap: () {
               authController.requireLogin(
@@ -320,9 +321,13 @@ class _ProfilePageState extends State<ProfilePage> {
             },
           ),
 
-// Invoice
+          // Invoice
           ProfileItemWidget(
-            icon: SvgPicture.asset(Assets.svgTransaction, height: 26, width: 26),
+            icon: SvgPicture.asset(
+              Assets.svgTransaction,
+              height: 26,
+              width: 26,
+            ),
             title: "Invoice",
             onTap: () {
               authController.requireLogin(
@@ -333,7 +338,7 @@ class _ProfilePageState extends State<ProfilePage> {
             },
           ),
 
-// Refer & Earn
+          // Refer & Earn
           ProfileItemWidget(
             icon: SvgPicture.asset(Assets.svgRefer, height: 26, width: 26),
             title: "Refer & Earn",
@@ -346,22 +351,21 @@ class _ProfilePageState extends State<ProfilePage> {
             },
           ),
 
-// // Apply Promo Code
-//           ProfileItemWidget(
-//             icon: SvgPicture.asset(Assets.svgPromo, height: 26, width: 26),
-//             title: "Apply Promo Code",
-//             onTap: () {
-//               authController.requireLogin(
-//                 context,
-//                 message: "Please log in to apply a promo code.",
-//                 onSuccess: () {
-//                   // Your promo code logic here
-//                 },
-//               );
-//             },
-//           ),
+          // // Apply Promo Code
+          //           ProfileItemWidget(
+          //             icon: SvgPicture.asset(Assets.svgPromo, height: 26, width: 26),
+          //             title: "Apply Promo Code",
+          //             onTap: () {
+          //               authController.requireLogin(
+          //                 context,
+          //                 message: "Please log in to apply a promo code.",
+          //                 onSuccess: () {
+          //                   // Your promo code logic here
+          //                 },
+          //               );
+          //             },
+          //           ),
           SizedBox(height: screenHeight * 0.03),
-
 
           ProfileSectionWidget(title: "Rating & Reviews"),
           ProfileItemWidget(
@@ -390,7 +394,12 @@ class _ProfilePageState extends State<ProfilePage> {
             icon: SvgPicture.asset(Assets.svgReport, height: 26, width: 26),
             title: "Report an Issue",
             onTap: () {
-              Navigator.push(context, MaterialPageRoute(builder: (_) => ReportIssuePage(bookings: [],)));
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (_) => ReportIssuePage(bookings: []),
+                ),
+              );
             },
           ),
           ProfileItemWidget(
@@ -427,9 +436,29 @@ class _ProfilePageState extends State<ProfilePage> {
               icon: SvgPicture.asset(Assets.svgLogout, height: 26, width: 26),
               title: "Logout",
               onTap: () {
-                authController.logout(); // Clear data, sign out
-                NavigationFlow.navKey.currentState?.switchToTab(0); // Go to Home tab
-                Fluttertoast.showToast(msg: "Logged out successfully");
+                CommonPopupDialog.show(
+                  context,
+                  imagePath:
+                      'assets/images/access_denied.png', // Add appropriate logout icon
+                  title: "Confirm Logout",
+                  message: "Are you sure you want to logout from your account?",
+                  primaryBtnText: "Logout",
+                  onPrimaryPressed: () {
+                    authController.logout(); // Clear data, sign out
+                    NavigationFlow.navKey.currentState?.switchToTab(
+                      0,
+                    ); // Go to Home tab
+                    Fluttertoast.showToast(
+                      msg: "Logged out successfully",
+                      toastLength: Toast.LENGTH_SHORT,
+                      gravity: ToastGravity.BOTTOM,
+                    );
+                  },
+                  secondaryBtnText: "Cancel",
+                  onSecondaryPressed: () {
+                    // Just close dialog, nothing else to do
+                  },
+                );
               },
             ),
 
