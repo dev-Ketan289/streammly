@@ -307,10 +307,13 @@ class CompanyController extends GetxController {
 
   Future<void> fetchPopularPackages(int companyId, int studioId) async {
     try {
-      final url =
-          "${AppConstants.baseUrl}api/v1/package/getpopularpackages?company_id=$companyId&studio_id=$studioId";
+      final url = "${AppConstants.baseUrl}api/v1/package/getpopularpackages";
 
-      final response = await http.get(Uri.parse(url));
+      final response = await http.post(
+        Uri.parse(url),
+        headers: {'Content-Type': 'application/json'},
+        body: json.encode({'company_id': companyId, 'studio_id': studioId}),
+      );
 
       if (response.statusCode == 200) {
         final jsonBody = json.decode(response.body);
@@ -333,11 +336,9 @@ class CompanyController extends GetxController {
             }).toList();
 
         update();
-      } else {
-        Get.snackbar("Error", "Failed to fetch popular packages");
       }
     } catch (e) {
-      Get.snackbar("Exception", e.toString());
+      log('Popular packages error: $e', name: 'CompanyController');
     }
   }
 }

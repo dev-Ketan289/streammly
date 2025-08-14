@@ -5,7 +5,6 @@ import 'dart:typed_data';
 import 'dart:ui' as ui;
 
 import 'package:flutter/material.dart';
-import 'package:flutter/rendering.dart';
 import 'package:get/get.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:permission_handler/permission_handler.dart';
@@ -47,6 +46,13 @@ class _CompanyLocatorMapScreenState extends State<CompanyLocatorMapScreen> {
   int _currentPageIndex = 0;
   bool _showSlider = false;
 
+  // Cache for marker bitmaps - KEY OPTIMIZATION
+  // static final Map<String, Uint8List> _markerCache = {};
+  static final Map<String, Uint8List> _fallbackMarkerCache = {};
+
+  // Track which markers have network images loading
+  final Set<int> _loadingNetworkImages = {};
+
   @override
   void initState() {
     super.initState();
@@ -78,10 +84,13 @@ class _CompanyLocatorMapScreenState extends State<CompanyLocatorMapScreen> {
 
     // Always use current selected category
     await controller.fetchCompaniesByCategory(controller.selectedCategoryId);
-    await _generateCustomMarkers();
+
+    // STAGE 1: Show markers instantly with fallback icons
+    await _generateInstantMarkers();
 
     final gMap = await _mapController.future;
 
+    // In _loadData method - replace the camera animation part
     if (controller.userPosition != null) {
       final userLatLng = LatLng(
         controller.userPosition!.latitude,
@@ -89,12 +98,14 @@ class _CompanyLocatorMapScreenState extends State<CompanyLocatorMapScreen> {
       );
       gMap.animateCamera(
         CameraUpdate.newCameraPosition(
-          CameraPosition(target: userLatLng, zoom: 12),
+          CameraPosition(target: userLatLng, zoom: 14), // BETTER initial zoom
         ),
       );
     } else if (_customMarkers.isNotEmpty) {
       final first = _customMarkers.first.position;
-      gMap.animateCamera(CameraUpdate.newLatLngZoom(first, 13));
+      gMap.animateCamera(
+        CameraUpdate.newLatLngZoom(first, 14),
+      ); // BETTER initial zoom
     }
 
     // Show slider if there are companies
@@ -104,7 +115,6 @@ class _CompanyLocatorMapScreenState extends State<CompanyLocatorMapScreen> {
         _currentPageIndex = 0;
       });
 
-      // Reset page controller to first page
       if (_pageController.hasClients) {
         _pageController.jumpToPage(0);
       }
@@ -113,33 +123,313 @@ class _CompanyLocatorMapScreenState extends State<CompanyLocatorMapScreen> {
         _showSlider = false;
       });
     }
+
+    // STAGE 2: Load network images in background
+    _loadNetworkImagesInBackground();
   }
 
-  Future<void> _generateCustomMarkers() async {
+  // STAGE 1: Generate markers instantly with fallback icons
+  Future<void> _generateInstantMarkers() async {
     _customMarkers.clear();
     final usedPositions = <String>{};
 
-    for (int i = 0; i < controller.companies.length; i++) {
-      final company = controller.companies[i];
+    const batchSize = 15; // Larger batches for faster processing
+    final batches = <List<int>>[];
 
-      if (company.latitude == null || company.longitude == null) continue;
+    for (int i = 0; i < controller.companies.length; i += batchSize) {
+      final end = Math.min(i + batchSize, controller.companies.length);
+      batches.add(List.generate(end - i, (index) => i + index));
+    }
 
-      double lat = company.latitude!;
-      double lng = company.longitude!;
-      String posKey = "$lat-$lng";
+    // Process all batches in parallel for maximum speed
+    await Future.wait(
+      batches.map((batch) => _processFallbackBatch(batch, usedPositions)),
+    );
 
-      int retry = 0;
-      while (usedPositions.contains(posKey)) {
-        double offset = 0.00008 * (retry + 1);
-        double angle = (retry % 8) * (45 * 3.1416 / 180);
-        lat = company.latitude! + offset * Math.sin(angle);
-        lng = company.longitude! + offset * Math.cos(angle);
-        posKey = "$lat-$lng";
-        retry++;
+    setState(() {}); // Show all markers instantly
+  }
+
+  // Process batch with fallback markers only
+  Future<void> _processFallbackBatch(
+    List<int> indices,
+    Set<String> usedPositions,
+  ) async {
+    final futures = indices.map(
+      (i) => _createInstantFallbackMarker(i, usedPositions),
+    );
+    final markers = await Future.wait(futures);
+
+    _customMarkers.addAll(
+      markers.where((marker) => marker != null).cast<Marker>(),
+    );
+  }
+
+  // Create instant fallback marker
+  Future<Marker?> _createInstantFallbackMarker(
+    int i,
+    Set<String> usedPositions,
+  ) async {
+    final company = controller.companies[i];
+
+    if (company.latitude == null || company.longitude == null) return null;
+
+    final adjustedPos = _getAdjustedPosition(
+      company.latitude!,
+      company.longitude!,
+      usedPositions,
+    );
+
+    final distanceText =
+        company.distanceKm != null
+            ? (company.distanceKm! < 1
+                ? "${(company.distanceKm! * 1000).toStringAsFixed(0)} m"
+                : "${company.distanceKm!.toStringAsFixed(1)} km")
+            : "--";
+
+    // Use cached fallback or create new one
+    final bytes = await _getCachedFallbackMarker(distanceText);
+
+    return Marker(
+      markerId: MarkerId("${company.companyName}-$i"),
+      position: LatLng(adjustedPos['lat']!, adjustedPos['lng']!),
+      icon: BitmapDescriptor.bytes(bytes),
+      onTap: () => _onMarkerTapped(i),
+    );
+  }
+
+  // Get cached fallback marker (super fast)
+  Future<Uint8List> _getCachedFallbackMarker(String distance) async {
+    final cacheKey = "fallback-$distance";
+
+    if (_fallbackMarkerCache.containsKey(cacheKey)) {
+      return _fallbackMarkerCache[cacheKey]!;
+    }
+
+    final bytes = await _createFallbackMarkerBitmap(distance);
+    _fallbackMarkerCache[cacheKey] = bytes;
+    return bytes;
+  }
+
+  // Create optimized fallback marker with distance badge
+  // Create optimized fallback marker with distance badge
+  Future<Uint8List> _createFallbackMarkerBitmap(String distance) async {
+    const size = Size(120, 120); // INCREASED SIZE for better quality
+    final recorder = ui.PictureRecorder();
+    final canvas = Canvas(recorder);
+
+    // Draw distance badge - larger
+    final badgePaint = Paint()..color = Colors.blueAccent;
+    final badgeRect = RRect.fromRectAndRadius(
+      const Rect.fromLTWH(30, 8, 60, 24), // LARGER badge
+      const Radius.circular(12),
+    );
+    canvas.drawRRect(badgeRect, badgePaint);
+
+    // Draw distance text - larger
+    final textPainter = TextPainter(
+      text: TextSpan(
+        text: distance,
+        style: const TextStyle(
+          color: Colors.white,
+          fontSize: 14, // INCREASED font size
+          fontWeight: FontWeight.w600,
+        ),
+      ),
+      textDirection: TextDirection.ltr,
+    );
+    textPainter.layout();
+    textPainter.paint(canvas, const Offset(38, 14)); // Adjusted position
+
+    // Draw main circle with shadow - larger
+    final shadowPaint =
+        Paint()
+          ..color = Colors.black26
+          ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 3);
+    canvas.drawCircle(const Offset(60, 70), 28, shadowPaint); // LARGER circle
+
+    final circlePaint = Paint()..color = Colors.white;
+    canvas.drawCircle(const Offset(60, 70), 25, circlePaint); // LARGER circle
+
+    // Draw border
+    final borderPaint =
+        Paint()
+          ..color = Colors.grey.shade300
+          ..style = PaintingStyle.stroke
+          ..strokeWidth = 2; // Thicker border
+    canvas.drawCircle(const Offset(60, 70), 25, borderPaint);
+
+    // Draw business icon - larger
+    final iconPainter = TextPainter(
+      text: TextSpan(
+        text: String.fromCharCode(Icons.business.codePoint),
+        style: TextStyle(
+          fontFamily: Icons.business.fontFamily,
+          fontSize: 28, // INCREASED icon size
+          color: Colors.grey.shade600,
+        ),
+      ),
+      textDirection: TextDirection.ltr,
+    );
+    iconPainter.layout();
+    iconPainter.paint(canvas, const Offset(46, 56)); // Adjusted position
+
+    final picture = recorder.endRecording();
+    final image = await picture.toImage(
+      (size.width * 2).toInt(), // DOUBLE pixel density for sharp rendering
+      (size.height * 2).toInt(),
+    );
+    final byteData = await image.toByteData(format: ui.ImageByteFormat.png);
+
+    return byteData!.buffer.asUint8List();
+  }
+
+  // Create marker with network image - enhanced quality
+  Future<Uint8List> _createNetworkMarkerBitmap(
+    String title,
+    String distance,
+    String logoUrl,
+  ) async {
+    const size = Size(120, 120); // INCREASED SIZE
+    final recorder = ui.PictureRecorder();
+    final canvas = Canvas(recorder);
+
+    // Draw distance badge - larger
+    final badgePaint = Paint()..color = Colors.blueAccent;
+    final badgeRect = RRect.fromRectAndRadius(
+      const Rect.fromLTWH(30, 8, 60, 24), // LARGER badge
+      const Radius.circular(12),
+    );
+    canvas.drawRRect(badgeRect, badgePaint);
+
+    // Draw distance text - larger
+    final textPainter = TextPainter(
+      text: TextSpan(
+        text: distance,
+        style: const TextStyle(
+          color: Colors.white,
+          fontSize: 14, // INCREASED font size
+          fontWeight: FontWeight.w600,
+        ),
+      ),
+      textDirection: TextDirection.ltr,
+    );
+    textPainter.layout();
+    textPainter.paint(canvas, const Offset(38, 14)); // Adjusted position
+
+    // Draw main circle with shadow - larger
+    final shadowPaint =
+        Paint()
+          ..color = Colors.black26
+          ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 3);
+    canvas.drawCircle(const Offset(60, 70), 28, shadowPaint); // LARGER circle
+
+    final circlePaint = Paint()..color = Colors.white;
+    canvas.drawCircle(const Offset(60, 70), 25, circlePaint); // LARGER circle
+
+    // Draw border
+    final borderPaint =
+        Paint()
+          ..color = Colors.grey.shade300
+          ..style = PaintingStyle.stroke
+          ..strokeWidth = 2;
+    canvas.drawCircle(const Offset(60, 70), 25, borderPaint);
+
+    // Load and draw network image - larger area
+    try {
+      final networkImage = NetworkImage(logoUrl);
+      final imageStream = networkImage.resolve(const ImageConfiguration());
+      final completer = Completer<ui.Image>();
+
+      imageStream.addListener(
+        ImageStreamListener((ImageInfo info, bool _) {
+          if (!completer.isCompleted) {
+            completer.complete(info.image);
+          }
+        }),
+      );
+
+      final loadedImage = await completer.future;
+
+      // Draw the loaded image in circle - larger destination
+      final srcRect = Rect.fromLTWH(
+        0,
+        0,
+        loadedImage.width.toDouble(),
+        loadedImage.height.toDouble(),
+      );
+      final destRect = const Rect.fromLTWH(37, 47, 46, 46); // LARGER image area
+
+      canvas.save();
+      canvas.clipPath(Path()..addOval(destRect));
+      canvas.drawImageRect(loadedImage, srcRect, destRect, Paint());
+      canvas.restore();
+    } catch (e) {
+      // Fallback to business icon if image fails - larger
+      final iconPainter = TextPainter(
+        text: TextSpan(
+          text: String.fromCharCode(Icons.business.codePoint),
+          style: TextStyle(
+            fontFamily: Icons.business.fontFamily,
+            fontSize: 28, // INCREASED icon size
+            color: Colors.grey.shade600,
+          ),
+        ),
+        textDirection: TextDirection.ltr,
+      );
+      iconPainter.layout();
+      iconPainter.paint(canvas, const Offset(46, 56)); // Adjusted position
+    }
+
+    final picture = recorder.endRecording();
+    final image = await picture.toImage(
+      (size.width * 2).toInt(), // DOUBLE pixel density for sharp rendering
+      (size.height * 2).toInt(),
+    );
+    final byteData = await image.toByteData(format: ui.ImageByteFormat.png);
+
+    return byteData!.buffer.asUint8List();
+  }
+
+  // STAGE 2: Load network images in background
+  void _loadNetworkImagesInBackground() {
+    // Small delay to ensure markers are rendered first
+    Timer(const Duration(milliseconds: 100), () async {
+      const batchSize = 5; // Smaller batches for network loading
+
+      for (int i = 0; i < controller.companies.length; i += batchSize) {
+        final end = Math.min(i + batchSize, controller.companies.length);
+        final batch = List.generate(end - i, (index) => i + index);
+
+        // Process batch
+        await _loadNetworkImageBatch(batch);
+
+        // Small delay between batches to prevent overwhelming the network
+        await Future.delayed(const Duration(milliseconds: 50));
       }
+    });
+  }
 
-      usedPositions.add(posKey);
+  // Load network images for a batch
+  Future<void> _loadNetworkImageBatch(List<int> indices) async {
+    final futures = indices.map(_loadSingleNetworkImage);
+    await Future.wait(futures);
+  }
 
+  // Load single network image and update marker
+  Future<void> _loadSingleNetworkImage(int index) async {
+    final company = controller.companies[index];
+    final logoUrl = company.company?.logo;
+
+    // Skip if no logo URL or already loading
+    if (logoUrl == null ||
+        logoUrl.isEmpty ||
+        _loadingNetworkImages.contains(index)) {
+      return;
+    }
+
+    _loadingNetworkImages.add(index);
+
+    try {
       final distanceText =
           company.distanceKm != null
               ? (company.distanceKm! < 1
@@ -147,32 +437,77 @@ class _CompanyLocatorMapScreenState extends State<CompanyLocatorMapScreen> {
                   : "${company.distanceKm!.toStringAsFixed(1)} km")
               : "--";
 
-      final bytes = await _createCustomMarkerBitmap(
-        context,
+      final bytes = await _createNetworkMarkerBitmap(
         company.companyName,
         distanceText,
-        company.company?.logo,
-      );
+        logoUrl,
+      ).timeout(const Duration(seconds: 2)); // Reasonable timeout
 
-      _customMarkers.add(
-        Marker(
-          markerId: MarkerId("${company.companyName}-$i"),
-          position: LatLng(lat, lng),
-          icon: BitmapDescriptor.bytes(bytes),
-          onTap: () => _onMarkerTapped(i),
-        ),
-      );
+      // Update the marker with network image
+      await _updateMarkerWithNetworkImage(index, bytes);
+    } catch (e) {
+      // Keep fallback marker if network loading fails
+      log('Failed to load network image for ${company.companyName}: $e');
+    } finally {
+      _loadingNetworkImages.remove(index);
     }
-
-    setState(() {});
   }
 
+  // Update specific marker with network image
+  Future<void> _updateMarkerWithNetworkImage(int index, Uint8List bytes) async {
+    final company = controller.companies[index];
+    final markerId = MarkerId("${company.companyName}-$index");
+
+    // Find existing marker
+    final existingMarker = _customMarkers.cast<Marker?>().firstWhere(
+      (marker) => marker?.markerId == markerId,
+      orElse: () => null,
+    );
+
+    if (existingMarker != null) {
+      // Remove old marker and add updated one
+      _customMarkers.remove(existingMarker);
+      _customMarkers.add(
+        existingMarker.copyWith(iconParam: BitmapDescriptor.bytes(bytes)),
+      );
+
+      // Update UI - but only if mounted
+      if (mounted) {
+        setState(() {});
+      }
+    }
+  }
+
+  // Position adjustment logic (unchanged)
+  Map<String, double> _getAdjustedPosition(
+    double lat,
+    double lng,
+    Set<String> usedPositions,
+  ) {
+    String posKey = "$lat-$lng";
+    double adjustedLat = lat;
+    double adjustedLng = lng;
+
+    int retry = 0;
+    while (usedPositions.contains(posKey) && retry < 8) {
+      double offset = 0.00008 * (retry + 1);
+      double angle = (retry % 8) * (45 * 3.1416 / 180);
+      adjustedLat = lat + offset * Math.sin(angle);
+      adjustedLng = lng + offset * Math.cos(angle);
+      posKey = "$adjustedLat-$adjustedLng";
+      retry++;
+    }
+
+    usedPositions.add(posKey);
+    return {'lat': adjustedLat, 'lng': adjustedLng};
+  }
+
+  // Your existing methods remain unchanged
   void _onMarkerTapped(int index) {
     if (index < controller.companies.length) {
       final company = controller.companies[index];
       controller.fetchCompanyById(company.id);
 
-      // Animate to the corresponding page in the slider
       if (_showSlider && _pageController.hasClients) {
         _pageController.animateToPage(
           index,
@@ -209,7 +544,7 @@ class _CompanyLocatorMapScreenState extends State<CompanyLocatorMapScreen> {
           mapController.animateCamera(
             CameraUpdate.newLatLngZoom(
               marker.position, // Use the marker's adjusted position
-              30, // Adjusted zoom level for better visibility
+              19, // Adjusted zoom level for better visibility
             ),
           );
         });
@@ -217,161 +552,10 @@ class _CompanyLocatorMapScreenState extends State<CompanyLocatorMapScreen> {
     }
   }
 
-  Future<Uint8List> _createCustomMarkerBitmap(
-    BuildContext context,
-    String title,
-    String distance,
-    String? logoUrl,
-  ) async {
-    final key = GlobalKey(
-      debugLabel: 'marker-${DateTime.now().millisecondsSinceEpoch}',
-    );
-    final completer = Completer<void>();
-
-    final markerWidget = Material(
-      type: MaterialType.transparency,
-      child: RepaintBoundary(
-        key: key,
-        child: _buildCustomMarker(title, distance, logoUrl, completer),
-      ),
-    );
-
-    final overlay = Overlay.of(context);
-    final entry = OverlayEntry(builder: (_) => Center(child: markerWidget));
-    overlay.insert(entry);
-
-    // Wait for the widget to be properly rendered
-    await Future.delayed(const Duration(milliseconds: 50));
-
-    // Wait for image loading if there's a logo URL
-    if (logoUrl != null && logoUrl.isNotEmpty) {
-      await completer.future.timeout(
-        const Duration(seconds: 3),
-        onTimeout: () {
-          if (!completer.isCompleted) {
-            completer.complete();
-          }
-        },
-      );
-    } else {
-      // Ensure completer is completed for cases without logo
-      if (!completer.isCompleted) {
-        completer.complete();
-      }
-    }
-
-    // Additional delay to ensure rendering is complete
-    await Future.delayed(const Duration(milliseconds: 100));
-
-    RenderRepaintBoundary boundary =
-        key.currentContext!.findRenderObject() as RenderRepaintBoundary;
-    final image = await boundary.toImage(pixelRatio: 1.5);
-    final byteData = await image.toByteData(format: ui.ImageByteFormat.png);
-    final pngBytes = byteData!.buffer.asUint8List();
-
-    entry.remove();
-    return pngBytes;
-  }
-
-  Widget _buildCustomMarker(
-    String title,
-    String distance,
-    String? logoUrl,
-    Completer<void> completer,
-  ) {
-    // Complete the completer immediately if no logo URL
-    if (logoUrl == null || logoUrl.isEmpty) {
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        if (!completer.isCompleted) {
-          completer.complete();
-        }
-      });
-    }
-
-    return Column(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        Container(
-          padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 2),
-          decoration: BoxDecoration(
-            color: Colors.blueAccent,
-            borderRadius: BorderRadius.circular(20),
-          ),
-          child: Text(
-            distance,
-            style: const TextStyle(
-              color: Colors.white,
-              fontSize: 12,
-              fontWeight: FontWeight.bold,
-            ),
-          ),
-        ),
-        const SizedBox(height: 2),
-        Container(
-          width: 40,
-          height: 40,
-          decoration: BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.circular(30),
-            boxShadow: const [BoxShadow(color: Colors.black26, blurRadius: 4)],
-          ),
-          child: ClipRRect(
-            borderRadius: BorderRadius.circular(30),
-            child:
-                logoUrl != null && logoUrl.isNotEmpty
-                    ? Image.network(
-                      logoUrl,
-                      fit: BoxFit.cover,
-                      frameBuilder: (
-                        context,
-                        child,
-                        frame,
-                        wasSynchronouslyLoaded,
-                      ) {
-                        if (frame != null && !completer.isCompleted) {
-                          completer.complete();
-                        }
-                        return child;
-                      },
-                      errorBuilder: (context, error, stackTrace) {
-                        if (!completer.isCompleted) {
-                          completer.complete();
-                        }
-                        return Container(
-                          decoration: BoxDecoration(
-                            color: Colors.grey[200],
-                            borderRadius: BorderRadius.circular(30),
-                          ),
-                          child: Icon(
-                            Icons.business,
-                            color: Colors.grey[600],
-                            size: 24,
-                          ),
-                        );
-                      },
-                    )
-                    : Container(
-                      decoration: BoxDecoration(
-                        color: Colors.grey[200],
-                        borderRadius: BorderRadius.circular(30),
-                      ),
-                      child: Icon(
-                        Icons.business,
-                        color: Colors.grey[600],
-                        size: 24,
-                      ),
-                    ),
-          ),
-        ),
-      ],
-    );
-  }
-
   bool isSearchSelected = false;
   bool isFilterSelected = false;
   bool isVendorSelected = false;
 
-  // ...existing code...
   String get subtitle {
     if (isVendorSelected) return ' vendors';
     if (isFilterSelected) return ' filter';
@@ -386,8 +570,6 @@ class _CompanyLocatorMapScreenState extends State<CompanyLocatorMapScreen> {
       isVendorSelected = type == 'vendor' ? !isVendorSelected : false;
     });
   }
-
-  // ...existing code...
 
   @override
   Widget build(BuildContext context) {
@@ -413,19 +595,11 @@ class _CompanyLocatorMapScreenState extends State<CompanyLocatorMapScreen> {
                 setState(() {
                   isFilterSelected = false;
                 });
-                _loadData(); // Only if _loadData doesn't contain setState itself
+                _loadData();
               },
             );
           }
 
-          // } else if (isSearchSelected) {
-          //   return FilterCompanyListScreen(
-          //     onTap: () {
-          //       toggleSelection("vendor");
-          //       _loadData();
-          //     },
-          //   );
-          // }
           return Stack(
             children: [
               GoogleMap(
@@ -455,7 +629,7 @@ class _CompanyLocatorMapScreenState extends State<CompanyLocatorMapScreen> {
                 },
               ),
 
-              // Company Slider
+              // Company Slider (unchanged)
               if (_showSlider)
                 Positioned(
                   bottom: 0,
@@ -464,15 +638,10 @@ class _CompanyLocatorMapScreenState extends State<CompanyLocatorMapScreen> {
                   child: LayoutBuilder(
                     builder: (context, constraints) {
                       final screenHeight = MediaQuery.of(context).size.height;
-                      final sliderHeight =
-                          screenHeight *
-                          0.28; // 28% of screen height, responsive
+                      final sliderHeight = screenHeight * 0.28;
                       return AnimatedContainer(
                         duration: const Duration(milliseconds: 300),
-                        height: sliderHeight.clamp(
-                          180.0,
-                          320.0,
-                        ), // min 180, max 320
+                        height: sliderHeight.clamp(180.0, 320.0),
                         decoration: BoxDecoration(
                           gradient: LinearGradient(
                             begin: Alignment.topCenter,
@@ -486,7 +655,6 @@ class _CompanyLocatorMapScreenState extends State<CompanyLocatorMapScreen> {
                         ),
                         child: Column(
                           children: [
-                            // Company cards slider
                             Expanded(
                               child: GetBuilder<CompanyController>(
                                 builder: (_) {
@@ -519,7 +687,6 @@ class _CompanyLocatorMapScreenState extends State<CompanyLocatorMapScreen> {
                                               ),
                                               hideBottomBar: true,
                                             );
-                                            // Get.to(() => VendorDescription(company: company));
                                           },
                                           child: VendorInfoCard(
                                             logoImage:
