@@ -22,11 +22,18 @@ class WalletScreen extends StatelessWidget {
             Get.back();
           },
         ),
-        title: const Text('My Wallet', style: TextStyle(color: Color(0xFF2864A6), fontSize: 18, fontWeight: FontWeight.w600)),
+        title: const Text(
+          'My Wallet',
+          style: TextStyle(
+            color: Color(0xFF2864A6),
+            fontSize: 18,
+            fontWeight: FontWeight.w600,
+          ),
+        ),
       ),
       body: GetBuilder<AuthController>(
         builder: (authController) {
-          final double? wallet = authController.userProfile?.wallet;
+          final double? wallet = authController.userProfile?.wallet?.toDouble();
 
           return SingleChildScrollView(
             padding: const EdgeInsets.all(16),
@@ -37,15 +44,37 @@ class WalletScreen extends StatelessWidget {
 
                 /// Show image only when wallet is null or zero
                 if (wallet == null || wallet == 0) ...[
-                  Image.asset('assets/images/wallet.png', width: screenWidth * 0.5, height: screenWidth * 0.5, fit: BoxFit.contain),
+                  Image.asset(
+                    'assets/images/wallet.png',
+                    width: screenWidth * 0.5,
+                    height: screenWidth * 0.5,
+                    fit: BoxFit.contain,
+                  ),
                   const SizedBox(height: 24),
-                  const Text('Streammly Money', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20)),
+                  const Text(
+                    'Streammly Money',
+                    style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20),
+                  ),
                   const SizedBox(height: 8),
-                  const Text('Add Money to enjoy one-tap, streamline payments', textAlign: TextAlign.center, style: TextStyle(fontSize: 14, color: Colors.grey)),
+                  const Text(
+                    'Add Money to enjoy one-tap, streamline payments',
+                    textAlign: TextAlign.center,
+                    style: TextStyle(fontSize: 14, color: Colors.grey),
+                  ),
                 ] else ...[
-                  const Text('Your Wallet Balance', style: TextStyle(fontSize: 20, fontWeight: FontWeight.w600)),
+                  const Text(
+                    'Your Wallet Balance',
+                    style: TextStyle(fontSize: 20, fontWeight: FontWeight.w600),
+                  ),
                   const SizedBox(height: 12),
-                  Text('₹${wallet.toStringAsFixed(2)}', style: const TextStyle(fontSize: 36, fontWeight: FontWeight.bold, color: Colors.green)),
+                  Text(
+                    '₹${wallet.toStringAsFixed(2)}',
+                    style: const TextStyle(
+                      fontSize: 36,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.green,
+                    ),
+                  ),
                   const SizedBox(height: 12),
                 ],
 
@@ -56,28 +85,48 @@ class WalletScreen extends StatelessWidget {
                     style: ElevatedButton.styleFrom(
                       backgroundColor: const Color(0xFF2864A6),
                       padding: const EdgeInsets.symmetric(vertical: 16),
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(8),
+                      ),
                     ),
                     onPressed: () {
                       // Add your "Add Money" logic or navigation here
                     },
-                    child: const Text('Add Money', style: TextStyle(color: Colors.white, fontSize: 16)),
+                    child: const Text(
+                      'Add Money',
+                      style: TextStyle(color: Colors.white, fontSize: 16),
+                    ),
                   ),
                 ),
                 const SizedBox(height: 24),
-                const Align(alignment: Alignment.centerLeft, child: Text('Important Update', style: TextStyle(fontWeight: FontWeight.w600, fontSize: 15))),
+                const Align(
+                  alignment: Alignment.centerLeft,
+                  child: Text(
+                    'Important Update',
+                    style: TextStyle(fontWeight: FontWeight.w600, fontSize: 15),
+                  ),
+                ),
                 const SizedBox(height: 8),
                 Container(
                   width: double.infinity,
                   padding: const EdgeInsets.all(12),
-                  decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(8)),
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(8),
+                  ),
                   child: const Text(
                     'Effective 1st July 2025, Streammly money can be used only pay for available balance atleast 200 in wallet',
                     style: TextStyle(fontSize: 14, color: Colors.black87),
                   ),
                 ),
                 const SizedBox(height: 24),
-                const Align(alignment: Alignment.centerLeft, child: Text('Transaction History', style: TextStyle(fontWeight: FontWeight.w600, fontSize: 15))),
+                const Align(
+                  alignment: Alignment.centerLeft,
+                  child: Text(
+                    'Transaction History',
+                    style: TextStyle(fontWeight: FontWeight.w600, fontSize: 15),
+                  ),
+                ),
                 const SizedBox(height: 16),
                 SingleChildScrollView(
                   scrollDirection: Axis.horizontal,
@@ -109,9 +158,20 @@ class WalletScreen extends StatelessWidget {
       decoration: BoxDecoration(
         color: isActive ? Colors.white : Colors.grey[200],
         borderRadius: BorderRadius.circular(8),
-        border: Border.all(color: isActive ? const Color(0xFF2864A6) : Colors.transparent, width: 1.5),
+        border: Border.all(
+          color: isActive ? const Color(0xFF2864A6) : Colors.transparent,
+          width: 1.5,
+        ),
       ),
-      child: Text(text, textAlign: TextAlign.center, style: TextStyle(fontWeight: FontWeight.w600, fontSize: 13, color: isActive ? const Color(0xFF2864A6) : Colors.black54)),
+      child: Text(
+        text,
+        textAlign: TextAlign.center,
+        style: TextStyle(
+          fontWeight: FontWeight.w600,
+          fontSize: 13,
+          color: isActive ? const Color(0xFF2864A6) : Colors.black54,
+        ),
+      ),
     );
   }
 }

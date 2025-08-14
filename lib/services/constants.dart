@@ -26,16 +26,19 @@ class AppConstants {
   set setBaseUrl(String url) => baseUrl = url;
 
   //TODO: Change Base Url
-  static String baseUrl = 'https://admin.streammly.com/';
-  // static String baseUrl = 'http://192.168.1.113:8000/';
+  // static String baseUrl = 'https://admin.streammly.com/';
+  static String baseUrl = 'http://192.168.1.113:8000/';
 
   static String appName = 'App Name';
 
   static const String agoraAppId = 'c87b710048c049f59570bd1895b7e561';
 
   // User
-  static const String getUserProfile = 'api/v1/user/getuserprofile';
-  static const String updateUserProfile = 'api/v1/user/updateuserprofile';
+  static const String getUserProfile = 'api/v1/user/getuserprofile/';
+  static const String updateUserProfile = 'api/v1/user/updateuserprofile/';
+  static const String addUserAddress = 'api/v1/user/adduseraddress/';
+  static const String updateUserAddress = 'api/v1/user/updateuseraddress/';
+  static const String deleteUserAddress = 'api/v1/user/deleteuseraddress/';
 
   // OTP
   static const String sendOtp = 'api/v1/user/auth/generateOtp';

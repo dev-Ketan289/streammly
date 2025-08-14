@@ -34,7 +34,7 @@ class _ProfileFormScreenState extends State<ProfileFormScreen> {
       nameController.text = authController.userProfile?.name ?? '';
       emailController.text = authController.userProfile?.email ?? '';
       phoneController.text = authController.userProfile?.phone ?? '';
-      dobController.text = authController.userProfile?.dob ?? '';
+      dobController.text = authController.userProfile?.dob.toString() ?? '';
       selectedGender = authController.userProfile?.gender;
     } else {
       phoneController.text = authController.phoneController.text;
@@ -51,7 +51,7 @@ class _ProfileFormScreenState extends State<ProfileFormScreen> {
     );
     if (picked != null) {
       dobController.text =
-      "${picked.year.toString().padLeft(4, '0')}-${picked.month.toString().padLeft(2, '0')}-${picked.day.toString().padLeft(2, '0')}";
+          "${picked.year.toString().padLeft(4, '0')}-${picked.month.toString().padLeft(2, '0')}-${picked.day.toString().padLeft(2, '0')}";
     }
   }
 
@@ -84,7 +84,6 @@ class _ProfileFormScreenState extends State<ProfileFormScreen> {
 
         // ✅ Navigate to next screen after success
         Get.offAll(() => const LocationScreen());
-
       } else {
         Fluttertoast.showToast(msg: response?.message ?? "Update failed");
       }
@@ -106,9 +105,8 @@ class _ProfileFormScreenState extends State<ProfileFormScreen> {
       ),
       filled: true,
       fillColor: theme.backgroundLight.withValues(alpha: 0.97),
-      suffixIcon: icon != null
-          ? Icon(icon, color: Colors.grey[600], size: 19)
-          : null,
+      suffixIcon:
+          icon != null ? Icon(icon, color: Colors.grey[600], size: 19) : null,
       contentPadding: const EdgeInsets.symmetric(horizontal: 15, vertical: 14),
       border: OutlineInputBorder(
         borderRadius: BorderRadius.circular(10),
@@ -248,8 +246,14 @@ class _ProfileFormScreenState extends State<ProfileFormScreen> {
                         },
                         items: const [
                           DropdownMenuItem(value: "male", child: Text("Male")),
-                          DropdownMenuItem(value: "female", child: Text("Female")),
-                          DropdownMenuItem(value: "other", child: Text("Other")),
+                          DropdownMenuItem(
+                            value: "female",
+                            child: Text("Female"),
+                          ),
+                          DropdownMenuItem(
+                            value: "other",
+                            child: Text("Other"),
+                          ),
                         ],
                         isExpanded: true,
                         decoration: InputDecoration(
@@ -261,7 +265,10 @@ class _ProfileFormScreenState extends State<ProfileFormScreen> {
                           ),
                           filled: true,
                           fillColor: const Color(0xFFF7F8FA),
-                          contentPadding: const EdgeInsets.symmetric(horizontal: 15, vertical: 14),
+                          contentPadding: const EdgeInsets.symmetric(
+                            horizontal: 15,
+                            vertical: 14,
+                          ),
                           border: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(10),
                             borderSide: BorderSide(color: Colors.grey[300]!),
@@ -301,28 +308,30 @@ class _ProfileFormScreenState extends State<ProfileFormScreen> {
                               borderRadius: BorderRadius.circular(10),
                             ),
                           ),
-                          child: isLoading
-                              ? const SizedBox(
-                            width: 22,
-                            height: 22,
-                            child: CircularProgressIndicator(
-                              strokeWidth: 2,
-                              color: Colors.white,
-                            ),
-                          )
-                              : Text(
-                            "Save Profile",
-                            style: themeData.textTheme.bodyLarge?.copyWith(
-                              color: Colors.white,
-                              fontWeight: FontWeight.bold,
-                              fontSize: 16,
-                            ),
-                          ),
+                          child:
+                              isLoading
+                                  ? const SizedBox(
+                                    width: 22,
+                                    height: 22,
+                                    child: CircularProgressIndicator(
+                                      strokeWidth: 2,
+                                      color: Colors.white,
+                                    ),
+                                  )
+                                  : Text(
+                                    "Save Profile",
+                                    style: themeData.textTheme.bodyLarge
+                                        ?.copyWith(
+                                          color: Colors.white,
+                                          fontWeight: FontWeight.bold,
+                                          fontSize: 16,
+                                        ),
+                                  ),
                         ),
                       ),
                     ],
                   ),
-                )
+                ),
               ],
             ),
           ),

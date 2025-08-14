@@ -35,7 +35,10 @@ class EnterLocationManuallyScreen extends StatelessWidget {
                   controller.setMapController(mapController);
                 },
                 onTap: (LatLng position) {
-                  controller.updateLocation(position.latitude, position.longitude);
+                  controller.updateLocation(
+                    position.latitude,
+                    position.longitude,
+                  );
                 },
                 markers: {
                   Marker(
@@ -50,7 +53,10 @@ class EnterLocationManuallyScreen extends StatelessWidget {
               /// ---------- SEARCH BAR ----------
               SafeArea(
                 child: Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 16,
+                    vertical: 12,
+                  ),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
@@ -69,16 +75,23 @@ class EnterLocationManuallyScreen extends StatelessWidget {
                           onChanged: controller.searchAutocomplete,
                           decoration: InputDecoration(
                             hintText: "Search Location here",
-                            prefixIcon: Icon(Icons.search, color: theme.hintColor),
-                            suffixIcon: searchController.text.isNotEmpty
-                                ? IconButton(
-                              icon: Icon(Icons.clear, color: theme.hintColor),
-                              onPressed: () {
-                                searchController.clear();
-                                controller.clearSuggestions();
-                              },
-                            )
-                                : null,
+                            prefixIcon: Icon(
+                              Icons.search,
+                              color: theme.hintColor,
+                            ),
+                            suffixIcon:
+                                searchController.text.isNotEmpty
+                                    ? IconButton(
+                                      icon: Icon(
+                                        Icons.clear,
+                                        color: theme.hintColor,
+                                      ),
+                                      onPressed: () {
+                                        searchController.clear();
+                                        controller.clearSuggestions();
+                                      },
+                                    )
+                                    : null,
                             filled: true,
                             fillColor: colorScheme.surface,
                             border: OutlineInputBorder(
@@ -109,15 +122,23 @@ class EnterLocationManuallyScreen extends StatelessWidget {
                           ),
                           child: ListView.separated(
                             itemCount: controller.suggestions.length,
-                            separatorBuilder: (context, index) => const Divider(height: 1),
+                            separatorBuilder:
+                                (context, index) => const Divider(height: 1),
                             itemBuilder: (context, index) {
                               final prediction = controller.suggestions[index];
                               return ListTile(
-                                leading: Icon(Icons.location_on, color: colorScheme.primary),
-                                title: Text(prediction.description ?? '', style: theme.textTheme.bodyMedium),
+                                leading: Icon(
+                                  Icons.location_on,
+                                  color: colorScheme.primary,
+                                ),
+                                title: Text(
+                                  prediction.description ?? '',
+                                  style: theme.textTheme.bodyMedium,
+                                ),
                                 onTap: () {
                                   controller.selectPrediction(prediction);
-                                  searchController.text = prediction.description ?? '';
+                                  searchController.text =
+                                      prediction.description ?? '';
                                 },
                               );
                             },
@@ -137,10 +158,21 @@ class EnterLocationManuallyScreen extends StatelessWidget {
                   return Container(
                     decoration: BoxDecoration(
                       color: colorScheme.surface,
-                      borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
-                      boxShadow: const [BoxShadow(color: Colors.black12, blurRadius: 10, offset: Offset(0, -2))],
+                      borderRadius: const BorderRadius.vertical(
+                        top: Radius.circular(20),
+                      ),
+                      boxShadow: const [
+                        BoxShadow(
+                          color: Colors.black12,
+                          blurRadius: 10,
+                          offset: Offset(0, -2),
+                        ),
+                      ],
                     ),
-                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 16,
+                      vertical: 12,
+                    ),
                     child: SingleChildScrollView(
                       controller: scrollController,
                       child: Column(
@@ -157,8 +189,12 @@ class EnterLocationManuallyScreen extends StatelessWidget {
                             ),
                           ),
                           const SizedBox(height: 16),
-                          Text("Selected Location",
-                              style: theme.textTheme.bodyLarge!.copyWith(fontWeight: FontWeight.bold)),
+                          Text(
+                            "Selected Location",
+                            style: theme.textTheme.bodyLarge!.copyWith(
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
                           const SizedBox(height: 8),
 
                           Container(
@@ -166,23 +202,40 @@ class EnterLocationManuallyScreen extends StatelessWidget {
                             decoration: BoxDecoration(
                               color: colorScheme.primary.withValues(alpha: 0.1),
                               borderRadius: BorderRadius.circular(12),
-                              border: Border.all(color: colorScheme.primary.withValues(alpha: 0.3)),
+                              border: Border.all(
+                                color: colorScheme.primary.withValues(
+                                  alpha: 0.3,
+                                ),
+                              ),
                             ),
                             child: Row(
                               children: [
                                 CircleAvatar(
                                   backgroundColor: colorScheme.primary,
-                                  child: const Icon(Icons.location_pin, color: Colors.white, size: 20),
+                                  child: const Icon(
+                                    Icons.location_pin,
+                                    color: Colors.white,
+                                    size: 20,
+                                  ),
                                 ),
                                 const SizedBox(width: 12),
                                 Expanded(
                                   child: Column(
-                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
                                     children: [
-                                      Text("Current Selection",
-                                          style: theme.textTheme.bodyMedium!.copyWith(fontWeight: FontWeight.w500)),
-                                      Text(controller.formattedCurrentLocation,
-                                          style: theme.textTheme.bodySmall!.copyWith(color: Colors.grey[600])),
+                                      Text(
+                                        "Current Selection",
+                                        style: theme.textTheme.bodyMedium!
+                                            .copyWith(
+                                              fontWeight: FontWeight.w500,
+                                            ),
+                                      ),
+                                      Text(
+                                        controller.formattedCurrentLocation,
+                                        style: theme.textTheme.bodySmall!
+                                            .copyWith(color: Colors.grey[600]),
+                                      ),
                                     ],
                                   ),
                                 ),
@@ -193,8 +246,12 @@ class EnterLocationManuallyScreen extends StatelessWidget {
                           const SizedBox(height: 20),
                           const Divider(),
 
-                          Text("Saved Addresses",
-                              style: theme.textTheme.bodyLarge!.copyWith(fontWeight: FontWeight.bold)),
+                          Text(
+                            "Saved Addresses",
+                            style: theme.textTheme.bodyLarge!.copyWith(
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
                           const SizedBox(height: 8),
 
                           /// Dynamic saved address list
@@ -204,29 +261,34 @@ class EnterLocationManuallyScreen extends StatelessWidget {
                               icon: saved.type.icon,
                               title: saved.title,
                               subtitle: saved.address,
-                              onTap: () => controller.updateLocation(saved.lat, saved.lng),
-                              onEdit: () {
-                                Get.to(() => AddressPage(
-                                  mode: AddressPageMode.edit,
-                                  existingAddress: AddressModel(
-                                    title: saved.title,
-                                    line1: saved.line1,
-                                    line2: saved.line2,
-                                    city: saved.city,
-                                    state: saved.state,
-                                    pincode: saved.pincode,
-                                    isPrimary: saved.title == "Primary",
+                              onTap:
+                                  () => controller.updateLocation(
+                                    saved.lat,
+                                    saved.lng,
                                   ),
-                                ))?.then((updated) {
-                                  if (updated is AddressModel) {
-                                    controller.updateSavedAddress(saved.id, updated);
-                                  }
-                                });
-                              },
+                              // onEdit: () {
+                              //   Get.to(() => AddressPage(
+                              //     mode: AddressPageMode.edit,
+                              //     existingAddress: AddressModel(
+                              //       title: saved.title,
+                              //       line1: saved.line1,
+                              //       line2: saved.line2,
+                              //       city: saved.city,
+                              //       state: saved.state,
+                              //       pincode: saved.pincode,
+                              //       isPrimary: saved.title == "Primary",
+                              //     ),
+                              //   ))?.then((updated) {
+                              //     if (updated is AddressModel) {
+                              //       controller.updateSavedAddress(saved.id, updated);
+                              //     }
+                              //   });
+                              // },
                               onDelete: () {
                                 Get.defaultDialog(
                                   title: "Delete Address",
-                                  middleText: "Are you sure you want to delete this address?",
+                                  middleText:
+                                      "Are you sure you want to delete this address?",
                                   textCancel: "Cancel",
                                   textConfirm: "Delete",
                                   confirmTextColor: Colors.white,
@@ -242,32 +304,31 @@ class EnterLocationManuallyScreen extends StatelessWidget {
 
                           const SizedBox(height: 8),
 
-                          TextButton.icon(
-                            onPressed: () {
-                              Get.to(() => AddressPage(mode: AddressPageMode.add))?.then((updated) {
-                                if (updated is AddressModel) {
-                                  controller.addSavedAddress(SavedAddress(
-                                    id: DateTime.now().millisecondsSinceEpoch.toString(),
-                                    title: updated.title,
-                                    address:
-                                    '${updated.line1}, ${updated.line2}, ${updated.city}, ${updated.state}, ${updated.pincode}',
-                                    line1: updated.line1,
-                                    line2: updated.line2,
-                                    city: updated.city,
-                                    state: updated.state,
-                                    pincode: updated.pincode,
-                                    lat: controller.lat,
-                                    lng: controller.lng,
-                                    type: AddressType.other,
-                                  ));
-                                }
-                              });
-                            },
-                            icon: Icon(Icons.add, color: colorScheme.primary),
-                            label: Text("Add New Address",
-                                style: theme.textTheme.bodyMedium!.copyWith(color: colorScheme.primary)),
-                          ),
-
+                          // TextButton.icon(
+                          //   onPressed: () {
+                          //     Get.to(() => AddressPage(mode: AddressPageMode.add))?.then((updated) {
+                          //       if (updated is AddressModel) {
+                          //         controller.addSavedAddress(SavedAddress(
+                          //           id: DateTime.now().millisecondsSinceEpoch.toString(),
+                          //           title: updated.title,
+                          //           address:
+                          //           '${updated.line1}, ${updated.line2}, ${updated.city}, ${updated.state}, ${updated.pincode}',
+                          //           line1: updated.line1,
+                          //           line2: updated.line2,
+                          //           city: updated.city,
+                          //           state: updated.state,
+                          //           pincode: updated.pincode,
+                          //           lat: controller.lat,
+                          //           lng: controller.lng,
+                          //           type: AddressType.other,
+                          //         ));
+                          //       }
+                          //     });
+                          //   },
+                          //   icon: Icon(Icons.add, color: colorScheme.primary),
+                          //   label: Text("Add New Address",
+                          //       style: theme.textTheme.bodyMedium!.copyWith(color: colorScheme.primary)),
+                          // ),
                           const SizedBox(height: 16),
 
                           SizedBox(
@@ -277,20 +338,30 @@ class EnterLocationManuallyScreen extends StatelessWidget {
                               onPressed: () {
                                 controller.saveSelectedLocation();
                                 Get.find<HomeController>().fetchSlides();
-                                Get.find<HomeController>().fetchRecommendedCompanies();
-                                Get.find<CategoryController>().fetchCategories();
-                                Get.find<PromoSliderController>().fetchSliders();
-                                Get.find<CompanyController>().fetchAndCacheCompanyById(1);
+                                Get.find<HomeController>()
+                                    .fetchRecommendedCompanies();
+                                Get.find<CategoryController>()
+                                    .fetchCategories();
+                                Get.find<PromoSliderController>()
+                                    .fetchSliders();
+                                Get.find<CompanyController>()
+                                    .fetchAndCacheCompanyById(1);
                                 Get.to(() => NavigationFlow());
                               },
                               style: ElevatedButton.styleFrom(
                                 backgroundColor: colorScheme.primary,
-                                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(12),
+                                ),
                                 elevation: 2,
                               ),
-                              child: Text("Confirm Location",
-                                  style: theme.textTheme.bodyLarge!.copyWith(
-                                      color: Colors.white, fontWeight: FontWeight.w500)),
+                              child: Text(
+                                "Confirm Location",
+                                style: theme.textTheme.bodyLarge!.copyWith(
+                                  color: Colors.white,
+                                  fontWeight: FontWeight.w500,
+                                ),
+                              ),
                             ),
                           ),
                           const SizedBox(height: 16),
@@ -308,14 +379,14 @@ class EnterLocationManuallyScreen extends StatelessWidget {
   }
 
   Widget _buildSavedAddressTile(
-      BuildContext context, {
-        required IconData icon,
-        required String title,
-        required String subtitle,
-        required VoidCallback onTap,
-        VoidCallback? onEdit,
-        VoidCallback? onDelete,
-      }) {
+    BuildContext context, {
+    required IconData icon,
+    required String title,
+    required String subtitle,
+    required VoidCallback onTap,
+    VoidCallback? onEdit,
+    VoidCallback? onDelete,
+  }) {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
 
@@ -330,20 +401,34 @@ class EnterLocationManuallyScreen extends StatelessWidget {
           backgroundColor: colorScheme.primary.withValues(alpha: 0.1),
           child: Icon(icon, color: colorScheme.primary, size: 20),
         ),
-        title: Text(title,
-            style: theme.textTheme.bodyMedium!.copyWith(fontWeight: FontWeight.w500)),
-        subtitle:
-        Text(subtitle, style: theme.textTheme.bodySmall!.copyWith(color: Colors.grey[600])),
+        title: Text(
+          title,
+          style: theme.textTheme.bodyMedium!.copyWith(
+            fontWeight: FontWeight.w500,
+          ),
+        ),
+        subtitle: Text(
+          subtitle,
+          style: theme.textTheme.bodySmall!.copyWith(color: Colors.grey[600]),
+        ),
         onTap: onTap,
         trailing: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
             if (onEdit != null)
-              IconButton(icon: const Icon(Icons.edit_location_alt, size: 20), onPressed: onEdit),
+              IconButton(
+                icon: const Icon(Icons.edit_location_alt, size: 20),
+                onPressed: onEdit,
+              ),
             if (onDelete != null)
               IconButton(
-                  icon: const Icon(Icons.delete_forever, size: 20, color: Colors.red),
-                  onPressed: onDelete),
+                icon: const Icon(
+                  Icons.delete_forever,
+                  size: 20,
+                  color: Colors.red,
+                ),
+                onPressed: onDelete,
+              ),
           ],
         ),
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),

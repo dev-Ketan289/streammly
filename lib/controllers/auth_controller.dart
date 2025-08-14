@@ -10,10 +10,10 @@ import 'package:google_sign_in/google_sign_in.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:sms_autofill/sms_autofill.dart';
 import 'package:streammly/data/repository/auth_repo.dart';
+import 'package:streammly/models/profile/user_profile_model.dart';
 import 'package:streammly/models/response/response_model.dart';
 import 'package:uuid/uuid.dart';
 
-import '../models/profile/user_profile.dart';
 import '../services/custom_error_pop_widget.dart';
 import '../views/screens/auth_screens/create_user.dart';
 import '../views/screens/auth_screens/welcome.dart';
@@ -26,11 +26,12 @@ class AuthController extends GetxController implements GetxService {
   final TextEditingController emailController = TextEditingController();
 
   bool isLoading = false;
+  List<Address> address = [];
 
   String? loginMethod;
 
   // --- User Profile ---
-  UserProfile? userProfile;
+  UserProfileModel? userProfile;
 
   Future<ResponseModel?> fetchUserProfile() async {
     isLoading = true;
@@ -43,8 +44,17 @@ class AuthController extends GetxController implements GetxService {
         name: "***** Response in fetchUserProfile () ******",
       );
       if (response.statusCode == 200 && response.body['data'] != null) {
-        userProfile = UserProfile.fromJson(response.body['data']);
-
+        userProfile = UserProfileModel.fromJson(response.body['data']);
+        // If address is supposed to be a list, try to parse it from the response if available
+        if (response.body['data']['addresses'] != null &&
+            response.body['data']['addresses'] is List) {
+          address =
+              (response.body['data']['addresses'] as List)
+                  .map((e) => Address.fromJson(e))
+                  .toList();
+        } else {
+          address = [];
+        }
         // Populate controllers with user profile data
         if (userProfile!.phone != null && userProfile!.phone!.isNotEmpty) {
           phoneController.text = userProfile!.phone!;
@@ -100,38 +110,47 @@ class AuthController extends GetxController implements GetxService {
         dob: dob?.trim(),
         gender: gender,
         phone: phone.trim(),
-        alternatePhone: alternatePhone?.trim(),
+        alternatePhone: alternatePhone!.trim(),
         profileImage: profileImage,
         coverImage: coverImage,
       );
 
-      log("Response Status: ${response.statusCode}", name: "updateFullUserProfile");
-      log("Response Body: ${response.bodyString}", name: "updateFullUserProfile");
+      log(
+        "Response Status: ${response.statusCode}",
+        name: "updateFullUserProfile",
+      );
+      log(
+        "Response Body: ${response.bodyString}",
+        name: "updateFullUserProfile",
+      );
 
       if (response.statusCode == 200 && response.body is Map<String, dynamic>) {
         final body = response.body as Map<String, dynamic>;
 
-        bool isSuccess = body['success'] == true ||
+        bool isSuccess =
+            body['success'] == true ||
             body['status'] == 'success' ||
             body['code'] == 200;
 
         if (isSuccess) {
           if (body['data'] is Map<String, dynamic>) {
             // Parse full user profile
-            userProfile = UserProfile.fromJson(body['data']);
+            userProfile = UserProfileModel.fromJson(body['data']);
           }
           // If string, treat as success message only
           final msg = body['message'] ?? body['data'] ?? "Profile updated";
           responseModel = ResponseModel(true, msg.toString());
         } else {
-          responseModel = ResponseModel(false, body['message'] ?? "Profile update failed");
+          responseModel = ResponseModel(
+            false,
+            body['message'] ?? "Profile update failed",
+          );
         }
-
       } else {
         final errorMessage =
-        (response.body is Map && response.body['message'] != null)
-            ? response.body['message']
-            : "Server error occurred";
+            (response.body is Map && response.body['message'] != null)
+                ? response.body['message']
+                : "Server error occurred";
         log("HTTP Error: ${response.statusCode} - $errorMessage");
         responseModel = ResponseModel(false, errorMessage);
       }
@@ -145,6 +164,131 @@ class AuthController extends GetxController implements GetxService {
     return responseModel;
   }
 
+  //address
+  // Address Operations
+  Future<ResponseModel> addUserAddress(
+    String title,
+    String lineOne,
+    String lineTwo,
+    String landMark,
+    String city,
+    String state,
+    String pinCode,
+    String latitude,
+    String longitude,
+    String isDefault,
+  ) async {
+    isLoading = true;
+    update();
+    ResponseModel responseModel;
+    try {
+      Response response = await authRepo.addUserAddress(
+        title,
+        lineOne,
+        lineTwo,
+        landMark,
+        city,
+        state,
+        pinCode,
+        latitude,
+        longitude,
+        isDefault,
+      );
+      if (response.statusCode == 200 && response.body['success']) {
+        fetchUserProfile();
+        responseModel = ResponseModel(
+          true,
+          response.body['message'] ?? "Address added successfully",
+        );
+      } else {
+        responseModel = ResponseModel(
+          false,
+          response.body['message'] ?? "Failed to add address",
+        );
+      }
+    } catch (e) {
+      responseModel = ResponseModel(false, "CATCH");
+    }
+    isLoading = false;
+    update();
+    return responseModel;
+  }
+
+  Future<ResponseModel> updateUserAddress(
+    String id,
+    String title,
+    String lineOne,
+    String lineTwo,
+    String landMark,
+    String city,
+    String state,
+    String pinCode,
+    String latitude,
+    String longitude,
+    String isDefault,
+  ) async {
+    isLoading = true;
+    update();
+    ResponseModel responseModel;
+    try {
+      Response response = await authRepo.updateUserAddress(
+        id,
+        title,
+        lineOne,
+        lineTwo,
+        landMark,
+        city,
+        state,
+        pinCode,
+        latitude,
+        longitude,
+        isDefault,
+      );
+      if (response.statusCode == 200 && response.body['success']) {
+        fetchUserProfile();
+        responseModel = ResponseModel(
+          true,
+          response.body['message'] ?? "Address updated successfully",
+        );
+      } else {
+        responseModel = ResponseModel(
+          false,
+          response.body['message'] ?? "Failed to update address",
+        );
+      }
+    } catch (e) {
+      responseModel = ResponseModel(false, "CATCH");
+    }
+    isLoading = false;
+    update();
+    return responseModel;
+  }
+
+  Future<ResponseModel> deleteUserAddress(String id) async {
+    isLoading = true;
+    update();
+    ResponseModel responseModel;
+    try {
+      Response response = await authRepo.deleteUserAddress(id: id);
+      if (response.statusCode == 200 && response.body['success']) {
+        fetchUserProfile();
+        responseModel = ResponseModel(
+          true,
+          response.body['message'] ?? "Address deleted successfully",
+        );
+      } else {
+        responseModel = ResponseModel(
+          false,
+          response.body['message'] ?? "Failed to delete address",
+        );
+      }
+    } catch (e) {
+      responseModel = ResponseModel(false, "CATCH");
+    }
+    isLoading = false;
+    update();
+    return responseModel;
+  }
 
   // Otp Login
   Future<ResponseModel> sendOtp() async {
@@ -302,7 +446,6 @@ class AuthController extends GetxController implements GetxService {
       await GoogleSignIn().signOut();
       Get.find<BookingController>().clearBookings();
 
-
       authRepo.clearSharedData();
       userProfile = null;
       loginMethod = null;
@@ -315,12 +458,11 @@ class AuthController extends GetxController implements GetxService {
     }
   }
 
-
   void requireLogin(
-      BuildContext context, {
-        required String message,
-        required VoidCallback onSuccess,
-      }) {
+    BuildContext context, {
+    required String message,
+    required VoidCallback onSuccess,
+  }) {
     if (isLoggedIn()) {
       onSuccess();
     } else {
@@ -336,7 +478,4 @@ class AuthController extends GetxController implements GetxService {
       );
     }
   }
-
 }
-
-

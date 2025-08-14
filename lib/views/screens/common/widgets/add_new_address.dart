@@ -2,48 +2,29 @@ import 'package:flutter/material.dart';
 import 'package:csc_picker_plus/csc_picker_plus.dart';
 import 'package:get/get.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:streammly/controllers/auth_controller.dart';
 import 'package:streammly/controllers/location_controller.dart';
+import 'package:streammly/models/profile/user_profile_model.dart';
 import 'custom_textfield.dart';
 
-enum AddressPageMode { add, edit }
-
-class AddressModel {
-  final String title;
-  final String line1;
-  final String line2;
-  final String city;
-  final String state;
-  final String pincode;
-  final bool isPrimary;
-
-  AddressModel({
-    required this.title,
-    required this.line1,
-    required this.line2,
-    required this.city,
-    required this.state,
-    required this.pincode,
-    required this.isPrimary,
-  });
-}
-
 class AddressPage extends StatefulWidget {
-  final AddressPageMode mode;
-  final AddressModel? existingAddress;
+  final Address? address;
 
-  const AddressPage({super.key, required this.mode, this.existingAddress});
+  const AddressPage({super.key, this.address});
 
   @override
   State<AddressPage> createState() => _AddressPageState();
 }
 
 class _AddressPageState extends State<AddressPage> {
-  final controller = Get.put(LocationController());
+  final LocationController controller = Get.find<LocationController>();
+  final AuthController authController = Get.find<AuthController>();
 
   // Controllers
   final titleController = TextEditingController();
   final line1Controller = TextEditingController();
   final line2Controller = TextEditingController();
+  final landmarkController = TextEditingController();
   final pincodeController = TextEditingController();
 
   String? _selectedState;
@@ -53,17 +34,21 @@ class _AddressPageState extends State<AddressPage> {
   @override
   void initState() {
     super.initState();
-    if (widget.mode == AddressPageMode.edit && widget.existingAddress != null) {
-      titleController.text = widget.existingAddress!.title;
-      line1Controller.text = widget.existingAddress!.line1;
-      line2Controller.text = widget.existingAddress!.line2;
-      pincodeController.text = widget.existingAddress!.pincode;
-      _selectedState = widget.existingAddress!.state;
-      _selectedCity = widget.existingAddress!.city;
-      _setAsPrimary = widget.existingAddress!.isPrimary;
+    if (widget.address != null) {
+      // Prefill fields for edit mode
+      titleController.text = widget.address!.title ?? '';
+      line1Controller.text = widget.address!.addressOne ?? '';
+      line2Controller.text = widget.address!.addressTwo ?? '';
+      landmarkController.text = widget.address!.landmark ?? '';
+      pincodeController.text = widget.address!.pincode ?? '';
+      _selectedState = widget.address!.state ?? '';
+      _selectedCity = widget.address!.city ?? '';
+      _setAsPrimary = widget.address!.isDefault == 1;
+      controller.updateLocation(
+        double.tryParse(widget.address!.latitude ?? '0') ?? 0,
+        double.tryParse(widget.address!.longitude ?? '0') ?? 0,
+      );
     }
-
-    // Listen to location changes to update address fields
     controller.addListener(_onLocationChanged);
   }
 
@@ -72,39 +57,31 @@ class _AddressPageState extends State<AddressPage> {
     titleController.dispose();
     line1Controller.dispose();
     line2Controller.dispose();
+    landmarkController.dispose();
     pincodeController.dispose();
     controller.removeListener(_onLocationChanged);
     super.dispose();
   }
 
   void _onLocationChanged() {
-    // Update address fields with the selected address from map
     if (controller.selectedAddress.isNotEmpty &&
         controller.selectedAddress != 'Selected Location') {
       final detailedAddress = controller.detailedAddress;
-
-      // Update address line 1
       if (detailedAddress['line1']?.isNotEmpty == true) {
         line1Controller.text = detailedAddress['line1']!;
       } else {
         line1Controller.text = controller.selectedAddress;
       }
-
-      // Update city if available
       if (detailedAddress['city']?.isNotEmpty == true) {
         setState(() {
           _selectedCity = detailedAddress['city'];
         });
       }
-
-      // Update state if available
       if (detailedAddress['state']?.isNotEmpty == true) {
         setState(() {
           _selectedState = detailedAddress['state'];
         });
       }
-
-      // Update pincode if available
       if (detailedAddress['pincode']?.isNotEmpty == true) {
         pincodeController.text = detailedAddress['pincode']!;
       }
@@ -112,7 +89,6 @@ class _AddressPageState extends State<AddressPage> {
   }
 
   Widget _buildCSCField() {
-    // ✅ Always allow selection for both Add and Edit
     return CSCPickerPlus(
       layout: Layout.vertical,
       flagState: CountryFlag.DISABLE,
@@ -154,8 +130,7 @@ class _AddressPageState extends State<AddressPage> {
 
   @override
   Widget build(BuildContext context) {
-    final isEdit = widget.mode == AddressPageMode.edit;
-
+    final isEditMode = widget.address != null;
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Colors.transparent,
@@ -163,12 +138,12 @@ class _AddressPageState extends State<AddressPage> {
           icon: const Icon(Icons.arrow_back, color: Colors.black),
           onPressed: () => Navigator.pop(context),
         ),
-        title: Text(isEdit ? 'Edit Address' : 'Add New Address'),
+        title: Text(isEditMode ? 'Edit Address' : 'Add New Address'),
         centerTitle: true,
         actions: [
           IconButton(
             icon: const Icon(Icons.check, color: Colors.black),
-            onPressed: () {
+            onPressed: () async {
               if (titleController.text.trim().isEmpty ||
                   line1Controller.text.trim().isEmpty ||
                   pincodeController.text.trim().isEmpty ||
@@ -182,17 +157,52 @@ class _AddressPageState extends State<AddressPage> {
                 return;
               }
 
-              final updatedAddress = AddressModel(
-                title: titleController.text.trim(),
-                line1: line1Controller.text.trim(),
-                line2: line2Controller.text.trim(),
-                city: _selectedCity ?? '',
-                state: _selectedState ?? '',
-                pincode: pincodeController.text.trim(),
-                isPrimary: _setAsPrimary,
-              );
+              final response =
+                  isEditMode
+                      ? await authController.updateUserAddress(
+                        widget.address!.id.toString(),
+                        titleController.text.trim(),
+                        line1Controller.text.trim(),
+                        line2Controller.text.trim(),
+                        landmarkController.text.trim(),
+                        _selectedCity!,
+                        _selectedState!,
+                        pincodeController.text.trim(),
+                        controller.lat.toString(),
+                        controller.lng.toString(),
+                        _setAsPrimary ? "1" : "0",
+                      )
+                      : await authController.addUserAddress(
+                        titleController.text.trim(),
+                        line1Controller.text.trim(),
+                        line2Controller.text.trim(),
+                        landmarkController.text.trim(),
+                        _selectedCity!,
+                        _selectedState!,
+                        pincodeController.text.trim(),
+                        controller.lat.toString(),
+                        controller.lng.toString(),
+                        _setAsPrimary ? "1" : "0",
+                      );
 
-              Navigator.pop(context, updatedAddress);
+              if (response.isSuccess) {
+                Navigator.pop(context, true);
+                Get.snackbar(
+                  'Success',
+                  isEditMode
+                      ? 'Address updated successfully'
+                      : 'Address added successfully',
+                  backgroundColor: Colors.green,
+                  colorText: Colors.white,
+                );
+              } else {
+                Get.snackbar(
+                  'Error',
+                  response.message,
+                  backgroundColor: Colors.red,
+                  colorText: Colors.white,
+                );
+              }
             },
           ),
         ],
@@ -203,9 +213,12 @@ class _AddressPageState extends State<AddressPage> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const Text(
-                'Address Details',
-                style: TextStyle(fontWeight: FontWeight.w600, fontSize: 16),
+              Text(
+                isEditMode ? 'Edit Address Details' : 'Address Details',
+                style: const TextStyle(
+                  fontWeight: FontWeight.w600,
+                  fontSize: 16,
+                ),
               ),
               const SizedBox(height: 8),
               Container(
@@ -220,14 +233,12 @@ class _AddressPageState extends State<AddressPage> {
                 ),
                 child: Column(
                   children: [
-                    // Title field
                     CustomTextField(
                       labelText: 'Address Title',
                       hintText: 'e.g., Home, Work, Office',
                       controller: titleController,
                     ),
                     const SizedBox(height: 12),
-                    // Address Line 1 field
                     Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
@@ -236,29 +247,29 @@ class _AddressPageState extends State<AddressPage> {
                           hintText: 'Address Line 1',
                           controller: line1Controller,
                         ),
-                        // if (controller.selectedAddress.isNotEmpty &&
-                        //     controller.selectedAddress != 'Selected Location')
-                        //   Padding(
-                        //     padding: const EdgeInsets.only(top: 4, left: 4),
-                        //     child: Row(
-                        //       children: [
-                        //         Icon(
-                        //           Icons.check_circle,
-                        //           color: Colors.green,
-                        //           size: 14,
-                        //         ),
-                        //         const SizedBox(width: 4),
-                        //         Text(
-                        //           'Address from map',
-                        //           style: TextStyle(
-                        //             color: Colors.green,
-                        //             fontSize: 11,
-                        //             fontWeight: FontWeight.w500,
-                        //           ),
-                        //         ),
-                        //       ],
-                        //     ),
-                        //   ),
+                        if (controller.selectedAddress.isNotEmpty &&
+                            controller.selectedAddress != 'Selected Location')
+                          Padding(
+                            padding: const EdgeInsets.only(top: 4, left: 4),
+                            child: Row(
+                              children: [
+                                const Icon(
+                                  Icons.check_circle,
+                                  color: Colors.green,
+                                  size: 14,
+                                ),
+                                const SizedBox(width: 4),
+                                Text(
+                                  'Address from map',
+                                  style: TextStyle(
+                                    color: Colors.green,
+                                    fontSize: 11,
+                                    fontWeight: FontWeight.w500,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
                       ],
                     ),
                     const SizedBox(height: 12),
@@ -266,6 +277,12 @@ class _AddressPageState extends State<AddressPage> {
                       labelText: 'Address Line 2',
                       hintText: 'Address Line 2',
                       controller: line2Controller,
+                    ),
+                    const SizedBox(height: 12),
+                    CustomTextField(
+                      labelText: 'Landmark',
+                      hintText: 'e.g., Near Park, Opposite Mall',
+                      controller: landmarkController,
                     ),
                     const SizedBox(height: 12),
                     _buildCSCField(),
@@ -304,14 +321,12 @@ class _AddressPageState extends State<AddressPage> {
                 ),
               ),
               const SizedBox(height: 20),
-              // Map section with instruction
               Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   SizedBox(
                     width: double.infinity,
                     height: 200,
-
                     child: GoogleMap(
                       initialCameraPosition: CameraPosition(
                         target: LatLng(controller.lat, controller.lng),
@@ -325,7 +340,6 @@ class _AddressPageState extends State<AddressPage> {
                           position.latitude,
                           position.longitude,
                         );
-                        // Wait for geocoding to complete
                         await Future.delayed(const Duration(milliseconds: 500));
                       },
                       markers: {
@@ -338,7 +352,7 @@ class _AddressPageState extends State<AddressPage> {
                       myLocationButtonEnabled: true,
                     ),
                   ),
-                  SizedBox(height: 40),
+                  const SizedBox(height: 40),
                 ],
               ),
             ],

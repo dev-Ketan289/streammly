@@ -473,7 +473,7 @@ class BookingController extends GetxController {
         email: userProfile.email ?? '',
         phone: userProfile.phone ?? '', // Keep original phone
         alternatePhone: alternateMobiles[0], // Add verified alternate phone
-        dob: userProfile.dob,
+        dob: userProfile.dob.toString(),
         gender: userProfile.gender,
       );
 
