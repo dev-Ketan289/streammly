@@ -3,7 +3,6 @@ import 'dart:developer';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:pin_code_fields/pin_code_fields.dart';
 import 'package:sms_autofill/sms_autofill.dart';
 import 'package:streammly/controllers/auth_controller.dart';
 import 'package:streammly/controllers/otp_controller.dart';
@@ -65,14 +64,31 @@ class _OtpScreenState extends State<OtpScreen> with CodeAutoFill {
                 (context, constraints) => SingleChildScrollView(
                   physics: const ClampingScrollPhysics(),
                   child: ConstrainedBox(
-                    constraints: BoxConstraints(minHeight: constraints.maxHeight),
+                    constraints: BoxConstraints(
+                      minHeight: constraints.maxHeight,
+                    ),
                     child: IntrinsicHeight(
                       child: Column(
                         children: [
                           const SizedBox(height: 20),
-                          Text("STREAMMLY", style: GoogleFonts.cinzelDecorative(fontSize: 28, fontWeight: FontWeight.bold, color: theme.primaryColor)),
+                          Text(
+                            "STREAMMLY",
+                            style: GoogleFonts.cinzelDecorative(
+                              fontSize: 28,
+                              fontWeight: FontWeight.bold,
+                              color: theme.primaryColor,
+                            ),
+                          ),
                           const SizedBox(height: 20),
-                          Padding(padding: const EdgeInsets.symmetric(horizontal: 40.0), child: Image.asset("assets/images/loginpage.gif", height: 300)),
+                          Padding(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 40.0,
+                            ),
+                            child: Image.asset(
+                              "assets/images/loginpage.gif",
+                              height: 300,
+                            ),
+                          ),
                           const SizedBox(height: 20),
 
                           /// OTP Section
@@ -85,10 +101,21 @@ class _OtpScreenState extends State<OtpScreen> with CodeAutoFill {
                                     Text(
                                       "Please enter the code we just sent to your phone number",
                                       textAlign: TextAlign.center,
-                                      style: appTheme.textTheme.bodySmall?.copyWith(fontSize: 14, color: theme.textSecondary),
+                                      style: appTheme.textTheme.bodySmall
+                                          ?.copyWith(
+                                            fontSize: 14,
+                                            color: theme.textSecondary,
+                                          ),
                                     ),
                                     const SizedBox(height: 4),
-                                    Text(fullNumber, style: appTheme.textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.w400, fontSize: 13)),
+                                    Text(
+                                      fullNumber,
+                                      style: appTheme.textTheme.bodyMedium
+                                          ?.copyWith(
+                                            fontWeight: FontWeight.w400,
+                                            fontSize: 13,
+                                          ),
+                                    ),
                                     const SizedBox(height: 24),
 
                                     /// OTP Field
@@ -98,17 +125,29 @@ class _OtpScreenState extends State<OtpScreen> with CodeAutoFill {
                                         codeLength: 6,
                                         currentCode: otpController.otpCode,
                                         onCodeChanged: (value) {
-                                          log("Otp udpated from textfeild", name: "otpListner");
-                                          otpController.udpateOtpCode(value ?? "");
+                                          log(
+                                            "Otp udpated from textfeild",
+                                            name: "otpListner",
+                                          );
+                                          otpController.udpateOtpCode(
+                                            value ?? "",
+                                          );
                                         },
                                         controller: otpTextController,
                                         decoration: BoxLooseDecoration(
                                           gapSpace: 8,
                                           strokeWidth: 2,
-                                          strokeColorBuilder: FixedColorBuilder(primaryColor),
-                                          bgColorBuilder: FixedColorBuilder(Colors.white),
+                                          strokeColorBuilder: FixedColorBuilder(
+                                            primaryColor,
+                                          ),
+                                          bgColorBuilder: FixedColorBuilder(
+                                            Colors.white,
+                                          ),
                                           radius: const Radius.circular(12),
-                                          textStyle: Theme.of(context).textTheme.bodyMedium,
+                                          textStyle:
+                                              Theme.of(
+                                                context,
+                                              ).textTheme.bodyMedium,
                                         ),
                                       ),
                                     ),
@@ -116,30 +155,47 @@ class _OtpScreenState extends State<OtpScreen> with CodeAutoFill {
 
                                     /// Timer & Resend
                                     Row(
-                                      mainAxisAlignment: MainAxisAlignment.center,
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.center,
                                       children: [
-                                        Icon(Icons.watch_later_outlined, size: 16, color: appTheme.dividerColor),
+                                        Icon(
+                                          Icons.watch_later_outlined,
+                                          size: 16,
+                                          color: appTheme.dividerColor,
+                                        ),
                                         const SizedBox(width: 10),
                                         Text(
                                           "Resend code in 00:${otpController.secondsRemaining.toString().padLeft(2, '0')}",
-                                          style: appTheme.textTheme.bodySmall?.copyWith(fontSize: 13, color: theme.textSecondary),
+                                          style: appTheme.textTheme.bodySmall
+                                              ?.copyWith(
+                                                fontSize: 13,
+                                                color: theme.textSecondary,
+                                              ),
                                         ),
                                         const SizedBox(width: 10),
                                         GestureDetector(
                                           onTap:
-                                              otpController.secondsRemaining == 0
+                                              otpController.secondsRemaining ==
+                                                      0
                                                   ? () {
-                                                    Get.find<AuthController>().sendOtp();
+                                                    Get.find<AuthController>()
+                                                        .sendOtp();
                                                     otpController.startTimer();
                                                   }
                                                   : null,
                                           child: Text(
                                             "Resend OTP",
-                                            style: appTheme.textTheme.bodySmall?.copyWith(
-                                              color: otpController.secondsRemaining == 0 ? theme.primaryColor : theme.textSecondary,
-                                              fontWeight: FontWeight.bold,
-                                              fontSize: 13,
-                                            ),
+                                            style: appTheme.textTheme.bodySmall
+                                                ?.copyWith(
+                                                  color:
+                                                      otpController
+                                                                  .secondsRemaining ==
+                                                              0
+                                                          ? theme.primaryColor
+                                                          : theme.textSecondary,
+                                                  fontWeight: FontWeight.bold,
+                                                  fontSize: 13,
+                                                ),
                                           ),
                                         ),
                                       ],
@@ -152,19 +208,49 @@ class _OtpScreenState extends State<OtpScreen> with CodeAutoFill {
                                       width: double.infinity,
                                       height: 50,
                                       child: ElevatedButton(
-                                        style: ElevatedButton.styleFrom(backgroundColor: theme.primaryColor),
+                                        style: ElevatedButton.styleFrom(
+                                          backgroundColor: theme.primaryColor,
+                                        ),
                                         onPressed: () {
-                                          Get.find<OtpController>().verifyOtp(phone: phone, otp: otpTextController.text).then((value) {
-                                            if (value.isSuccess) {
-                                              final loginArgs = Get.arguments;
-                                              final redirectTo = loginArgs?['redirectTo'];
-                                              final formData = loginArgs?['formData'];
-                                              log(redirectTo, name: "fjfufu");
-                                              Get.off(() => const WelcomeScreen(), arguments: {'redirectTo': redirectTo, 'formData': formData});
-                                            }
-                                          });
+                                          Get.find<OtpController>()
+                                              .verifyOtp(
+                                                phone: phone,
+                                                otp: otpTextController.text,
+                                              )
+                                              .then((value) {
+                                                if (value.isSuccess) {
+                                                  final loginArgs =
+                                                      Get.arguments;
+                                                  final redirectTo =
+                                                      loginArgs?['redirectTo'];
+                                                  final formData =
+                                                      loginArgs?['formData'];
+                                                  final packageData =
+                                                      loginArgs?['packageData'];
+                                                  log(
+                                                    redirectTo,
+                                                    name: "fjfufu",
+                                                  );
+                                                  Get.off(
+                                                    () => const WelcomeScreen(),
+                                                    arguments: {
+                                                      'redirectTo': redirectTo,
+                                                      'formData': formData,
+                                                      'packageData':
+                                                          packageData,
+                                                    },
+                                                  );
+                                                }
+                                              });
                                         },
-                                        child: Text("Confirm OTP", style: appTheme.textTheme.bodyLarge?.copyWith(fontSize: 19, color: Colors.white)),
+                                        child: Text(
+                                          "Confirm OTP",
+                                          style: appTheme.textTheme.bodyLarge
+                                              ?.copyWith(
+                                                fontSize: 19,
+                                                color: Colors.white,
+                                              ),
+                                        ),
                                       ),
                                     ),
                                   ],
@@ -183,13 +269,33 @@ class _OtpScreenState extends State<OtpScreen> with CodeAutoFill {
                               alignment: Alignment.center,
                               child: Text.rich(
                                 TextSpan(
-                                  text: "By providing my phone number, I hereby agree and accept the ",
-                                  style: GoogleFonts.publicSans(fontSize: 10, fontWeight: FontWeight.w300),
+                                  text:
+                                      "By providing my phone number, I hereby agree and accept the ",
+                                  style: GoogleFonts.publicSans(
+                                    fontSize: 10,
+                                    fontWeight: FontWeight.w300,
+                                  ),
                                   children: [
-                                    TextSpan(text: "Terms & Condition", style: GoogleFonts.publicSans(fontSize: 10, fontWeight: FontWeight.w300, color: theme.primaryColor)),
+                                    TextSpan(
+                                      text: "Terms & Condition",
+                                      style: GoogleFonts.publicSans(
+                                        fontSize: 10,
+                                        fontWeight: FontWeight.w300,
+                                        color: theme.primaryColor,
+                                      ),
+                                    ),
                                     const TextSpan(text: " & "),
-                                    TextSpan(text: "Privacy Policy", style: GoogleFonts.publicSans(fontSize: 10, fontWeight: FontWeight.w300, color: theme.primaryColor)),
-                                    const TextSpan(text: " in use of this app."),
+                                    TextSpan(
+                                      text: "Privacy Policy",
+                                      style: GoogleFonts.publicSans(
+                                        fontSize: 10,
+                                        fontWeight: FontWeight.w300,
+                                        color: theme.primaryColor,
+                                      ),
+                                    ),
+                                    const TextSpan(
+                                      text: " in use of this app.",
+                                    ),
                                   ],
                                 ),
                                 textAlign: TextAlign.center,

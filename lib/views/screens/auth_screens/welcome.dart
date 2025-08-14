@@ -29,17 +29,48 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
       final args = Get.arguments ?? {};
       final redirectTo = args['redirectTo'];
       final formData = args['formData'];
+      final packageData = args['packageData']; // ✅ Get package data
+
+      log('WelcomeScreen - redirectTo: $redirectTo');
+      log('WelcomeScreen - packageData: $packageData');
       log((Get.find<QuoteController>().companyId != null).toString());
+
       if (authController.userProfile == null ||
           (authController.userProfile!.name ?? '').isEmpty ||
           (authController.userProfile!.email ?? '').isEmpty) {
-        // New user: show profile form
-        Get.off(() => ProfileFormScreen());
+        // New user: show profile form with redirect info
+        Get.off(
+          () => ProfileFormScreen(),
+          arguments: {
+            'redirectTo': redirectTo,
+            'packageData': packageData,
+            'formData': formData,
+          },
+        );
+      } else if (redirectTo == 'packages' && packageData != null) {
+        // ✅ Handle package redirect
+        log('Redirecting to PackagesPage with data: $packageData');
+        _redirectToPackagesPage(packageData);
       } else if (Get.find<QuoteController>().companyId != null) {
         Get.offNamed('/getQuote', arguments: formData);
       } else {
         // Default: go to main navigation
         Get.off(() => NavigationFlow());
+      }
+    });
+  }
+
+  // ✅ Helper method to handle package redirect
+  void _redirectToPackagesPage(Map<String, dynamic> packageData) {
+    Get.off(() => NavigationFlow(initialIndex: 0));
+
+    Future.delayed(const Duration(milliseconds: 300), () {
+      final navigationState = NavigationFlow.navKey.currentState;
+      if (navigationState != null) {
+        log('Calling navigateToPackages with: $packageData');
+        navigationState.navigateToPackages(packageData);
+      } else {
+        log('NavigationFlow.navKey.currentState is null');
       }
     });
   }

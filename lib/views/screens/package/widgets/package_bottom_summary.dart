@@ -112,9 +112,9 @@ class PackagesBottomBar extends StatelessWidget {
                         ? null
                         : () async {
                           final authController = Get.find<AuthController>();
+
                           if (!authController.isLoggedIn()) {
                             bool? confirmed;
-
                             await CommonPopupDialog.show(
                               context,
                               imagePath: 'assets/images/access_denied.png',
@@ -133,17 +133,39 @@ class PackagesBottomBar extends StatelessWidget {
                             );
 
                             if (confirmed != true) {
-                              // User cancelled, do nothing
                               return;
                             }
 
-                            // User confirmed, navigate to login screen
+                            // Store package navigation data for after login
                             Get.toNamed(
                               '/login',
-                            ); // replace with your login route
+                              arguments: {
+                                'redirectTo': 'packages',
+                                'packageData': {
+                                  'companyId': companyId,
+                                  'subCategoryId':
+                                      selectedPackages.isNotEmpty
+                                          ? selectedPackages
+                                              .first['subCategoryId']
+                                          : null,
+                                  'subVerticalId':
+                                      selectedPackages.isNotEmpty
+                                          ? selectedPackages
+                                              .first['subVerticalId']
+                                          : null,
+                                  'studioId':
+                                      selectedPackages.isNotEmpty
+                                          ? selectedPackages.first['studioId']
+                                          : null,
+                                  'companyLocation': companyLocation,
+                                },
+                              },
+                            );
+
                             return;
                           }
 
+                          // Continue with booking logic for logged-in users...
                           final mainState =
                               context
                                   .findAncestorStateOfType<

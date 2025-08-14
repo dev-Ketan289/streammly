@@ -1,5 +1,3 @@
-import 'dart:developer';
-
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -24,7 +22,6 @@ class _LoginScreenState extends State<LoginScreen> {
 
   @override
   Widget build(BuildContext context) {
-
     final theme = Theme.of(context);
 
     return Scaffold(
@@ -43,16 +40,33 @@ class _LoginScreenState extends State<LoginScreen> {
                       return Column(
                         children: [
                           const SizedBox(height: 40),
-                          Center(child: Text("STREAMMLY", style: GoogleFonts.cinzelDecorative(fontSize: 28, fontWeight: FontWeight.bold, color: theme.primaryColor))),
+                          Center(
+                            child: Text(
+                              "STREAMMLY",
+                              style: GoogleFonts.cinzelDecorative(
+                                fontSize: 28,
+                                fontWeight: FontWeight.bold,
+                                color: theme.primaryColor,
+                              ),
+                            ),
+                          ),
                           const SizedBox(height: 40),
-                          Image.asset('assets/images/loginpage.gif', height: 280),
+                          Image.asset(
+                            'assets/images/loginpage.gif',
+                            height: 280,
+                          ),
                           const SizedBox(height: 30),
                           Padding(
-                            padding: const EdgeInsets.symmetric(horizontal: 24.0),
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 24.0,
+                            ),
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                Text("Mobile Number", style: theme.textTheme.bodyMedium),
+                                Text(
+                                  "Mobile Number",
+                                  style: theme.textTheme.bodyMedium,
+                                ),
                                 const SizedBox(height: 8),
                                 TextField(
                                   controller: authController.phoneController,
@@ -61,15 +75,26 @@ class _LoginScreenState extends State<LoginScreen> {
                                   maxLength: 10,
                                   decoration: InputDecoration(
                                     prefixIcon: Padding(
-                                      padding: const EdgeInsets.symmetric(horizontal: 10),
+                                      padding: const EdgeInsets.symmetric(
+                                        horizontal: 10,
+                                      ),
                                       child: Row(
                                         mainAxisSize: MainAxisSize.min,
-                                        children: const [Text("🇮🇳 +91", style: TextStyle(fontSize: 16)), SizedBox(width: 8), VerticalDivider(thickness: 1)],
+                                        children: const [
+                                          Text(
+                                            "🇮🇳 +91",
+                                            style: TextStyle(fontSize: 16),
+                                          ),
+                                          SizedBox(width: 8),
+                                          VerticalDivider(thickness: 1),
+                                        ],
                                       ),
                                     ),
                                     hintText: "Enter phone number",
                                     hintStyle: theme.textTheme.bodySmall,
-                                    border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
+                                    border: OutlineInputBorder(
+                                      borderRadius: BorderRadius.circular(10),
+                                    ),
                                     counterText: '',
                                   ),
                                   onChanged: (value) {
@@ -79,7 +104,12 @@ class _LoginScreenState extends State<LoginScreen> {
                                   },
                                 ),
                                 const SizedBox(height: 8),
-                                Center(child: Text("OTP will be sent to the entered phone number", style: theme.textTheme.bodySmall)),
+                                Center(
+                                  child: Text(
+                                    "OTP will be sent to the entered phone number",
+                                    style: theme.textTheme.bodySmall,
+                                  ),
+                                ),
                                 const SizedBox(height: 24),
                                 SizedBox(
                                   width: double.infinity,
@@ -89,25 +119,50 @@ class _LoginScreenState extends State<LoginScreen> {
                                         authController.isLoading
                                             ? null
                                             : () {
-                                              authController.sendOtp().then((value) {
+                                              authController.sendOtp().then((
+                                                value,
+                                              ) {
                                                 if (value.isSuccess) {
-                                                  Navigator.push(context, MaterialPageRoute(builder: (context) => OtpScreen()));
+                                                  Navigator.push(
+                                                    context,
+                                                    MaterialPageRoute(
+                                                      builder:
+                                                          (context) =>
+                                                              OtpScreen(),
+                                                    ),
+                                                  );
                                                 }
                                               });
                                             },
                                     style: ElevatedButton.styleFrom(
                                       backgroundColor: theme.primaryColor,
-                                      side: BorderSide(color: theme.primaryColor),
-                                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                                      side: BorderSide(
+                                        color: theme.primaryColor,
+                                      ),
+                                      shape: RoundedRectangleBorder(
+                                        borderRadius: BorderRadius.circular(10),
+                                      ),
                                     ),
-                                    child: Text("Generate OTP", style: theme.textTheme.titleMedium?.copyWith(color: Colors.white)),
+                                    child: Text(
+                                      "Generate OTP",
+                                      style: theme.textTheme.titleMedium
+                                          ?.copyWith(color: Colors.white),
+                                    ),
                                   ),
                                 ),
                                 const SizedBox(height: 16),
                                 Row(
                                   children: [
                                     const Expanded(child: Divider()),
-                                    Padding(padding: const EdgeInsets.symmetric(horizontal: 8), child: Text("Or", style: theme.textTheme.bodyMedium)),
+                                    Padding(
+                                      padding: const EdgeInsets.symmetric(
+                                        horizontal: 8,
+                                      ),
+                                      child: Text(
+                                        "Or",
+                                        style: theme.textTheme.bodyMedium,
+                                      ),
+                                    ),
                                     const Expanded(child: Divider()),
                                   ],
                                 ),
@@ -120,20 +175,50 @@ class _LoginScreenState extends State<LoginScreen> {
                                         authController.isLoading
                                             ? null
                                             : () async {
-                                              final result = await authController.signInWithGoogle();
+                                              final result =
+                                                  await authController
+                                                      .signInWithGoogle();
+
+                                              // In the Google Sign-In success handler
                                               if (result?.isSuccess ?? false) {
                                                 final loginArgs = Get.arguments;
-                                                final redirectTo = loginArgs?['redirectTo'];
-                                                final formData = loginArgs?['formData'];
-                                                Get.off(() => const WelcomeScreen(), arguments: {'redirectTo': redirectTo, 'formData': formData});
+                                                final redirectTo =
+                                                    loginArgs?['redirectTo'];
+                                                final formData =
+                                                    loginArgs?['formData'];
+                                                final packageData =
+                                                    loginArgs?['packageData'];
+
+                                                Get.off(
+                                                  () => const WelcomeScreen(),
+                                                  arguments: {
+                                                    'redirectTo': redirectTo,
+                                                    'formData': formData,
+                                                    'packageData': packageData,
+                                                  },
+                                                );
                                               }
                                             },
 
-                                    icon: Image.asset('assets/images/img.png', height: 24),
-                                    label: Text("Continue with Google", style: Theme.of(context).textTheme.bodyMedium?.copyWith(color: Theme.of(context).primaryColor)),
+                                    icon: Image.asset(
+                                      'assets/images/img.png',
+                                      height: 24,
+                                    ),
+                                    label: Text(
+                                      "Continue with Google",
+                                      style: Theme.of(
+                                        context,
+                                      ).textTheme.bodyMedium?.copyWith(
+                                        color: Theme.of(context).primaryColor,
+                                      ),
+                                    ),
                                     style: OutlinedButton.styleFrom(
-                                      side: BorderSide(color: theme.primaryColor),
-                                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                                      side: BorderSide(
+                                        color: theme.primaryColor,
+                                      ),
+                                      shape: RoundedRectangleBorder(
+                                        borderRadius: BorderRadius.circular(10),
+                                      ),
                                     ),
                                   ),
                                 ),
@@ -149,13 +234,33 @@ class _LoginScreenState extends State<LoginScreen> {
                               alignment: Alignment.center,
                               child: Text.rich(
                                 TextSpan(
-                                  text: "By providing my phone number, I hereby agree and accept the ",
-                                  style: GoogleFonts.publicSans(fontSize: 10, fontWeight: FontWeight.w300),
+                                  text:
+                                      "By providing my phone number, I hereby agree and accept the ",
+                                  style: GoogleFonts.publicSans(
+                                    fontSize: 10,
+                                    fontWeight: FontWeight.w300,
+                                  ),
                                   children: [
-                                    TextSpan(text: "Terms & Condition", style: GoogleFonts.publicSans(fontSize: 10, fontWeight: FontWeight.w300, color: theme.primaryColor)),
+                                    TextSpan(
+                                      text: "Terms & Condition",
+                                      style: GoogleFonts.publicSans(
+                                        fontSize: 10,
+                                        fontWeight: FontWeight.w300,
+                                        color: theme.primaryColor,
+                                      ),
+                                    ),
                                     const TextSpan(text: " & "),
-                                    TextSpan(text: "Privacy Policy", style: GoogleFonts.publicSans(fontSize: 10, fontWeight: FontWeight.w300, color: theme.primaryColor)),
-                                    const TextSpan(text: " in use of this app."),
+                                    TextSpan(
+                                      text: "Privacy Policy",
+                                      style: GoogleFonts.publicSans(
+                                        fontSize: 10,
+                                        fontWeight: FontWeight.w300,
+                                        color: theme.primaryColor,
+                                      ),
+                                    ),
+                                    const TextSpan(
+                                      text: " in use of this app.",
+                                    ),
                                   ],
                                 ),
                                 textAlign: TextAlign.center,

@@ -1,7 +1,7 @@
 import 'dart:developer';
 
 import 'package:flutter/material.dart';
-import 'package:flutter_svg/flutter_svg.dart'; // Use flutter_svg for SVG images
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:get/get.dart';
 import 'package:streammly/controllers/company_controller.dart';
 import 'package:streammly/controllers/company_specialities_controller.dart';

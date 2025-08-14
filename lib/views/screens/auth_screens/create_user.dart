@@ -1,13 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:streammly/views/widgets/custom_doodle.dart';
+
 import '../../../controllers/auth_controller.dart';
 import '../../../services/theme.dart' as theme;
-import 'package:fluttertoast/fluttertoast.dart';
-
-import '../../screens/common/location_screen.dart'; // ✅ import your next screen
+import '../../screens/common/location_screen.dart';
 
 class ProfileFormScreen extends StatefulWidget {
   const ProfileFormScreen({super.key});
