@@ -18,8 +18,19 @@ class PromoSliderController extends GetxController {
 
     try {
       promoList = await promoSliderRepo.getSliders();
-    } catch (_) {
+
+      // Debug: Log each slider's data
+      for (int i = 0; i < promoList.length; i++) {
+        final item = promoList[i];
+        print(
+          'Slider $i: ID=${item.id}, StudioID=${item.studioId}, '
+          'CompanyID=${item.companyId}, Categories=${item.categoryIds}, '
+          'SubCategories=${item.subcategoryIds}, Vendors=${item.vendorIds}',
+        );
+      }
+    } catch (e) {
       promoList = [];
+      print('Error fetching sliders: $e');
     }
 
     isLoading = false;

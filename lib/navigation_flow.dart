@@ -8,6 +8,7 @@ import 'package:streammly/services/coming_soon_page.dart';
 import 'package:streammly/services/route_helper.dart';
 import 'package:streammly/views/screens/home/home_screen.dart';
 import 'package:streammly/views/screens/package/booking/my_bookings.dart';
+import 'package:streammly/views/screens/package/package_page.dart';
 
 import 'controllers/home_screen_controller.dart';
 import 'services/custom_exit_dailogue.dart';
@@ -354,6 +355,24 @@ class NavigationFlowState extends State<NavigationFlow> {
       _navigationHistory.add(index);
       navigatorKeys[index].currentState?.popUntil((route) => route.isFirst);
     });
+  }
+
+  void navigateToPackages(Map<String, dynamic> packageData) {
+    // Switch to Home tab first
+    switchToTab(0);
+
+    // Then push PackagesPage to the Home tab
+    pushToCurrentTab(
+      PackagesPage(
+        companyId: packageData['companyId'],
+        subCategoryId: packageData['subCategoryId'] ?? 0,
+        subVerticalId: packageData['subVerticalId'] ?? 0,
+        studioId: packageData['studioId'] ?? 0,
+        companyLocation: packageData['companyLocation'],
+      ),
+      hideBottomBar: false,
+      transitionType: PageTransitionType.rightToLeft,
+    );
   }
 }
 

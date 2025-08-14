@@ -88,7 +88,7 @@ class _VendorDetailScreenState extends State<VendorDetailScreen> {
                         categories:
                             subs.map((sub) {
                               return CategoryItem(
-                                label: sub.title,
+                                label: _truncateTitle(sub.title),
                                 imagePath: resolveImageUrl(sub.image),
                                 onTap: () {
                                   final mainState =
@@ -433,5 +433,16 @@ class _VendorDetailScreenState extends State<VendorDetailScreen> {
         ),
       ),
     );
+  }
+
+  String _truncateTitle(String title) {
+    // Option 1: Limit by character count
+    if (title.length <= 15) return title;
+    return '${title.substring(0, 15)}...';
+
+    // Option 2: Limit by word count (alternative)
+    // final words = title.split(' ');
+    // if (words.length <= 2) return title;
+    // return '${words.take(2).join(' ')}...';
   }
 }
