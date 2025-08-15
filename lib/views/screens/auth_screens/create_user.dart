@@ -3,6 +3,8 @@ import 'package:flutter/services.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:streammly/controllers/location_controller.dart';
+import 'package:streammly/navigation_flow.dart';
 import 'package:streammly/views/widgets/custom_doodle.dart';
 
 import '../../../controllers/auth_controller.dart';
@@ -82,8 +84,18 @@ class _ProfileFormScreenState extends State<ProfileFormScreen> {
         await authController.fetchUserProfile();
         Fluttertoast.showToast(msg: response?.message ?? "Profile updated");
 
-        // ✅ Navigate to next screen after success
-        Get.offAll(() => const LocationScreen());
+        // ✅ Navigate to main app after successful profile completion
+        // Check if user has saved location, if yes go to home, if no go to location
+        final locationController = Get.find<LocationController>();
+        final hasSavedLocation = await locationController.hasSavedLocation();
+
+        if (hasSavedLocation) {
+          // User has location, go to main app
+          Get.offAll(() => NavigationFlow());
+        } else {
+          // No saved location, go to location screen first
+          Get.offAll(() => const LocationScreen());
+        }
       } else {
         Fluttertoast.showToast(msg: response?.message ?? "Update failed");
       }

@@ -3,6 +3,7 @@ import 'dart:developer';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:streammly/controllers/quote_controller.dart';
+import 'package:streammly/navigation_flow.dart';
 import 'package:streammly/views/screens/auth_screens/create_user.dart';
 
 import '../../../controllers/auth_controller.dart';
@@ -46,6 +47,18 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
             'formData': formData,
           },
         );
+      } else {
+        // User profile is complete, navigate to main app
+        if (redirectTo != null && redirectTo == 'home') {
+          // Redirect to home with package data if available
+          Get.offAll(() => NavigationFlow());
+        } else if (packageData != null) {
+          // Handle package-related navigation
+          Get.offAll(() => NavigationFlow());
+        } else {
+          // Default navigation to main app
+          Get.offAll(() => NavigationFlow());
+        }
       }
     });
   }
