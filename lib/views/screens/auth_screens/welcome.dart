@@ -3,7 +3,6 @@ import 'dart:developer';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:streammly/controllers/quote_controller.dart';
-import 'package:streammly/navigation_flow.dart';
 import 'package:streammly/views/screens/auth_screens/create_user.dart';
 
 import '../../../controllers/auth_controller.dart';
@@ -47,33 +46,11 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
             'formData': formData,
           },
         );
-      } else if (redirectTo == 'packages' && packageData != null) {
-        // ✅ Handle package redirect
-        log('Redirecting to PackagesPage with data: $packageData');
-        _redirectToPackagesPage(packageData);
-      } else if (Get.find<QuoteController>().companyId != null) {
-        Get.offNamed('/getQuote', arguments: formData);
-      } else {
-        // Default: go to main navigation
-        Get.off(() => NavigationFlow());
       }
     });
   }
 
-  // ✅ Helper method to handle package redirect
-  void _redirectToPackagesPage(Map<String, dynamic> packageData) {
-    Get.off(() => NavigationFlow(initialIndex: 0));
-
-    Future.delayed(const Duration(milliseconds: 300), () {
-      final navigationState = NavigationFlow.navKey.currentState;
-      if (navigationState != null) {
-        log('Calling navigateToPackages with: $packageData');
-        navigationState.navigateToPackages(packageData);
-      } else {
-        log('NavigationFlow.navKey.currentState is null');
-      }
-    });
-  }
+  // Removed unused package redirect helper
 
   @override
   Widget build(BuildContext context) {

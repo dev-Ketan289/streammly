@@ -136,31 +136,8 @@ class PackagesBottomBar extends StatelessWidget {
                               return;
                             }
 
-                            // Store package navigation data for after login
-                            Get.toNamed(
-                              '/login',
-                              arguments: {
-                                'redirectTo': 'packages',
-                                'packageData': {
-                                  'companyId': companyId,
-                                  'subCategoryId':
-                                      selectedPackages.isNotEmpty
-                                          ? selectedPackages
-                                              .first['subCategoryId']
-                                          : null,
-                                  'subVerticalId':
-                                      selectedPackages.isNotEmpty
-                                          ? selectedPackages
-                                              .first['subVerticalId']
-                                          : null,
-                                  'studioId':
-                                      selectedPackages.isNotEmpty
-                                          ? selectedPackages.first['studioId']
-                                          : null,
-                                  'companyLocation': companyLocation,
-                                },
-                              },
-                            );
+                            // Open login and, on success, pop back to this page
+                            Get.toNamed('/login');
 
                             return;
                           }

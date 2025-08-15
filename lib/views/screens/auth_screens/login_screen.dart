@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:streammly/views/screens/auth_screens/otp_verification_screen.dart';
-import 'package:streammly/views/screens/auth_screens/welcome.dart';
+// Removed Welcome import; we just pop back after login
 
 import '../../../controllers/auth_controller.dart';
 
@@ -121,16 +121,16 @@ class _LoginScreenState extends State<LoginScreen> {
                                             : () {
                                               authController.sendOtp().then((
                                                 value,
-                                              ) {
+                                              ) async {
                                                 if (value.isSuccess) {
-                                                  Navigator.push(
-                                                    context,
-                                                    MaterialPageRoute(
-                                                      builder:
-                                                          (context) =>
-                                                              OtpScreen(),
-                                                    ),
+                                                  await Get.to(
+                                                    () => OtpScreen(),
                                                   );
+                                                  // After OTP success, just pop back to previous page
+                                                  if (Get.currentRoute ==
+                                                      '/login') {
+                                                    Get.back();
+                                                  }
                                                 }
                                               });
                                             },
@@ -179,24 +179,9 @@ class _LoginScreenState extends State<LoginScreen> {
                                                   await authController
                                                       .signInWithGoogle();
 
-                                              // In the Google Sign-In success handler
                                               if (result?.isSuccess ?? false) {
-                                                final loginArgs = Get.arguments;
-                                                final redirectTo =
-                                                    loginArgs?['redirectTo'];
-                                                final formData =
-                                                    loginArgs?['formData'];
-                                                final packageData =
-                                                    loginArgs?['packageData'];
-
-                                                Get.off(
-                                                  () => const WelcomeScreen(),
-                                                  arguments: {
-                                                    'redirectTo': redirectTo,
-                                                    'formData': formData,
-                                                    'packageData': packageData,
-                                                  },
-                                                );
+                                                // On success, just go back to the previous page
+                                                Get.back();
                                               }
                                             },
 
