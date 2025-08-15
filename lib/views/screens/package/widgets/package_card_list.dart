@@ -39,7 +39,6 @@ class PackagesListView extends StatelessWidget {
                 decoration: BoxDecoration(
                   color: theme.colorScheme.surface,
                   borderRadius: BorderRadius.circular(12),
-                  border: isSelected ? Border.all(color: primaryColor, width: 2) : null,
                   boxShadow: [
                     BoxShadow(
                       color: Colors.black.withAlpha(20),

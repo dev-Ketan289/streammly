@@ -71,25 +71,25 @@ class PackagesBottomBar extends StatelessWidget {
                       Wrap(
                         spacing: 4,
                         children:
-                            selectedPackages.map((pkg) {
-                              return Container(
-                                padding: const EdgeInsets.symmetric(
-                                  horizontal: 8,
-                                  vertical: 4,
-                                ),
-                                decoration: BoxDecoration(
-                                  color: primaryColor.withAlpha(25),
-                                  borderRadius: BorderRadius.circular(12),
-                                ),
-                                child: Text(
-                                  "${pkg['title']} (${pkg['selectedHours'].join(', ')})",
-                                  style: theme.textTheme.bodySmall?.copyWith(
-                                    color: primaryColor,
-                                    fontWeight: FontWeight.w500,
-                                  ),
-                                ),
-                              );
-                            }).toList(),
+                        selectedPackages.map((pkg) {
+                          return Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 8,
+                              vertical: 4,
+                            ),
+                            decoration: BoxDecoration(
+                              color: primaryColor.withAlpha(25),
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                            child: Text(
+                              "${pkg['title']} (${pkg['selectedHours'].join(', ')})",
+                              style: theme.textTheme.bodySmall?.copyWith(
+                                color: primaryColor,
+                                fontWeight: FontWeight.w500,
+                              ),
+                            ),
+                          );
+                        }).toList(),
                       ),
                     ],
                   ),
@@ -99,105 +99,105 @@ class PackagesBottomBar extends StatelessWidget {
                 style: ElevatedButton.styleFrom(
                   minimumSize: const Size(double.infinity, 50),
                   backgroundColor:
-                      selectedPackages.isEmpty
-                          ? theme.disabledColor
-                          : primaryColor,
+                  selectedPackages.isEmpty
+                      ? theme.disabledColor
+                      : primaryColor,
                   foregroundColor: Colors.white,
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(8),
                   ),
                 ),
                 onPressed:
-                    selectedPackages.isEmpty
-                        ? null
-                        : () async {
-                          final authController = Get.find<AuthController>();
+                selectedPackages.isEmpty
+                    ? null
+                    : () async {
+                  final authController = Get.find<AuthController>();
 
-                          if (!authController.isLoggedIn()) {
-                            bool? confirmed;
-                            await CommonPopupDialog.show(
-                              context,
-                              imagePath: 'assets/images/access_denied.png',
-                              title: 'Login Required',
-                              message:
-                                  'You need to be logged in to continue. Do you want to login now?',
-                              primaryBtnText: 'Cancel',
-                              onPrimaryPressed: () {
-                                confirmed = false;
-                              },
-                              secondaryBtnText: 'Login',
-                              onSecondaryPressed: () {
-                                confirmed = true;
-                                Navigator.of(context).pop(true);
-                              },
-                            );
+                  if (!authController.isLoggedIn()) {
+                    bool? confirmed;
+                    await CommonPopupDialog.show(
+                      context,
+                      imagePath: 'assets/images/access_denied.png',
+                      title: 'Login Required',
+                      message:
+                      'You need to be logged in to continue. Do you want to login now?',
+                      primaryBtnText: 'Cancel',
+                      onPrimaryPressed: () {
+                        confirmed = false;
+                      },
+                      secondaryBtnText: 'Login',
+                      onSecondaryPressed: () {
+                        confirmed = true;
+                        Navigator.of(context).pop(true);
+                      },
+                    );
 
-                            if (confirmed != true) {
-                              return;
-                            }
+                    if (confirmed != true) {
+                      return;
+                    }
 
-                            // Store package navigation data for after login
-                            Get.toNamed(
-                              '/login',
-                              arguments: {
-                                'redirectTo': 'packages',
-                                'packageData': {
-                                  'companyId': companyId,
-                                  'subCategoryId':
-                                      selectedPackages.isNotEmpty
-                                          ? selectedPackages
-                                              .first['subCategoryId']
-                                          : null,
-                                  'subVerticalId':
-                                      selectedPackages.isNotEmpty
-                                          ? selectedPackages
-                                              .first['subVerticalId']
-                                          : null,
-                                  'studioId':
-                                      selectedPackages.isNotEmpty
-                                          ? selectedPackages.first['studioId']
-                                          : null,
-                                  'companyLocation': companyLocation,
-                                },
-                              },
-                            );
-
-                            return;
-                          }
-
-                          // Continue with booking logic for logged-in users...
-                          final mainState =
-                              context
-                                  .findAncestorStateOfType<
-                                    NavigationFlowState
-                                  >();
-
-                          // Attach correct companyLocation to each selected package
-                          final enrichedPackages =
-                              selectedPackages.map((pkg) {
-                                final matchedLocation = companyLocations
-                                    .firstWhereOrNull(
-                                      (loc) =>
-                                          loc['id'] ==
-                                              pkg['company_location_id'] ||
-                                          loc.id == pkg['company_location_id'],
-                                    );
-                                return {
-                                  ...pkg,
-                                  'companyLocation': matchedLocation,
-                                };
-                              }).toList();
-
-                          mainState?.pushToCurrentTab(
-                            BookingPage(
-                              packages: enrichedPackages,
-                              companyLocations: companyLocations,
-                              companyLocation: companyLocation,
-                              companyId: companyId,
-                            ),
-                            hideBottomBar: true,
-                          );
+                    // Store package navigation data for after login
+                    Get.toNamed(
+                      '/login',
+                      arguments: {
+                        'redirectTo': 'packages',
+                        'packageData': {
+                          'companyId': companyId,
+                          'subCategoryId':
+                          selectedPackages.isNotEmpty
+                              ? selectedPackages
+                              .first['subCategoryId']
+                              : null,
+                          'subVerticalId':
+                          selectedPackages.isNotEmpty
+                              ? selectedPackages
+                              .first['subVerticalId']
+                              : null,
+                          'studioId':
+                          selectedPackages.isNotEmpty
+                              ? selectedPackages.first['studioId']
+                              : null,
+                          'companyLocation': companyLocation,
                         },
+                      },
+                    );
+
+                    return;
+                  }
+
+                  // Continue with booking logic for logged-in users...
+                  final mainState =
+                  context
+                      .findAncestorStateOfType<
+                      NavigationFlowState
+                  >();
+
+                  // Attach correct companyLocation to each selected package
+                  final enrichedPackages =
+                  selectedPackages.map((pkg) {
+                    final matchedLocation = companyLocations
+                        .firstWhereOrNull(
+                          (loc) =>
+                      loc['id'] ==
+                          pkg['company_location_id'] ||
+                          loc.id == pkg['company_location_id'],
+                    );
+                    return {
+                      ...pkg,
+                      'companyLocation': matchedLocation,
+                    };
+                  }).toList();
+
+                  mainState?.pushToCurrentTab(
+                    BookingPage(
+                      packages: enrichedPackages,
+                      companyLocations: companyLocations,
+                      companyLocation: companyLocation,
+                      companyId: companyId,
+                    ),
+                    hideBottomBar: true,
+                  );
+                },
 
                 child: Text(
                   selectedPackages.isEmpty

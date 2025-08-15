@@ -6,6 +6,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:streammly/views/widgets/custom_doodle.dart';
 
 import '../../../controllers/auth_controller.dart';
+import '../../../navigation_flow.dart';
 import '../../../services/theme.dart' as theme;
 import '../../screens/common/location_screen.dart';
 
@@ -26,6 +27,18 @@ class _ProfileFormScreenState extends State<ProfileFormScreen> {
   bool isLoading = false;
   late final AuthController authController;
 
+  String formatDateForDisplay(dynamic dateValue) {
+    if (dateValue == null) return '';
+
+    if (dateValue is DateTime) {
+      return "${dateValue.year.toString().padLeft(4, '0')}-${dateValue.month.toString().padLeft(2, '0')}-${dateValue.day.toString().padLeft(2, '0')}";
+    } else if (dateValue is String && dateValue.isNotEmpty && dateValue != 'null') {
+      return dateValue;
+    }
+
+    return '';
+  }
+
   @override
   void initState() {
     super.initState();
@@ -34,13 +47,14 @@ class _ProfileFormScreenState extends State<ProfileFormScreen> {
       nameController.text = authController.userProfile?.name ?? '';
       emailController.text = authController.userProfile?.email ?? '';
       phoneController.text = authController.userProfile?.phone ?? '';
-      dobController.text = authController.userProfile?.dob.toString() ?? '';
+      dobController.text = formatDateForDisplay(authController.userProfile?.dob);
       selectedGender = authController.userProfile?.gender;
     } else {
       phoneController.text = authController.phoneController.text;
       emailController.text = authController.emailController.text;
     }
   }
+
 
   Future<void> _pickDate() async {
     DateTime? picked = await showDatePicker(
@@ -51,7 +65,7 @@ class _ProfileFormScreenState extends State<ProfileFormScreen> {
     );
     if (picked != null) {
       dobController.text =
-          "${picked.year.toString().padLeft(4, '0')}-${picked.month.toString().padLeft(2, '0')}-${picked.day.toString().padLeft(2, '0')}";
+      "${picked.year.toString().padLeft(4, '0')}-${picked.month.toString().padLeft(2, '0')}-${picked.day.toString().padLeft(2, '0')}";
     }
   }
 
@@ -83,7 +97,27 @@ class _ProfileFormScreenState extends State<ProfileFormScreen> {
         Fluttertoast.showToast(msg: response?.message ?? "Profile updated");
 
         // ✅ Navigate to next screen after success
-        Get.offAll(() => const LocationScreen());
+        final args = Get.arguments ?? {};
+        final redirectTo = args['redirectTo'];
+        final packageData = args['packageData'];
+        final formData = args['formData'];
+
+        if (redirectTo == 'packages' && packageData != null) {
+          // User came from package booking - return them there
+          Get.offAll(() => NavigationFlow(initialIndex: 0));
+          Future.delayed(const Duration(milliseconds: 300), () {
+            final navigationState = NavigationFlow.navKey.currentState;
+            if (navigationState != null) {
+              navigationState.navigateToPackages(packageData);
+            }
+          });
+        } else if (formData != null) {
+          // User has other form data - go to quote
+          Get.offNamed('/getQuote', arguments: formData);
+        } else {
+          // Default: go to location screen for normal onboarding
+          Get.offAll(() => const LocationScreen());
+        }
       } else {
         Fluttertoast.showToast(msg: response?.message ?? "Update failed");
       }
@@ -94,31 +128,48 @@ class _ProfileFormScreenState extends State<ProfileFormScreen> {
     setState(() => isLoading = false);
   }
 
-  InputDecoration fieldDecoration({String? hint, IconData? icon}) {
+  InputDecoration fieldDecoration({
+    String? hint,
+    IconData? icon,
+    bool isReadOnly = false
+  }) {
     final themeData = Theme.of(context);
     return InputDecoration(
       hintText: hint,
       hintStyle: themeData.textTheme.bodyMedium?.copyWith(
-        color: Colors.grey[500],
+        color: isReadOnly ? Colors.grey[400] : Colors.grey[500],
         fontSize: 15,
         fontWeight: FontWeight.w400,
       ),
       filled: true,
-      fillColor: theme.backgroundLight.withValues(alpha: 0.97),
-      suffixIcon:
-          icon != null ? Icon(icon, color: Colors.grey[600], size: 19) : null,
+      fillColor: isReadOnly
+          ? Colors.grey[100]
+          : theme.backgroundLight.withValues(alpha: 0.97),
+      suffixIcon: icon != null
+          ? Icon(
+          icon,
+          color: isReadOnly ? Colors.grey[400] : Colors.grey[600],
+          size: 19
+      )
+          : null,
       contentPadding: const EdgeInsets.symmetric(horizontal: 15, vertical: 14),
       border: OutlineInputBorder(
         borderRadius: BorderRadius.circular(10),
-        borderSide: BorderSide(color: Colors.grey[300]!),
+        borderSide: BorderSide(
+            color: isReadOnly ? Colors.grey[300]! : Colors.grey[300]!
+        ),
       ),
       enabledBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(10),
-        borderSide: BorderSide(color: Colors.grey[300]!),
+        borderSide: BorderSide(
+            color: isReadOnly ? Colors.grey[300]! : Colors.grey!
+        ),
       ),
       focusedBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(10),
-        borderSide: BorderSide(color: theme.primaryColor),
+        borderSide: BorderSide(
+            color: isReadOnly ? Colors.grey[300]! : theme.primaryColor
+        ),
       ),
     );
   }
@@ -141,8 +192,15 @@ class _ProfileFormScreenState extends State<ProfileFormScreen> {
           keyboardType: keyboardType,
           readOnly: readOnly,
           inputFormatters: inputFormatters,
-          style: Theme.of(context).textTheme.bodyMedium?.copyWith(fontSize: 15),
-          decoration: fieldDecoration(hint: hint, icon: suffixIcon),
+          style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+            fontSize: 15,
+            color: readOnly ? Colors.grey[600] : Colors.black87,
+          ),
+          decoration: fieldDecoration(
+              hint: hint,
+              icon: suffixIcon,
+              isReadOnly: readOnly
+          ),
         ),
       ),
     );
@@ -152,9 +210,10 @@ class _ProfileFormScreenState extends State<ProfileFormScreen> {
   Widget build(BuildContext context) {
     final themeData = Theme.of(context);
 
-    return Scaffold(
-      body: SafeArea(
-        child: CustomBackground(
+    return CustomBackground(
+      child: Scaffold(
+        backgroundColor: Colors.transparent,
+        body: SafeArea(
           child: SingleChildScrollView(
             padding: EdgeInsets.zero,
             child: Column(
@@ -236,8 +295,9 @@ class _ProfileFormScreenState extends State<ProfileFormScreen> {
                         controller: dobController,
                         hint: "Select DOB",
                         onTap: _pickDate,
-                        suffixIcon: Icons.calendar_month,
+                        suffixIcon: Icons.calendar_month,  // Remove the escape characters
                       ),
+
                       const SizedBox(height: 10),
                       DropdownButtonFormField<String>(
                         value: selectedGender,
@@ -264,7 +324,7 @@ class _ProfileFormScreenState extends State<ProfileFormScreen> {
                             fontWeight: FontWeight.w400,
                           ),
                           filled: true,
-                          fillColor: const Color(0xFFF7F8FA),
+                          fillColor: theme.backgroundLight.withValues(alpha: 0.97),
                           contentPadding: const EdgeInsets.symmetric(
                             horizontal: 15,
                             vertical: 14,
@@ -287,7 +347,7 @@ class _ProfileFormScreenState extends State<ProfileFormScreen> {
                           color: Colors.grey[600],
                           size: 24,
                         ),
-                        dropdownColor: Colors.white,
+                        dropdownColor: theme.backgroundLight.withValues(alpha: 0.97),
                         style: GoogleFonts.poppins(
                           color: Colors.black87,
                           fontSize: 15.0,
@@ -308,25 +368,23 @@ class _ProfileFormScreenState extends State<ProfileFormScreen> {
                               borderRadius: BorderRadius.circular(10),
                             ),
                           ),
-                          child:
-                              isLoading
-                                  ? const SizedBox(
-                                    width: 22,
-                                    height: 22,
-                                    child: CircularProgressIndicator(
-                                      strokeWidth: 2,
-                                      color: Colors.white,
-                                    ),
-                                  )
-                                  : Text(
-                                    "Save Profile",
-                                    style: themeData.textTheme.bodyLarge
-                                        ?.copyWith(
-                                          color: Colors.white,
-                                          fontWeight: FontWeight.bold,
-                                          fontSize: 16,
-                                        ),
-                                  ),
+                          child: isLoading
+                              ? const SizedBox(
+                            width: 22,
+                            height: 22,
+                            child: CircularProgressIndicator(
+                              strokeWidth: 2,
+                              color: Colors.white,
+                            ),
+                          )
+                              : Text(
+                            "Save Profile",
+                            style: themeData.textTheme.bodyLarge?.copyWith(
+                              color: Colors.white,
+                              fontWeight: FontWeight.bold,
+                              fontSize: 16,
+                            ),
+                          ),
                         ),
                       ),
                     ],

@@ -110,7 +110,7 @@ class AuthController extends GetxController implements GetxService {
         dob: dob?.trim(),
         gender: gender,
         phone: phone.trim(),
-        alternatePhone: alternatePhone!.trim(),
+        alternatePhone: alternatePhone?.trim() ?? '',
         profileImage: profileImage,
         coverImage: coverImage,
       );

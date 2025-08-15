@@ -112,12 +112,14 @@ class OtpController extends GetxController implements GetxService {
 
         await Get.find<AuthController>().fetchUserProfile();
 
+        final loginArgs = Get.arguments;
+
         if (Get.find<AuthController>().userProfile == null ||
             Get.find<AuthController>().userProfile!.name == null ||
             Get.find<AuthController>().userProfile!.email == null) {
-          Get.offAll(() => ProfileFormScreen());
+          Get.offAll(() => ProfileFormScreen(), arguments: loginArgs); // ✅ Pass arguments
         } else {
-          Get.offAll(() => const WelcomeScreen());
+          Get.offAll(() => const WelcomeScreen(), arguments: loginArgs); // ✅ Pass arguments
         }
 
         responseModel = ResponseModel(true, "Verification Successful");

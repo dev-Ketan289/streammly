@@ -20,6 +20,7 @@ import 'package:streammly/navigation_flow.dart';
 import 'package:streammly/services/constants.dart';
 import 'package:streammly/services/theme.dart';
 import 'package:streammly/views/screens/auth_screens/login_screen.dart';
+import 'package:streammly/views/screens/auth_screens/otp_verification_screen.dart';
 import 'package:streammly/views/screens/common/location_screen.dart';
 import 'package:streammly/views/screens/common/webview_screen.dart';
 import 'package:streammly/views/screens/home/widgets/category/category.dart';
@@ -116,6 +117,7 @@ class StreammlyApp extends StatelessWidget {
         GetPage(name: '/getQuote', page: () => GetQuoteScreen()),
         GetPage(name: '/webview', page: () => const WebViewScreen()),
         GetPage(name: '/category', page: () => CategoryListScreen()),
+        GetPage(name: '/otp', page: () => OtpScreen()),
       ],
     );
   }

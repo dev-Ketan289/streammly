@@ -14,15 +14,17 @@ import 'controllers/home_screen_controller.dart';
 import 'services/custom_exit_dailogue.dart';
 
 class NavigationFlow extends StatefulWidget {
-  const NavigationFlow({super.key, this.initialIndex});
+  const NavigationFlow({Key? key, this.initialIndex}) : super(key: key);
+
   static final GlobalKey<NavigationFlowState> navKey =
-      GlobalKey<NavigationFlowState>();
+  GlobalKey<NavigationFlowState>();
 
   final int? initialIndex;
 
   @override
   State<NavigationFlow> createState() => NavigationFlowState();
 }
+
 
 class NavigationFlowState extends State<NavigationFlow> {
   ValueNotifier<bool> showBottomBar = ValueNotifier(true);

@@ -126,9 +126,8 @@ class _LoginScreenState extends State<LoginScreen> {
                                                   Navigator.push(
                                                     context,
                                                     MaterialPageRoute(
-                                                      builder:
-                                                          (context) =>
-                                                              OtpScreen(),
+                                                      builder: (context) => OtpScreen(),
+                                                      settings: RouteSettings(arguments: Get.arguments), // ✅ Pass arguments
                                                     ),
                                                   );
                                                 }
