@@ -146,7 +146,9 @@ class UserProfileModel {
     "addresss": addresss,
     "deleted_at": deletedAt,
     "dob":
-        "${dob!.year.toString().padLeft(4, '0')}-${dob!.month.toString().padLeft(2, '0')}-${dob!.day.toString().padLeft(2, '0')}",
+        dob == null
+            ? null
+            : "${dob!.year.toString().padLeft(4, '0')}-${dob!.month.toString().padLeft(2, '0')}-${dob!.day.toString().padLeft(2, '0')}",
     "gender": gender,
     "date_of_birth": dateOfBirth,
     "email_verified_at": emailVerifiedAt,
@@ -236,4 +238,3 @@ class Address {
     "updated_at": updatedAt?.toIso8601String(),
   };
 }
-

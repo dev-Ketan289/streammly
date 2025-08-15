@@ -7,7 +7,6 @@ import 'package:sms_autofill/sms_autofill.dart';
 import 'package:streammly/controllers/auth_controller.dart';
 import 'package:streammly/controllers/otp_controller.dart';
 import 'package:streammly/services/theme.dart';
-import 'package:streammly/views/screens/auth_screens/welcome.dart';
 
 import '../../../generated/animation/shake_widget.dart';
 import '../../../services/theme.dart' as theme;
@@ -219,27 +218,8 @@ class _OtpScreenState extends State<OtpScreen> with CodeAutoFill {
                                               )
                                               .then((value) {
                                                 if (value.isSuccess) {
-                                                  final loginArgs =
-                                                      Get.arguments;
-                                                  final redirectTo =
-                                                      loginArgs?['redirectTo'];
-                                                  final formData =
-                                                      loginArgs?['formData'];
-                                                  final packageData =
-                                                      loginArgs?['packageData'];
-                                                  log(
-                                                    redirectTo,
-                                                    name: "fjfufu",
-                                                  );
-                                                  Get.off(
-                                                    () => const WelcomeScreen(),
-                                                    arguments: {
-                                                      'redirectTo': redirectTo,
-                                                      'formData': formData,
-                                                      'packageData':
-                                                          packageData,
-                                                    },
-                                                  );
+                                                  // Return to LoginScreen with success
+                                                  Get.back(result: true);
                                                 }
                                               });
                                         },

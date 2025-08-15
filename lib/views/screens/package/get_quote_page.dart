@@ -9,7 +9,6 @@ import 'package:streammly/views/widgets/custom_doodle.dart';
 import '../../../controllers/auth_controller.dart';
 import '../../../controllers/quote_controller.dart';
 import '../../../services/custom_error_pop_widget.dart';
-import '../auth_screens/login_screen.dart';
 import '../package/booking/widgets/custom_time_picker.dart';
 
 class GetQuoteScreen extends StatefulWidget {
@@ -56,7 +55,7 @@ class _GetQuoteScreenState extends State<GetQuoteScreen> {
 
       quoteController.update();
     });
-    final nowFormatted = DateFormat('hh:mm a').format(DateTime.now());
+    DateFormat('hh:mm a').format(DateTime.now());
   }
 
   void _pickDate() async {
@@ -111,30 +110,9 @@ class _GetQuoteScreenState extends State<GetQuoteScreen> {
         primaryBtnText: 'Cancel',
         onPrimaryPressed: () {},
         secondaryBtnText: 'Login',
-        onSecondaryPressed: () {
-          Navigator.of(context).pop(); // Close dialog first
-          Get.off(
-            () => const LoginScreen(),
-            arguments: {
-              'redirectTo': '/getQuote',
-              'formData': {
-                'companyId': quoteController.companyId,
-                'subCategoryId': quoteController.subCategoryId,
-                'subVerticalId': quoteController.subVerticalId,
-                'subCategoryTitle': quoteController.subCategoryTitle,
-                'subVerticalTitle': quoteController.subVerticalTitle,
-                'name': quoteController.nameController.text,
-                'mobile': quoteController.mobileController.text,
-                'email': quoteController.emailController.text,
-                'requirements': quoteController.requirementsController.text,
-                'date': quoteController.dateController.text,
-                'startTime': quoteController.startTime,
-                'endTime': quoteController.endTime,
-                'favStartTime': quoteController.favStartTime,
-                'favEndTime': quoteController.favEndTime,
-              },
-            },
-          );
+        onSecondaryPressed: () async {
+          Navigator.of(context).pop();
+          await Get.toNamed('/login');
         },
       );
       return;

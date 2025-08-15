@@ -86,7 +86,7 @@ class _ProfileFormScreenState extends State<ProfileFormScreen> {
       final response = await authController.updateFullUserProfile(
         name: name,
         email: email,
-        dob: dob.isEmpty ? null : dob,
+        dob: dob,
         gender: selectedGender,
         phone: phone,
       );

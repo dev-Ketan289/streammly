@@ -12,11 +12,11 @@ import 'package:sms_autofill/sms_autofill.dart';
 import 'package:streammly/data/repository/auth_repo.dart';
 import 'package:streammly/models/profile/user_profile_model.dart';
 import 'package:streammly/models/response/response_model.dart';
+import 'package:streammly/views/screens/auth_screens/create_user.dart';
+import 'package:streammly/views/screens/auth_screens/welcome.dart';
 import 'package:uuid/uuid.dart';
 
 import '../services/custom_error_pop_widget.dart';
-import '../views/screens/auth_screens/create_user.dart';
-import '../views/screens/auth_screens/welcome.dart';
 import 'booking_form_controller.dart';
 
 class AuthController extends GetxController implements GetxService {
